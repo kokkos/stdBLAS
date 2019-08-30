@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Requirements:
+#
+#   - CMake >= 3.12 (requirement of mdarray)
+#   - C++14 or greater compiler (requirement of mdspan)
+
+# Build instructions
+#
+# 1. Download and install googletest 
+#    - https://github.com/google/googletest
+#    - (master appears to work)
+# 2. Download and install mdspan:
+#    - git@github.com:kokkos/mdspan.git
+# 3. Download and install mdarray:
+#    - git@github.com:dhollman/mdarray.git
+#    - Set CMAKE_PREFIX_PATH to where you installed mdspan.
+
+# Set this to the path of your stdBLAS source directory.
+SRC_DIR=$HOME/Documents/Code/CPP/src/stdBLAS
+
+# Set this to the root directory of the place where you
+# installed googletest, mdspan, and mdarray.
+INSTALL_ROOT=$HOME/Documents/Code/CPP/install
+
+cmake \
+-D CMAKE_INSTALL_PREFIX=${INSTALL_ROOT}/mdarray \
+-D CMAKE_PREFIX_PATH="${INSTALL_ROOT}/mdspan;${INSTALL_ROOT}/mdarray;${INSTALL_ROOT}/googletest" \
+-D LINALG_ENABLE_TESTS:BOOL=ON \
+-D LINALG_ENABLE_EXAMPLES:BOOL=ON \
+${SRC_DIR}
+
