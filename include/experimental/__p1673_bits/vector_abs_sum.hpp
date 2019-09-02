@@ -6,8 +6,7 @@
 //              Copyright (2019) Sandia Corporation
 //
 // Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
-// the U.S. Government retains certain rights in this software.
-//
+// the U.S. Government retains certain rights in this software. //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
@@ -41,22 +40,27 @@
 //@HEADER
 */
 
-#pragma once
+#ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_VECTOR_ABS_SUM_HPP_
+#define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_VECTOR_ABS_SUM_HPP_
 
-#include "__p1673_bits/maybe_static_size.hpp"
-#include "__p1673_bits/layout_blas_general.hpp"
-#include "__p1673_bits/layout_tags.hpp"
-#include "__p1673_bits/layout_triangle.hpp"
-#include "__p1673_bits/packed_layout_view.hpp"
-#include "__p1673_bits/scaled_view.hpp"
-#include "__p1673_bits/conjugated_view.hpp"
-#include "__p1673_bits/transposed_view.hpp"
-#include "__p1673_bits/conjugate_transpose_view.hpp"
-#include "__p1673_bits/givens.hpp"
-#include "__p1673_bits/linalg_swap.hpp"
-#include "__p1673_bits/scale.hpp"
-#include "__p1673_bits/linalg_copy.hpp"
-#include "__p1673_bits/linalg_add.hpp"
-#include "__p1673_bits/dot.hpp"
-#include "__p1673_bits/vector_norm2.hpp"
-#include "__p1673_bits/vector_abs_sum.hpp"
+namespace std {
+namespace experimental {
+inline namespace __p1673_version_0 {
+
+template<class in_vector_t,
+         class Scalar>
+void vector_abs_sum(in_vector_t v,
+                    Scalar& result);
+
+template<class ExecutionPolicy,
+         class in_vector_t,
+         class Scalar>
+void vector_abs_sum(ExecutionPolicy&& exec,
+                    in_vector_t v,
+                    Scalar& result);
+
+} // end inline namespace __p1673_version_0
+} // end namespace experimental
+} // end namespace std
+
+#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_VECTOR_ABS_SUM_HPP_
