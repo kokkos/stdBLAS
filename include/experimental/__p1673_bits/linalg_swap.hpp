@@ -6,8 +6,7 @@
 //              Copyright (2019) Sandia Corporation
 //
 // Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
-// the U.S. Government retains certain rights in this software.
-//
+// the U.S. Government retains certain rights in this software. //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
@@ -41,17 +40,27 @@
 //@HEADER
 */
 
-#pragma once
+#ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_LINALG_SWAP_HPP_
+#define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_LINALG_SWAP_HPP_
 
-#include "__p1673_bits/maybe_static_size.hpp"
-#include "__p1673_bits/layout_blas_general.hpp"
-#include "__p1673_bits/layout_tags.hpp"
-#include "__p1673_bits/layout_triangle.hpp"
-#include "__p1673_bits/packed_layout_view.hpp"
-#include "__p1673_bits/scaled_view.hpp"
-#include "__p1673_bits/conjugated_view.hpp"
-#include "__p1673_bits/transposed_view.hpp"
-#include "__p1673_bits/conjugate_transpose_view.hpp"
-#include "__p1673_bits/givens.hpp"
-#include "__p1673_bits/linalg_swap.hpp"
-#include "__p1673_bits/scale.hpp"
+namespace std {
+namespace experimental {
+inline namespace __p1673_version_0 {
+
+template<class inout_object_1_t,
+         class inout_object_2_t>
+void linalg_swap(inout_object_1_t v1,
+                 inout_object_2_t v2);
+
+template<class ExecutionPolicy,
+         class inout_object_1_t,
+         class inout_object_2_t>
+void linalg_swap(ExecutionPolicy&& exec,
+                 inout_object_1_t v1,
+                 inout_object_2_t v2);
+
+} // end inline namespace __p1673_version_0
+} // end namespace experimental
+} // end namespace std
+
+#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_LINALG_SWAP_HPP_
