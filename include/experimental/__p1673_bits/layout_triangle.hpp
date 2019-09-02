@@ -58,7 +58,9 @@ namespace __triangular_layouts_impl {
 template <class, class, class, class, class, class>
 struct __lower_triangle_layout_impl;
 
-};
+// FIXME work-around for #4.
+#if 0
+
 // lower triangular offsets are triangular numbers (n*(n+1)/2)
 template <
   ptrdiff_t ExtLast, ptrdiff_t... Exts, class BaseMap, class LastTwoMap,
@@ -98,6 +100,7 @@ public:
 
 };
 
+#endif // 0  
 
 } // end namespace __triangular_layouts_impl
 
