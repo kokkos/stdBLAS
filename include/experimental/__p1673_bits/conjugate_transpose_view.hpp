@@ -54,7 +54,10 @@ template<class EltType, class Extents, class Layout, class Accessor>
 basic_mdspan<EltType, Extents, layout_transpose<Layout>,
              accessor_conjugate<Accessor, EltType>>
 conjugate_transpose_view(
-  basic_mdspan<EltType, Extents, Layout, Accessor> a);
+  basic_mdspan<EltType, Extents, Layout, Accessor> a)
+{
+  return conjugate_view(transpose_view(a));
+}
 
 // FIXME Must fill in see-below.
 #if 0

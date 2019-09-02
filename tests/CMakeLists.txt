@@ -6,7 +6,7 @@ endmacro()
 
 find_package(GTest REQUIRED)
 
+add_test(conjugate_transpose_view)
 add_test(conjugate_view)
-add_test(transpose_view)
 add_test(dot)
-
+add_test(transpose_view)
