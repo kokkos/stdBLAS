@@ -47,6 +47,8 @@ namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
 
+// Overwriting general matrix-vector product: y := A * x
+
 template<class ExecutionPolicy,
          class in_vector_t,
          class in_matrix_t,
@@ -63,6 +65,177 @@ void matrix_vector_product(ExecutionPolicy&& exec,
                            in_matrix_t A,
                            in_vector_t x,
                            out_vector_t y);
+
+// Updating general matrix-vector product: z := y + A * x
+
+template<class ExecutionPolicy, class in_vector_1_t,
+         class in_matrix_t, class in_vector_2_t,
+         class out_vector_t>
+void matrix_vector_product(in_matrix_t A,
+                           in_vector_1_t x,
+                           in_vector_2_t y,
+                           out_vector_t z);
+
+template<class ExecutionPolicy, class in_vector_1_t,
+         class in_matrix_t, class in_vector_2_t,
+         class out_vector_t>
+void matrix_vector_product(ExecutionPolicy&& exec,
+                           in_matrix_t A,
+                           in_vector_1_t x,
+                           in_vector_2_t y,
+                           out_vector_t z);
+
+// Overwriting symmetric matrix-vector product: y := A * x
+
+template<class in_matrix_t,
+         class Triangle,
+         class in_vector_t,
+         class out_vector_t>
+void symmetric_matrix_vector_product(in_matrix_t A,
+                                     Triangle t,
+                                     in_vector_t x,
+                                     out_vector_t y);
+
+template<class ExecutionPolicy,
+         class in_matrix_t,
+         class Triangle,
+         class in_vector_t,
+         class out_vector_t>
+void symmetric_matrix_vector_product(ExecutionPolicy&& exec,
+                                     in_matrix_t A,
+                                     Triangle t,
+                                     in_vector_t x,
+                                     out_vector_t y);
+
+// Updating symmetric matrix-vector product: z := y + A * x
+
+template<class in_matrix_t,
+         class Triangle,
+         class in_vector_1_t,
+         class in_vector_2_t,
+         class out_vector_t>
+void symmetric_matrix_vector_product(in_matrix_t A,
+                                     Triangle t,
+                                     in_vector_1_t x,
+                                     in_vector_2_t y,
+                                     out_vector_t z);
+
+template<class ExecutionPolicy,
+         class in_matrix_t,
+         class Triangle,
+         class in_vector_1_t,
+         class in_vector_2_t,
+         class out_vector_t>
+void symmetric_matrix_vector_product(ExecutionPolicy&& exec,
+                                     in_matrix_t A,
+                                     Triangle t,
+                                     in_vector_1_t x,
+                                     in_vector_2_t y,
+                                     out_vector_t z);
+
+// Overwriting Hermitian matrix-vector product: y := A * x
+
+template<class in_matrix_t,
+         class Triangle,
+         class in_vector_t,
+         class out_vector_t>
+void hermitian_matrix_vector_product(in_matrix_t A,
+                                     Triangle t,
+                                     in_vector_t x,
+                                     out_vector_t y);
+
+template<class ExecutionPolicy,
+         class in_matrix_t,
+         class Triangle,
+         class in_vector_t,
+         class out_vector_t>
+void hermitian_matrix_vector_product(ExecutionPolicy&& exec,
+                                     in_matrix_t A,
+                                     Triangle t,
+                                     in_vector_t x,
+                                     out_vector_t y);
+
+// Updating Hermitian matrix-vector product: z := y + A * x
+
+template<class in_matrix_t,
+         class Triangle,
+         class in_vector_1_t,
+         class in_vector_2_t,
+         class out_vector_t>
+void hermitian_matrix_vector_product(in_matrix_t A,
+                                     Triangle t,
+                                     in_vector_1_t x,
+                                     in_vector_2_t y,
+                                     out_vector_t z);
+
+template<class ExecutionPolicy,
+         class in_matrix_t,
+         class Triangle,
+         class in_vector_1_t,
+         class in_vector_2_t,
+         class out_vector_t>
+void hermitian_matrix_vector_product(ExecutionPolicy&& exec,
+                                     in_matrix_t A,
+                                     Triangle t,
+                                     in_vector_1_t x,
+                                     in_vector_2_t y,
+                                     out_vector_t z);
+
+// Overwriting triangular matrix-vector product: y := A * x
+
+template<class in_matrix_t,
+         class Triangle,
+         class DiagonalStorage,
+         class in_vector_t,
+         class out_vector_t>
+void triangular_matrix_vector_product(in_matrix_t A,
+                                      Triangle t,
+                                      DiagonalStorage d,
+                                      in_vector_t x,
+                                      out_vector_t y);
+
+template<class ExecutionPolicy,
+         class in_matrix_t,
+         class Triangle,
+         class DiagonalStorage,
+         class in_vector_t,
+         class out_vector_t>
+void triangular_matrix_vector_product(ExecutionPolicy&& exec,
+                                      in_matrix_t A,
+                                      Triangle t,
+                                      DiagonalStorage d,
+                                      in_vector_t x,
+                                      out_vector_t y);
+
+// Updating triangular matrix-vector product: z := y + A * x
+
+template<class in_matrix_t,
+         class Triangle,
+         class DiagonalStorage,
+         class in_vector_1_t,
+         class in_vector_2_t,
+         class out_vector_t>
+void triangular_matrix_vector_product(in_matrix_t A,
+                                      Triangle t,
+                                      DiagonalStorage d,
+                                      in_vector_1_t x,
+                                      in_vector_2_t y,
+                                      out_vector_t z);
+
+template<class ExecutionPolicy,
+         class in_matrix_t,
+         class Triangle,
+         class DiagonalStorage,
+         class in_vector_1_t,
+         class in_vector_2_t,
+         class out_vector_t>
+void triangular_matrix_vector_product(ExecutionPolicy&& exec,
+                                      in_matrix_t A,
+                                      Triangle t,
+                                      DiagonalStorage d,
+                                      in_vector_1_t x,
+                                      in_vector_2_t y,
+                                      out_vector_t z);
 
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
