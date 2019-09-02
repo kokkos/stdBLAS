@@ -6,5 +6,5 @@ endmacro()
 
 find_package(GTest REQUIRED)
 
-#add_test(test_thingy)
+add_test(dot)
 

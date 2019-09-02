@@ -53,16 +53,26 @@ template<class in_vector_1_t,
          class Scalar>
 void dot(in_vector_1_t v1,
          in_vector_2_t v2,
-         Scalar& result);
+         Scalar& result)
+{
+  Scalar myResult {};
+  for (size_t k = 0; k < v1.extent (0); ++k) {
+    myResult += v1(k) * v2(k);
+  }
+  result = myResult;
+}
 
 template<class ExecutionPolicy,
          class in_vector_1_t,
          class in_vector_2_t,
          class Scalar>
-void dot(ExecutionPolicy&& exec,
+void dot(ExecutionPolicy&& /* exec */,
          in_vector_1_t v1,
          in_vector_2_t v2,
-         Scalar& result);
+         Scalar& result)
+{
+  dot (v1, v2, result);
+}
 
 // Conjugated dot
 
