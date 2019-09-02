@@ -131,13 +131,21 @@ private:
   Accessor acc;
 };
 
-// FIXME Must fill in see-below; see #10.
-#if 0
 template<class EltType, class Extents, class Layout, class Accessor>
 basic_mdspan<EltType, Extents, Layout,
              accessor_conjugate<Accessor, EltType>>
-conjugate_view(basic_mdspan<EltType, Extents, Layout, Accessor> a);
+conjugate_view(basic_mdspan<EltType, Extents, Layout, Accessor> a)
+{
+  return basic_mdspan<EltType, Extents, Layout,
+    accessor_conjugate<Accessor, EltType>> (
+      a.data (),
+      a.mapping (),
+      accessor_conjugate<Accessor, EltType> (a.accessor ())
+      );
+}
 
+#if 0         
+// FIXME Must fill in see-below; see #10.         
 template<class EltType, class Extents, class Layout, class Accessor>
 basic_mdspan<const EltType, Extents, Layout, <i>see-below</i> >
 conjugate_view(const basic_mdarray<EltType, Extents, Layout, Accessor>& a);

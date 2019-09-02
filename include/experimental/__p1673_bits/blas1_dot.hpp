@@ -56,7 +56,7 @@ void dot(in_vector_1_t v1,
          Scalar& result)
 {
   Scalar myResult {};
-  for (size_t k = 0; k < v1.extent (0); ++k) {
+  for (size_t k = 0; k < v1.extent(0); ++k) {
     myResult += v1(k) * v2(k);
   }
   result = myResult;
@@ -81,16 +81,34 @@ template<class in_vector_1_t,
          class Scalar>
 void dotc(in_vector_1_t v1,
           in_vector_2_t v2,
-          Scalar& result);
+          Scalar& result)
+{
+  // FIXME We don't have an mdarray implementation of conjugate_view
+  // yet.  See #10.
+  //
+  // FIXME This compiles, but doesn't actually work; it returns zero.
+  
+  //dot(v1, conjugate_view(v2), result);
+
+  Scalar myResult {};
+  for (size_t k = 0; k < v1.extent(0); ++k) {
+    using std::conj;
+    myResult += v1(k) * conj(v2(k));
+  }
+  result = myResult;
+}
 
 template<class ExecutionPolicy,
          class in_vector_1_t,
          class in_vector_2_t,
          class Scalar>
-void dotc(ExecutionPolicy&& exec,
+void dotc(ExecutionPolicy&& /* exec */,
           in_vector_1_t v1,
           in_vector_2_t v2,
-          Scalar& result);
+          Scalar& result)
+{
+  dotc(v1, v2, result);
+}
          
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
