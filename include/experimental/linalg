@@ -49,3 +49,4 @@
 #include "__p1673_bits/layout_triangle.hpp"
 #include "__p1673_bits/packed_layout_view.hpp"
 #include "__p1673_bits/scaled_view.hpp"
+#include "__p1673_bits/conjugated_view.hpp"
