@@ -17,6 +17,7 @@ namespace {
   using std::experimental::extents;
   using std::experimental::basic_mdspan;
   using std::experimental::dot;
+  using std::experimental::dotc;
 
   TEST(BLAS1_dot, mdspan_double)
   {
@@ -43,6 +44,9 @@ namespace {
     dot (x, y, dotResult);
     EXPECT_EQ( dotResult, expectedDotResult );
 
+    scalar_t conjDotResult {};
+    dotc (x, y, conjDotResult);
+    EXPECT_EQ( conjDotResult, expectedDotResult );
 
     scalar_t dotResultPar {};
     // See note above.
@@ -84,7 +88,6 @@ namespace {
     EXPECT_EQ( dotResult, expectedDotResult );
 
     scalar_t conjDotResult {};
-    using std::experimental::dotc;
     dotc (x, y, conjDotResult);
     EXPECT_EQ( conjDotResult, expectedConjDotResult );
 

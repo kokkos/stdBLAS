@@ -43,6 +43,8 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_DOT_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_DOT_HPP_
 
+#include <type_traits>
+
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
@@ -92,8 +94,15 @@ void dotc(in_vector_1_t v1,
 
   Scalar myResult {};
   for (size_t k = 0; k < v1.extent(0); ++k) {
-    using std::conj;
-    myResult += v1(k) * conj(v2(k));
+    if constexpr (std::is_same_v<Scalar, std::complex<float>> ||
+                  std::is_same_v<Scalar, std::complex<double>> ||
+                  std::is_same_v<Scalar, std::complex<long double>>) {
+      using std::conj;
+      myResult += v1(k) * conj(v2(k));
+    }
+    else {
+      myResult += v1(k) * v2(k);
+    }
   }
   result = myResult;
 }
