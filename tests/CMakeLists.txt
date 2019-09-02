@@ -6,5 +6,6 @@ endmacro()
 
 find_package(GTest REQUIRED)
 
+add_test(conjugate_view)
 add_test(dot)
 

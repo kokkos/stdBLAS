@@ -70,8 +70,15 @@ public:
     return conj(val) + upd;
   }
 
-  // ... add only those operators needed for the functions in this
-  // proposal ...
+  template<class T2>
+  bool operator== (const T2 upd) const {
+    return conj(val) == upd;
+  }
+
+  template<class T2>
+  bool operator!= (const T2 upd) const {
+    return conj(val) != upd;
+  }
 
 private:
   const T& val;
@@ -85,6 +92,8 @@ public:
   using reference     = typename Accessor::reference;
   using offset_policy = typename Accessor::offset_policy;
 
+  accessor_conjugate() = default;
+
   accessor_conjugate(Accessor a) : acc(a) {}
 
   reference access(pointer p, ptrdiff_t i) const noexcept {
@@ -92,7 +101,7 @@ public:
   }
 
   typename offset_policy::pointer offset(pointer p, ptrdiff_t i) const noexcept {
-    return acc.offset(p,i);
+    return acc.offset(p, i);
   }
 
   element_type* decay(pointer p) const noexcept {
@@ -105,6 +114,10 @@ private:
 template<class Accessor, class T>
 class accessor_conjugate<Accessor, std::complex<T>> {
 public:
+  // FIXME If BLAS functions want to strip off accessor_conjugate for
+  // optimization, they will need a way to work with th underlying
+  // Accessor (which may not be the default one).
+
   using element_type  = typename Accessor::element_type;
   using pointer       = typename Accessor::pointer;
   // FIXME Do we actually need to template conjugated_scalar
@@ -113,6 +126,8 @@ public:
     conjugated_scalar< /* typename Accessor::reference, */ std::complex<T>>;
   using offset_policy =
     accessor_conjugate<typename Accessor::offset_policy, std::complex<T>>;
+
+  accessor_conjugate() = default;
 
   accessor_conjugate(Accessor a) : acc(a) {}
 
@@ -136,16 +151,13 @@ basic_mdspan<EltType, Extents, Layout,
              accessor_conjugate<Accessor, EltType>>
 conjugate_view(basic_mdspan<EltType, Extents, Layout, Accessor> a)
 {
-  return basic_mdspan<EltType, Extents, Layout,
-    accessor_conjugate<Accessor, EltType>> (
-      a.data (),
-      a.mapping (),
-      accessor_conjugate<Accessor, EltType> (a.accessor ())
-      );
+  using accessor_t = accessor_conjugate<Accessor, EltType>;
+  return basic_mdspan<EltType, Extents, Layout, accessor_t> (
+    a.data (), a.mapping (), accessor_t (a.accessor ()));
 }
 
-#if 0         
-// FIXME Must fill in see-below; see #10.         
+#if 0
+// FIXME Must fill in see-below; see #10.
 template<class EltType, class Extents, class Layout, class Accessor>
 basic_mdspan<const EltType, Extents, Layout, <i>see-below</i> >
 conjugate_view(const basic_mdarray<EltType, Extents, Layout, Accessor>& a);
