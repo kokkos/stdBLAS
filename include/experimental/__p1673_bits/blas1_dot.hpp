@@ -40,8 +40,8 @@
 //@HEADER
 */
 
-#ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_DOT_HPP_
-#define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_DOT_HPP_
+#ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_DOT_HPP_
+#define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_DOT_HPP_
 
 namespace std {
 namespace experimental {
@@ -86,4 +86,4 @@ void dotc(ExecutionPolicy&& exec,
 } // end namespace experimental
 } // end namespace std
 
-#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_DOT_HPP_
+#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_DOT_HPP_

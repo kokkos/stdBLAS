@@ -40,8 +40,8 @@
 //@HEADER
 */
 
-#ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_SCALE_HPP_
-#define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_SCALE_HPP_
+#ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_SCALE_HPP_
+#define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_SCALE_HPP_
 
 namespace std {
 namespace experimental {
@@ -63,4 +63,4 @@ void scale(ExecutionPolicy&& exec,
 } // end namespace experimental
 } // end namespace std
 
-#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_SCALE_HPP_
+#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_SCALE_HPP_
