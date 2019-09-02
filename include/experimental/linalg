@@ -49,7 +49,7 @@
 #include "__p1673_bits/layout_triangle.hpp"
 #include "__p1673_bits/packed_layout_view.hpp"
 #include "__p1673_bits/scaled_view.hpp"
-#include "__p1673_bits/conjugated_view.hpp"
+#include "__p1673_bits/conjugate_view.hpp"
 #include "__p1673_bits/transposed_view.hpp"
 #include "__p1673_bits/conjugate_transpose_view.hpp"
 #include "__p1673_bits/blas1_givens.hpp"

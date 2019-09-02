@@ -40,8 +40,8 @@
 //@HEADER
 */
 
-#ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATED_VIEW_HPP_
-#define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATED_VIEW_HPP_
+#ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATE_VIEW_HPP_
+#define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATE_VIEW_HPP_
 
 #include <experimental/mdspan>
 #include <experimental/mdarray>
@@ -167,4 +167,4 @@ conjugate_view(const basic_mdarray<EltType, Extents, Layout, Accessor>& a);
 } // end namespace experimental
 } // end namespace std
 
-#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATED_VIEW_HPP_
+#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATE_VIEW_HPP_

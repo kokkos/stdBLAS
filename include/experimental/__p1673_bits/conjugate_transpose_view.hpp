@@ -43,7 +43,7 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATE_TRANSPOSE_VIEW_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATE_TRANSPOSE_VIEW_HPP_
 
-#include "conjugated_view.hpp"
+#include "conjugate_view.hpp"
 #include "transposed_view.hpp"
 
 namespace std {
