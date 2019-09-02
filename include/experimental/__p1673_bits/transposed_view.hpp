@@ -52,10 +52,17 @@ inline namespace __p1673_version_0 {
 
 template<class Layout>
 class layout_transpose {
+public:
+  template<class Extents>
   struct mapping {
-    typename Layout::mapping nested_mapping;
+  private:
+    using nested_mapping_type = typename Layout::template mapping<Extents>;
+  public:
+    nested_mapping_type nested_mapping;
 
-    mapping(typename Layout::mapping map):nested_mapping(map) {}
+    mapping() = default;
+
+    mapping(nested_mapping_type map) : nested_mapping(map) {}
 
     // TODO insert other standard mapping things
 
@@ -75,7 +82,13 @@ class layout_transpose {
 
 template<class EltType, class Extents, class Layout, class Accessor>
 basic_mdspan<EltType, Extents, layout_transpose<Layout>, Accessor>
-transpose_view(basic_mdspan<EltType, Extents, Layout, Accessor> a);
+transpose_view(basic_mdspan<EltType, Extents, Layout, Accessor> a)
+{
+  using layout_type = layout_transpose<Layout>;
+  using mapping_type = typename layout_type::template mapping<Extents>;
+  return basic_mdspan<EltType, Extents, layout_type, Accessor> (
+    a.data (), mapping_type (a.mapping ()), a.accessor ());
+}
 
 // FIXME Must fill in see-below; see #11.
 #if 0
