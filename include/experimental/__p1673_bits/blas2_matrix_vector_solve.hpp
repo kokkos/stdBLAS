@@ -6,8 +6,7 @@
 //              Copyright (2019) Sandia Corporation
 //
 // Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
-// the U.S. Government retains certain rights in this software.
-//
+// the U.S. Government retains certain rights in this software. //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
@@ -41,25 +40,41 @@
 //@HEADER
 */
 
-#pragma once
+#ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS2_MATRIX_VECTOR_SOLVE_HPP_
+#define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS2_MATRIX_VECTOR_SOLVE_HPP_
 
-#include "__p1673_bits/maybe_static_size.hpp"
-#include "__p1673_bits/layout_blas_general.hpp"
-#include "__p1673_bits/layout_tags.hpp"
-#include "__p1673_bits/layout_triangle.hpp"
-#include "__p1673_bits/packed_layout_view.hpp"
-#include "__p1673_bits/scaled_view.hpp"
-#include "__p1673_bits/conjugated_view.hpp"
-#include "__p1673_bits/transposed_view.hpp"
-#include "__p1673_bits/conjugate_transpose_view.hpp"
-#include "__p1673_bits/blas1_givens.hpp"
-#include "__p1673_bits/blas1_linalg_swap.hpp"
-#include "__p1673_bits/blas1_scale.hpp"
-#include "__p1673_bits/blas1_linalg_copy.hpp"
-#include "__p1673_bits/blas1_linalg_add.hpp"
-#include "__p1673_bits/blas1_dot.hpp"
-#include "__p1673_bits/blas1_vector_norm2.hpp"
-#include "__p1673_bits/blas1_vector_abs_sum.hpp"
-#include "__p1673_bits/blas1_vector_idx_abs_max.hpp"
-#include "__p1673_bits/blas2_matrix_vector_product.hpp"
-#include "__p1673_bits/blas2_matrix_vector_solve.hpp"
+namespace std {
+namespace experimental {
+inline namespace __p1673_version_0 {
+
+template<class in_matrix_t,
+         class Triangle,
+         class DiagonalStorage,
+         class in_object_t,
+         class out_object_t>
+void triangular_matrix_vector_solve(
+  in_matrix_t A,
+  Triangle t,
+  DiagonalStorage d,
+  in_object_t b,
+  out_object_t x);
+
+template<class ExecutionPolicy,
+         class in_matrix_t,
+         class Triangle,
+         class DiagonalStorage,
+         class in_object_t,
+         class out_object_t>
+void triangular_matrix_vector_solve(
+  ExecutionPolicy&& exec,
+  in_matrix_t A,
+  Triangle t,
+  DiagonalStorage d,
+  in_object_t b,
+  out_object_t x);
+
+} // end inline namespace __p1673_version_0
+} // end namespace experimental
+} // end namespace std
+
+#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS2_MATRIX_VECTOR_SOLVE_HPP_
