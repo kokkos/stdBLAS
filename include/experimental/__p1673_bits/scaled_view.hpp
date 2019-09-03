@@ -50,32 +50,25 @@ namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
 
-template<class T, class S>
+template<class Reference, class ScalingFactor>
 class scaled_scalar {
-public:
-  scaled_scalar(const T& v, const S& s) :
-    val(v), scale(s) {}
-
-  operator T() const { return val * scale; }
-
-  T operator- () const { return -(val * scale); }
-
-  template<class T2>
-  decltype(auto) operator+ (const T2& upd) const {
-    return val*scale + upd;
-  }
-
-  template<class T2>
-  decltype(auto) operator* (const T2 upd) const {
-    return val*scale * upd;
-  }
-
-  // ... add only those operators needed for the functions
-  // in this proposal ...
-
 private:
-  const T& val;
-  const S scale;
+  Reference value;
+  const ScalingFactor scaling_factor;
+
+  using result_type = decltype (value * scaling_factor);
+public:
+  scaled_scalar(Reference v, const ScalingFactor& s) :
+    value(v), scaling_factor(s) {}
+
+  operator result_type() const { return value * scaling_factor; }
+
+  // mfh 03 Sep 2019: This doesn't appear to be necessary.
+
+  // template<class T>
+  // decltype(auto) operator+ (T update) const {
+  //   return value * scaling_factor + update;
+  // }
 };
 
 template<class Accessor, class S>
@@ -86,10 +79,12 @@ public:
   using reference     = scaled_scalar<typename Accessor::reference, S>;
   using offset_policy = accessor_scaled<typename Accessor::offset_policy, S>;
 
+  accessor_scaled() = default;
+
   accessor_scaled(Accessor a, S sval) :
     acc(a), scale_factor(sval) {}
 
-  reference access(pointer& p, ptrdiff_t i) const noexcept {
+  reference access(pointer p, ptrdiff_t i) const noexcept {
     return reference(acc.access(p,i), scale_factor);
   }
 
@@ -106,13 +101,23 @@ private:
   S scale_factor;
 };
 
+template<class ElementType,
+         class Extents,
+         class Layout,
+         class Accessor,
+         class ScalingFactorType>
+basic_mdspan<ElementType, Extents, Layout,
+             accessor_scaled<Accessor, ScalingFactorType>>
+scaled_view(ScalingFactorType scalingFactor,
+            const basic_mdspan<ElementType, Extents, Layout, Accessor>& a)
+{
+  using accessor_t = accessor_scaled<Accessor, ScalingFactorType>;
+  return basic_mdspan<ElementType, Extents, Layout, accessor_t> (
+    a.data(), a.mapping(), accessor_t (a.accessor(), scalingFactor));
+}
+
 // FIXME Finish these (see e.g., "see-below")
 #if 0
-template<class T, class Extents, class Layout,
-         class Accessor, class S>
-basic_mdspan<T, Extents, Layout, accessor_scaled<Accessor, S>>
-scaled_view(S s, const basic_mdspan<T, Extents, Layout, Accessor>& a);
-
 template<class T, class Extents, class Layout,
          class Accessor, class S>
 basic_mdspan<const T, Extents, Layout, <i>see-below</i> >
