@@ -2,6 +2,7 @@
 macro(linalg_add_test name)
   add_executable(${name} ${name}.cpp)
   target_link_libraries(${name} linalg GTest::GTest GTest::Main)
+  add_test(${name} ${name})
 endmacro()
 
 find_package(GTest REQUIRED)

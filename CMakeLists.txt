@@ -141,6 +141,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/LinAlgConfig.cmake ${CMAKE_CURRENT_BIN
 ################################################################################
 
 if(LINALG_ENABLE_TESTS)
+  enable_testing()
   add_subdirectory(tests)
   add_subdirectory(compilation_tests)
 endif()
