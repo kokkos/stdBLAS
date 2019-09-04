@@ -57,20 +57,24 @@ inline namespace __p1673_version_0 {
 
 namespace __layout_blas_general_impl {
 
-template <class BaseLayout, ptrdiff_t StaticLDA>
+// Strides is an extents object.
+//
+// Key is that the base mapping uses the strides, not the extents.
+//
+// For BaseLayout=LayoutLeft, the leftmost stride is 1; for
+// BaseLayout=LayoutRight, the rightmost stride is 1.  Even though
+// this is a compile-time constant, implementations might choose not
+// to store it, by making Strides one shorter than Extents.  The
+// implementation below would need to change if
+template <class BaseLayout, class Extents, class Strides>
 class __layout_blas_impl {
 private:
-
-  _MDSPAN_NO_UNIQUE_ADDRESS BaseLayout _base_layout;
-
-public: // but not really
-  using __lda_t = __maybe_static_extent<StaticLDA>;
-  _MDSPAN_NO_UNIQUE_ADDRESS __lda_t __lda = { };
+  _MDSPAN_NO_UNIQUE_ADDRESS Extents _extents;
+  using mapping_type = BaseLayout::template mapping<Strides>;
+  _MDSPAN_NO_UNIQUE_ADDRESS mapping_type _mapping;
 
 private:
-  using __extents_type = decltype(std::declval<BaseLayout const&>().extents());
-
-  template <class, ptrdiff_t>
+  template <class, class, class>
   friend class __layout_blas_impl;
 
 public:
@@ -84,106 +88,97 @@ public:
 
   MDSPAN_INLINE_FUNCTION
   constexpr explicit
-  __layout_blas_impl(__extents_type const& exts) noexcept
-    : _base_layout(exts),
-      __lda(1)
+  __layout_blas_impl(Extents const& base_extents) noexcept
+    : _extents(base_extents),
+      _mapping(base_extents)
   { }
 
-  MDSPAN_FUNCTION_REQUIRES(
-    (MDSPAN_INLINE_FUNCTION constexpr),
-    __layout_blas_impl, (__extents_type const& exts, ptrdiff_t lda), noexcept,
-    /* requires */ (!__lda_t::is_static)
-  ) : _base_layout(exts),
-      __lda(lda)
+  MDSPAN_INLINE_FUNCTION
+  constexpr explicit
+  __layout_blas_impl(Extents const& base_extents, Strides const& strides) noexcept
+    : _extents(base_extents),
+      _mapping(strides) // key is that the base mapping uses the strides, not the extents.
   { }
 
-  // TODO noexcept specification
-  // TODO throw if rhs is dynamic LDA and doesn't match static lhs
-  MDSPAN_TEMPLATE_REQUIRES(
-    class OtherExtents, ptrdiff_t OtherLDA, /* requires */ (
-      _MDSPAN_TRAIT(is_convertible, OtherExtents, __extents_type)
-      && (
-        !__layout_blas_impl<OtherExtents, OtherLDA>::__lda_t::is_static
-        || !__lda_t::is_static
-        || __lda_t::value_static == OtherLDA
-      )
-    )
-  )
+  template<class OtherExtents, class OtherStrides>
   MDSPAN_INLINE_FUNCTION _MDSPAN_CONSTEXPR_14
-  __layout_blas_impl(__layout_blas_impl<OtherExtents, OtherLDA> const& other) // NOLINT(google-explicit-constructor)
-    : _base_layout(other.extents()),
-      __lda(other.__lda)
-  { }
-
-
-  // TODO noexcept specification
-  // TODO throw if rhs is dynamic LDA and doesn't match static lhs
-  MDSPAN_TEMPLATE_REQUIRES(
-    class OtherExtents, ptrdiff_t OtherLDA,
-    /* requires */ (
-      _MDSPAN_TRAIT(is_convertible, OtherExtents, __extents_type)
-      && (
-        !__layout_blas_impl<OtherExtents, OtherLDA>::__lda_t::is_static
-          || !__lda_t::is_static
-          || __lda_t::value_static == OtherLDA
-      )
-    )
-  )
-  MDSPAN_INLINE_FUNCTION _MDSPAN_CONSTEXPR_14
-  __layout_blas_impl& operator=(__layout_blas_impl<OtherExtents, OtherLDA> const& other)
+  __layout_blas_impl& operator=(
+    __layout_blas_impl<BaseLayout, OtherExtents, OtherStrides> const& other)
   {
     this->_extents = other.extents();
-    this->__lda = other.__lda.value;
+    this->_mapping = other._mapping;
     return *this;
   }
 
   template <class... Integral>
   MDSPAN_FORCE_INLINE_FUNCTION
   constexpr ptrdiff_t operator()(Integral... idxs) const noexcept {
-    return __lda.value * _base_layout(idxs...);
+    return _mapping(idxs...);
   }
 
   MDSPAN_INLINE_FUNCTION constexpr bool is_unique() const noexcept { return true; }
-  MDSPAN_INLINE_FUNCTION constexpr bool is_contiguous() const noexcept { return __lda.value == 1; }
+  MDSPAN_INLINE_FUNCTION constexpr bool is_contiguous() const noexcept { return _mapping.extents () == _extents; }
   MDSPAN_INLINE_FUNCTION constexpr bool is_strided() const noexcept { return true; }
 
   MDSPAN_INLINE_FUNCTION static constexpr bool is_always_unique() noexcept { return true; }
-  MDSPAN_INLINE_FUNCTION static constexpr bool is_always_contiguous() noexcept { return __lda_t::value_static == 1; }
+  MDSPAN_INLINE_FUNCTION static constexpr bool is_always_contiguous() noexcept { return false; /* FIXME */ }
   MDSPAN_INLINE_FUNCTION static constexpr bool is_always_strided() noexcept { return true; }
 
-  MDSPAN_INLINE_FUNCTION constexpr __extents_type extents() const noexcept { return _base_layout.extents(); }
+  MDSPAN_INLINE_FUNCTION constexpr Extents extents() const noexcept { return _extents; }
 
   MDSPAN_INLINE_FUNCTION
   constexpr ptrdiff_t required_span_size() const noexcept {
-    return _base_layout.required_span_size() * __lda.value;
+    return _mapping.required_span_size();
   }
 
   MDSPAN_INLINE_FUNCTION
   constexpr ptrdiff_t stride(size_t r) const noexcept {
-    return _base_layout.stride(r) * __lda.value;
+    return _mapping.stride(r);
   }
 
-  template<class OtherExtents, ptrdiff_t OtherLDA>
+  template<class OtherExtents, class OtherStrides>
   MDSPAN_INLINE_FUNCTION
-  friend constexpr bool operator==(__layout_blas_impl const& a, __layout_blas_impl<OtherExtents, OtherLDA> const& b) noexcept {
-    return a.extents() == b.extents() && a.__lda == b.__lda;
+  friend constexpr bool operator==(
+    __layout_blas_impl const& a,
+    __layout_blas_impl<BaseLayout, OtherExtents, OtherStrides> const& b) noexcept {
+    return a.extents() == b.extents() &&
+      a._mapping.extents() == b._mapping.extents();
   }
 
-  template<class OtherExtents, ptrdiff_t OtherLDA>
+  template<class OtherExtents, class OtherStrides>
   MDSPAN_INLINE_FUNCTION
-  friend constexpr bool operator!=(__layout_blas_impl const& a, __layout_blas_impl<OtherExtents, OtherLDA> const& b) noexcept {
-    return a.extents() != b.extents() || a.__lda != b.__lda;
+  friend constexpr bool operator!=(
+    __layout_blas_impl const& a,
+    __layout_blas_impl<BaseLayout, OtherExtents, OtherStrides> const& b) noexcept {
+    return ! (a == b);
   }
 
-  // Needed to work with subspan()
-  template <size_t N>
-  struct __static_stride_workaround {
-    static constexpr ptrdiff_t value = __lda_t::is_static ?
-      (BaseLayout::template __static_stride_workaround<N>::value == dynamic_extent ? dynamic_extent :
-        (__lda_t::value_static * BaseLayout::template __static_stride_workaround<N>::value)
-      ) : dynamic_extent;
+  // // Needed to work with subspan()
+  // template <size_t N>
+  // struct __static_stride_workaround {
+  //   static constexpr ptrdiff_t value = __lda_t::is_static ?
+  //     (BaseLayout::template __static_stride_workaround<N>::value == dynamic_extent ? dynamic_extent :
+  //       (__lda_t::value_static * BaseLayout::template __static_stride_workaround<N>::value)
+  //     ) : dynamic_extent;
   };
 };
+
+
+template <ptrdiff... OriginalExtents>
+constexpr auto compute_column_major_strides_from_extents (const extents<OriginalExtents...> in);
+
+         
+template <ptrdiff... Extents>
+constexpr extents<ptrdiff_t(1), Extents...>
+prepend_one_to_extents (const extents<Extents...> in) {
+  return extents<ptrdiff_t(1), Extents...>;
+}
+
+template <ptrdiff... Extents>
+constexpr extents<Extents..., ptrdiff_t(1)>
+append_one_to_extents (const extents<Extents...> in) {
+  return extents<ptrdiff_t(1), Extents...>;
+}
 
 } // end namespace __layout_blas_general_impl
 
@@ -192,14 +187,16 @@ class layout_blas_general;
 
 template <>
 class layout_blas_general<column_major_t> {
+public:
   template <class Extents>
-  using mapping = __layout_blas_general_impl::__layout_blas_impl<layout_left, dynamic_extent>;
+  using mapping = __layout_blas_general_impl::__layout_blas_impl<layout_left, Extents, Strides>;
 };
 
 template <>
 class layout_blas_general<row_major_t> {
+public:
   template <class Extents>
-  using mapping = __layout_blas_general_impl::__layout_blas_impl<layout_right, dynamic_extent>;
+  using mapping = __layout_blas_general_impl::__layout_blas_impl<layout_right, Extents, Strides>;
 };
 
 } // end inline namespace __p1673_version_0
