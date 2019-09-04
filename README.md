@@ -13,5 +13,5 @@
 2. Download and install mdspan:
    - git@github.com:kokkos/mdspan.git
 3. Download and install mdarray:
-   - git@github.com:dhollman/mdarray.git
+   - git@github.com:kokkos/mdarray.git
    - Set `CMAKE_PREFIX_PATH` to where you installed mdspan.
