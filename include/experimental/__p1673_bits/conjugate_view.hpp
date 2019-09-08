@@ -84,6 +84,12 @@ private:
   const T& val;
 };
 
+template<class T1, class T2>
+auto operator* (const T1 x, const conjugated_scalar<T2> y) {
+  using std::conj;
+  return x * T2(y);
+}
+
 template<class Accessor, class T>
 class accessor_conjugate {
 public:

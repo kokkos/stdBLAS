@@ -49,7 +49,7 @@ namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
 
-// Non-conjugated dot         
+// Non-conjugated dot
 template<class in_vector_1_t,
          class in_vector_2_t,
          class Scalar>
@@ -85,26 +85,7 @@ void dotc(in_vector_1_t v1,
           in_vector_2_t v2,
           Scalar& result)
 {
-  // FIXME We don't have an mdarray implementation of conjugate_view
-  // yet.  See #10.
-  //
-  // FIXME This compiles, but doesn't actually work; it returns zero.
-  
-  //dot(v1, conjugate_view(v2), result);
-
-  Scalar myResult {};
-  for (size_t k = 0; k < v1.extent(0); ++k) {
-    if constexpr (std::is_same_v<Scalar, std::complex<float>> ||
-                  std::is_same_v<Scalar, std::complex<double>> ||
-                  std::is_same_v<Scalar, std::complex<long double>>) {
-      using std::conj;
-      myResult += v1(k) * conj(v2(k));
-    }
-    else {
-      myResult += v1(k) * v2(k);
-    }
-  }
-  result = myResult;
+  dot(v1, conjugate_view(v2), result);
 }
 
 template<class ExecutionPolicy,
@@ -118,7 +99,7 @@ void dotc(ExecutionPolicy&& /* exec */,
 {
   dotc(v1, v2, result);
 }
-         
+
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
 } // end namespace std
