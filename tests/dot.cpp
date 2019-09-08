@@ -12,6 +12,19 @@
 #include <vector>
 #include "gtest/gtest.h"
 
+#ifdef LINALG_ENABLE_BLAS
+extern "C" double ddot_(const int* pN, const double* DX2,
+                        const int* pINCX, const double* DY2,
+                        const int* pINCY);
+
+double ddot_wrapper (const int N, const double* DX,
+                     const int INCX, const double* DY,
+                     const int INCY)
+{
+  return ddot_ (&N, DX, &INCX, DY, &INCY);
+}
+#endif // LINALG_ENABLE_BLAS
+
 namespace {
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
@@ -41,11 +54,17 @@ namespace {
     }
 
     scalar_t dotResult {};
-    dot (x, y, dotResult);
+    dot(x, y, dotResult);
     EXPECT_EQ( dotResult, expectedDotResult );
 
+#ifdef LINALG_ENABLE_BLAS
+    const scalar_t blasResult =
+      ddot_wrapper(x.extent(0), x.data(), 1, y.data(), 1);
+    EXPECT_EQ( dotResult, blasResult );    
+#endif // LINALG_ENABLE_BLAS
+    
     scalar_t conjDotResult {};
-    dotc (x, y, conjDotResult);
+    dotc(x, y, conjDotResult);
     EXPECT_EQ( conjDotResult, expectedDotResult );
 
     scalar_t dotResultPar {};

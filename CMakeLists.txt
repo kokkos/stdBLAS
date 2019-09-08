@@ -93,6 +93,18 @@ endif()
 find_package(MDSpan REQUIRED)
 find_package(MDArray REQUIRED)
 
+find_package(BLAS)
+option(LINALG_ENABLE_BLAS
+  "Assume that we are linking with a BLAS library."
+  ${BLAS_FOUND})
+
+################################################################################
+
+CONFIGURE_FILE(include/experimental/__p1673_bits/linalg_config.h.in
+  include/experimental/__p1673_bits/linalg_config.h)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/include/experimental)
+message(STATUS "Build include directory: ${CMAKE_CURRENT_BINARY_DIR}/include/experimental")
+
 ################################################################################
 
 add_library(linalg INTERFACE)

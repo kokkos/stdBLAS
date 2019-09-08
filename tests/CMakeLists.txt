@@ -1,7 +1,7 @@
 
 macro(linalg_add_test name)
   add_executable(${name} ${name}.cpp)
-  target_link_libraries(${name} linalg GTest::GTest GTest::Main)
+  target_link_libraries(${name} linalg GTest::GTest GTest::Main ${BLAS_LIBRARIES})
   add_test(${name} ${name})
 endmacro()
 

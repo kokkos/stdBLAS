@@ -1,0 +1,4 @@
+#pragma once
+
+#cmakedefine LINALG_ENABLE_BLAS
+#cmakedefine LINALG_ENABLE_CONCEPTS
