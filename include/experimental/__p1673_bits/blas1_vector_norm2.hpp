@@ -43,21 +43,60 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_VECTOR_NORM2_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_VECTOR_NORM2_HPP_
 
+#include <cmath>
+#include <cstdlib>
+
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
 
 template<class in_vector_t,
          class Scalar>
-void vector_norm2(in_vector_t v,
-                  Scalar& result);
+void vector_norm2(in_vector_t x,
+                  Scalar& result)
+{
+  using std::abs;
+  using std::sqrt;
+
+  // Rescaling, as in the Reference BLAS DNRM2 implementation, avoids
+  // unwarranted overflow or underflow.
+
+  result = 0.0;
+  if (x.extent(0) == 0) {
+    return;
+  }
+  else if (x.extent(0) == ptrdiff_t(1)) {
+    result = abs(x(0));
+    return;
+  }
+
+  Scalar scale = 0.0;
+  Scalar ssq = 1.0;
+  for (ptrdiff_t i = 0; i < x.extent(0); ++i) {
+    if (abs(x(i)) != 0.0) {
+      const auto absxi = abs(x(i));
+      const auto quotient = scale / absxi;
+      if (scale < absxi) {
+        ssq = Scalar(1.0) + ssq * quotient * quotient;
+        scale = absxi;
+      }
+      else {
+        ssq = ssq + quotient * quotient;
+      }
+    }
+  }
+  result = scale * sqrt(ssq);
+}
 
 template<class ExecutionPolicy,
          class in_vector_t,
          class Scalar>
-void vector_norm2(ExecutionPolicy&& exec,
+void vector_norm2(ExecutionPolicy&& /* exec */,
                   in_vector_t v,
-                  Scalar& result);
+                  Scalar& result)
+{
+  vector_norm2(v, result);
+}
 
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
