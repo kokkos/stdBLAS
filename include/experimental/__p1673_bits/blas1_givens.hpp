@@ -187,16 +187,18 @@ void givens_rotation_setup(const complex<Real>& f,
   using std::pow;
   using std::real;
 
-  // For IEEE 754 floating-point arithmetic only.
+  // safmin == min (smallest normalized positive floating-point
+  // number) for IEEE 754 floating-point arithmetic only.
   constexpr Real safmin = std::numeric_limits<Real>::min();
   constexpr Real eps = std::numeric_limits<Real>::epsilon();
+  // Base of the floating-point arithmetic.
   constexpr Real base = 2.0; // slamch('B')
   const Real safmn2 = pow(base, int(log(safmin / eps) / log(base) / two));
   const Real safmx2 = one / safmn2;
 
   Real scale = max(impl::abs1(f), impl::abs1(g));
-  Real fs = f;
-  Real gs = g;
+  auto fs = f;
+  auto gs = g;
   int count = 0;
   if (scale >= safmx2) { // scale is large
 label10:
