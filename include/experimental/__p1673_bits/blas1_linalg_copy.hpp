@@ -50,14 +50,22 @@ inline namespace __p1673_version_0 {
 template<class in_object_t,
          class out_object_t>
 void linalg_copy(in_object_t x,
-                 out_object_t y);
+                 out_object_t y)
+{
+  for (ptrdiff_t i = 0; i < y.extent(0); ++i) {
+    y(i) = x(i);
+  }
+}
 
 template<class ExecutionPolicy,
          class in_object_t,
          class out_object_t>
-void linalg_copy(ExecutionPolicy&& exec,
+void linalg_copy(ExecutionPolicy&& /* exec */,
                  in_object_t x,
-                 out_object_t y);
+                 out_object_t y)
+{
+  linalg_copy(x, y);
+}
 
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
