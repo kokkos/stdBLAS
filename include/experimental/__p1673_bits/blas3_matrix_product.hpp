@@ -91,9 +91,9 @@ void matrix_product(in_matrix_1_t A,
 {
   for(ptrdiff_t i = 0; i < C.extent(0); ++i) {
     for(ptrdiff_t j = 0; j < C.extent(1); ++j) {
-      C(i,j) = 0.0;
+      C(i,j) = E(i,j);
       for(ptrdiff_t k = 0; k < A.extent(1); ++k) {
-        C(i,j) += E(i,j) + A(i,k) * B(k,j);
+        C(i,j) += A(i,k) * B(k,j);
       }
     }
   }
@@ -210,9 +210,9 @@ void symmetric_matrix_product(
     if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
       for (ptrdiff_t j = 0; j < C.extent(1); ++j) {
         for (ptrdiff_t i = j; i < C.extent(0); ++i) {
-          C(i,j) = 0.0;
+          C(i,j) = E(i,j);
           for (ptrdiff_t k = 0; k < A.extent(1); ++k) {
-            C(i,j) += E(i,j) + A(i,k) * B(k,j);
+            C(i,j) += A(i,k) * B(k,j);
           }
         }
       }
@@ -220,9 +220,9 @@ void symmetric_matrix_product(
     else { // upper_triangle_t
       for (ptrdiff_t j = 0; j < C.extent(1); ++j) {
         for (ptrdiff_t i = 0; i <= j; ++i) {
-          C(i,j) = 0.0;
+          C(i,j) = E(i,j);
           for (ptrdiff_t k = 0; k < A.extent(1); ++k) {
-            C(i,j) += E(i,j) + A(i,k) * B(k,j);
+            C(i,j) += A(i,k) * B(k,j);
           }
         }
       }
@@ -232,9 +232,9 @@ void symmetric_matrix_product(
     if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
       for (ptrdiff_t j = 0; j < C.extent(1); ++j) {
         for (ptrdiff_t i = j; i < C.extent(0); ++i) {
-          C(i,j) = 0.0;
+          C(i,j) = E(i,j);
           for (ptrdiff_t k = 0; k < A.extent(1); ++k) {
-            C(i,j) += E(i,j) + B(i,k) * A(k,j);
+            C(i,j) += B(i,k) * A(k,j);
           }
         }
       }
@@ -242,9 +242,9 @@ void symmetric_matrix_product(
     else { // upper_triangle_t
       for (ptrdiff_t j = 0; j < C.extent(1); ++j) {
         for (ptrdiff_t i = 0; i <= j; ++i) {
-          C(i,j) = 0.0;
+          C(i,j) = E(i,j);
           for (ptrdiff_t k = 0; k < A.extent(1); ++k) {
-            C(i,j) += E(i,j) + B(i,k) * A(k,j);
+            C(i,j) += B(i,k) * A(k,j);
           }
         }
       }
@@ -368,9 +368,9 @@ void hermitian_matrix_product(
     if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
       for (ptrdiff_t j = 0; j < C.extent(1); ++j) {
         for (ptrdiff_t i = j; i < C.extent(0); ++i) {
-          C(i,j) = 0.0;
+          C(i,j) = E(i,j);
           for (ptrdiff_t k = 0; k < A.extent(1); ++k) {
-            C(i,j) += E(i,j) + A(i,k) * B(k,j);
+            C(i,j) += A(i,k) * B(k,j);
           }
         }
       }
@@ -378,9 +378,9 @@ void hermitian_matrix_product(
     else { // upper_triangle_t
       for (ptrdiff_t j = 0; j < C.extent(1); ++j) {
         for (ptrdiff_t i = 0; i <= j; ++i) {
-          C(i,j) = 0.0;
+          C(i,j) = E(i,j);
           for (ptrdiff_t k = 0; k < A.extent(1); ++k) {
-            C(i,j) += E(i,j) + A(i,k) * B(k,j);
+            C(i,j) += A(i,k) * B(k,j);
           }
         }
       }
@@ -390,9 +390,9 @@ void hermitian_matrix_product(
     if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
       for (ptrdiff_t j = 0; j < C.extent(1); ++j) {
         for (ptrdiff_t i = j; i < C.extent(0); ++i) {
-          C(i,j) = 0.0;
+          C(i,j) = E(i,j);
           for (ptrdiff_t k = 0; k < A.extent(1); ++k) {
-            C(i,j) += E(i,j) + B(i,k) * A(k,j);
+            C(i,j) += B(i,k) * A(k,j);
           }
         }
       }
@@ -400,9 +400,9 @@ void hermitian_matrix_product(
     else { // upper_triangle_t
       for (ptrdiff_t j = 0; j < C.extent(1); ++j) {
         for (ptrdiff_t i = 0; i <= j; ++i) {
-          C(i,j) = 0.0;
+          C(i,j) = E(i,j);
           for (ptrdiff_t k = 0; k < A.extent(1); ++k) {
-            C(i,j) += E(i,j) + B(i,k) * A(k,j);
+            C(i,j) += B(i,k) * A(k,j);
           }
         }
       }
