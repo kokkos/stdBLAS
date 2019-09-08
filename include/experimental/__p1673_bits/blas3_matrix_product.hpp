@@ -54,16 +54,29 @@ template<class in_matrix_1_t,
          class out_matrix_t>
 void matrix_product(in_matrix_1_t A,
                     in_matrix_2_t B,
-                    out_matrix_t C);
+                    out_matrix_t C)
+{
+  for(ptrdiff_t i = 0; i < C.extent(0); ++i) {
+    for(ptrdiff_t j = 0; j < C.extent(1); ++j) {
+      C(i,j) = 0.0;
+      for(ptrdiff_t k = 0; k < A.extent(1); ++k) {
+        C(i,j) += A(i,k) * B(k,j);
+      }
+    }
+  }
+}
 
 template<class ExecutionPolicy,
          class in_matrix_1_t,
          class in_matrix_2_t,
          class out_matrix_t>
-void matrix_product(ExecutionPolicy&& exec,
+void matrix_product(ExecutionPolicy&& /* exec */,
                     in_matrix_1_t A,
                     in_matrix_2_t B,
-                    out_matrix_t C);
+                    out_matrix_t C)
+{
+  matrix_product(A, B, C);
+}
 
 // Updating general matrix-matrix product
 
@@ -74,18 +87,31 @@ template<class in_matrix_1_t,
 void matrix_product(in_matrix_1_t A,
                     in_matrix_2_t B,
                     in_matrix_3_t E,
-                    out_matrix_t C);
+                    out_matrix_t C)
+{
+  for(ptrdiff_t i = 0; i < C.extent(0); ++i) {
+    for(ptrdiff_t j = 0; j < C.extent(1); ++j) {
+      C(i,j) = 0.0;
+      for(ptrdiff_t k = 0; k < A.extent(1); ++k) {
+        C(i,j) += E(i,j) + A(i,k) * B(k,j);
+      }
+    }
+  }
+}
 
 template<class ExecutionPolicy,
          class in_matrix_1_t,
          class in_matrix_2_t,
          class in_matrix_3_t,
          class out_matrix_t>
-void matrix_product(ExecutionPolicy&& exec,
+void matrix_product(ExecutionPolicy&& /* exec */,
                     in_matrix_1_t A,
                     in_matrix_2_t B,
                     in_matrix_3_t E,
-                    out_matrix_t C);
+                    out_matrix_t C)
+{
+  matrix_product(A, B, E, C);
+}
 
 // Overwriting symmetric matrix-matrix product
 
@@ -99,7 +125,53 @@ void symmetric_matrix_product(
   Triangle t,
   Side s,
   in_matrix_2_t B,
-  out_matrix_t C);
+  out_matrix_t C)
+{
+  if constexpr (std::is_same_v<Side, left_side_t>) {
+    if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
+      for (ptrdiff_t j = 0; j < C.extent(1); ++j) {
+        for (ptrdiff_t i = j; i < C.extent(0); ++i) {
+          C(i,j) = 0.0;
+          for (ptrdiff_t k = 0; k < A.extent(1); ++k) {
+            C(i,j) += A(i,k) * B(k,j);
+          }
+        }
+      }
+    }
+    else { // upper_triangle_t
+      for (ptrdiff_t j = 0; j < C.extent(1); ++j) {      
+        for (ptrdiff_t i = 0; i <= j; ++i) {
+          C(i,j) = 0.0;
+          for (ptrdiff_t k = 0; k < A.extent(1); ++k) {
+            C(i,j) += A(i,k) * B(k,j);
+          }
+        }
+      }
+    }
+  }
+  else { // right_side_t
+    if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
+      for (ptrdiff_t j = 0; j < C.extent(1); ++j) {
+        for (ptrdiff_t i = j; i < C.extent(0); ++i) {
+          C(i,j) = 0.0;
+          for (ptrdiff_t k = 0; k < A.extent(1); ++k) {
+            C(i,j) += B(i,k) * A(k,j);
+          }
+        }
+      }
+    }
+    else { // upper_triangle_t
+      for (ptrdiff_t j = 0; j < C.extent(1); ++j) {      
+        for (ptrdiff_t i = 0; i <= j; ++i) {
+          C(i,j) = 0.0;
+          for (ptrdiff_t k = 0; k < A.extent(1); ++k) {
+            C(i,j) += B(i,k) * A(k,j);
+          }
+        }
+      }
+    }
+  }
+}
 
 template<class ExecutionPolicy,
          class in_matrix_1_t,
@@ -108,12 +180,15 @@ template<class ExecutionPolicy,
          class in_matrix_2_t,
          class out_matrix_t>
 void symmetric_matrix_product(
-  ExecutionPolicy&& exec,
+  ExecutionPolicy&& /* exec */,
   in_matrix_1_t A,
   Triangle t,
   Side s,
   in_matrix_2_t B,
-  out_matrix_t C);
+  out_matrix_t C)
+{
+  symmetric_matrix_product(A, t, s, B, C);
+}
 
 // Updating symmetric matrix-matrix product
 
@@ -129,7 +204,53 @@ void symmetric_matrix_product(
   Side s,
   in_matrix_2_t B,
   in_matrix_3_t E,
-  out_matrix_t C);
+  out_matrix_t C)
+{
+  if constexpr (std::is_same_v<Side, left_side_t>) {
+    if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
+      for (ptrdiff_t j = 0; j < C.extent(1); ++j) {
+        for (ptrdiff_t i = j; i < C.extent(0); ++i) {
+          C(i,j) = 0.0;
+          for (ptrdiff_t k = 0; k < A.extent(1); ++k) {
+            C(i,j) += E(i,j) + A(i,k) * B(k,j);
+          }
+        }
+      }
+    }
+    else { // upper_triangle_t
+      for (ptrdiff_t j = 0; j < C.extent(1); ++j) {      
+        for (ptrdiff_t i = 0; i <= j; ++i) {
+          C(i,j) = 0.0;
+          for (ptrdiff_t k = 0; k < A.extent(1); ++k) {
+            C(i,j) += E(i,j) + A(i,k) * B(k,j);
+          }
+        }
+      }
+    }
+  }
+  else { // right_side_t
+    if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
+      for (ptrdiff_t j = 0; j < C.extent(1); ++j) {
+        for (ptrdiff_t i = j; i < C.extent(0); ++i) {
+          C(i,j) = 0.0;
+          for (ptrdiff_t k = 0; k < A.extent(1); ++k) {
+            C(i,j) += E(i,j) + B(i,k) * A(k,j);
+          }
+        }
+      }
+    }
+    else { // upper_triangle_t
+      for (ptrdiff_t j = 0; j < C.extent(1); ++j) {      
+        for (ptrdiff_t i = 0; i <= j; ++i) {
+          C(i,j) = 0.0;
+          for (ptrdiff_t k = 0; k < A.extent(1); ++k) {
+            C(i,j) += E(i,j) + B(i,k) * A(k,j);
+          }
+        }
+      }
+    }
+  }
+}
 
 template<class ExecutionPolicy,
          class in_matrix_1_t,
@@ -139,13 +260,16 @@ template<class ExecutionPolicy,
          class in_matrix_3_t,
          class out_matrix_t>
 void symmetric_matrix_product(
-  ExecutionPolicy&& exec,
+  ExecutionPolicy&& /* exec */,
   in_matrix_1_t A,
   Triangle t,
   Side s,
   in_matrix_2_t B,
   in_matrix_3_t E,
-  out_matrix_t C);
+  out_matrix_t C)
+{
+  symmetric_matrix_product(A, t, s, B, E, C);
+}
 
 // Overwriting Hermitian matrix-matrix product
 
