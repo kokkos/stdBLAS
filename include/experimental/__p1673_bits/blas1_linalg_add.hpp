@@ -52,16 +52,24 @@ template<class in_object_1_t,
          class out_object_t>
 void linalg_add(in_object_1_t x,
                 in_object_2_t y,
-                out_object_t z);
+                out_object_t z)
+{
+  for (ptrdiff_t i = 0; i < z.extent(0); ++i) {
+    z(i) = x(i) + y(i);
+  }
+}
 
 template<class ExecutionPolicy,
          class in_object_1_t,
          class in_object_2_t,
          class out_object_t>
-void linalg_add(ExecutionPolicy&& exec,
+void linalg_add(ExecutionPolicy&& /* exec */,
                 in_object_1_t x,
                 in_object_2_t y,
-                out_object_t z);
+                out_object_t z)
+{
+  linalg_add(x, y, z);
+}
 
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
