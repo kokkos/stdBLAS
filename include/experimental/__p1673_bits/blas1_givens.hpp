@@ -89,13 +89,13 @@ void givens_rotation_setup(const Real a,
                            Real& s,
                            Real& r)
 {
-  Real r, roe, scale, z;
   using std::abs;
   using std::hypot;
   using std::sqrt;
   using std::conj;
   using std::copysign;
 
+  Real z, scale;
   if (b == 0.0) { // includes the case a == b == 0
     c = 1.0;
     s = 0.0;
@@ -108,7 +108,7 @@ void givens_rotation_setup(const Real a,
     r = abs(b);
   }
   else { // a and b both nonzero
-    const Real scale = hypot(a, b);
+    scale = hypot(a, b);
 
     c = abs(a) / scale;
     // s = sign(a) * conj(b) / scale
@@ -116,7 +116,7 @@ void givens_rotation_setup(const Real a,
     r = sign(a) * scale;
   }
 
-  roe = b;
+  Real roe = b;
   if (abs(a) > abs(b)) {
     roe = a;
   }
@@ -224,24 +224,24 @@ label20:
       goto label20;
     }
   }
-  f2 = impl::abssq(fs);
-  g2 = impl::abssq(gs);
+  auto f2 = impl::abssq(fs);
+  auto g2 = impl::abssq(gs);
   if (f2 <= max(g2, one) * safmin) {
     // This is a rare case: F is very small.
     if (f == czero) {
       cs = zero;
       r = hypot(real(g), imag(g));
       // Do complex/real division explicitly with two real divisions
-      d = hypot(real(gs), imag(gs));
+      const auto d = hypot(real(gs), imag(gs));
       sn = complex<Real>(real(gs) / d, -imag(gs) / d);
       return;
     }
-    f2s = hypot(real(fs), imag(fs));
+    auto f2s = hypot(real(fs), imag(fs));
 
     // G2 and G2S are accurate
     // G2 is at least SAFMIN, and G2S is at least SAFMN2
 
-    g2s = sqrt(g2);
+    auto g2s = sqrt(g2);
 
     // Error in CS from underflow in F2S is at most
     // UNFL / SAFMN2 .lt. sqrt(UNFL*EPS) .lt. EPS
@@ -255,14 +255,15 @@ label20:
 
     // Make sure abs(FF) = 1
     // Do complex/real division explicitly with 2 real divisions
+    complex<Real> ff;
     if (impl::abs1(f) > one) {
-      d = hypot(real(f), imag(f));
+      const auto d = hypot(real(f), imag(f));
       ff = complex<Real>(real(f) / d, imag(f) / d);
     }
     else {
-      dr = safmx2 * real(f);
-      di = safmx2 * imag(f);
-      d = hypot(dr, di);
+      const auto dr = safmx2 * real(f);
+      const auto di = safmx2 * imag(f);
+      const auto d = hypot(dr, di);
       ff = complex<Real>(dr / d, di / d);
     }
     sn = ff * complex<Real>(real(gs) / g2s, -imag(gs) / g2s);
@@ -273,13 +274,13 @@ label20:
     // Neither F2 nor F2/G2 are less than SAFMIN
     // F2S cannot overflow, and it is accurate
 
-    f2s = sqrt(one + g2 / f2);
+    const auto f2s = sqrt(one + g2 / f2);
 
     // Do the F2S(real)*FS(complex) multiply with two real multiplies
 
     r = complex<Real>(f2s * real(fs), f2s * imag(fs));
     cs = one / f2s;
-    d = f2 + g2;
+    const auto d = f2 + g2;
 
     // Do complex/real division explicitly with two real divisions
 
