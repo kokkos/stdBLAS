@@ -43,6 +43,8 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_LINALG_SWAP_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_LINALG_SWAP_HPP_
 
+#include <utility>
+
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
@@ -50,14 +52,23 @@ inline namespace __p1673_version_0 {
 template<class inout_object_1_t,
          class inout_object_2_t>
 void linalg_swap(inout_object_1_t v1,
-                 inout_object_2_t v2);
+                 inout_object_2_t v2)
+{
+  for (ptrdiff_t i = 0; i < v1.extent(0); ++i) {
+    using std::swap;
+    swap(v1(i), v2(i));
+  }
+}
 
 template<class ExecutionPolicy,
          class inout_object_1_t,
          class inout_object_2_t>
-void linalg_swap(ExecutionPolicy&& exec,
+void linalg_swap(ExecutionPolicy&& /* exec */,
                  inout_object_1_t v1,
-                 inout_object_2_t v2);
+                 inout_object_2_t v2)
+{
+  linalg_swap(v1, v2);
+}
 
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
