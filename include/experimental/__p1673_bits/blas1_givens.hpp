@@ -83,69 +83,109 @@ inline namespace __p1673_version_0 {
 // slapy2(real(fs), aimag(fs)) -> hypot(real(fs), imag(fs))
 
 template<class Real>
-void givens_rotation_setup(const Real a,
-                           const Real b,
-                           Real& c,
-                           Real& s,
+void givens_rotation_setup(const Real f,
+                           const Real g,
+                           Real& cs,
+                           Real& sn,
                            Real& r)
 {
+  //safmin = dlamch( 'S' )
+  // safmin == min (smallest normalized positive floating-point
+  // number) for IEEE 754 floating-point arithmetic only.
+  constexpr Real safmin = std::numeric_limits<Real>::min();
+  //eps = dlamch( 'E' )
+  constexpr Real eps = std::numeric_limits<Real>::epsilon();
+  // Base of the floating-point arithmetic.
+  constexpr Real base = 2.0; // slamch('B')
+
   using std::abs;
-  using std::hypot;
+  using std::log;  
+  using std::max;
+  using std::pow;  
   using std::sqrt;
-  using std::conj;
-  using std::copysign;
+
+  // Original Fortran expresssion:
+  //
+  //    safmn2 = dlamch( 'B' )**int( log( safmin / eps ) /
+  // $            log( dlamch( 'B' ) ) / two )
+  //
+  // The ** (pow) operator has highest precedence.
+  constexpr Real two (2.0);
+  const Real safmn2 =
+    pow(base, int(log(safmin / eps) / log(base) / two));
+  const Real safmx2 = Real(1.0) / safmn2;
 
   Real z, scale;
-  if (b == 0.0) { // includes the case a == b == 0
-    c = 1.0;
-    s = 0.0;
-    r = a;
+  if (g == 0.0) { // includes the case f == g == 0
+    cs = 1.0;
+    sn = 0.0;
+    r = f;
   }
-  else if (a == 0.0) { // b must be nonzero
-    c = 0.0;
-    s = sign(b);
-    // s = sign(conj(b)); // ?????? one-argument sign???
-    r = abs(b);
+  else if (f == 0.0) { // g must be nonzero
+    cs = 0.0;
+    sn = 1.0;
+    r = g;
   }
-  else { // a and b both nonzero
-    scale = hypot(a, b);
+  else { // f and g both nonzero
+    auto f1 = f;
+    auto g1 = g;
+    auto scale = max(abs(f1), abs(g1));
 
-    c = abs(a) / scale;
-    // s = sign(a) * conj(b) / scale
-    s = sign(a) * b / scale;
-    r = sign(a) * scale;
-  }
+    if (scale >= safmx2) {
+      // At least one of f1 and g1 is large; rescale to avoid hypot.
+      int count = 0;
+      do {
+        // 10       CONTINUE
+        count = count + 1;
+        f1 = f1 * safmn2;
+        g1 = g1 * safmn2;
+        scale = max(abs(f1), abs(g1));
+        // IF( scale.GE.safmx2 ) GO TO 10
+      } while (scale >= safmx2);
 
-  Real roe = b;
-  if (abs(a) > abs(b)) {
-    roe = a;
-  }
-  scale = abs(a) + abs(b);
-  if (scale == 0.0) {
-    c = 1.0;
-    s = 0.0;
-    r = 0.0;
-    z = 0.0;
-  }
-  else {
-    // I introduced temporaries into the translated BLAS code for clarity.
-    const Real a_scaled = a / scale;
-    const Real b_scaled = b / scale;
-
-    r = scale * sqrt(a_scaled*a_scaled + b_scaled*b_scaled);
-    r = copysign(Real(1.0), roe) * r;
-    c = a / r;
-    s = b / r;
-    z = 1.0;
-    if (abs(a) > abs(b)) {
-      z = s;
+      r = sqrt(f1*f1 + g1*g1);
+      cs = f1 / r;
+      sn = g1 / r;
+      for (int i = 1; i <= count; ++i) {
+        r = r * safmx2;
+      }
     }
-    if (abs(b) >= abs(a) && c != 0.0) {
-      z = Real(1.0) / c;
+    else if (scale <= safmn2) {
+      // f1 and g1 are both small; rescale to avoid hypot.
+      int count = 0;
+      do {
+        // 30       CONTINUE
+        count = count + 1;
+        f1 = f1 * safmx2;
+        g1 = g1 * safmx2;
+        scale = max(abs(f1), abs(g1));
+        // IF( scale.LE.safmn2 ) GO TO 30
+      } while (scale <= safmn2);
+      
+      r = sqrt(f1*f1 + g1*g1);
+      cs = f1 / r;
+      sn = g1 / r;
+      for (int i = 1; i <= count; ++i) {
+        r = r * safmn2;
+      }
+    }
+    else {
+      // If f and g are not both too small, and neither of them is too
+      // large, then we don't have to trouble ourselves with hypot,
+      // since the usual formula won't commit unwarranted underflow or
+      // overflow.
+      r = sqrt(f1*f1 + g1*g1);
+      cs = f1 / r;
+      sn = g1 / r;
+    }
+
+    // abs( f ).GT.abs( g ) .AND. cs.LT.zero
+    if (abs(f) > abs(g) && cs < 0.0) {
+      cs = -cs;
+      sn = -sn;
+      r = -r;
     }
   }
-  a = r;
-  b = z;
 }
 
 namespace impl {
