@@ -43,23 +43,262 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_GIVENS_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_GIVENS_HPP_
 
+#include <cmath>
 #include <complex>
 
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
 
+// For the mathematical description of givens_rotation_setup, see BLAS
+// Standard, Section 2.8.3 ("Generate Transformations"), GEN_GROT.  In
+// the complex case, the implementation is based on LAPACK's CLARTG:
+//
+// http://www.netlib.org/lapack/explore-html/d1/dfa/clartg_8f_source.html
+//
+// For justification, see LAPACK Working Note #148, "On computing
+// Givens rotations reliably and efficiently."
+//
+// http://www.netlib.org/lapack/lawnspdf/lawn148.pdf
+//
+// If your hardware has fast floating-point "exception" handling, read
+// that report to learn how to optimize for your platform.  The
+// approach in that report has additional advantages over the BLAS'
+// CROTG; for example, the definition for complex data is consistent
+// with the definition for real data.
+//
+// I used the following rules to translate Fortran types and
+// intrinsic functions into C++:
+//
+// DOUBLE PRECISION -> Real
+// DOUBLE COMPLEX -> complex<Real>
+//
+// CDABS -> abs (complex<Real> input, Real return value)
+// DABS -> abs (Real input and return value)
+// DSQRT -> sqrt (Real input and return value)
+// DSIGN -> copysign (Real input and return value)
+// DCMPLX -> complex<Real> constructor (two Real input)
+// DCONJG -> conj (complex<Real> input and return value)
+// DSQRT -> sqrt (Real input and return value)
+// slapy2(real(fs), aimag(fs)) -> hypot(real(fs), imag(fs))
+
 template<class Real>
 void givens_rotation_setup(const Real a,
                            const Real b,
                            Real& c,
-                           Real& s);
+                           Real& s,
+                           Real& r)
+{
+  Real r, roe, scale, z;
+  using std::abs;
+  using std::hypot;
+  using std::sqrt;
+  using std::conj;
+  using std::copysign;
+
+  if (b == 0.0) { // includes the case a == b == 0
+    c = 1.0;
+    s = 0.0;
+    r = a;
+  }
+  else if (a == 0.0) { // b must be nonzero
+    c = 0.0;
+    s = sign(b);
+    // s = sign(conj(b)); // ?????? one-argument sign???
+    r = abs(b);
+  }
+  else { // a and b both nonzero
+    const Real scale = hypot(a, b);
+
+    c = abs(a) / scale;
+    // s = sign(a) * conj(b) / scale
+    s = sign(a) * b / scale;
+    r = sign(a) * scale;
+  }
+
+  roe = b;
+  if (abs(a) > abs(b)) {
+    roe = a;
+  }
+  scale = abs(a) + abs(b);
+  if (scale == 0.0) {
+    c = 1.0;
+    s = 0.0;
+    r = 0.0;
+    z = 0.0;
+  }
+  else {
+    // I introduced temporaries into the translated BLAS code for clarity.
+    const Real a_scaled = a / scale;
+    const Real b_scaled = b / scale;
+
+    r = scale * sqrt(a_scaled*a_scaled + b_scaled*b_scaled);
+    r = copysign(Real(1.0), roe) * r;
+    c = a / r;
+    s = b / r;
+    z = 1.0;
+    if (abs(a) > abs(b)) {
+      z = s;
+    }
+    if (abs(b) >= abs(a) && c != 0.0) {
+      z = Real(1.0) / c;
+    }
+  }
+  a = r;
+  b = z;
+}
+
+namespace impl {
+template<class Real>
+Real abs1(const complex<Real>& ff) {
+  using std::abs;
+  using std::imag;
+  using std::max;
+  using std::real;
+
+  return max(abs(real(ff)), abs(imag(ff)));
+}
 
 template<class Real>
-void givens_rotation_setup(const complex<Real>& a,
-                           const complex<Real>& b,
-                           Real& c,
-                           complex<Real>& s);
+Real abssq(const complex<Real>& ff) {
+  using std::imag;
+  using std::real;
+
+  return real(ff)*real(ff) + imag(ff)*imag(ff);
+}
+}
+
+template<class Real>
+void givens_rotation_setup(const complex<Real>& f,
+                           const complex<Real>& g,
+                           Real& cs,
+                           complex<Real>& sn,
+                           complex<Real>& r)
+{
+  const Real two = 2.0;
+  const Real one = 1.0;
+  const Real zero = 0.0;
+  const complex<Real> czero (0.0, 0.0);
+
+  using std::abs;
+  using std::imag;
+  using std::isnan;
+  using std::log;
+  using std::pow;
+  using std::real;
+
+  // For IEEE 754 floating-point arithmetic only.
+  constexpr Real safmin = std::numeric_limits<Real>::min();
+  constexpr Real eps = std::numeric_limits<Real>::epsilon();
+  constexpr Real base = 2.0; // slamch('B')
+  const Real safmn2 = pow(base, int(log(safmin / eps) / log(base) / two));
+  const Real safmx2 = one / safmn2;
+
+  Real scale = max(impl::abs1(f), impl::abs1(g));
+  Real fs = f;
+  Real gs = g;
+  int count = 0;
+  if (scale >= safmx2) { // scale is large
+label10:
+    count = count + 1;
+    fs = fs*safmn2;
+    gs = gs*safmn2;
+    scale = scale*safmn2;
+    if (scale >= safmx2) {
+      goto label10;
+    }
+  }
+  else if (scale <= safmn2) { // scale is small
+    if (g == czero || isnan(abs(g))) {
+      cs = one;
+      sn = czero;
+      r = f;
+      return;
+    }
+label20:
+    count = count - 1;
+    fs = fs * safmx2;
+    gs = gs * safmx2;
+    scale = scale * safmx2;
+    if (scale <= safmn2) {
+      goto label20;
+    }
+  }
+  f2 = impl::abssq(fs);
+  g2 = impl::abssq(gs);
+  if (f2 <= max(g2, one) * safmin) {
+    // This is a rare case: F is very small.
+    if (f == czero) {
+      cs = zero;
+      r = hypot(real(g), imag(g));
+      // Do complex/real division explicitly with two real divisions
+      d = hypot(real(gs), imag(gs));
+      sn = complex<Real>(real(gs) / d, -imag(gs) / d);
+      return;
+    }
+    f2s = hypot(real(fs), imag(fs));
+
+    // G2 and G2S are accurate
+    // G2 is at least SAFMIN, and G2S is at least SAFMN2
+
+    g2s = sqrt(g2);
+
+    // Error in CS from underflow in F2S is at most
+    // UNFL / SAFMN2 .lt. sqrt(UNFL*EPS) .lt. EPS
+    // If MAX(G2,ONE)=G2, then F2 .lt. G2*SAFMIN,
+    // and so CS .lt. sqrt(SAFMIN)
+    // If MAX(G2,ONE)=ONE, then F2 .lt. SAFMIN
+    // and so CS .lt. sqrt(SAFMIN)/SAFMN2 = sqrt(EPS)
+    // Therefore, CS = F2S/G2S / sqrt( 1 + (F2S/G2S)**2 ) = F2S/G2S
+
+    cs = f2s / g2s;
+
+    // Make sure abs(FF) = 1
+    // Do complex/real division explicitly with 2 real divisions
+    if (impl::abs1(f) > one) {
+      d = hypot(real(f), imag(f));
+      ff = complex<Real>(real(f) / d, imag(f) / d);
+    }
+    else {
+      dr = safmx2 * real(f);
+      di = safmx2 * imag(f);
+      d = hypot(dr, di);
+      ff = complex<Real>(dr / d, di / d);
+    }
+    sn = ff * complex<Real>(real(gs) / g2s, -imag(gs) / g2s);
+    r = cs * f + sn * g;
+  }
+  else {
+    // This is the most common case.
+    // Neither F2 nor F2/G2 are less than SAFMIN
+    // F2S cannot overflow, and it is accurate
+
+    f2s = sqrt(one + g2 / f2);
+
+    // Do the F2S(real)*FS(complex) multiply with two real multiplies
+
+    r = complex<Real>(f2s * real(fs), f2s * imag(fs));
+    cs = one / f2s;
+    d = f2 + g2;
+
+    // Do complex/real division explicitly with two real divisions
+
+    sn = complex<Real>(real(r) / d, imag(r) / d);
+    sn = sn * conj(gs);
+    if (count != 0) {
+      if (count > 0) {
+        for (int i = 1; i <= count; ++i) {
+          r = r * safmx2;
+        }
+      }
+      else {
+        for (int i = 1; i >= -count; --i) {
+          r = r * safmn2;
+        }
+      }
+    }
+  }
+}
 
 template<class ExecutionPolicy,
          class inout_vector_1_t,
