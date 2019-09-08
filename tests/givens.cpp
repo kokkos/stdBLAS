@@ -1,6 +1,7 @@
 #include <experimental/linalg>
-//#include <experimental/mdspan>
+#include <experimental/mdspan>
 #include <limits>
+#include <vector>
 #include "gtest/gtest.h"
 
 namespace {
@@ -146,6 +147,120 @@ namespace {
       EXPECT_TRUE( abs(std::hypot(a, b) - r) <= tol );
       // It's really scalingFactor*eps, not sqrt(scalingFactor)*eps.
       ASSERT_TRUE( abs(scalingFactor - r) <= scalingFactor*eps );
+    }
+  }
+
+  TEST(givens_rotation_apply, double)
+  {
+    using real_t = double;
+    using scalar_t = real_t;
+    using vector_t = basic_mdspan<scalar_t, extents<dynamic_extent>>;
+
+    constexpr size_t vectorSize(5);
+    constexpr size_t storageSize = size_t(2) * vectorSize;
+    std::vector<scalar_t> storage(storageSize);
+
+    vector_t x(storage.data(), vectorSize);
+    vector_t y(storage.data() + vectorSize, vectorSize);
+
+    for (size_t k = 0; k < vectorSize; ++k) {
+      const scalar_t x_k(real_t(k) + 4.0);
+      const scalar_t y_k(real_t(k) + 5.0);
+      x(k) = x_k;
+      y(k) = y_k;
+    }
+
+    {
+      const real_t c(1.0);
+      const scalar_t s(0.0);
+
+      givens_rotation_apply(x, y, c, s);
+      for (size_t k = 0; k < vectorSize; ++k) {
+        scalar_t x_k(real_t(k) + 4.0);
+        scalar_t y_k(real_t(k) + 5.0);
+
+        const scalar_t tmp = c * x_k + s * y_k;
+        y_k = c * y_k - s * x_k;
+        x_k = tmp;
+
+        EXPECT_EQ( x(k), x_k );
+        EXPECT_EQ( y(k), y_k );
+      }
+    }
+    {
+      const real_t c(0.0);
+      const scalar_t s(1.0);
+
+      givens_rotation_apply(x, y, c, s);
+      for (size_t k = 0; k < vectorSize; ++k) {
+        scalar_t x_k(real_t(k) + 4.0);
+        scalar_t y_k(real_t(k) + 5.0);
+
+        const scalar_t tmp = c * x_k + s * y_k;
+        y_k = c * y_k - s * x_k;
+        x_k = tmp;
+
+        EXPECT_EQ( x(k), x_k );
+        EXPECT_EQ( y(k), y_k );
+      }
+    }
+  }
+
+  TEST(givens_rotation_apply, complex_double)
+  {
+    using real_t = double;
+    using scalar_t = std::complex<real_t>;
+    using vector_t = basic_mdspan<scalar_t, extents<dynamic_extent>>;
+
+    constexpr size_t vectorSize(5);
+    constexpr size_t storageSize = size_t(2) * vectorSize;
+    std::vector<scalar_t> storage(storageSize);
+
+    vector_t x(storage.data(), vectorSize);
+    vector_t y(storage.data() + vectorSize, vectorSize);
+
+    for (size_t k = 0; k < vectorSize; ++k) {
+      const scalar_t x_k(real_t(k) + 4.0, -real_t(k) - 1.0);
+      const scalar_t y_k(real_t(k) + 5.0, -real_t(k) - 2.0);
+      x(k) = x_k;
+      y(k) = y_k;
+    }
+
+    using std::conj;
+
+    {
+      const real_t c(1.0);
+      const scalar_t s(0.0, 0.0);
+
+      givens_rotation_apply(x, y, c, s);
+      for (size_t k = 0; k < vectorSize; ++k) {
+        scalar_t x_k(real_t(k) + 4.0, -real_t(k) - 1.0);
+        scalar_t y_k(real_t(k) + 5.0, -real_t(k) - 2.0);
+
+        const scalar_t tmp = c * x_k + s * y_k;
+        y_k = c * y_k - conj(s) * x_k;
+        x_k = tmp;
+
+        EXPECT_EQ( x(k), x_k );
+        EXPECT_EQ( y(k), y_k );
+      }
+    }
+    {
+      const real_t c(0.0);
+      const scalar_t s(1.0, 0.0);
+
+      givens_rotation_apply(x, y, c, s);
+      for (size_t k = 0; k < vectorSize; ++k) {
+        scalar_t x_k(real_t(k) + 4.0, -real_t(k) - 1.0);
+        scalar_t y_k(real_t(k) + 5.0, -real_t(k) - 2.0);
+
+        const scalar_t tmp = c * x_k + s * y_k;
+        y_k = c * y_k - conj(s) * x_k;
+        x_k = tmp;
+
+        EXPECT_EQ( x(k), x_k );
+        EXPECT_EQ( y(k), y_k );
+      }
     }
   }
 }

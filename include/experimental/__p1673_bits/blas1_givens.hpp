@@ -99,9 +99,9 @@ void givens_rotation_setup(const Real f,
   constexpr Real base = 2.0; // slamch('B')
 
   using std::abs;
-  using std::log;  
+  using std::log;
   using std::max;
-  using std::pow;  
+  using std::pow;
   using std::sqrt;
 
   // Original Fortran expresssion:
@@ -161,7 +161,7 @@ void givens_rotation_setup(const Real f,
         scale = max(abs(f1), abs(g1));
         // IF( scale.LE.safmn2 ) GO TO 30
       } while (scale <= safmn2);
-      
+
       r = sqrt(f1*f1 + g1*g1);
       cs = f1 / r;
       sn = g1 / r;
@@ -343,45 +343,66 @@ label20:
   }
 }
 
+template<class inout_vector_1_t,
+         class inout_vector_2_t,
+         class Real>
+void givens_rotation_apply(
+  inout_vector_1_t x,
+  inout_vector_2_t y,
+  const Real c,
+  const Real s)
+{
+  for (ptrdiff_t i = 0; i < x.extent(0); ++i) {
+    const auto dtemp = c * x(i) + s * y(i);
+    y(i) = c * y(i) - s * x(i);
+    x(i) = dtemp;
+  }
+}
+
 template<class ExecutionPolicy,
          class inout_vector_1_t,
          class inout_vector_2_t,
          class Real>
 void givens_rotation_apply(
-  ExecutionPolicy&& exec,
-  inout_vector_1_t v1,
-  inout_vector_2_t v2,
+  ExecutionPolicy&& /* exec */,
+  inout_vector_1_t x,
+  inout_vector_2_t y,
   const Real c,
-  const Real s);
+  const Real s)
+{
+  givens_rotation_apply(x, y, c, s);
+}
 
 template<class inout_vector_1_t,
          class inout_vector_2_t,
          class Real>
 void givens_rotation_apply(
-  inout_vector_1_t v1,
-  inout_vector_2_t v2,
+  inout_vector_1_t x,
+  inout_vector_2_t y,
   const Real c,
-  const Real s);
+  const complex<Real> s)
+{
+  using std::conj;
+  for (ptrdiff_t i = 0; i < x.extent(0); ++i) {
+    const auto dtemp = c * x(i) + s * y(i);
+    y(i) = c * y(i) - conj(s) * x(i);
+    x(i) = dtemp;
+  }
+}
 
 template<class ExecutionPolicy,
          class inout_vector_1_t,
          class inout_vector_2_t,
          class Real>
 void givens_rotation_apply(
-  ExecutionPolicy&& exec,
-  inout_vector_1_t v1,
-  inout_vector_2_t v2,
+  ExecutionPolicy&& /* exec */,
+  inout_vector_1_t x,
+  inout_vector_2_t y,
   const Real c,
-  const complex<Real> s);
-
-template<class inout_vector_1_t,
-         class inout_vector_2_t,
-         class Real>
-void givens_rotation_apply(
-  inout_vector_1_t v1,
-  inout_vector_2_t v2,
-  const Real c,
-  const complex<Real> s);
+  const complex<Real> s)
+{
+  givens_rotation_apply(x, y, c, s);
+}
 
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
