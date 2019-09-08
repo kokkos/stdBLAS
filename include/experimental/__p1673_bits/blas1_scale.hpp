@@ -50,14 +50,22 @@ inline namespace __p1673_version_0 {
 template<class Scalar,
          class inout_object_t>
 void scale(const Scalar alpha,
-           inout_object_t obj);
+           inout_object_t obj)
+{
+  for (ptrdiff_t i = 0; i < obj.extent(0); ++i) {
+    obj(i) *= alpha;
+  }
+}
 
 template<class ExecutionPolicy,
          class Scalar,
          class inout_object_t>
-void scale(ExecutionPolicy&& exec,
+void scale(ExecutionPolicy&& /* exec */,
            const Scalar alpha,
-           inout_object_t obj);
+           inout_object_t obj)
+{
+  scale(alpha, obj);
+}
 
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
