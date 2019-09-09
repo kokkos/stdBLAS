@@ -82,11 +82,11 @@ template<class in_object_t,
 void linalg_copy(in_object_t x,
                  out_object_t y)
 {
-  if constexpr (x.rank() == 1 && y.rank() == 1) {
-    linalg_copy_rank_1 (x, y);
+  if constexpr (x.rank() == 1) {
+    linalg_copy_rank_1(x, y);
   }
-  else if constexpr (x.rank() == 2 && y.rank() == 2) {
-    linalg_copy_rank_2 (x, y);
+  else if constexpr (x.rank() == 2) {
+    linalg_copy_rank_2(x, y);
   }
   else {
     static_assert("Not implemented");

@@ -47,13 +47,49 @@ namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
 
+namespace {
+
+template<class Scalar,
+         class inout_vector_t>
+void linalg_scale_rank_1(const Scalar alpha,
+                         inout_vector_t x)
+{
+  for (ptrdiff_t i = 0; i < x.extent(0); ++i) {
+    x(i) *= alpha;
+  }
+}
+
+template<class Scalar,
+         class inout_matrix_t>
+void linalg_scale_rank_2(const Scalar alpha,
+                        inout_matrix_t x)
+{
+  for (ptrdiff_t j = 0; j < x.extent(1); ++j) {
+    for (ptrdiff_t i = 0; i < x.extent(0); ++i) {
+      x(i,j) *= alpha;
+    }
+  }
+}
+
+// TODO add mdarray specializations; needed so that inout_object_t is
+// not passed by value (which would be wrong for a container type like
+// mdarray).
+
+}
+
 template<class Scalar,
          class inout_object_t>
 void scale(const Scalar alpha,
-           inout_object_t obj)
+           inout_object_t x)
 {
-  for (ptrdiff_t i = 0; i < obj.extent(0); ++i) {
-    obj(i) *= alpha;
+  if constexpr (x.rank() == 1) {
+    linalg_scale_rank_1(alpha, x);
+  }
+  else if constexpr (x.rank() == 2) {
+    linalg_scale_rank_2(alpha, x);
+  }
+  else {
+    static_assert("Not implemented");
   }
 }
 
