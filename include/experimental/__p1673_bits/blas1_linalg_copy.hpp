@@ -89,7 +89,7 @@ void linalg_copy(in_object_t x,
     linalg_copy_rank_2 (x, y);
   }
   else {
-    // TODO unimplemented
+    static_assert("Not implemented");
   }
 }
 
