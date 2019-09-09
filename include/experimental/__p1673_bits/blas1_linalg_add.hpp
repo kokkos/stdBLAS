@@ -47,6 +47,40 @@ namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
 
+namespace {
+
+template<class in_vector_1_t,
+         class in_vector_2_t,
+         class out_vector_t>
+void linalg_add_rank_1(in_vector_1_t x,
+                       in_vector_2_t y,
+                       out_vector_t z)
+{
+  for (ptrdiff_t i = 0; i < z.extent(0); ++i) {
+    z(i) = x(i) + y(i);
+  }
+}
+
+template<class in_matrix_1_t,
+         class in_matrix_2_t,
+         class out_matrix_t>
+void linalg_add_rank_2(in_matrix_1_t x,
+                       in_matrix_2_t y,
+                       out_matrix_t z)
+{
+  for (ptrdiff_t j = 0; j < x.extent(1); ++j) {
+    for (ptrdiff_t i = 0; i < x.extent(0); ++i) {
+      z(i,j) = x(i,j) + y(i,j);
+    }
+  }
+}
+
+// TODO add mdarray specializations; needed so that out_*_t is
+// not passed by value (which would be wrong for a container type like
+// mdarray).
+
+}
+
 template<class in_object_1_t,
          class in_object_2_t,
          class out_object_t>
@@ -54,8 +88,14 @@ void linalg_add(in_object_1_t x,
                 in_object_2_t y,
                 out_object_t z)
 {
-  for (ptrdiff_t i = 0; i < z.extent(0); ++i) {
-    z(i) = x(i) + y(i);
+  if constexpr (z.rank() == 1) {
+    linalg_add_rank_1 (x, y, z);
+  }
+  else if constexpr (z.rank() == 2) {
+    linalg_add_rank_2 (x, y, z);
+  }
+  else {
+    // TODO unimplemented
   }
 }
 

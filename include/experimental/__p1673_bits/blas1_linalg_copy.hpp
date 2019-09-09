@@ -49,23 +49,23 @@ inline namespace __p1673_version_0 {
 
 namespace {
 
-template<class in_object_t,
-         class out_object_t>
-void linalg_copy_rank_1(in_object_t x,
-                        out_object_t y)
+template<class in_vector_t,
+         class out_vector_t>
+void linalg_copy_rank_1(in_vector_t x,
+                        out_vector_t y)
 {
   for (ptrdiff_t i = 0; i < y.extent(0); ++i) {
     y(i) = x(i);
   }
 }
 
-template<class in_object_t,
-         class out_object_t>
-void linalg_copy_rank_2(in_object_t x,
-                        out_object_t y)
+template<class in_matrix_t,
+         class out_matrix_t>
+void linalg_copy_rank_2(in_matrix_t x,
+                        out_matrix_t y)
 {
-  for (ptrdiff_t i = 0; i < y.extent(0); ++i) {
-    for (ptrdiff_t j = 0; j < y.extent(1); ++j) {
+  for (ptrdiff_t j = 0; j < y.extent(1); ++j) {
+    for (ptrdiff_t i = 0; i < y.extent(0); ++i) {
       y(i,j) = x(i,j);
     }
   }
@@ -89,7 +89,7 @@ void linalg_copy(in_object_t x,
     linalg_copy_rank_2 (x, y);
   }
   else {
-    // TODO report unimplemented
+    // TODO unimplemented
   }
 }
 
