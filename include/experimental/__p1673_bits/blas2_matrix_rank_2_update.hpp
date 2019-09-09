@@ -57,7 +57,19 @@ void symmetric_matrix_rank_2_update(
   in_vector_1_t x,
   in_vector_2_t y,
   inout_matrix_t A,
-  Triangle t);
+  Triangle /* t */)
+{
+  constexpr bool lower_tri =
+    std::is_same_v<Triangle, lower_triangle_t>;
+  for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
+    const ptrdiff_t i_lower = lower_tri ? j : ptrdiff_t(0);
+    const ptrdiff_t i_upper = lower_tri ? A.extent(0) : j+1;
+
+    for (ptrdiff_t i = i_lower; i < i_upper; ++i) {
+      A(i,j) += x(i) * y(j) + y(i) * x(j);
+    }
+  }
+}
 
 template<class ExecutionPolicy,
          class in_vector_1_t,
@@ -65,11 +77,14 @@ template<class ExecutionPolicy,
          class inout_matrix_t,
          class Triangle>
 void symmetric_matrix_rank_2_update(
-  ExecutionPolicy&& exec,
+  ExecutionPolicy&& /* exec */,
   in_vector_1_t x,
   in_vector_2_t y,
   inout_matrix_t A,
-  Triangle t);
+  Triangle t)
+{
+  symmetric_matrix_rank_2_update(x, y, A, t);
+}
 
 // Rank-2 update of a Hermitian matrix
 
@@ -81,7 +96,21 @@ void hermitian_matrix_rank_2_update(
   in_vector_1_t x,
   in_vector_2_t y,
   inout_matrix_t A,
-  Triangle t);
+  Triangle /* t */)
+{
+  using std::conj;
+
+  constexpr bool lower_tri =
+    std::is_same_v<Triangle, lower_triangle_t>;
+  for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
+    const ptrdiff_t i_lower = lower_tri ? j : ptrdiff_t(0);
+    const ptrdiff_t i_upper = lower_tri ? A.extent(0) : j+1;
+
+    for (ptrdiff_t i = i_lower; i < i_upper; ++i) {
+      A(i,j) += x(i) * conj(y(j)) + y(i) * conj(x(j));
+    }
+  }
+}
 
 template<class ExecutionPolicy,
          class in_vector_1_t,
@@ -89,12 +118,15 @@ template<class ExecutionPolicy,
          class inout_matrix_t,
          class Triangle>
 void hermitian_matrix_rank_2_update(
-  ExecutionPolicy&& exec,
+  ExecutionPolicy&& /* exec */,
   in_vector_1_t x,
   in_vector_2_t y,
   inout_matrix_t A,
-  Triangle t);
-         
+  Triangle t)
+{
+  hermitian_matrix_rank_2_update(x, y, A, t);
+}
+
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
 } // end namespace std
