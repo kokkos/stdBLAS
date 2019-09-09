@@ -43,35 +43,124 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS2_MATRIX_VECTOR_SOLVE_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS2_MATRIX_VECTOR_SOLVE_HPP_
 
+#include <type_traits>
+
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
 
+namespace {
+
+template<class in_matrix_t,
+         class DiagonalStorage,
+         class in_vector_t,
+         class out_vector_t>
+void trsv_upper_triangular_left_side(
+  in_matrix_t A,
+  DiagonalStorage d,
+  in_vector_t B,
+  out_vector_t X)
+{
+  constexpr bool explicit_diagonal =
+    std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
+
+  const ptrdiff_t A_num_rows = A.extent(0);
+  const ptrdiff_t A_num_cols = A.extent(1);
+
+  // One advantage of using signed index types is that you can write
+  // descending loops with zero-based indices.
+  for (ptrdiff_t i = A_num_rows - 1; i >= 0; --i) {
+    // TODO this would be a great opportunity for an implementer to
+    // add value, by accumulating in extended precision (or at least
+    // in a type with the max precision of X and B).
+    using sum_type = decltype (B(i) - A(0,0) * X(0));
+    //using sum_type = typename out_object_t::element_type;
+    const sum_type t (B(i));
+    for (ptrdiff_t j = i + 1; j < A_num_cols; ++j) {
+      t = t - A(i,j) * X(j);
+    }
+    if constexpr (explicit_diagonal) {
+      X(i) = t / A(i,i);
+    }
+    else {
+      X(i) = t;
+    }
+  }
+}
+
+template<class in_matrix_t,
+         class DiagonalStorage,
+         class in_vector_t,
+         class out_vector_t>
+void trsv_lower_triangular_left_side(
+  in_matrix_t A,
+  DiagonalStorage d,
+  in_vector_t B,
+  out_vector_t X)
+{
+  constexpr bool explicit_diagonal =
+    std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
+
+  const ptrdiff_t A_num_rows = A.extent(0);
+  const ptrdiff_t A_num_cols = A.extent(1);
+
+  for (ptrdiff_t i = 0; i < A_num_rows; ++i) {
+    // TODO this would be a great opportunity for an implementer to
+    // add value, by accumulating in extended precision (or at least
+    // in a type with the max precision of X and B).
+    using sum_type = decltype (B(i) - A(0,0) * X(0));
+    //using sum_type = typename out_object_t::element_type;
+    const sum_type t (B(i));
+    for (ptrdiff_t j = 0; j < i; ++j) {
+      t = t - A(i,j) * X(j);
+    }
+    if constexpr (explicit_diagonal) {
+      X(i) = t / A(i,i);
+    }
+    else {
+      X(i) = t;
+    }
+  }
+}
+
+}
+
 template<class in_matrix_t,
          class Triangle,
          class DiagonalStorage,
-         class in_object_t,
-         class out_object_t>
+         class in_vector_t,
+         class out_vector_t>
 void triangular_matrix_vector_solve(
   in_matrix_t A,
   Triangle t,
   DiagonalStorage d,
-  in_object_t b,
-  out_object_t x);
+  in_vector_t b,
+  out_vector_t x)
+{
+  if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
+    trsv_lower_triangular_left_side(A, d, b, x);
+  }
+  else {
+    trsv_upper_triangular_left_side(A, d, b, x);
+  }
+}
 
 template<class ExecutionPolicy,
          class in_matrix_t,
          class Triangle,
          class DiagonalStorage,
-         class in_object_t,
-         class out_object_t>
+         class in_vector_t,
+         class out_vector_t>
 void triangular_matrix_vector_solve(
-  ExecutionPolicy&& exec,
+  ExecutionPolicy&& /* exec */,
   in_matrix_t A,
   Triangle t,
   DiagonalStorage d,
-  in_object_t b,
-  out_object_t x);
+  in_vector_t b,
+  out_vector_t x)
+{
+  triangular_matrix_vector_solve(A, t, d, b, x);
+}
 
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
