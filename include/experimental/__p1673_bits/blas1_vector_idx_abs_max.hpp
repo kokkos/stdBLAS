@@ -48,12 +48,34 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 
 template<class in_vector_t>
-ptrdiff_t vector_idx_abs_max(in_vector_t v);
+ptrdiff_t vector_idx_abs_max(in_vector_t v)
+{
+  using std::abs;
+  using element_type = typename in_vector_t::element_type;
+  using magnitude_type = decltype(abs(v(0)));
+
+  if (v.extent(0) == 0) {
+    return -1;
+  }
+  ptrdiff_t maxInd = 0;
+  magnitude_type maxVal = abs(v(0));
+  for (ptrdiff_t i = 1; i < v.extent(0); ++i) {
+    if (maxVal < abs(v(i))) {
+      maxVal = abs(v(i));
+      maxInd = i;
+    }
+  }
+  return maxInd; // FIXME check for NaN "never less than" stuff
+}
+
 
 template<class ExecutionPolicy,
          class in_vector_t>
-ptrdiff_t vector_idx_abs_max(ExecutionPolicy&& exec,
-                             in_vector_t v);
+ptrdiff_t vector_idx_abs_max(ExecutionPolicy&& /* exec */,
+                             in_vector_t v)
+{
+  return vector_idx_abs_max(v);
+}
 
 } // end inline namespace __p1673_version_0
 } // end namespace experimental

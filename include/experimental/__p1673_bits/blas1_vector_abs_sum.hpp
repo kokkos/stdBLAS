@@ -43,6 +43,9 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_VECTOR_ABS_SUM_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_VECTOR_ABS_SUM_HPP_
 
+#include <cstdlib>
+#include <cmath>
+
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
@@ -50,14 +53,24 @@ inline namespace __p1673_version_0 {
 template<class in_vector_t,
          class Scalar>
 void vector_abs_sum(in_vector_t v,
-                    Scalar& result);
+                    Scalar& result)
+{
+  result = 0.0;
+  for (ptrdiff_t i = 0; i < v.extent(0); ++i) {
+    using std::abs;
+    result += abs(v(i));
+  }
+}
 
 template<class ExecutionPolicy,
          class in_vector_t,
          class Scalar>
-void vector_abs_sum(ExecutionPolicy&& exec,
+void vector_abs_sum(ExecutionPolicy&& /* exec */,
                     in_vector_t v,
-                    Scalar& result);
+                    Scalar& result)
+{
+  vector_abs_sum(v, result);
+}
 
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
