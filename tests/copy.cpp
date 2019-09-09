@@ -21,7 +21,7 @@ namespace {
 
   template<class Real>
   struct MakeVectorValues {
-    static std::pair<Real, Real> make (const size_t k) {
+    static std::pair<Real, Real> make(const size_t k) {
       const Real x_k = Real(k) + Real(1.0);
       const Real y_k = Real(k) + Real(2.0);
       return {x_k, y_k};
@@ -99,6 +99,101 @@ namespace {
   }
 }
 
-// int main() {
-//   std::cout << "hello world" << std::endl;
-// }
+template<class Real>
+struct MakeMatrixValues {
+  static std::pair<Real, Real>
+  make(const ptrdiff_t i, const ptrdiff_t j, const ptrdiff_t numRows) {
+    const Real A_ij = (Real(i) + Real(1.0)) +
+      Real(numRows) * (Real(j) + Real(1.0));
+    const Real B_ij = Real(i) + Real(2.0) +
+      Real(numRows) * (Real(j) + Real(2.0));
+    return {A_ij, B_ij};
+  }
+};
+
+template<class Real>
+struct MakeMatrixValues<std::complex<Real>> {
+  static std::pair<std::complex<Real>, std::complex<Real>>
+  make(const ptrdiff_t i, const ptrdiff_t j, const ptrdiff_t numRows) {
+    using scalar_t = std::complex<Real>;
+    const scalar_t A_i(Real(i) + 4.0, -Real(i) - 1.0);
+    const scalar_t B_i(Real(i) + 5.0, -Real(i) - 2.0);
+    const scalar_t A_j(Real(j) + 4.0, -Real(j) - 1.0);
+    const scalar_t B_j(Real(j) + 5.0, -Real(j) - 2.0);
+
+    const scalar_t A_ij = A_i + Real(numRows) * A_j;
+    const scalar_t B_ij = B_i + Real(numRows) * B_j;
+    return {A_ij, B_ij};
+  }
+};
+
+template<class Scalar>
+std::pair<Scalar, Scalar>
+makeMatrixValues(const ptrdiff_t i, const ptrdiff_t j, const ptrdiff_t numRows) {
+  return MakeMatrixValues<Scalar>::make(i, j, numRows);
+}
+
+TEST(BLAS1_copy_matrix, mdspan_double)
+{
+  using scalar_t = double;
+  using matrix_t = basic_mdspan<scalar_t, extents<dynamic_extent, dynamic_extent>>;
+
+  constexpr ptrdiff_t numRows(5);
+  constexpr ptrdiff_t numCols(4);
+  constexpr size_t storageSize = size_t(2) * size_t(numRows*numCols);
+  std::vector<scalar_t> storage(storageSize);
+
+  matrix_t A(storage.data(), numRows, numCols);
+  matrix_t B(storage.data() + numRows*numCols, numRows, numCols);
+
+  for (ptrdiff_t j = 0; j < numCols; ++j) {
+    for (ptrdiff_t i = 0; i < numRows; ++i) {
+      const auto vals = makeMatrixValues<scalar_t>(i, j, numRows);
+      A(i,j) = vals.first;
+      B(i,j) = vals.second;
+    }
+  }
+
+  linalg_copy(A, B);
+  for (ptrdiff_t j = 0; j < numCols; ++j) {
+    for (ptrdiff_t i = 0; i < numRows; ++i) {
+      const auto vals = makeMatrixValues<scalar_t>(i, j, numRows);
+      // Make sure the function didn't modify the input.
+      EXPECT_EQ( A(i,j), vals.first );
+      EXPECT_EQ( B(i,j), vals.first ); // check the output
+    }
+  }
+}
+
+TEST(BLAS1_copy_matrix, mdspan_complex_double)
+{
+  using real_t = double;
+  using scalar_t = std::complex<real_t>;
+  using matrix_t = basic_mdspan<scalar_t, extents<dynamic_extent, dynamic_extent>>;
+
+  constexpr ptrdiff_t numRows(5);
+  constexpr ptrdiff_t numCols(4);
+  constexpr size_t storageSize = size_t(2) * size_t(numRows*numCols);
+  std::vector<scalar_t> storage(storageSize);
+
+  matrix_t A(storage.data(), numRows, numCols);
+  matrix_t B(storage.data() + numRows*numCols, numRows, numCols);
+
+  for (ptrdiff_t j = 0; j < numCols; ++j) {
+    for (ptrdiff_t i = 0; i < numRows; ++i) {
+      const auto vals = makeMatrixValues<scalar_t>(i, j, numRows);
+      A(i,j) = vals.first;
+      B(i,j) = vals.second;
+    }
+  }
+
+  linalg_copy(A, B);
+  for (ptrdiff_t j = 0; j < numCols; ++j) {
+    for (ptrdiff_t i = 0; i < numRows; ++i) {
+      const auto vals = makeMatrixValues<scalar_t>(i, j, numRows);
+      // Make sure the function didn't modify the input.
+      EXPECT_EQ( A(i,j), vals.first );
+      EXPECT_EQ( B(i,j), vals.first ); // check the output
+    }
+  }
+}

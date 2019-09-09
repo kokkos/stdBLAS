@@ -47,13 +47,49 @@ namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
 
+namespace {
+
+template<class in_object_t,
+         class out_object_t>
+void linalg_copy_rank_1(in_object_t x,
+                        out_object_t y)
+{
+  for (ptrdiff_t i = 0; i < y.extent(0); ++i) {
+    y(i) = x(i);
+  }
+}
+
+template<class in_object_t,
+         class out_object_t>
+void linalg_copy_rank_2(in_object_t x,
+                        out_object_t y)
+{
+  for (ptrdiff_t i = 0; i < y.extent(0); ++i) {
+    for (ptrdiff_t j = 0; j < y.extent(1); ++j) {
+      y(i,j) = x(i,j);
+    }
+  }
+}
+
+// TODO add mdarray specializations; needed so that out_object_t is
+// not passed by value (which would be wrong for a container type like
+// mdarray).
+
+}
+
 template<class in_object_t,
          class out_object_t>
 void linalg_copy(in_object_t x,
                  out_object_t y)
 {
-  for (ptrdiff_t i = 0; i < y.extent(0); ++i) {
-    y(i) = x(i);
+  if constexpr (x.rank() == 1 && y.rank() == 1) {
+    linalg_copy_rank_1 (x, y);
+  }
+  else if constexpr (x.rank() == 2 && y.rank() == 2) {
+    linalg_copy_rank_2 (x, y);
+  }
+  else {
+    // TODO report unimplemented
   }
 }
 
@@ -66,6 +102,8 @@ void linalg_copy(ExecutionPolicy&& /* exec */,
 {
   linalg_copy(x, y);
 }
+
+// TODO add mdarray specializations
 
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
