@@ -55,17 +55,27 @@ template<class in_vector_1_t,
 void matrix_rank_1_update(
   in_vector_1_t x,
   in_vector_2_t y,
-  inout_matrix_t A);
+  inout_matrix_t A)
+{
+  for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
+    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
+      A(i,j) += x(i) * y(j);
+    }
+  }
+}
 
 template<class ExecutionPolicy,
          class in_vector_1_t,
          class in_vector_2_t,
          class inout_matrix_t>
 void matrix_rank_1_update(
-  ExecutionPolicy&& exec,
+  ExecutionPolicy&& /* exec */,
   in_vector_1_t x,
   in_vector_2_t y,
-  inout_matrix_t A);
+  inout_matrix_t A)
+{
+  matrix_rank_1_update(x, y, A);
+}
 
 // Nonsymmetric conjugated rank-1 update
 
@@ -75,17 +85,23 @@ template<class in_vector_1_t,
 void matrix_rank_1_update_c(
   in_vector_1_t x,
   in_vector_2_t y,
-  inout_matrix_t A);
+  inout_matrix_t A)
+{
+  matrix_rank_1_update(x, conjugate_view(y), A);
+}
 
 template<class ExecutionPolicy,
          class in_vector_1_t,
          class in_vector_2_t,
          class inout_matrix_t>
 void matrix_rank_1_update_c(
-  ExecutionPolicy&& exec,
+  ExecutionPolicy&& /* exec */,
   in_vector_1_t x,
   in_vector_2_t y,
-  inout_matrix_t A);
+  inout_matrix_t A)
+{
+  matrix_rank_1_update_c(x, y, A);
+}
 
 // Rank-1 update of a Symmetric matrix
 
@@ -95,17 +111,36 @@ template<class in_vector_t,
 void symmetric_matrix_rank_1_update(
   in_vector_t x,
   inout_matrix_t A,
-  Triangle t);
+  Triangle /* t */)
+{
+  if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
+    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
+      for (ptrdiff_t i = j; i < A.extent(0); ++i) {
+        A(i,j) += x(i) * x(j);
+      }
+    }
+  }
+  else {
+    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
+      for (ptrdiff_t i = 0; i <= j; ++i) {
+        A(i,j) += x(i) * x(j);
+      }
+    }
+  }
+}
 
 template<class ExecutionPolicy,
          class in_vector_t,
          class inout_matrix_t,
          class Triangle>
 void symmetric_matrix_rank_1_update(
-  ExecutionPolicy&& exec,
+  ExecutionPolicy&& /* exec */,
   in_vector_t x,
   inout_matrix_t A,
-  Triangle t);
+  Triangle t)
+{
+  symmetric_matrix_rank_1_update(x, A, t);
+}
 
 // Rank-1 update of a Hermitian matrix
 
@@ -115,18 +150,39 @@ template<class in_vector_t,
 void hermitian_matrix_rank_1_update(
   in_vector_t x,
   inout_matrix_t A,
-  Triangle t);
+  Triangle /* t */)
+{
+  using std::conj;
+
+  if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
+    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
+      for (ptrdiff_t i = j; i < A.extent(0); ++i) {
+        A(i,j) += x(i) * conj(x(j));
+      }
+    }
+  }
+  else {
+    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
+      for (ptrdiff_t i = 0; i <= j; ++i) {
+        A(i,j) += x(i) * conj(x(j));
+      }
+    }
+  }
+}
 
 template<class ExecutionPolicy,
          class in_vector_t,
          class inout_matrix_t,
          class Triangle>
 void hermitian_matrix_rank_1_update(
-  ExecutionPolicy&& exec,
+  ExecutionPolicy&& /* exec */,
   in_vector_t x,
   inout_matrix_t A,
-  Triangle t);
-         
+  Triangle t)
+{
+  hermitian_matrix_rank_1_update(x, A, t);
+}
+
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
 } // end namespace std
