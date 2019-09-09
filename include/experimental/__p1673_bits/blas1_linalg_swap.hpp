@@ -49,14 +49,51 @@ namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
 
+namespace {
+
+template<class in_vector_t,
+         class out_vector_t>
+void linalg_swap_rank_1(in_vector_t x,
+                        out_vector_t y)
+{
+  using std::swap;
+  for (ptrdiff_t i = 0; i < y.extent(0); ++i) {
+    swap(x(i), y(i));
+  }
+}
+
+template<class in_matrix_t,
+         class out_matrix_t>
+void linalg_swap_rank_2(in_matrix_t x,
+                        out_matrix_t y)
+{
+  using std::swap;
+  for (ptrdiff_t j = 0; j < y.extent(1); ++j) {
+    for (ptrdiff_t i = 0; i < y.extent(0); ++i) {
+      swap(x(i,j), y(i,j));
+    }
+  }
+}
+
+// TODO add mdarray specializations; needed so that out_object_t is
+// not passed by value (which would be wrong for a container type like
+// mdarray).
+
+}
+
 template<class inout_object_1_t,
          class inout_object_2_t>
 void linalg_swap(inout_object_1_t v1,
                  inout_object_2_t v2)
 {
-  for (ptrdiff_t i = 0; i < v1.extent(0); ++i) {
-    using std::swap;
-    swap(v1(i), v2(i));
+  if constexpr (v1.rank() == 1) {
+    linalg_swap_rank_1(v1, v2);
+  }
+  else if constexpr (v1.rank() == 2) {
+    linalg_swap_rank_2(v1, v2);
+  }
+  else {
+    static_assert("Not implemented");
   }
 }
 
