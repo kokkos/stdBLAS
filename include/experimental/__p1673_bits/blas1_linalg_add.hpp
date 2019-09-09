@@ -95,7 +95,7 @@ void linalg_add(in_object_1_t x,
     linalg_add_rank_2 (x, y, z);
   }
   else {
-    // TODO unimplemented
+    static_assert("Not implemented");
   }
 }
 
