@@ -164,7 +164,7 @@ struct BlasGemm<std::complex<float>> {
 };
 
 template<class in_matrix_t>
-constexpr bool valid_input_blas_accessor (in_matrix_t /* A */)
+constexpr bool valid_input_blas_accessor ()
 {
   using element_type = typename in_matrix_t::element_type;
   using accessor_type = typename in_matrix_t::accessor_type;
@@ -182,7 +182,7 @@ constexpr bool valid_input_blas_accessor (in_matrix_t /* A */)
 }
 
 template<class inout_matrix_t>
-constexpr bool valid_output_blas_accessor (inout_matrix_t /* C */)
+constexpr bool valid_output_blas_accessor ()
 {
   using element_type = typename inout_matrix_t::element_type;
   using accessor_type = typename inout_matrix_t::accessor_type;
@@ -192,7 +192,7 @@ constexpr bool valid_output_blas_accessor (inout_matrix_t /* C */)
 }
 
 template<class in_matrix_t>
-constexpr bool valid_input_blas_layout (in_matrix_t /* A */)
+constexpr bool valid_input_blas_layout()
 {
   // Either input matrix may have a transposed layout, but the
   // underlying layout of all matrices must be layout_left (or
@@ -212,7 +212,7 @@ constexpr bool valid_input_blas_layout (in_matrix_t /* A */)
 }
 
 template<class inout_matrix_t>
-constexpr bool valid_output_blas_layout (inout_matrix_t /* A */)
+constexpr bool valid_output_blas_layout()
 {
   using layout_type = typename inout_matrix_t::layout_type;
   return std::is_same_v<layout_type, layout_left>;
@@ -224,10 +224,7 @@ template<class in_matrix_1_t,
          class in_matrix_2_t,
          class out_matrix_t>
 constexpr bool
-valid_blas_element_types(
-  in_matrix_1_t /* A */,
-  in_matrix_2_t /* B */,
-  out_matrix_t /* C */)
+valid_blas_element_types()
 {
   using element_type = typename out_matrix_t::element_type;
   constexpr bool elt_types_same =
@@ -247,23 +244,20 @@ template<class in_matrix_1_t,
          class in_matrix_2_t,
          class out_matrix_t>
 constexpr bool
-matrix_product_dispatch_to_blas(
-  in_matrix_1_t A,
-  in_matrix_2_t B,
-  out_matrix_t C)
+matrix_product_dispatch_to_blas()
 {
   // The accessor types need not be the same.
   // Input matrices may be scaled or transposed.
-  constexpr bool in1_acc_type_ok = valid_input_blas_accessor(A);
-  constexpr bool in2_acc_type_ok = valid_input_blas_accessor(B);
-  constexpr bool out_acc_type_ok = valid_output_blas_accessor(C);
+  constexpr bool in1_acc_type_ok = valid_input_blas_accessor<in_matrix_1_t>();
+  constexpr bool in2_acc_type_ok = valid_input_blas_accessor<in_matrix_2_t>();
+  constexpr bool out_acc_type_ok = valid_output_blas_accessor<out_matrix_t>();
 
-  constexpr bool in1_layout_ok = valid_input_blas_layout(A);
-  constexpr bool in2_layout_ok = valid_input_blas_layout(B);
-  constexpr bool out_layout_ok = valid_output_blas_layout(C);
+  constexpr bool in1_layout_ok = valid_input_blas_layout<in_matrix_1_t>();
+  constexpr bool in2_layout_ok = valid_input_blas_layout<in_matrix_2_t>();
+  constexpr bool out_layout_ok = valid_output_blas_layout<out_matrix_t>();
 
-  return C.rank_dynamic() == 2 &&
-    valid_blas_element_types(A, B, C) &&
+  return out_matrix_t::rank_dynamic() == 2 &&
+    valid_blas_element_types<in_matrix_1_t, in_matrix_2_t, out_matrix_t>() &&
     in1_acc_type_ok && in2_acc_type_ok && out_acc_type_ok &&
     in1_layout_ok && in2_layout_ok && out_layout_ok;
 }
@@ -282,7 +276,8 @@ void matrix_product(in_matrix_1_t A,
                     out_matrix_t C)
 {
 #ifdef LINALG_ENABLE_BLAS
-  if constexpr (matrix_product_dispatch_to_blas(A, B, C)) {
+  constexpr bool blas_able = matrix_product_dispatch_to_blas<in_matrix_1_t, in_matrix_2_t, out_matrix_t>();
+  if constexpr (blas_able) {
     // FIXME I'm assuming here that all element types are the same.
     // Classic BLAS assumes that, but we could be using
     // mixed-precision (X) BLAS.
