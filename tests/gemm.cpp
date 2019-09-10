@@ -13,9 +13,10 @@
 #include "gtest/gtest.h"
 
 namespace {
+  using std::experimental::basic_mdspan;
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
-  using std::experimental::basic_mdspan;
+  using std::experimental::layout_left;
   using std::experimental::matrix_product;
 
   template<class MdspanType, class Scalar>
@@ -32,6 +33,21 @@ namespace {
       for (ptrdiff_t j = 0; j < A_numCols; ++j) {
         for (ptrdiff_t i = 0; i < A_numRows; ++i) {
           A(i,j) = int((i+startVal) + (j+startVal) * A_numRows);
+        }
+      }
+    }
+  };
+
+  template<class MdspanType>
+  struct FillMatrix<MdspanType, double> {
+    static void fill(MdspanType A, const double startVal)
+    {
+      const ptrdiff_t A_numRows = A.extent(0);
+      const ptrdiff_t A_numCols = A.extent(1);
+      for (ptrdiff_t j = 0; j < A_numCols; ++j) {
+        for (ptrdiff_t i = 0; i < A_numRows; ++i) {
+          A(i,j) = (double(i)+startVal) +
+            (double(j)+startVal) * double(A_numRows);
         }
       }
     }
@@ -56,9 +72,9 @@ namespace {
   {
     using scalar_t = Scalar;
     using real_t = typename Magnitude<Scalar>::type;
-      
+
     using extents_t = extents<dynamic_extent, dynamic_extent>;
-    using matrix_t = basic_mdspan<scalar_t, extents_t>;
+    using matrix_t = basic_mdspan<scalar_t, extents_t, layout_left>;
 
     constexpr size_t maxDim = 7;
     constexpr size_t storageSize(4*maxDim*maxDim);
@@ -120,6 +136,12 @@ namespace {
   TEST(BLAS3_gemm, mdspan_int)
   {
     const bool result = test_matrix_product<int>();
+    EXPECT_TRUE( result );
+  }
+
+  TEST(BLAS3_gemm, mdspan_double)
+  {
+    const bool result = test_matrix_product<double>();
     EXPECT_TRUE( result );
   }
 }

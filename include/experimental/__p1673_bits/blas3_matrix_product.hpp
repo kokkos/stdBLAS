@@ -173,9 +173,9 @@ constexpr bool valid_input_blas_accessor ()
   // Input matrices may be scaled or transposed.
   return std::is_same_v<accessor_type,
                         accessor_basic<element_type>> ||
-    std::is_same_v<accessor_type,
-                   accessor_scaled<accessor_basic<element_type>,
-                                   element_type>> ||
+    // std::is_same_v<accessor_type,
+    //                accessor_scaled<accessor_basic<element_type>,
+    //                                element_type>> ||
     std::is_same_v<accessor_type,
                    accessor_conjugate<accessor_basic<element_type>,
                                       element_type>>;
@@ -276,7 +276,8 @@ void matrix_product(in_matrix_1_t A,
                     out_matrix_t C)
 {
 #ifdef LINALG_ENABLE_BLAS
-  constexpr bool blas_able = matrix_product_dispatch_to_blas<in_matrix_1_t, in_matrix_2_t, out_matrix_t>();
+  constexpr bool blas_able =
+    matrix_product_dispatch_to_blas<in_matrix_1_t, in_matrix_2_t, out_matrix_t>();
   if constexpr (blas_able) {
     // FIXME I'm assuming here that all element types are the same.
     // Classic BLAS assumes that, but we could be using
@@ -317,7 +318,7 @@ void matrix_product(in_matrix_1_t A,
     const int LDA = A.stride(1) == 0 ? 1 : int(A.stride(1));
     const int LDB = B.stride(1) == 0 ? 1 : int(B.stride(1));
     const int LDC = C.stride(1) == 0 ? 1 : int(C.stride(1));
-    BlasGemm<element_type>::gemm(TRANSA, TRANSB, M, N, K,
+    BlasGemm<element_type>::gemm(&TRANSA, &TRANSB, M, N, K,
                                  alpha, A.data(), LDA,
                                  B.data(), LDB,
                                  beta, C.data(), LDC);
