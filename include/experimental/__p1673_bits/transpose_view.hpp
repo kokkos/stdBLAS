@@ -50,6 +50,14 @@ namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
 
+namespace {
+  template<ptrdiff_t ext0, ptrdiff_t ext1>
+  extents<ext1, ext0> transpose_extents (extents<ext0, ext1> e)
+  {
+    return extents<ext1, ext0> (e.extent(1), e.extent(0));
+  }
+}
+
 template<class Layout>
 class layout_transpose {
 public:
@@ -69,6 +77,25 @@ public:
     // for non-batched layouts
     ptrdiff_t operator() (ptrdiff_t i, ptrdiff_t j) const {
       return nested_mapping(j, i);
+    }
+
+    constexpr auto extents() const noexcept {
+      return transpose_extents(nested_mapping.extents());
+    }
+
+    constexpr bool is_unique() const noexcept {
+      return nested_mapping.is_unique();
+    }
+    constexpr bool is_contiguous() const noexcept {
+      return nested_mapping.is_contiguous();
+    }
+    constexpr bool is_strided() const noexcept {
+      return nested_mapping.is_strided();
+    }
+
+    constexpr ptrdiff_t stride(size_t r) const noexcept {
+      // FIXME this only works for rank 2
+      return nested_mapping.stride(size_t(1) - r);
     }
 
     // FIXME The overload below doesn't compile

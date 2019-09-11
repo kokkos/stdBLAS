@@ -50,6 +50,12 @@ inline namespace __p1673_version_0 {
 #ifdef LINALG_ENABLE_BLAS
 namespace {
 
+// NOTE: I'm only exposing these extern declarations in a header file
+// so that we can keep this a header-only library, for ease of testing
+// and installation.  Exposing them in a real production
+// implementation is really bad form.  This is because users may
+// declare their own extern declarations of BLAS functions, and yours
+// will collide with theirs at build time.
 extern "C" void
 dgemm_ (const char TRANSA[], const char TRANSB[],
         const int* pM, const int* pN, const int* pK,
@@ -315,8 +321,8 @@ void matrix_product(in_matrix_1_t A,
     const element_type beta (0.0);
 
     static_assert(A.is_strided() && B.is_strided() && C.is_strided());
-    const int LDA = A.stride(1) == 0 ? 1 : int(A.stride(1));
-    const int LDB = B.stride(1) == 0 ? 1 : int(B.stride(1));
+    const int LDA = A_trans ? A.stride(0) : A.stride(1);
+    const int LDB = B_trans ? B.stride(0) : B.stride(1);
     const int LDC = C.stride(1) == 0 ? 1 : int(C.stride(1));
     BlasGemm<element_type>::gemm(&TRANSA, &TRANSB, M, N, K,
                                  alpha, A.data(), LDA,
