@@ -92,181 +92,202 @@ namespace {
           const ptrdiff_t B_numRows = A_numCols;
           const ptrdiff_t B_numCols = C_numCols;
 
-          {
-            ptrdiff_t offset = 0;
-            matrix_t A(storage.data() + offset, A_numRows, A_numCols);
-            offset += A_numRows * A_numCols;
-            matrix_t B(storage.data() + offset, B_numRows, B_numCols);
-            offset += B_numRows * B_numCols;
-            matrix_t C(storage.data() + offset, C_numRows, C_numCols);
-            offset += C_numRows * C_numCols;
-            matrix_t C2(storage.data() + offset, C_numRows, C_numCols);
-            offset += C_numRows * C_numCols;
-            matrix_t A_t(storage.data() + offset, A_numCols, A_numRows);
-            offset += A_numCols * A_numRows;
-            matrix_t B_t(storage.data() + offset, B_numCols, B_numRows);
-            offset += B_numCols * B_numRows;
-            matrix_t C3(storage.data() + offset, C_numRows, C_numCols);
-            offset += C_numRows * C_numCols;
+          ptrdiff_t offset = 0;
+          matrix_t A(storage.data() + offset, A_numRows, A_numCols);
+          offset += A_numRows * A_numCols;
+          matrix_t B(storage.data() + offset, B_numRows, B_numCols);
+          offset += B_numRows * B_numCols;
+          matrix_t C(storage.data() + offset, C_numRows, C_numCols);
+          offset += C_numRows * C_numCols;
+          matrix_t C2(storage.data() + offset, C_numRows, C_numCols);
+          offset += C_numRows * C_numCols;
+          matrix_t A_t(storage.data() + offset, A_numCols, A_numRows);
+          offset += A_numCols * A_numRows;
+          matrix_t B_t(storage.data() + offset, B_numCols, B_numRows);
+          offset += B_numCols * B_numRows;
+          matrix_t C3(storage.data() + offset, C_numRows, C_numCols);
+          offset += C_numRows * C_numCols;
 
-            fill_matrix(A, scalar_t(real_t(1)));
-            fill_matrix(B, scalar_t(real_t(2)));
-            for (ptrdiff_t j = 0; j < A_numCols; ++j) {
-              for (ptrdiff_t i = 0; i < A_numRows; ++i) {
-                A_t(j,i) = A(i,j);
+          fill_matrix(A, scalar_t(real_t(1)));
+          fill_matrix(B, scalar_t(real_t(2)));
+          for (ptrdiff_t j = 0; j < A_numCols; ++j) {
+            for (ptrdiff_t i = 0; i < A_numRows; ++i) {
+              A_t(j,i) = A(i,j);
+            }
+          }
+          for (ptrdiff_t j = 0; j < B_numCols; ++j) {
+            for (ptrdiff_t i = 0; i < B_numRows; ++i) {
+              B_t(j,i) = B(i,j);
+            }
+          }
+
+          for (ptrdiff_t j = 0; j < C_numCols; ++j) {
+            for (ptrdiff_t i = 0; i < C_numRows; ++i) {
+              C(i,j) = scalar_t(0.0); // this works even for complex
+              for (ptrdiff_t k = 0; k < A_numCols; ++k) {
+                C(i,j) += A(i,k) * B(k,j);
               }
             }
-            for (ptrdiff_t j = 0; j < B_numCols; ++j) {
-              for (ptrdiff_t i = 0; i < B_numRows; ++i) {
-                B_t(j,i) = B(i,j);
+          }
+
+          // Fill result matrix with flag values to make sure that we
+          // computed everything.
+          for (ptrdiff_t j = 0; j < C_numCols; ++j) {
+            for (ptrdiff_t i = 0; i < C_numRows; ++i) {
+              C2(i,j) = std::numeric_limits<scalar_t>::min();
+            }
+          }
+
+          cout << " Test C2(" << C_numRows << " x " << C_numCols
+               << ") = A(" << A_numRows << " x " << A_numCols
+               << ") * B(" << B_numRows << " x " << B_numCols
+               << ")" << endl;
+          matrix_product(A, B, C2);
+          {
+            bool bad = false;
+            for (ptrdiff_t j = 0; j < C_numCols; ++j) {
+              for (ptrdiff_t i = 0; i < C_numRows; ++i) {
+                if (C(i,j) != C2(i,j)) {
+                  bad = true;
+                  cout << " *** C(" << i << "," << j << ")=" << C(i,j)
+                       << " != C2(" << i << "," << j << ")=" << C2(i,j)
+                       << endl;
+                }
               }
+            }
+          }
+
+          // Fill result matrix with flag values to make sure that
+          // we computed everything.
+          for (ptrdiff_t j = 0; j < C_numCols; ++j) {
+            for (ptrdiff_t i = 0; i < C_numRows; ++i) {
+              C3(i,j) = std::numeric_limits<scalar_t>::min();
+            }
+          }
+
+          cout << " Test C3(" << C3.extent(0) << " x " << C3.extent(1)
+               << ") = "
+               << "A_t(" << A_t.extent(0) << " x " << A_t.extent(1)
+               << ")^T * "
+               << "B_t(" << B_t.extent(0) << " x " << B_t.extent(1)
+               << ")^T" << endl;
+          matrix_product(transpose_view(A_t),
+                         transpose_view(B_t), C3);
+          {
+            bool bad = false;
+            for (ptrdiff_t j = 0; j < C_numCols; ++j) {
+              for (ptrdiff_t i = 0; i < C_numRows; ++i) {
+                if (C(i,j) != C3(i,j)) {
+                  bad = true;
+                  cout << " *** C(" << i << "," << j << ")=" << C(i,j)
+                       << " != C3(" << i << "," << j << ")=" << C3(i,j)
+                       << endl;
+                }
+              }
+            }
+          }
+          {
+            bool bad_transpose_view = false;
+
+            auto A_tt = transpose_view(A_t);
+            auto B_tt = transpose_view(B_t);
+            if (A_tt.extent(0) != A.extent(0)) {
+              cout << " *** A_tt.extent(0)=" << A_tt.extent(0)
+                   << " != A.extent(0)=" << A.extent(0)
+                   << endl;
+              bad_transpose_view = true;
+            }
+            if (A_t.extent(0) != A.extent(1)) {
+              cout << " *** A_t.extent(0)=" << A_t.extent(0)
+                   << " != A.extent(1)=" << A.extent(1)
+                   << endl;
+              bad_transpose_view = true;
+            }
+            if (A_t.extent(1) != A.extent(0)) {
+              cout << " *** A_t.extent(1)=" << A_t.extent(1)
+                   << " != A.extent(0)=" << A.extent(0)
+                   << endl;
+              bad_transpose_view = true;
+            }
+            if (B_tt.extent(0) != B.extent(0)) {
+              cout << " *** B_tt.extent(0)=" << B_tt.extent(0)
+                   << " != B.extent(0)=" << B.extent(0)
+                   << endl;
+              bad_transpose_view = true;
+            }
+            if (B_t.extent(0) != B.extent(1)) {
+              cout << " *** B_t.extent(0)=" << B_t.extent(0)
+                   << " != B.extent(1)=" << B.extent(1)
+                   << endl;
+              bad_transpose_view = true;
+            }
+            if (B_t.extent(1) != B.extent(0)) {
+              cout << " *** B_t.extent(1)=" << B_t.extent(1)
+                   << " != B.extent(0)=" << B.extent(0)
+                   << endl;
+              bad_transpose_view = true;
+            }
+            if (A_tt.extent(1) != B_tt.extent(0)) {
+              cout << " *** A_tt.extent(1)=" << A_tt.extent(1)
+                   << " != B_tt.extent(0)=" << B_tt.extent(0)
+                   << endl;
+              bad_transpose_view = true;
+            }
+            if (bad_transpose_view) {
+              return false;
             }
 
             for (ptrdiff_t j = 0; j < C_numCols; ++j) {
               for (ptrdiff_t i = 0; i < C_numRows; ++i) {
                 C(i,j) = scalar_t(0.0); // this works even for complex
-                for (ptrdiff_t k = 0; k < A_numCols; ++k) {
-                  C(i,j) += A(i,k) * B(k,j);
-                }
-              }
-            }
-
-            // Fill result matrix with flag values to make sure that we
-            // computed everything.
-            for (ptrdiff_t j = 0; j < C_numCols; ++j) {
-              for (ptrdiff_t i = 0; i < C_numRows; ++i) {
-                C2(i,j) = std::numeric_limits<scalar_t>::min();
-              }
-            }
-
-            cout << " Test C2(" << C_numRows << " x " << C_numCols
-                 << ") = A(" << A_numRows << " x " << A_numCols
-                 << ") * B(" << B_numRows << " x " << B_numCols
-                 << ")" << endl;
-            matrix_product(A, B, C2);
-            {
-              bool bad = false;
-              for (ptrdiff_t j = 0; j < C_numCols; ++j) {
-                for (ptrdiff_t i = 0; i < C_numRows; ++i) {
-                  if (C(i,j) != C2(i,j)) {
-                    bad = true;
-                    cout << " *** C(" << i << "," << j << ")=" << C(i,j)
-                         << " != C2(" << i << "," << j << ")=" << C2(i,j)
-                         << endl;
-                  }
-                }
-              }
-            }
-
-            // Fill result matrix with flag values to make sure that
-            // we computed everything.
-            for (ptrdiff_t j = 0; j < C_numCols; ++j) {
-              for (ptrdiff_t i = 0; i < C_numRows; ++i) {
-                C3(i,j) = std::numeric_limits<scalar_t>::min();
-              }
-            }
-
-            cout << " Test C3(" << C3.extent(0) << " x " << C3.extent(1)
-                 << ") = "
-                 << "A_t(" << A_t.extent(0) << " x " << A_t.extent(1)
-                 << ")^T * "
-                 << "B_t(" << B_t.extent(0) << " x " << B_t.extent(1)
-                 << ")^T" << endl;
-            matrix_product(transpose_view(A_t),
-                           transpose_view(B_t), C3);
-            {
-              bool bad = false;
-              for (ptrdiff_t j = 0; j < C_numCols; ++j) {
-                for (ptrdiff_t i = 0; i < C_numRows; ++i) {
-                  if (C(i,j) != C3(i,j)) {
-                    bad = true;
-                    cout << " *** C(" << i << "," << j << ")=" << C(i,j)
-                         << " != C3(" << i << "," << j << ")=" << C3(i,j)
-                         << endl;
-                  }
-                }
-              }
-            }
-            {
-              bool bad_transpose_view = false;
-
-              auto A_tt = transpose_view(A_t);
-              auto B_tt = transpose_view(B_t);
-              if (A_tt.extent(0) != A.extent(0)) {
-                cout << " *** A_tt.extent(0)=" << A_tt.extent(0)
-                     << " != A.extent(0)=" << A.extent(0)
-                     << endl;
-                bad_transpose_view = true;
-              }
-              if (A_t.extent(0) != A.extent(1)) {
-                cout << " *** A_t.extent(0)=" << A_t.extent(0)
-                     << " != A.extent(1)=" << A.extent(1)
-                     << endl;
-                bad_transpose_view = true;
-              }
-              if (A_t.extent(1) != A.extent(0)) {
-                cout << " *** A_t.extent(1)=" << A_t.extent(1)
-                     << " != A.extent(0)=" << A.extent(0)
-                     << endl;
-                bad_transpose_view = true;
-              }
-              if (B_tt.extent(0) != B.extent(0)) {
-                cout << " *** B_tt.extent(0)=" << B_tt.extent(0)
-                     << " != B.extent(0)=" << B.extent(0)
-                     << endl;
-                bad_transpose_view = true;
-              }
-              if (B_t.extent(0) != B.extent(1)) {
-                cout << " *** B_t.extent(0)=" << B_t.extent(0)
-                     << " != B.extent(1)=" << B.extent(1)
-                     << endl;
-                bad_transpose_view = true;
-              }
-              if (B_t.extent(1) != B.extent(0)) {
-                cout << " *** B_t.extent(1)=" << B_t.extent(1)
-                     << " != B.extent(0)=" << B.extent(0)
-                     << endl;
-                bad_transpose_view = true;
-              }
-              if (A_tt.extent(1) != B_tt.extent(0)) {
-                cout << " *** A_tt.extent(1)=" << A_tt.extent(1)
-                     << " != B_tt.extent(0)=" << B_tt.extent(0)
-                     << endl;
-                bad_transpose_view = true;
-              }
-              if (bad_transpose_view) {
-                return false;
-              }
-
-              for (ptrdiff_t j = 0; j < C_numCols; ++j) {
-                for (ptrdiff_t i = 0; i < C_numRows; ++i) {
-                  C(i,j) = scalar_t(0.0); // this works even for complex
-                  for (ptrdiff_t k = 0; k < A_tt.extent(1); ++k) {
-                    C(i,j) += A_tt(i,k) * B_tt(k,j);
-                  }
-                }
-              }
-            }
-
-            cout << " Compare using hand-rolled transpose_view loop"
-                 << endl;
-            {
-              bool bad = false;
-              for (ptrdiff_t j = 0; j < C_numCols; ++j) {
-                for (ptrdiff_t i = 0; i < C_numRows; ++i) {
-                  if (C(i,j) != C3(i,j)) {
-                    bad = true;
-                    cout << "C(" << i << "," << j << ")=" << C(i,j)
-                         << " != C3(" << i << "," << j << ")=" << C3(i,j)
-                         << endl;
-                  }
+                for (ptrdiff_t k = 0; k < A_tt.extent(1); ++k) {
+                  C(i,j) += A_tt(i,k) * B_tt(k,j);
                 }
               }
             }
           }
-        }
-      }
-    }
+
+          cout << " Compare using hand-rolled transpose_view loop"
+               << endl;
+          {
+            bool bad = false;
+            for (ptrdiff_t j = 0; j < C_numCols; ++j) {
+              for (ptrdiff_t i = 0; i < C_numRows; ++i) {
+                if (C(i,j) != C3(i,j)) {
+                  bad = true;
+                  cout << "C(" << i << "," << j << ")=" << C(i,j)
+                       << " != C3(" << i << "," << j << ")=" << C3(i,j)
+                       << endl;
+                }
+              }
+            }
+          }
+
+          cout << " Test C3(" << C3.extent(0) << " x " << C3.extent(1)
+               << ") = "
+               << "2*A_t(" << A_t.extent(0) << " x " << A_t.extent(1)
+               << ")^T * "
+               << "B_t(" << B_t.extent(0) << " x " << B_t.extent(1)
+               << ")^T" << endl;
+          matrix_product(scaled_view(scalar_t(2.0), transpose_view(A_t)),
+                         transpose_view(B_t), C3);
+          {
+            bool bad = false;
+            for (ptrdiff_t j = 0; j < C_numCols; ++j) {
+              for (ptrdiff_t i = 0; i < C_numRows; ++i) {
+                if (scalar_t(2.0)*C(i,j) != C3(i,j)) {
+                  bad = true;
+                  cout << " *** 2*C(" << i << "," << j << ")=" << scalar_t(2.0)*C(i,j)
+                       << " != C3(" << i << "," << j << ")=" << C3(i,j)
+                       << endl;
+                }
+              }
+            }
+          }
+          
+        } // A_numCols
+      } // C_numCols
+    } // C_numRows
     return true;
   }
 

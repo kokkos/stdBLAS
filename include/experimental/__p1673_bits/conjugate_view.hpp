@@ -148,6 +148,15 @@ public:
   element_type* decay(pointer p) const noexcept {
     return acc.decay(p);
   }
+
+  // NOT IN PROPOSAL
+  //
+  // This isn't marked noexcept because that would impose a constraint
+  // on Accessor's copy constructor.
+  Accessor nested_accessor() const {
+    return acc;
+  }
+
 private:
   Accessor acc;
 };

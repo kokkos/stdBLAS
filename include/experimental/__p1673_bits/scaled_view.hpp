@@ -82,23 +82,40 @@ public:
   accessor_scaled() = default;
 
   accessor_scaled(Accessor a, S sval) :
-    acc(a), scale_factor(sval) {}
+    acc_(a), scale_factor_(sval) {}
 
   reference access(pointer p, ptrdiff_t i) const noexcept {
-    return reference(acc.access(p,i), scale_factor);
+    return reference(acc_.access(p,i), scale_factor_);
   }
 
-  typename offset_policy::pointer offset(pointer p, ptrdiff_t i) const noexcept {
-    return acc.offset(p,i);
+  typename offset_policy::pointer
+  offset(pointer p, ptrdiff_t i) const noexcept {
+    return acc_.offset(p,i);
   }
 
   element_type* decay(pointer p) const noexcept {
-    return acc.decay(p);
+    return acc_.decay(p);
+  }
+
+  // NOT IN PROPOSAL
+  //
+  // This isn't marked noexcept because that would impose a constraint
+  // on Accessor's copy constructor.
+  Accessor nested_accessor() const {
+    return acc_;
+  }
+
+  // NOT IN PROPOSAL
+  //
+  // This isn't marked noexcept because that would impose a constraint
+  // on S's copy constructor.
+  S scale_factor() const {
+    return scale_factor_;
   }
 
 private:
-  Accessor acc;
-  S scale_factor;
+  Accessor acc_;
+  S scale_factor_;
 };
 
 template<class ElementType,
