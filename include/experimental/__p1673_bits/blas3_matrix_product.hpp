@@ -56,6 +56,14 @@ namespace {
 // implementation is really bad form.  This is because users may
 // declare their own extern declarations of BLAS functions, and yours
 // will collide with theirs at build time.
+
+// NOTE: I'm assuming a particular BLAS ABI mangling here.  Typical
+// BLAS C++ wrappers need to account for a variety of manglings that
+// don't necessarily match the system's Fortran compiler (if it has
+// one).  Lowercase with trailing underscore is a common pattern.
+// Watch out for BLAS functions that return something, esp. a complex
+// number.
+
 extern "C" void
 dgemm_ (const char TRANSA[], const char TRANSB[],
         const int* pM, const int* pN, const int* pK,
@@ -94,7 +102,6 @@ zgemm_ (const char TRANSA[], const char TRANSB[],
 
 template<class Scalar>
 struct BlasGemm {
-  static constexpr bool supported = false;
   // static void
   // gemm (const char TRANSA[], const char TRANSB[],
   //       const int M, const int N, const int K,
@@ -107,7 +114,6 @@ struct BlasGemm {
 
 template<>
 struct BlasGemm<double> {
-  static constexpr bool supported = true;
   static void
   gemm (const char TRANSA[], const char TRANSB[],
         const int M, const int N, const int K,
@@ -117,13 +123,13 @@ struct BlasGemm<double> {
         const double BETA,
         double* C, const int LDC)
   {
-    dgemm_ (TRANSA, TRANSB, &M, &N, &K, &ALPHA, A, &LDA, B, &LDB, &BETA, C, &LDC);
+    dgemm_ (TRANSA, TRANSB, &M, &N, &K,
+            &ALPHA, A, &LDA, B, &LDB, &BETA, C, &LDC);
   }
 };
 
 template<>
 struct BlasGemm<float> {
-  static constexpr bool supported = true;
   static void
   gemm (const char TRANSA[], const char TRANSB[],
         const int M, const int N, const int K,
@@ -133,13 +139,13 @@ struct BlasGemm<float> {
         const float BETA,
         float* C, const int LDC)
   {
-    sgemm_ (TRANSA, TRANSB, &M, &N, &K, &ALPHA, A, &LDA, B, &LDB, &BETA, C, &LDC);
+    sgemm_ (TRANSA, TRANSB, &M, &N, &K,
+            &ALPHA, A, &LDA, B, &LDB, &BETA, C, &LDC);
   }
 };
 
 template<>
 struct BlasGemm<std::complex<double>> {
-  static constexpr bool supported = true;
   static void
   gemm (const char TRANSA[], const char TRANSB[],
         const int M, const int N, const int K,
@@ -149,13 +155,13 @@ struct BlasGemm<std::complex<double>> {
         const std::complex<double> BETA,
         std::complex<double>* C, const int LDC)
   {
-    zgemm_ (TRANSA, TRANSB, &M, &N, &K, &ALPHA, A, &LDA, B, &LDB, &BETA, C, &LDC);
+    zgemm_ (TRANSA, TRANSB, &M, &N, &K,
+            &ALPHA, A, &LDA, B, &LDB, &BETA, C, &LDC);
   }
 };
 
 template<>
 struct BlasGemm<std::complex<float>> {
-  static constexpr bool supported = true;
   static void
   gemm (const char TRANSA[], const char TRANSB[],
         const int M, const int N, const int K,
@@ -165,7 +171,8 @@ struct BlasGemm<std::complex<float>> {
         const std::complex<float> BETA,
         std::complex<float>* C, const int LDC)
   {
-    cgemm_ (TRANSA, TRANSB, &M, &N, &K, &ALPHA, A, &LDA, B, &LDB, &BETA, C, &LDC);
+    cgemm_ (TRANSA, TRANSB, &M, &N, &K,
+            &ALPHA, A, &LDA, B, &LDB, &BETA, C, &LDC);
   }
 };
 
@@ -178,8 +185,7 @@ constexpr bool valid_input_blas_accessor ()
   using valid_acc_t_0 = accessor_basic<elt_t>;
   using valid_acc_t_1 = accessor_scaled<
     accessor_basic<elt_t>, elt_t>;
-  // NOTE issue with ordering of accessors.  Do they commute?
-  // Who knows; we haven't specified this in the proposal.
+  // NOTE accessors don't necessarily commute.
   using valid_acc_t_2 = accessor_scaled<
     accessor_conjugate<accessor_basic<elt_t>, elt_t>,
     elt_t>;
@@ -268,14 +274,20 @@ matrix_product_dispatch_to_blas()
 {
   // The accessor types need not be the same.
   // Input matrices may be scaled or transposed.
-  constexpr bool in1_acc_type_ok = valid_input_blas_accessor<in_matrix_1_t>();
-  constexpr bool in2_acc_type_ok = valid_input_blas_accessor<in_matrix_2_t>();
-  constexpr bool out_acc_type_ok = valid_output_blas_accessor<out_matrix_t>();
+  constexpr bool in1_acc_type_ok =
+    valid_input_blas_accessor<in_matrix_1_t>();
+  constexpr bool in2_acc_type_ok =
+    valid_input_blas_accessor<in_matrix_2_t>();
+  constexpr bool out_acc_type_ok =
+    valid_output_blas_accessor<out_matrix_t>();
 
   constexpr bool in1_layout_ok = valid_input_blas_layout<in_matrix_1_t>();
   constexpr bool in2_layout_ok = valid_input_blas_layout<in_matrix_2_t>();
   constexpr bool out_layout_ok = valid_output_blas_layout<out_matrix_t>();
 
+  // If both dimensions are run time, then it's likely that they are
+  // appropriate for the BLAS.  Compile-time dimensions are probably
+  // small, and BLAS implementations aren't optimized for that case.
   return out_matrix_t::rank_dynamic() == 2 &&
     valid_blas_element_types<in_matrix_1_t, in_matrix_2_t, out_matrix_t>() &&
     in1_acc_type_ok && in2_acc_type_ok && out_acc_type_ok &&
@@ -364,9 +376,8 @@ void matrix_product(in_matrix_1_t A,
   constexpr bool blas_able =
     matrix_product_dispatch_to_blas<in_matrix_1_t, in_matrix_2_t, out_matrix_t>();
   if constexpr (blas_able) {
-    // FIXME I'm assuming here that all element types are the same.
-    // Classic BLAS assumes that, but we could be using
-    // mixed-precision (X) BLAS.
+    // Classic BLAS assumes that all matrices' element_type are the
+    // same.  Mixed-precision (X) BLAS would let us generalize.
     using element_type = typename out_matrix_t::element_type;
 
     constexpr bool A_trans = extractTrans<in_matrix_1_t>();
