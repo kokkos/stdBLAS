@@ -146,7 +146,7 @@ namespace {
   }
 
   template<class SpanType>
-  constexpr bool testMdspanIteratorConcept()
+  constexpr bool testMdspanIteratorStaticConcept()
   {
     using element_type = typename SpanType::element_type;
     using extents_type = typename SpanType::extents_type;
@@ -158,9 +158,30 @@ namespace {
     static_assert(mdspan_type::rank() == 1);
     using pointer = typename mdspan_type::pointer;
 
-    mdspan_type x(pointer{}, 0);
+    mdspan_type x(nullptr, 0);
     using iterator = decltype(begin(x));
     static_assert(std::is_same_v<iterator, decltype(end(x))>);
+
+    static_assert(std::is_copy_constructible_v<iterator>);
+    static_assert(std::is_copy_assignable_v<iterator>);
+    static_assert(std::is_destructible_v<iterator>);
+    static_assert(std::is_swappable_v<iterator>); // C++17
+
+    static_assert(std::is_same_v<
+      typename std::iterator_traits<iterator>::value_type,
+      element_type>);
+    static_assert(std::is_same_v<
+      typename std::iterator_traits<iterator>::difference_type,
+      typename mdspan_type::difference_type>);
+    static_assert(std::is_same_v<
+      typename std::iterator_traits<iterator>::reference,
+      typename mdspan_type::reference>);
+    static_assert(std::is_same_v<
+      typename std::iterator_traits<iterator>::pointer,
+      typename mdspan_type::pointer>);
+    // It just has to exist
+    using iterator_category =
+      std::iterator_traits<iterator>::iterator_category;
     return true;
   }
 
@@ -223,7 +244,7 @@ namespace {
     auto A_col0 = subspan(A, all, 0);
     EXPECT_TRUE( A_col0.stride(0) != 1 );
     constexpr bool col0_test =
-      testMdspanIteratorConcept<decltype(A_col0)>();
+      testMdspanIteratorStaticConcept<decltype(A_col0)>();
     static_assert(col0_test);
 
     const bool ok_col = testRotateSort(A_col0);
@@ -232,7 +253,7 @@ namespace {
     auto A_row0 = subspan(A, 0, all);
     EXPECT_TRUE( A_row0.stride(0) == 1 );
     constexpr bool row0_test =
-      testMdspanIteratorConcept<decltype(A_row0)>();
+      testMdspanIteratorStaticConcept<decltype(A_row0)>();
     static_assert(row0_test);
 
     const bool ok_row = testRotateSort(A_row0);
