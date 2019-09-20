@@ -49,8 +49,9 @@ namespace {
       ElementType, extents_t, Layout, Accessor>;
     using iterator = MdspanRandomAccessIterator<
       ElementType, extents_t, Layout, Accessor>;
-    using reference = typename mdspan_t::reference;
     using difference_type = typename mdspan_t::difference_type;
+    using reference = typename mdspan_t::reference;
+    using pointer = typename mdspan_t::pointer;
 
     explicit MdspanRandomAccessIterator(mdspan_t x) : x_(x) {}
     explicit MdspanRandomAccessIterator(mdspan_t x,
@@ -107,6 +108,11 @@ namespace {
 
     reference operator*() const {
       return x_(current_index_);
+    }
+
+    pointer operator->() const {
+      return x_.accessor().
+        offset(x_.data(), x_.mapping()(current_index_));
     }
 
     // iterator begin() {
@@ -285,6 +291,7 @@ namespace {
           const auto expected_val = scalar_t(real_t(1)) +
             scalar_t(real_t(A.stride(0)*(k+1)));
           ASSERT_TRUE( *it == expected_val );
+          ASSERT_TRUE( *(it.operator->()) == expected_val );
         }
         ASSERT_TRUE( it == the_end );
       }
@@ -298,6 +305,7 @@ namespace {
           const auto expected_val = scalar_t(real_t(1)) +
             scalar_t(real_t(A.stride(0)*(k+1)));
           ASSERT_TRUE( *it == expected_val );
+          ASSERT_TRUE( *(it.operator->()) == expected_val );
           it = it++; // test postfix ++
           ++k;
         }
@@ -344,6 +352,7 @@ namespace {
           const auto expected_val = scalar_t(real_t(k+1)) +
             scalar_t(real_t(A.stride(0)));
           ASSERT_TRUE( *it == expected_val );
+          ASSERT_TRUE( *(it.operator->()) == expected_val );
 
           // *(a + k) is equivalent to *(std::addressof(*a) + k)
           ASSERT_TRUE( *(the_beg + k) == *(std::addressof(*the_beg) + k) );
@@ -360,6 +369,8 @@ namespace {
           const auto expected_val = scalar_t(real_t(k+1)) +
             scalar_t(real_t(A.stride(0)));
           ASSERT_TRUE( *it == expected_val );
+          ASSERT_TRUE( *(it.operator->()) == expected_val );
+
           it = it++; // test postfix ++
           ++k;
         }
