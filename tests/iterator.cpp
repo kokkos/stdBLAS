@@ -53,6 +53,9 @@ namespace {
     using reference = typename mdspan_t::reference;
     using pointer = typename mdspan_t::pointer;
 
+    // Needed for LegacyForwardIterator
+    MdspanRandomAccessIterator() = default;
+
     explicit MdspanRandomAccessIterator(mdspan_t x) : x_(x) {}
     explicit MdspanRandomAccessIterator(mdspan_t x,
                                ptrdiff_t current_index) :
@@ -115,14 +118,6 @@ namespace {
         offset(x_.data(), x_.mapping()(current_index_));
     }
 
-    // iterator begin() {
-    //   return iterator(x_);
-    // }
-
-    // iterator end() {
-    //   return iterator(x_.extent(0));
-    // }
-
   private:
     mdspan_t x_;
     ptrdiff_t current_index_ = 0;
@@ -142,6 +137,17 @@ namespace {
 
   template<class ElementType,
            class Extents,
+           class Accessor>
+  ElementType*
+  // typename basic_mdspan<
+  //   ElementType, Extents, layout_right, Accessor>::pointer
+  begin(basic_mdspan<ElementType, Extents, layout_right, Accessor> x)
+  {
+    return x.data();
+  }
+
+  template<class ElementType,
+           class Extents,
            class Layout,
            class Accessor>
   MdspanRandomAccessIterator<ElementType, Extents, Layout, Accessor>
@@ -152,8 +158,18 @@ namespace {
     return iterator(x, x.extent(0));
   }
 
+  template<class ElementType,
+           class Extents,
+           class Accessor>
+  typename basic_mdspan<
+    ElementType, Extents, layout_right, Accessor>::pointer
+  end(basic_mdspan<ElementType, Extents, layout_right, Accessor> x)
+  {
+    return x.data() + x.extent(0);
+  }
+
   template<class SpanType>
-  constexpr bool testMdspanIterator_LegacyIterator_StaticConcept()
+  const bool testMdspanIterator_LegacyIterator_StaticConcept()
   {
     using element_type = typename SpanType::element_type;
     using extents_type = typename SpanType::extents_type;
@@ -195,8 +211,11 @@ namespace {
 
     using ref_t = decltype(*begin(x));
     static_assert(std::is_same_v<ref_t, reference>);
+
+    auto some_iter = begin(x);
+    auto some_iter_2 = ++some_iter;
     using iter_plusplus_t =
-      typename std::decay<decltype(++begin(x))>::type;
+      typename std::decay<decltype(some_iter_2)>::type;
     static_assert(std::is_same_v<iter_plusplus_t, iterator>);
 
     return true;
@@ -273,14 +292,17 @@ namespace {
     EXPECT_TRUE( A_col0.stride(0) != 1 );
     // This works only if A is layout_right
     static_assert(! decltype(A_col0)::is_always_contiguous());
-    constexpr bool col0_test =
+    const bool col0_test =
       testMdspanIterator_LegacyIterator_StaticConcept<decltype(A_col0)>();
-    static_assert(col0_test);
+    EXPECT_TRUE( col0_test );
 
     {
       auto the_beg = begin(A_col0);
       auto the_end = end(A_col0);
       ASSERT_TRUE( dim == 0 || the_beg != the_end );
+
+      // Part of LegacyForwardIterator
+      decltype(the_beg) default_constructed;
 
       {
         ptrdiff_t k = 0;
@@ -291,7 +313,12 @@ namespace {
           const auto expected_val = scalar_t(real_t(1)) +
             scalar_t(real_t(A.stride(0)*(k+1)));
           ASSERT_TRUE( *it == expected_val );
-          ASSERT_TRUE( *(it.operator->()) == expected_val );
+
+          // NOTE: pointer is a valid iterator if the mdspan is
+          // contiguous, so it.operator->() won't compile.
+          if constexpr (! std::is_pointer_v<decltype(it)>) {
+            ASSERT_TRUE( *(it.operator->()) == expected_val );
+          }
         }
         ASSERT_TRUE( it == the_end );
       }
@@ -299,15 +326,19 @@ namespace {
       {
         ptrdiff_t k = 0;
         auto it = the_beg;
-        while (it != the_end) {
+        for ( ; it != the_end; ++k) {
           ASSERT_TRUE( *it == A_col0(k) );
           ASSERT_TRUE( *it == A(k,0) );
           const auto expected_val = scalar_t(real_t(1)) +
             scalar_t(real_t(A.stride(0)*(k+1)));
           ASSERT_TRUE( *it == expected_val );
-          ASSERT_TRUE( *(it.operator->()) == expected_val );
+
+          // NOTE: pointer is a valid iterator if the mdspan is
+          // contiguous, so it.operator->() won't compile.
+          if constexpr (! std::is_pointer_v<decltype(it)>) {
+            ASSERT_TRUE( *(it.operator->()) == expected_val );
+          }
           it = it++; // test postfix ++
-          ++k;
         }
         ASSERT_TRUE( it == the_end );
       }
@@ -334,14 +365,17 @@ namespace {
     // want to test LegacyContiguousIterator below.
     static_assert(decltype(A_row0)::is_always_contiguous());
 
-    constexpr bool row0_test =
+    const bool row0_test =
       testMdspanIterator_LegacyIterator_StaticConcept<decltype(A_row0)>();
-    static_assert(row0_test);
+    EXPECT_TRUE( row0_test );
 
     {
       auto the_beg = begin(A_row0);
       auto the_end = end(A_row0);
       ASSERT_TRUE( dim == 0 || the_beg != the_end );
+
+      // Part of LegacyForwardIterator
+      decltype(the_beg) default_constructed;
 
       {
         ptrdiff_t k = 0;
@@ -352,29 +386,38 @@ namespace {
           const auto expected_val = scalar_t(real_t(k+1)) +
             scalar_t(real_t(A.stride(0)));
           ASSERT_TRUE( *it == expected_val );
-          ASSERT_TRUE( *(it.operator->()) == expected_val );
+
+          // NOTE: pointer is a valid iterator if the mdspan is
+          // contiguous, so it.operator->() won't compile.  Thus, we
+          // don't test that here.
 
           // *(a + k) is equivalent to *(std::addressof(*a) + k)
           ASSERT_TRUE( *(the_beg + k) == *(std::addressof(*the_beg) + k) );
         }
         ASSERT_TRUE( it == the_end );
+        ASSERT_TRUE( begin(A_row0) == the_beg );
       }
 
       {
         ptrdiff_t k = 0;
         auto it = the_beg;
-        while (it != the_end) {
+        for ( ; it != the_end; ++k, it++) { // test postfix ++
+          // std::cerr << "k: " << k << ", A_row0(k): " << A_row0(k)
+          //           << "it: " << it
+          //           << std::endl << std::endl;
+
           ASSERT_TRUE( *it == A_row0(k) );
           ASSERT_TRUE( *it == A(0,k) );
           const auto expected_val = scalar_t(real_t(k+1)) +
             scalar_t(real_t(A.stride(0)));
           ASSERT_TRUE( *it == expected_val );
-          ASSERT_TRUE( *(it.operator->()) == expected_val );
 
-          it = it++; // test postfix ++
-          ++k;
+          // NOTE: pointer is a valid iterator if the mdspan is
+          // contiguous, so it.operator->() won't compile.  Thus, we
+          // don't test that here.
         }
         ASSERT_TRUE( it == the_end );
+        ASSERT_TRUE( begin(A_row0) == the_beg );
       }
     }
 
