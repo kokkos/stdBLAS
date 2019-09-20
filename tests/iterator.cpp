@@ -67,7 +67,9 @@ namespace {
     }
 
     iterator operator++(int) {
-      return iterator (x_, current_index_+1);
+      auto tmp = *this;
+      ++*this;
+      return tmp;
     }
 
     iterator& operator--() {
@@ -76,7 +78,9 @@ namespace {
     }
 
     iterator operator--(int) {
-      return iterator (x_, current_index_-1);
+      auto tmp = *this;
+      --*this;
+      return tmp;
     }
 
     iterator operator+(difference_type n) const {
@@ -326,7 +330,7 @@ namespace {
       {
         ptrdiff_t k = 0;
         auto it = the_beg;
-        for ( ; it != the_end; ++k) {
+        for ( ; it != the_end; ++k, it++) { // test postfix ++
           ASSERT_TRUE( *it == A_col0(k) );
           ASSERT_TRUE( *it == A(k,0) );
           const auto expected_val = scalar_t(real_t(1)) +
@@ -338,7 +342,6 @@ namespace {
           if constexpr (! std::is_pointer_v<decltype(it)>) {
             ASSERT_TRUE( *(it.operator->()) == expected_val );
           }
-          it = it++; // test postfix ++
         }
         ASSERT_TRUE( it == the_end );
       }
@@ -402,10 +405,6 @@ namespace {
         ptrdiff_t k = 0;
         auto it = the_beg;
         for ( ; it != the_end; ++k, it++) { // test postfix ++
-          // std::cerr << "k: " << k << ", A_row0(k): " << A_row0(k)
-          //           << "it: " << it
-          //           << std::endl << std::endl;
-
           ASSERT_TRUE( *it == A_row0(k) );
           ASSERT_TRUE( *it == A(0,k) );
           const auto expected_val = scalar_t(real_t(k+1)) +
