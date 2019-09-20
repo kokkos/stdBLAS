@@ -259,6 +259,10 @@ namespace {
       }
     }
 
+    ////////////////////////////////////////////////////////////
+    // Test layout_stride
+    ////////////////////////////////////////////////////////////
+
     auto A_col0 = subspan(A, all, 0);
     EXPECT_TRUE( A_col0.stride(0) != 1 );
     // This works only if A is layout_right
@@ -311,10 +315,17 @@ namespace {
       }
     }
 
+    ////////////////////////////////////////////////////////////
+    // Test layout_right
+    ////////////////////////////////////////////////////////////
+
     auto A_row0 = subspan(A, 0, all);
     EXPECT_TRUE( A_row0.stride(0) == 1 );
-    // This works only if A is layout_right
+
+    // This works only if A is layout_right.  We need this because we
+    // want to test LegacyContiguousIterator below.
     static_assert(decltype(A_row0)::is_always_contiguous());
+
     constexpr bool row0_test =
       testMdspanIterator_LegacyIterator_StaticConcept<decltype(A_row0)>();
     static_assert(row0_test);
@@ -333,6 +344,9 @@ namespace {
           const auto expected_val = scalar_t(real_t(k+1)) +
             scalar_t(real_t(A.stride(0)));
           ASSERT_TRUE( *it == expected_val );
+
+          // *(a + k) is equivalent to *(std::addressof(*a) + k)
+          ASSERT_TRUE( *(the_beg + k) == *(std::addressof(*the_beg) + k) );
         }
         ASSERT_TRUE( it == the_end );
       }
