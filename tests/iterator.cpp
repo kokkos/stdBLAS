@@ -146,7 +146,7 @@ namespace {
   }
 
   template<class SpanType>
-  constexpr bool testMdspanIteratorStaticConcept()
+  constexpr bool testMdspanIterator_LegacyIterator_StaticConcept()
   {
     using element_type = typename SpanType::element_type;
     using extents_type = typename SpanType::extents_type;
@@ -179,9 +179,19 @@ namespace {
     static_assert(std::is_same_v<
       typename std::iterator_traits<iterator>::pointer,
       typename mdspan_type::pointer>);
-    // It just has to exist
+
+    using reference = typename mdspan_type::reference;
+
+    // This just needs to exist.
     using iterator_category =
       std::iterator_traits<iterator>::iterator_category;
+
+    using ref_t = decltype(*begin(x));
+    static_assert(std::is_same_v<ref_t, reference>);
+    using iter_plusplus_t =
+      typename std::decay<decltype(++begin(x))>::type;
+    static_assert(std::is_same_v<iter_plusplus_t, iterator>);
+
     return true;
   }
 
@@ -244,7 +254,7 @@ namespace {
     auto A_col0 = subspan(A, all, 0);
     EXPECT_TRUE( A_col0.stride(0) != 1 );
     constexpr bool col0_test =
-      testMdspanIteratorStaticConcept<decltype(A_col0)>();
+      testMdspanIterator_LegacyIterator_StaticConcept<decltype(A_col0)>();
     static_assert(col0_test);
 
     const bool ok_col = testRotateSort(A_col0);
@@ -253,7 +263,7 @@ namespace {
     auto A_row0 = subspan(A, 0, all);
     EXPECT_TRUE( A_row0.stride(0) == 1 );
     constexpr bool row0_test =
-      testMdspanIteratorStaticConcept<decltype(A_row0)>();
+      testMdspanIterator_LegacyIterator_StaticConcept<decltype(A_row0)>();
     static_assert(row0_test);
 
     const bool ok_row = testRotateSort(A_row0);
