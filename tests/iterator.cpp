@@ -4,6 +4,7 @@
 #include <iterator>
 #include <limits>
 #include <type_traits>
+#include <typeinfo>
 #include <vector>
 #include "gtest/gtest.h"
 
@@ -108,13 +109,13 @@ namespace {
       return x_(current_index_);
     }
 
-    iterator begin() {
-      return iterator(x_);
-    }
+    // iterator begin() {
+    //   return iterator(x_);
+    // }
 
-    iterator end() {
-      return iterator(x_.extent(0));
-    }
+    // iterator end() {
+    //   return iterator(x_.extent(0));
+    // }
 
   private:
     mdspan_t x_;
@@ -130,7 +131,7 @@ namespace {
   {
     using iterator =
       MdspanRandomAccessIterator<ElementType, Extents, Layout, Accessor>;
-    return iterator (x);
+    return iterator(x);
   }
 
   template<class ElementType,
@@ -142,7 +143,7 @@ namespace {
   {
     using iterator =
       MdspanRandomAccessIterator<ElementType, Extents, Layout, Accessor>;
-    return iterator (x, x.extent(0));
+    return iterator(x, x.extent(0));
   }
 
   template<class SpanType>
@@ -251,20 +252,106 @@ namespace {
     EXPECT_TRUE( A.stride(0) != 1 );
     EXPECT_TRUE( A.stride(1) == 1 );
 
+    for (ptrdiff_t i = 0; i < dim; ++i) {
+      for (ptrdiff_t j = 0; j < dim; ++j) {
+        A(i,j) = scalar_t(real_t(j+1)) +
+          scalar_t(real_t(A.stride(0)*(i+1)));
+      }
+    }
+
     auto A_col0 = subspan(A, all, 0);
     EXPECT_TRUE( A_col0.stride(0) != 1 );
+    // This works only if A is layout_right
+    static_assert(! decltype(A_col0)::is_always_contiguous());
     constexpr bool col0_test =
       testMdspanIterator_LegacyIterator_StaticConcept<decltype(A_col0)>();
     static_assert(col0_test);
 
+    {
+      auto the_beg = begin(A_col0);
+      auto the_end = end(A_col0);
+      ASSERT_TRUE( dim == 0 || the_beg != the_end );
+
+      {
+        ptrdiff_t k = 0;
+        auto it = the_beg;
+        for ( ; it != the_end; ++it, ++k) { // test prefix ++
+          ASSERT_TRUE( *it == A_col0(k) );
+          ASSERT_TRUE( *it == A(k,0) );
+          const auto expected_val = scalar_t(real_t(1)) +
+            scalar_t(real_t(A.stride(0)*(k+1)));
+          ASSERT_TRUE( *it == expected_val );
+        }
+        ASSERT_TRUE( it == the_end );
+      }
+
+      {
+        ptrdiff_t k = 0;
+        auto it = the_beg;
+        while (it != the_end) {
+          ASSERT_TRUE( *it == A_col0(k) );
+          ASSERT_TRUE( *it == A(k,0) );
+          const auto expected_val = scalar_t(real_t(1)) +
+            scalar_t(real_t(A.stride(0)*(k+1)));
+          ASSERT_TRUE( *it == expected_val );
+          it = it++; // test postfix ++
+          ++k;
+        }
+        ASSERT_TRUE( it == the_end );
+      }
+    }
+
     const bool ok_col = testRotateSort(A_col0);
     ASSERT_TRUE( ok_col );
 
+    for (ptrdiff_t i = 0; i < dim; ++i) {
+      for (ptrdiff_t j = 0; j < dim; ++j) {
+        A(i,j) = scalar_t(real_t(j+1)) +
+          scalar_t(real_t(A.stride(0)*(i+1)));
+      }
+    }
+
     auto A_row0 = subspan(A, 0, all);
     EXPECT_TRUE( A_row0.stride(0) == 1 );
+    // This works only if A is layout_right
+    static_assert(decltype(A_row0)::is_always_contiguous());
     constexpr bool row0_test =
       testMdspanIterator_LegacyIterator_StaticConcept<decltype(A_row0)>();
     static_assert(row0_test);
+
+    {
+      auto the_beg = begin(A_row0);
+      auto the_end = end(A_row0);
+      ASSERT_TRUE( dim == 0 || the_beg != the_end );
+
+      {
+        ptrdiff_t k = 0;
+        auto it = the_beg;
+        for ( ; it != the_end; ++it, ++k) { // test prefix ++
+          ASSERT_TRUE( *it == A_row0(k) );
+          ASSERT_TRUE( *it == A(0,k) );
+          const auto expected_val = scalar_t(real_t(k+1)) +
+            scalar_t(real_t(A.stride(0)));
+          ASSERT_TRUE( *it == expected_val );
+        }
+        ASSERT_TRUE( it == the_end );
+      }
+
+      {
+        ptrdiff_t k = 0;
+        auto it = the_beg;
+        while (it != the_end) {
+          ASSERT_TRUE( *it == A_row0(k) );
+          ASSERT_TRUE( *it == A(0,k) );
+          const auto expected_val = scalar_t(real_t(k+1)) +
+            scalar_t(real_t(A.stride(0)));
+          ASSERT_TRUE( *it == expected_val );
+          it = it++; // test postfix ++
+          ++k;
+        }
+        ASSERT_TRUE( it == the_end );
+      }
+    }
 
     const bool ok_row = testRotateSort(A_row0);
     ASSERT_TRUE( ok_row );
