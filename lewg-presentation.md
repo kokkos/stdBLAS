@@ -70,6 +70,7 @@ Lets upack the 11 !! parameters to compute `y = A*x`:
 
 * 11 !! parameters to do `y = A*x`
 * hopefully you defined the extern C functor `dgemv` correct to get the fortran link right
+  * the actual fortran functions need to take all the scalar parameters as pointers ...
 * The type of the scalars is part of the function name (`dgemv` == `double`, `sgemv` == `float`)
    * no mixed support, e.g. `A` and `x` are `float` and `y` is `double`
 * No compile time size propagation
@@ -79,8 +80,8 @@ Lets upack the 11 !! parameters to compute `y = A*x`:
 
 ### History of the proposal
 
-* Reviewed by SGs ... in ...
-* Reviewed by LEWGi in ...
+* Reviewed by SGs 6/19 in Cologne (Rev 0) and Belfast (Rev 1)
+* Reviewed by LEWGi in Cologne/Belfast
 
 ### The Philosophy Behind P1673
 
@@ -172,6 +173,8 @@ matrix_vector_product(y,transpose_view(A),x);
 
 * Covered by `basic_mdspan` and its `layouts` e.g. `layout_stride` 
   * we also propose more specific linear algebra layouts. 
+* This covers use cases such as building blocks for tensor algebra, where both dimensions of a matrix need to have a stride
+  * The BLAS standard doesn't support that
   
 ## Content of the proposal
 
