@@ -9,8 +9,8 @@
 * Nevin Liber (nliber@anl.gov) (Argonne National Laboratory)
 * Siva Rajamanickam (srajama@sandia.gov) (Sandia National Laboratories)
 * Li-Ta Lo (ollie@lanl.gov) (Los Alamos National Laboratory)
-* Damien Lebrun-Grandie (lebrungrandt@ornl.gov) (Oak Ridge National Laboratories)
-* Graham Lopez (lopezmg@ornl.gov) (Oak Ridge National Laboratories)
+* Damien Lebrun-Grandie (lebrungrandt@ornl.gov) (Oak Ridge National Laboratory)
+* Graham Lopez (lopezmg@ornl.gov) (Oak Ridge National Laboratory)
 * Peter Caday (peter.caday@intel.com) (Intel)
 * Sarah Knepper (sarah.knepper@intel.com) (Intel)
 * Piotr Luszczek (luszczek@icl.utk.edu) (University of Tennessee)
@@ -104,7 +104,7 @@ mdspan<double,dynamic_extent> y(y_ptr,nRows);
 matrix_vector_product(y,A,x);
 ```
 
-* Only the 3 parameters yoiu would expect
+* Only the 3 parameters you would expect
 * Function name doesn't encode scalar type
 
 ### What about mixed precision?
