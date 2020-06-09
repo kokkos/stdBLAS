@@ -25,7 +25,7 @@
 
 ## Background/Aims/Philosophy
 
-### Background: BLAS Standard
+### Background: Basic Linear Algebra Subprogram (BLAS) Standard
 
 * Existing standard (not ISO) developed in the 90s 
 * Widely used in Science and Engineering code
