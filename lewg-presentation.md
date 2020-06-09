@@ -3,7 +3,7 @@
 ## Authors
 
 * Mark Hoemmen (mhoemme@sandia.gov) (Sandia National Laboratories)
-* David Hollman (dshollm@sandia.gov) (Sandia National Laboratories)
+* D. S. Hollman (dshollm@sandia.gov) (Sandia National Laboratories)
 * Christian Trott (crtrott@sandia.gov) (Sandia National Laboratories)
 * Daniel Sunderland (dsunder@sandia.gov) (Sandia National Laboratories)
 * Nevin Liber (nliber@anl.gov) (Argonne National Laboratory)
