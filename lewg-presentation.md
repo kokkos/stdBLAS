@@ -231,4 +231,18 @@ matrix_vector_product(y,transpose_view(A),x);
   * `triangular_matrix_matrix_left_solve`
   * `triangular_matrix_matrix_right_solve`
   
+## Reference Implementation
 
+* Under preparation at https://github.com/kokkos/stdBlas
+  * didn't have much time last year
+  * Project plan has work scheduled for it for the next three months
+  
+## Plan for the rest of the presentation
+
+* Questions? Things LEWG wants to look at in detail?
+* Walk through Algorithm Requirements
+  * https://github.com/ORNL/cpp-proposals-pub/blob/master/D1673/blas_interface.md#algorithms-linalgalgs
+* Look at matrix-vector multiply and dot
+  * https://github.com/ORNL/cpp-proposals-pub/blob/master/D1673/blas_interface.md#dot-product-of-two-vectors-linalgalgsblas1dot
+  * https://github.com/ORNL/cpp-proposals-pub/blob/master/D1673/blas_interface.md#general-matrix-vector-product-linalgalgsblas2gemv
+  * https://github.com/ORNL/cpp-proposals-pub/blob/master/D1673/blas_interface.md#symmetric-matrix-vector-product-linalgalgsblas2symv
