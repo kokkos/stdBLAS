@@ -21,7 +21,7 @@ namespace {
     using matrix_static_t =
       basic_mdspan<scalar_t, extents<dim, dim>>;
 
-    constexpr size_t storageSize = size_t(dim*dim);
+    constexpr ptrdiff_t storageSize = ptrdiff_t(dim*dim);
     std::vector<scalar_t> A_storage (storageSize);
     std::vector<scalar_t> B_storage (storageSize);
 

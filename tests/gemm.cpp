@@ -80,8 +80,8 @@ namespace {
     using extents_t = extents<dynamic_extent, dynamic_extent>;
     using matrix_t = basic_mdspan<scalar_t, extents_t, layout_left>;
 
-    constexpr size_t maxDim = 7;
-    constexpr size_t storageSize(7*maxDim*maxDim);
+    constexpr ptrdiff_t maxDim = 7;
+    constexpr ptrdiff_t storageSize(7*maxDim*maxDim);
     std::vector<scalar_t> storage(storageSize);
 
     for (ptrdiff_t C_numRows : {1, 4, 7}) {

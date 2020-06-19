@@ -17,14 +17,14 @@ namespace {
     using vector_t =
       basic_mdspan<vector_element_type, extents<dynamic_extent>>;
 
-    constexpr size_t vectorSize (5);
-    constexpr size_t storageSize = size_t (2) * vectorSize;
+    constexpr ptrdiff_t vectorSize (5);
+    constexpr ptrdiff_t storageSize = ptrdiff_t (2) * vectorSize;
     std::vector<vector_element_type> storage (storageSize);
 
     vector_t x (storage.data (), vectorSize);
     vector_t y (storage.data () + vectorSize, vectorSize);
 
-    for (size_t k = 0; k < vectorSize; ++k) {
+    for (ptrdiff_t k = 0; k < vectorSize; ++k) {
       const vector_element_type x_k = vector_element_type(k) + 1.0;
       const vector_element_type y_k = vector_element_type(k) + 2.0;
       x(k) = x_k;
@@ -44,7 +44,7 @@ namespace {
     }
 
     auto y_scaled = scaled_view (scalingFactor, y);
-    for (size_t k = 0; k < vectorSize; ++k) {
+    for (ptrdiff_t k = 0; k < vectorSize; ++k) {
       const vector_element_type x_k = vector_element_type(k) + 1.0;
       EXPECT_EQ( x(k), x_k );
 

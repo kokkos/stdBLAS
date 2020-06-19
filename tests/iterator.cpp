@@ -185,7 +185,7 @@ namespace {
     static_assert(mdspan_type::rank() == 1);
     using pointer = typename mdspan_type::pointer;
 
-    mdspan_type x(nullptr, 0);
+    mdspan_type x; // (nullptr, extents_type(0)); // FIXME (mfh 2020/06/18) doesn't build with VS 2019
     using iterator = decltype(begin(x));
     static_assert(std::is_same_v<iterator, decltype(end(x))>);
 
@@ -273,8 +273,8 @@ namespace {
     using extents_t = extents<dynamic_extent, dynamic_extent>;
     using matrix_t = basic_mdspan<scalar_t, extents_t, layout_t>;
 
-    constexpr size_t dim(5);
-    constexpr size_t storageSize(dim * dim);
+    constexpr ptrdiff_t dim(5);
+    constexpr ptrdiff_t storageSize(dim * dim);
 
     std::vector<scalar_t> storage(storageSize);
     matrix_t A(storage.data(), dim, dim);
@@ -432,8 +432,8 @@ namespace {
   //   using extents_t = extents<dynamic_extent>;
   //   using vector_t = basic_mdspan<scalar_t, extents_t, layout_t>;
 
-  //   constexpr size_t vectorSize(10);
-  //   constexpr size_t storageSize(10);
+  //   constexpr ptrdiff_t vectorSize(10);
+  //   constexpr ptrdiff_t storageSize(10);
   //   std::vector<scalar_t> storage(storageSize);
   //   vector_t x(storage.data(), vectorSize);
   // }

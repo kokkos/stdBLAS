@@ -37,15 +37,15 @@ namespace {
     using scalar_t = double;
     using vector_t = basic_mdspan<scalar_t, extents<dynamic_extent>>;
 
-    constexpr size_t vectorSize (5);
-    constexpr size_t storageSize = size_t (2) * vectorSize;
+    constexpr ptrdiff_t vectorSize (5);
+    constexpr ptrdiff_t storageSize = ptrdiff_t (2) * vectorSize;
     std::vector<scalar_t> storage (storageSize);
 
     vector_t x (storage.data (), vectorSize);
     vector_t y (storage.data () + vectorSize, vectorSize);
 
     scalar_t expectedDotResult {};
-    for (size_t k = 0; k < vectorSize; ++k) {
+    for (ptrdiff_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k = scalar_t (k) + 1.0;
       const scalar_t y_k = scalar_t (k) + 2.0;
       x(k) = x_k;
@@ -83,8 +83,8 @@ namespace {
     using scalar_t = std::complex<real_t>;
     using vector_t = basic_mdspan<scalar_t, extents<dynamic_extent>>;
 
-    constexpr size_t vectorSize (5);
-    constexpr size_t storageSize = size_t (2) * vectorSize;
+    constexpr ptrdiff_t vectorSize (5);
+    constexpr ptrdiff_t storageSize = ptrdiff_t (2) * vectorSize;
     std::vector<scalar_t> storage (storageSize);
 
     vector_t x (storage.data (), vectorSize);
@@ -92,7 +92,7 @@ namespace {
 
     scalar_t expectedDotResult {};
     scalar_t expectedConjDotResult {};
-    for (size_t k = 0; k < vectorSize; ++k) {
+    for (ptrdiff_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k(real_t(k) + 1.0, real_t(k) + 1.0);
       const scalar_t y_k(real_t(k) + 2.0, real_t(k) + 2.0);
       x(k) = x_k;

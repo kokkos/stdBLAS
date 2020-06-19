@@ -21,7 +21,7 @@ namespace {
 
   template<class Real>
   struct MakeVectorValues {
-    static std::pair<Real, Real> make(const size_t k) {
+    static std::pair<Real, Real> make(const ptrdiff_t k) {
       const Real x_k = Real(k) + Real(1.0);
       const Real y_k = Real(k) + Real(2.0);
       return {x_k, y_k};
@@ -31,7 +31,7 @@ namespace {
   template<class Real>
   struct MakeVectorValues<std::complex<Real>> {
     static std::pair<std::complex<Real>, std::complex<Real>>
-    make (const size_t k) {
+    make (const ptrdiff_t k) {
       const std::complex<Real> x_k(Real(k) + 4.0, -Real(k) - 1.0);
       const std::complex<Real> y_k(Real(k) + 5.0, -Real(k) - 2.0);
       return {x_k, y_k};
@@ -39,7 +39,7 @@ namespace {
   };
 
   template<class Scalar>
-  std::pair<Scalar, Scalar> makeVectorValues(const size_t k) {
+  std::pair<Scalar, Scalar> makeVectorValues(const ptrdiff_t k) {
     return MakeVectorValues<Scalar>::make(k);
   }
 
@@ -48,21 +48,21 @@ namespace {
     using scalar_t = double;
     using vector_t = basic_mdspan<scalar_t, extents<dynamic_extent>>;
 
-    constexpr size_t vectorSize(5);
-    constexpr size_t storageSize = size_t(2) * vectorSize;
+    constexpr ptrdiff_t vectorSize(5);
+    constexpr ptrdiff_t storageSize = ptrdiff_t(2) * vectorSize;
     std::vector<scalar_t> storage(storageSize);
 
     vector_t x(storage.data(), vectorSize);
     vector_t y(storage.data() + vectorSize, vectorSize);
 
-    for (size_t k = 0; k < vectorSize; ++k) {
+    for (ptrdiff_t k = 0; k < vectorSize; ++k) {
       const auto vals = makeVectorValues<scalar_t>(k);
       x(k) = vals.first;
       y(k) = vals.second;
     }
 
     linalg_copy(x, y);
-    for (size_t k = 0; k < vectorSize; ++k) {
+    for (ptrdiff_t k = 0; k < vectorSize; ++k) {
       const auto vals = makeVectorValues<scalar_t>(k);
       // Make sure the function didn't modify the input.
       EXPECT_EQ( x(k), vals.first );
@@ -76,21 +76,21 @@ namespace {
     using scalar_t = std::complex<real_t>;
     using vector_t = basic_mdspan<scalar_t, extents<dynamic_extent>>;
 
-    constexpr size_t vectorSize(5);
-    constexpr size_t storageSize = size_t(2) * vectorSize;
+    constexpr ptrdiff_t vectorSize(5);
+    constexpr ptrdiff_t storageSize = ptrdiff_t(2) * vectorSize;
     std::vector<scalar_t> storage(storageSize);
 
     vector_t x(storage.data(), vectorSize);
     vector_t y(storage.data() + vectorSize, vectorSize);
 
-    for (size_t k = 0; k < vectorSize; ++k) {
+    for (ptrdiff_t k = 0; k < vectorSize; ++k) {
       const auto vals = makeVectorValues<scalar_t>(k);
       x(k) = vals.first;
       y(k) = vals.second;
     }
 
     linalg_copy(x, y);
-    for (size_t k = 0; k < vectorSize; ++k) {
+    for (ptrdiff_t k = 0; k < vectorSize; ++k) {
       const auto vals = makeVectorValues<scalar_t>(k);
       // Make sure the function didn't modify the input.
       EXPECT_EQ( x(k), vals.first );
@@ -140,7 +140,7 @@ TEST(BLAS1_copy_matrix, mdspan_double)
 
   constexpr ptrdiff_t numRows(5);
   constexpr ptrdiff_t numCols(4);
-  constexpr size_t storageSize = size_t(2) * size_t(numRows*numCols);
+  constexpr ptrdiff_t storageSize = ptrdiff_t(2) * ptrdiff_t(numRows*numCols);
   std::vector<scalar_t> storage(storageSize);
 
   matrix_t A(storage.data(), numRows, numCols);
@@ -173,7 +173,7 @@ TEST(BLAS1_copy_matrix, mdspan_complex_double)
 
   constexpr ptrdiff_t numRows(5);
   constexpr ptrdiff_t numCols(4);
-  constexpr size_t storageSize = size_t(2) * size_t(numRows*numCols);
+  constexpr ptrdiff_t storageSize = ptrdiff_t(2) * ptrdiff_t(numRows*numCols);
   std::vector<scalar_t> storage(storageSize);
 
   matrix_t A(storage.data(), numRows, numCols);
