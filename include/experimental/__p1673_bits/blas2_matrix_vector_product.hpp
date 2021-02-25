@@ -60,7 +60,7 @@ void matrix_vector_product(in_matrix_t A,
                            out_vector_t y)
 {
   for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
-    y(i) = 0.0;
+    y(i) = typename out_vector_t::value_type{};
     for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
       y(i) += A(i,j) * x(j);
     }
@@ -124,7 +124,7 @@ void symmetric_matrix_vector_product(in_matrix_t A,
                                      out_vector_t y)
 {
   for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
-    y(i) = 0.0;
+    y(i) = typename out_vector_t::value_type{};
   }
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
@@ -226,7 +226,7 @@ void hermitian_matrix_vector_product(in_matrix_t A,
                                      out_vector_t y)
 {
   for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
-    y(i) = 0.0;
+    y(i) = typename out_vector_t::value_type{};
   }
 
   using std::conj;
@@ -332,7 +332,7 @@ void triangular_matrix_vector_product(in_matrix_t A,
                                       out_vector_t y)
 {
   for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
-    y(i) = 0.0;
+    y(i) = typename out_vector_t::value_type{};
   }
   constexpr bool explicitDiagonal =
     std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
