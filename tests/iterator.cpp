@@ -211,7 +211,7 @@ namespace {
 
     // This just needs to exist.
     using iterator_category =
-      std::iterator_traits<iterator>::iterator_category;
+      typename std::iterator_traits<iterator>::iterator_category;
 
     using ref_t = decltype(*begin(x));
     static_assert(std::is_same_v<ref_t, reference>);
