@@ -1,0 +1,79 @@
+name: CMake
+
+on: [push]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: RelWithDebInfo
+
+jobs:
+  build:
+    # The CMake configure and build commands are platform agnostic and should work equally
+    # well on Windows or Mac.  You can convert this to a matrix build if you need
+    # cross-platform coverage.
+    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Create Build Environment (mdspan)
+      # Some projects don't allow in-source building, so create a separate build directory
+      # We'll use this as our working directory for all subsequent commands
+      run: cmake -E make_directory ${{github.workspace}}/build-mdspan
+      
+    - name: Check Out (mdspan)
+      uses: actions/checkout@v2
+      with:
+        repository: kokkos/mdspan
+        path: ${{github.workspace}}/mdspan
+      
+    - name: Configure CMake (mdspan)
+      shell: bash
+      working-directory: ${{github.workspace}}/build-mdspan
+      run: cmake $GITHUB_WORKSPACE/mdspan -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      
+    - name: Create Build Environment (mdarray)
+      # Some projects don't allow in-source building, so create a separate build directory
+      # We'll use this as our working directory for all subsequent commands
+      run: cmake -E make_directory ${{github.workspace}}/build-mdarray
+      
+    - name: Check Out (mdarray)
+      uses: actions/checkout@v2
+      with:
+        repository: kokkos/mdarray
+        path: ${{github.workspace}}/mdarray
+      
+    - name: Configure CMake (mdarray)
+      shell: bash
+      working-directory: ${{github.workspace}}/build-mdarray
+      run: cmake $GITHUB_WORKSPACE/mdarray -DMDSpan_DIR=$GITHUB_WORKSPACE/build-mdspan -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+    - name: Install gtest manually
+      run: sudo apt-get install libgtest-dev && cd /usr/src/gtest && sudo cmake CMakeLists.txt && sudo make && sudo cp *.a /usr/lib && sudo ln -s /usr/lib/libgtest.a /usr/local/lib/libgtest.a && sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/libgtest_main.a
+
+    - name: Create Build Environment (stdBLAS)
+      # Some projects don't allow in-source building, so create a separate build directory
+      # We'll use this as our working directory for all subsequent commands
+      run: cmake -E make_directory ${{github.workspace}}/build
+      
+    - name: Check Out (stdBLAS)
+      uses: actions/checkout@v2
+      with:
+        path: ${{github.workspace}}/stdBLAS
+      
+    - name: Configure CMake (stdBLAS)
+      shell: bash
+      working-directory: ${{github.workspace}}/build
+      run: cmake $GITHUB_WORKSPACE/stdBLAS -DMDSpan_DIR=$GITHUB_WORKSPACE/build-mdspan -DMDArray_DIR=$GITHUB_WORKSPACE/build-mdarray -DLINALG_ENABLE_TESTS=On -DLINALG_ENABLE_EXAMPLES=On -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+    - name: Build (stdBLAS)
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      # Execute the build.  You can specify a specific target with "--target <NAME>"
+      run: cmake --build . --config $BUILD_TYPE
+
+    - name: Test (stdBLAS)
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      # Execute tests defined by the CMake configuration.  
+      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+      run: ctest -C $BUILD_TYPE
