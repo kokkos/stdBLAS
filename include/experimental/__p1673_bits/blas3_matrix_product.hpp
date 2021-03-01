@@ -398,7 +398,7 @@ void matrix_product(in_matrix_1_t A,
     const element_type alpha_A = extractScalingFactor(A, 1.0);
     const element_type alpha_B = extractScalingFactor(B, 1.0);
     const element_type alpha = alpha_A * alpha_B;
-    const element_type beta ();
+    const element_type beta {};
 
     static_assert(A.is_strided() && B.is_strided() && C.is_strided());
     const int LDA = A_trans ? A.stride(0) : A.stride(1);
