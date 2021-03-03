@@ -72,7 +72,7 @@ namespace {
   };
 
   template<class Scalar>
-  bool test_matrix_product()
+  void test_matrix_product()
   {
     using scalar_t = Scalar;
     using real_t = typename Magnitude<Scalar>::type;
@@ -143,17 +143,10 @@ namespace {
                << ") * B(" << B_numRows << " x " << B_numCols
                << ")" << endl;
           matrix_product(A, B, C2);
-          {
-            bool bad = false;
-            for (ptrdiff_t j = 0; j < C_numCols; ++j) {
-              for (ptrdiff_t i = 0; i < C_numRows; ++i) {
-                if (C(i,j) != C2(i,j)) {
-                  bad = true;
-                  cout << " *** C(" << i << "," << j << ")=" << C(i,j)
-                       << " != C2(" << i << "," << j << ")=" << C2(i,j)
-                       << endl;
-                }
-              }
+          for (ptrdiff_t j = 0; j < C_numCols; ++j) {
+            for (ptrdiff_t i = 0; i < C_numRows; ++i) {
+              EXPECT_DOUBLE_EQ(C2(i,j), C(i,j)) << "Matrices differ at index (" 
+                  << i << "," << j << ")=\n";
             }
           }
 
@@ -173,69 +166,23 @@ namespace {
                << ")^T" << endl;
           matrix_product(transpose_view(A_t),
                          transpose_view(B_t), C3);
-          {
-            bool bad = false;
-            for (ptrdiff_t j = 0; j < C_numCols; ++j) {
-              for (ptrdiff_t i = 0; i < C_numRows; ++i) {
-                if (C(i,j) != C3(i,j)) {
-                  bad = true;
-                  cout << " *** C(" << i << "," << j << ")=" << C(i,j)
-                       << " != C3(" << i << "," << j << ")=" << C3(i,j)
-                       << endl;
-                }
-              }
+          for (ptrdiff_t j = 0; j < C_numCols; ++j) {
+            for (ptrdiff_t i = 0; i < C_numRows; ++i) {
+              EXPECT_DOUBLE_EQ(C3(i,j), C(i,j)) << "Matrices differ at index (" 
+                  << i << "," << j << ")=\n";
             }
           }
-          {
-            bool bad_transpose_view = false;
 
+          {
             auto A_tt = transpose_view(A_t);
             auto B_tt = transpose_view(B_t);
-            if (A_tt.extent(0) != A.extent(0)) {
-              cout << " *** A_tt.extent(0)=" << A_tt.extent(0)
-                   << " != A.extent(0)=" << A.extent(0)
-                   << endl;
-              bad_transpose_view = true;
-            }
-            if (A_t.extent(0) != A.extent(1)) {
-              cout << " *** A_t.extent(0)=" << A_t.extent(0)
-                   << " != A.extent(1)=" << A.extent(1)
-                   << endl;
-              bad_transpose_view = true;
-            }
-            if (A_t.extent(1) != A.extent(0)) {
-              cout << " *** A_t.extent(1)=" << A_t.extent(1)
-                   << " != A.extent(0)=" << A.extent(0)
-                   << endl;
-              bad_transpose_view = true;
-            }
-            if (B_tt.extent(0) != B.extent(0)) {
-              cout << " *** B_tt.extent(0)=" << B_tt.extent(0)
-                   << " != B.extent(0)=" << B.extent(0)
-                   << endl;
-              bad_transpose_view = true;
-            }
-            if (B_t.extent(0) != B.extent(1)) {
-              cout << " *** B_t.extent(0)=" << B_t.extent(0)
-                   << " != B.extent(1)=" << B.extent(1)
-                   << endl;
-              bad_transpose_view = true;
-            }
-            if (B_t.extent(1) != B.extent(0)) {
-              cout << " *** B_t.extent(1)=" << B_t.extent(1)
-                   << " != B.extent(0)=" << B.extent(0)
-                   << endl;
-              bad_transpose_view = true;
-            }
-            if (A_tt.extent(1) != B_tt.extent(0)) {
-              cout << " *** A_tt.extent(1)=" << A_tt.extent(1)
-                   << " != B_tt.extent(0)=" << B_tt.extent(0)
-                   << endl;
-              bad_transpose_view = true;
-            }
-            if (bad_transpose_view) {
-              return false;
-            }
+            EXPECT_EQ(A_tt.extent(0), A.extent(0));
+            EXPECT_EQ(A_t.extent(0), A.extent(1));
+            EXPECT_EQ(A_t.extent(1), A.extent(0));
+            EXPECT_EQ(B_tt.extent(0), B.extent(0));
+            EXPECT_EQ(B_t.extent(0), B.extent(1));
+            EXPECT_EQ(B_t.extent(1), B.extent(0));
+            EXPECT_EQ(A_tt.extent(1), B_tt.extent(0));
 
             for (ptrdiff_t j = 0; j < C_numCols; ++j) {
               for (ptrdiff_t i = 0; i < C_numRows; ++i) {
@@ -249,17 +196,11 @@ namespace {
 
           cout << " Compare using hand-rolled transpose_view loop"
                << endl;
-          {
-            bool bad = false;
-            for (ptrdiff_t j = 0; j < C_numCols; ++j) {
-              for (ptrdiff_t i = 0; i < C_numRows; ++i) {
-                if (C(i,j) != C3(i,j)) {
-                  bad = true;
-                  cout << "C(" << i << "," << j << ")=" << C(i,j)
-                       << " != C3(" << i << "," << j << ")=" << C3(i,j)
-                       << endl;
-                }
-              }
+
+          for (ptrdiff_t j = 0; j < C_numCols; ++j) {
+            for (ptrdiff_t i = 0; i < C_numRows; ++i) {
+              EXPECT_DOUBLE_EQ(C3(i,j), C(i,j)) << "Matrices differ at index (" 
+                << i << "," << j << ")=\n";
             }
           }
 
@@ -271,36 +212,27 @@ namespace {
                << ")^T" << endl;
           matrix_product(scaled_view(scalar_t(2.0), transpose_view(A_t)),
                          transpose_view(B_t), C3);
-          {
-            bool bad = false;
-            for (ptrdiff_t j = 0; j < C_numCols; ++j) {
-              for (ptrdiff_t i = 0; i < C_numRows; ++i) {
-                if (scalar_t(2.0)*C(i,j) != C3(i,j)) {
-                  bad = true;
-                  cout << " *** 2*C(" << i << "," << j << ")=" << scalar_t(2.0)*C(i,j)
-                       << " != C3(" << i << "," << j << ")=" << C3(i,j)
-                       << endl;
-                }
-              }
+
+          for (ptrdiff_t j = 0; j < C_numCols; ++j) {
+            for (ptrdiff_t i = 0; i < C_numRows; ++i) {
+              EXPECT_DOUBLE_EQ(C3(i,j), scalar_t(2.0)*C(i,j)) 
+                << "Matrices differ at index (" 
+                << i << "," << j << ")=\n";
             }
           }
-          
         } // A_numCols
       } // C_numCols
     } // C_numRows
-    return true;
   }
 
   // Testing int is a way to test the non-BLAS-library implementation.
   TEST(BLAS3_gemm, mdspan_int)
   {
-    const bool result = test_matrix_product<int>();
-    EXPECT_TRUE( result );
+    test_matrix_product<int>();
   }
 
   TEST(BLAS3_gemm, mdspan_double)
   {
-    const bool result = test_matrix_product<double>();
-    EXPECT_TRUE( result );
+    test_matrix_product<double>();
   }
 }
