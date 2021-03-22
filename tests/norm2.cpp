@@ -56,14 +56,12 @@ namespace {
     mag_t normResult {};
     vector_norm2(x, normResult);
     const mag_t expectedNormResult = sqrt(expectedNormResultSquared);
-    std::cout << "normResult: " << normResult
-              << ", expectedNormResult: " << expectedNormResult << std::endl;
-    EXPECT_TRUE( abs(normResult - expectedNormResult) <= tol );
+    EXPECT_NEAR( expectedNormResult, normResult, tol );
 
 #ifdef LINALG_ENABLE_BLAS
     const mag_t blasResult =
       dnrm2_wrapper(int(vectorSize), x.data(), 1);
-    EXPECT_TRUE( abs(blasResult - expectedNormResult) <= tol );
+    EXPECT_NEAR( expectedNormResult, blasResult, tol );
 #endif // LINALG_ENABLE_BLAS
   }
 
@@ -94,10 +92,6 @@ namespace {
     mag_t normResult {};
     vector_norm2(x, normResult);
     const mag_t expectedNormResult = sqrt(expectedNormResultSquared);
-    EXPECT_TRUE( abs(normResult - expectedNormResult) <= tol );
+    EXPECT_NEAR( expectedNormResult, normResult, tol );
   }
 }
-
-// int main() {
-//   std::cout << "hello world" << std::endl;
-// }
