@@ -29,6 +29,48 @@ namespace {
   using std::experimental::basic_mdspan;
   using std::experimental::vector_norm2;
 
+  TEST(BLAS1_norm2, mdspan_zero)
+  {
+    // This test ensures that vectors with no entries have a norm of exactly 0
+
+    using mag_t = double;
+    using scalar_t = double;
+    using vector_t = basic_mdspan<scalar_t, extents<dynamic_extent>>;
+
+    constexpr ptrdiff_t vectorSize(0);
+    std::vector<scalar_t> storage(vectorSize);
+    vector_t x(storage.data(), vectorSize);
+
+    // Testing for absolute equality
+    mag_t normResult {};
+    vector_norm2(x, normResult);
+    const mag_t expectedNormResult = mag_t(0.0);
+    EXPECT_EQ( expectedNormResult, normResult );
+  }
+
+  TEST(BLAS1_norm2, mdspan_one)
+  {
+    // This test ensures that vectors with one entry have a norm of exactly the magnitude of the only element
+
+    using std::abs;
+    using real_t = double;
+    using mag_t = real_t;
+    using scalar_t = std::complex<real_t>;
+    using vector_t = basic_mdspan<scalar_t, extents<dynamic_extent>>;
+
+    constexpr ptrdiff_t vectorSize(1);
+    std::vector<scalar_t> storage(vectorSize);
+    vector_t x(storage.data(), vectorSize);
+
+    x[0] = (-5, -3);
+
+    // Testing for absolute equality
+    mag_t normResult {};
+    vector_norm2(x, normResult);
+    const mag_t expectedNormResult = abs( x[0] );
+    EXPECT_EQ( expectedNormResult, normResult );
+  }
+
   TEST(BLAS1_norm2, mdspan_double)
   {
     using std::abs;
@@ -46,24 +88,23 @@ namespace {
 
     vector_t x(storage.data(), vectorSize);
 
+    // Set elements in descending order so the scaling triggers
     mag_t expectedNormResultSquared {};
-    for (ptrdiff_t k = 0; k < vectorSize; ++k) {
-      const scalar_t x_k = scalar_t(k) + scalar_t(1.0);
-      x(k) = x_k;
+    for (ptrdiff_t k = vectorSize; k > 1; --k) {
+      const scalar_t x_k = scalar_t(k);
+      x(k-1) = x_k;
       expectedNormResultSquared += x_k * x_k;
     }
 
     mag_t normResult {};
     vector_norm2(x, normResult);
     const mag_t expectedNormResult = sqrt(expectedNormResultSquared);
-    std::cout << "normResult: " << normResult
-              << ", expectedNormResult: " << expectedNormResult << std::endl;
-    EXPECT_TRUE( abs(normResult - expectedNormResult) <= tol );
+    EXPECT_NEAR( expectedNormResult, normResult, tol );
 
 #ifdef LINALG_ENABLE_BLAS
     const mag_t blasResult =
       dnrm2_wrapper(int(vectorSize), x.data(), 1);
-    EXPECT_TRUE( abs(blasResult - expectedNormResult) <= tol );
+    EXPECT_NEAR( expectedNormResult, blasResult, tol );
 #endif // LINALG_ENABLE_BLAS
   }
 
@@ -94,10 +135,6 @@ namespace {
     mag_t normResult {};
     vector_norm2(x, normResult);
     const mag_t expectedNormResult = sqrt(expectedNormResultSquared);
-    EXPECT_TRUE( abs(normResult - expectedNormResult) <= tol );
+    EXPECT_NEAR( expectedNormResult, normResult, tol );
   }
 }
-
-// int main() {
-//   std::cout << "hello world" << std::endl;
-// }
