@@ -7,6 +7,7 @@ endmacro()
 
 find_package(GTest REQUIRED)
 
+linalg_add_test(abs_sum)
 linalg_add_test(add)
 linalg_add_test(conjugate_transpose_view)
 linalg_add_test(conjugate_view)

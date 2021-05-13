@@ -55,10 +55,32 @@ template<class in_vector_t,
 void vector_abs_sum(in_vector_t v,
                     Scalar& result)
 {
+  using std::abs;
+
   result = 0.0;
-  for (ptrdiff_t i = 0; i < v.extent(0); ++i) {
-    using std::abs;
-    result += abs(v(i));
+  ptrdiff_t n = v.extent(0);
+  if (n == 0) {
+    return;
+  }
+  else if (n == ptrdiff_t(1)) {
+    result = abs(v(0));
+    return;
+  }
+
+  // Clean-up loop for sizes that aren't evenly divisible by 6
+  ptrdiff_t m = n%6;
+  if (m != 0) {
+    for (ptrdiff_t i = 0; i < m; ++i) {
+      result += abs(v(i));
+    }
+    if (n < 6) {
+      return;
+    }
+  }
+  // Explicit loop unrolling
+  for (ptrdiff_t i = m; i < n; i+=6) {
+    result += abs(v(i))   + abs(v(i+1)) + abs(v(i+2)) +
+              abs(v(i+3)) + abs(v(i+4)) + abs(v(i+5));
   }
 }
 
