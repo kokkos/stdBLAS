@@ -7,7 +7,7 @@ namespace {
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::basic_mdspan;
-  using std::experimental::transpose_view;
+  using std::experimental::linalg::transpose_view;
 
   TEST(transpose_view, mdspan_double)
   {

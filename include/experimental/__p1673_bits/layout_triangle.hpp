@@ -52,6 +52,7 @@
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
+namespace linalg {
 
 namespace __triangular_layouts_impl {
 
@@ -107,6 +108,7 @@ public:
 template <class Triangle, class StorageOrder>
 class layout_blas_packed;
 
+} // end namespace linalg
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
 } // end namespace std

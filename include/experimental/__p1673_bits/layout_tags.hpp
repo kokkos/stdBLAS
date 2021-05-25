@@ -49,6 +49,7 @@
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
+namespace linalg {
 
 // TODO @proposal-bug make sure these can't convert from `{}`
 
@@ -72,6 +73,7 @@ _MDSPAN_INLINE_VARIABLE constexpr auto left_side = left_side_t{};
 struct right_side_t { };
 _MDSPAN_INLINE_VARIABLE constexpr auto right_side = right_side_t{};
 
+} // end namespace linalg
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
 } // end namespace std

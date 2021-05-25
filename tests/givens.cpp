@@ -8,7 +8,8 @@ namespace {
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::basic_mdspan;
-  using std::experimental::givens_rotation_setup;
+  using std::experimental::linalg::givens_rotation_setup;
+  using std::experimental::linalg::givens_rotation_apply;
 
   TEST(givens_rotation_setup, complex_double)
   {

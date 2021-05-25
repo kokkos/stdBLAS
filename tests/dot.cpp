@@ -29,8 +29,8 @@ namespace {
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::basic_mdspan;
-  using std::experimental::dot;
-  using std::experimental::dotc;
+  using std::experimental::linalg::dot;
+  using std::experimental::linalg::dotc;
 
   TEST(BLAS1_dot, mdspan_double)
   {

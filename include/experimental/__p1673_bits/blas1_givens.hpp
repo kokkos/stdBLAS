@@ -49,6 +49,7 @@
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
+namespace linalg {
 
 // For the mathematical description of givens_rotation_setup, see BLAS
 // Standard, Section 2.8.3 ("Generate Transformations"), GEN_GROT.  In
@@ -404,6 +405,7 @@ void givens_rotation_apply(
   givens_rotation_apply(x, y, c, s);
 }
 
+} // end namespace linalg
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
 } // end namespace std

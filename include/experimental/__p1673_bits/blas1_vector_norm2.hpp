@@ -49,6 +49,7 @@
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
+namespace linalg {
 
 template<class in_vector_t,
          class Scalar>
@@ -98,6 +99,7 @@ void vector_norm2(ExecutionPolicy&& /* exec */,
   vector_norm2(v, result);
 }
 
+} // end namespace linalg
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
 } // end namespace std

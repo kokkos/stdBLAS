@@ -7,7 +7,7 @@ namespace {
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::basic_mdspan;
-  using std::experimental::conjugate_view;
+  using std::experimental::linalg::conjugate_view;
 
   TEST(conjugate_view, mdspan_complex_double)
   {
@@ -34,7 +34,7 @@ namespace {
       using accessor_t = vector_t::accessor_type;
       accessor_t accessor0;
       accessor_t accessor1 (y.accessor ());
-      using std::experimental::accessor_conjugate;
+      using std::experimental::linalg::accessor_conjugate;
       using accessor_conj_t = accessor_conjugate<accessor_t, scalar_t>;
       accessor_conj_t accessor2;
       accessor_conj_t accessor3 (y.accessor ());

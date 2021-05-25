@@ -27,7 +27,7 @@ namespace {
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::basic_mdspan;
-  using std::experimental::vector_norm2;
+  using std::experimental::linalg::vector_norm2;
 
   TEST(BLAS1_norm2, mdspan_zero)
   {

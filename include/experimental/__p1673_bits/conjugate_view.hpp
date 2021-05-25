@@ -50,6 +50,7 @@
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
+namespace linalg {
 
 template<class T>
 class conjugated_scalar {
@@ -178,6 +179,7 @@ basic_mdspan<const EltType, Extents, Layout, <i>see-below</i> >
 conjugate_view(const basic_mdarray<EltType, Extents, Layout, Accessor>& a);
 #endif // 0
 
+} // end namespace linalg
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
 } // end namespace std

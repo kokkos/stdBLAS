@@ -7,7 +7,7 @@ namespace {
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::basic_mdspan;
-  using std::experimental::scaled_view;
+  using std::experimental::linalg::scaled_view;
 
   TEST(scaled_view, mdspan_double_scalar_float)
   {
@@ -36,7 +36,7 @@ namespace {
     // Make sure that accessor_scaled compiles
     {
       using accessor_t = vector_t::accessor_type;
-      using std::experimental::accessor_scaled;
+      using std::experimental::linalg::accessor_scaled;
       using scaled_accessor_t =
         accessor_scaled<accessor_t, scaling_factor_type>;
       scaled_accessor_t accessor0;

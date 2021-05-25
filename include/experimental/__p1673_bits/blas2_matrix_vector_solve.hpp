@@ -48,6 +48,7 @@
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
+namespace linalg {
 
 namespace {
 
@@ -162,6 +163,7 @@ void triangular_matrix_vector_solve(
   triangular_matrix_vector_solve(A, t, d, b, x);
 }
 
+} // end namespace linalg
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
 } // end namespace std

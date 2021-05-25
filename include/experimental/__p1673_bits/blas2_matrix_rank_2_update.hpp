@@ -46,6 +46,7 @@
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
+namespace linalg {
 
 // Rank-2 update of a symmetric matrix
 
@@ -127,6 +128,7 @@ void hermitian_matrix_rank_2_update(
   hermitian_matrix_rank_2_update(x, y, A, t);
 }
 
+} // end namespace linalg
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
 } // end namespace std

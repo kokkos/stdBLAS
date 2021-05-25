@@ -49,6 +49,7 @@
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
+namespace linalg {
 
 namespace {
   template<ptrdiff_t ext0, ptrdiff_t ext1>
@@ -124,6 +125,7 @@ basic_mdspan<EltType, Extents, layout_transpose<Layout>, <i>see-below</i> >
 transpose_view(const basic_mdarray<EltType, Extents, Layout, Accessor>& a);
 #endif // 0
 
+} // end namespace linalg
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
 } // end namespace std

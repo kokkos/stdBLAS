@@ -49,6 +49,7 @@
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
+namespace linalg {
 
 template<class in_vector_t,
          class Scalar>
@@ -72,6 +73,7 @@ void vector_abs_sum(ExecutionPolicy&& /* exec */,
   vector_abs_sum(v, result);
 }
 
+} // end namespace linalg
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
 } // end namespace std

@@ -54,6 +54,7 @@
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
+namespace linalg {
 
 namespace __layout_blas_general_impl {
 
@@ -202,6 +203,7 @@ class layout_blas_general<row_major_t> {
   using mapping = __layout_blas_general_impl::__layout_blas_impl<layout_right, dynamic_extent>;
 };
 
+} // end namespace linalg
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
 } // end namespace std

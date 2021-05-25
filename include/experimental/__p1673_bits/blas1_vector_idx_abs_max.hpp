@@ -46,6 +46,7 @@
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
+namespace linalg {
 
 template<class in_vector_t>
 ptrdiff_t vector_idx_abs_max(in_vector_t v)
@@ -77,6 +78,7 @@ ptrdiff_t vector_idx_abs_max(ExecutionPolicy&& /* exec */,
   return vector_idx_abs_max(v);
 }
 
+} // end namespace linalg
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
 } // end namespace std
