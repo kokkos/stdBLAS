@@ -90,7 +90,7 @@ endif()
 
 ################################################################################
 
-find_package(MDSpan REQUIRED)
+find_package(mdspan REQUIRED)
 find_package(MDArray REQUIRED)
 
 find_package(BLAS)

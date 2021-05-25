@@ -7,73 +7,273 @@ env:
   BUILD_TYPE: RelWithDebInfo
 
 jobs:
-  build:
-    # The CMake configure and build commands are platform agnostic and should work equally
-    # well on Windows or Mac.  You can convert this to a matrix build if you need
-    # cross-platform coverage.
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+  build-mdspan:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Create Build Environment (mdspan)
-      # Some projects don't allow in-source building, so create a separate build directory
-      # We'll use this as our working directory for all subsequent commands
-      run: cmake -E make_directory ${{github.workspace}}/build-mdspan
+
+    - id: get-sha
+      run: echo ::set-output name=sha::$( curl https://api.github.com/repos/kokkos/mdspan/git/ref/heads/stable | jq .object.sha | tr -d '"' )
+ 
+    - name: Determine whether mdspan needs to be rebuilt
+      id: cache-mdspan
+      uses: actions/cache@v2
+      with:
+        path: ${{github.workspace}}/mdspan-install
+        key: mdspan-${{ steps.get-sha.outputs.sha }}
+ 
+    - name: Create Build Environment
+      if: steps.cache-mdspan.outputs.cache-hit != 'true'
+      run: cmake -E make_directory ${{github.workspace}}/mdspan-build
       
-    - name: Check Out (mdspan)
+    - name: Check Out
+      if: steps.cache-mdspan.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         repository: kokkos/mdspan
-        path: ${{github.workspace}}/mdspan
+        path: ${{github.workspace}}/mdspan-src
       
-    - name: Configure CMake (mdspan)
+    - name: Configure CMake
+      if: steps.cache-mdspan.outputs.cache-hit != 'true'
       shell: bash
-      working-directory: ${{github.workspace}}/build-mdspan
-      run: cmake $GITHUB_WORKSPACE/mdspan -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      working-directory: ${{github.workspace}}/mdspan-build
+      run: cmake $GITHUB_WORKSPACE/mdspan-src -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/mdspan-install
       
-    - name: Create Build Environment (mdarray)
-      # Some projects don't allow in-source building, so create a separate build directory
-      # We'll use this as our working directory for all subsequent commands
-      run: cmake -E make_directory ${{github.workspace}}/build-mdarray
+    - name: Build
+      if: steps.cache-mdspan.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: ${{github.workspace}}/mdspan-build
+      run: make
       
-    - name: Check Out (mdarray)
+    - name: Install
+      if: steps.cache-mdspan.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: ${{github.workspace}}/mdspan-build
+      run: make install
+      
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: mdspan
+        path: ${{github.workspace}}/mdspan-install
+      
+  build-mdarray:
+    runs-on: ubuntu-latest
+    needs: build-mdspan
+
+    steps:
+    - id: get-sha
+      run: echo ::set-output name=sha::$( curl https://api.github.com/repos/kokkos/mdarray/git/ref/heads/master | jq .object.sha | tr -d '"' )
+ 
+    - name: Determine whether mdarray needs to be rebuilt
+      id: cache-mdarray
+      uses: actions/cache@v2
+      with:
+        path: ${{github.workspace}}/mdarray-install
+        key: mdspan-${{ steps.get-sha.outputs.sha }}
+    
+    - name: Download mdspan
+      if: steps.cache-mdarray.outputs.cache-hit != 'true'
+      uses: actions/download-artifact@v2
+      with:
+        name: mdspan
+        path: ${{github.workspace}}/mdspan-install 
+
+    - name: Create Build Environment
+      if: steps.cache-mdarray.outputs.cache-hit != 'true'
+      run: cmake -E make_directory ${{github.workspace}}/mdarray-build
+      
+    - name: Check Out
+      if: steps.cache-mdarray.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         repository: kokkos/mdarray
-        path: ${{github.workspace}}/mdarray
+        path: ${{github.workspace}}/mdarray-src
       
-    - name: Configure CMake (mdarray)
+    - name: Configure CMake
+      if: steps.cache-mdarray.outputs.cache-hit != 'true'
       shell: bash
-      working-directory: ${{github.workspace}}/build-mdarray
-      run: cmake $GITHUB_WORKSPACE/mdarray -DMDSpan_DIR=$GITHUB_WORKSPACE/build-mdspan -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      working-directory: ${{github.workspace}}/mdarray-build
+      run: cmake $GITHUB_WORKSPACE/mdarray-src -Dmdspan_DIR=$GITHUB_WORKSPACE/mdspan-install/lib/cmake/mdspan -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/mdarray-install
 
-    - name: Install gtest manually
-      run: sudo apt-get install libgtest-dev && cd /usr/src/gtest && sudo cmake CMakeLists.txt && sudo make && sudo cp lib/*.a /usr/lib && sudo ln -s /usr/lib/libgtest.a /usr/local/lib/libgtest.a && sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/libgtest_main.a
-
-    - name: Create Build Environment (stdBLAS)
-      # Some projects don't allow in-source building, so create a separate build directory
-      # We'll use this as our working directory for all subsequent commands
-      run: cmake -E make_directory ${{github.workspace}}/build
+    - name: Build
+      if: steps.cache-mdarray.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: ${{github.workspace}}/mdarray-build
+      run: make
       
-    - name: Check Out (stdBLAS)
+    - name: Install
+      if: steps.cache-mdarray.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: ${{github.workspace}}/mdarray-build
+      run: make install
+      
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: mdarray
+        path: ${{github.workspace}}/mdarray-install
+        
+  build-gtest:
+    runs-on: ubuntu-latest
+    
+    steps:
+
+    - id: get-sha
+      run: echo ::set-output name=sha::$( curl https://api.github.com/repos/google/googletest/git/ref/heads/master | jq .object.sha | tr -d '"' )
+ 
+    - name: Determine whether gtest needs to be rebuilt
+      id: cache-gtest
+      uses: actions/cache@v2
+      with:
+        path: ${{github.workspace}}/gtest-install
+        key: gtest-${{ steps.get-sha.outputs.sha }}
+ 
+    - name: Create Build Environment
+      if: steps.cache-gtest.outputs.cache-hit != 'true'
+      run: cmake -E make_directory ${{github.workspace}}/gtest-build
+      
+    - name: Check Out
+      if: steps.cache-gtest.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
-        path: ${{github.workspace}}/stdBLAS
+        repository: google/googletest
+        path: ${{github.workspace}}/gtest-src
       
-    - name: Configure CMake (stdBLAS)
+    - name: Configure CMake
+      if: steps.cache-gtest.outputs.cache-hit != 'true'
       shell: bash
-      working-directory: ${{github.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE/stdBLAS -DMDSpan_DIR=$GITHUB_WORKSPACE/build-mdspan -DMDArray_DIR=$GITHUB_WORKSPACE/build-mdarray -DLINALG_ENABLE_TESTS=On -DLINALG_ENABLE_EXAMPLES=On -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      working-directory: ${{github.workspace}}/gtest-build
+      run: cmake $GITHUB_WORKSPACE/gtest-src -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/gtest-install
+      
+    - name: Build
+      if: steps.cache-gtest.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: ${{github.workspace}}/gtest-build
+      run: make
+      
+    - name: Install
+      if: steps.cache-gtest.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: ${{github.workspace}}/gtest-build
+      run: make install
+      
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: gtest
+        path: ${{github.workspace}}/gtest-install
 
-    - name: Build (stdBLAS)
-      working-directory: ${{github.workspace}}/build
-      shell: bash
-      # Execute the build.  You can specify a specific target with "--target <NAME>"
-      run: cmake --build . --config $BUILD_TYPE
+  configure-stdblas:
+    runs-on: ubuntu-latest
+    needs: [build-mdarray, build-gtest]
+    
+    steps:
+    - name: Download mdspan
+      uses: actions/download-artifact@v2
+      with:
+        name: mdspan
+        path: ${{github.workspace}}/mdspan-install 
+        
+    - name: Download mdarray
+      uses: actions/download-artifact@v2
+      with:
+        name: mdarray
+        path: ${{github.workspace}}/mdarray-install 
 
-    - name: Test (stdBLAS)
-      working-directory: ${{github.workspace}}/build
+    - name: Download googletest
+      uses: actions/download-artifact@v2
+      with:
+        name: gtest
+        path: ${{github.workspace}}/gtest-install 
+        
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{github.workspace}}/stdblas-build
+        
+    - name: Check Out
+      uses: actions/checkout@v2
+      with:
+        path: ${{github.workspace}}/stdblas-src
+        
+    - name: Configure CMake
       shell: bash
-      # Execute tests defined by the CMake configuration.  
-      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ctest -C $BUILD_TYPE
+      working-directory: ${{github.workspace}}/stdblas-build
+      run: cmake $GITHUB_WORKSPACE/stdblas-src -Dmdspan_DIR=$GITHUB_WORKSPACE/mdspan-install/lib/cmake/mdspan -DMDArray_DIR=$GITHUB_WORKSPACE/mdarray-install/cmake -DGTEST_ROOT=$GITHUB_WORKSPACE/gtest-install -DLINALG_ENABLE_TESTS=On -DLINALG_ENABLE_EXAMPLES=On -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/stdblas-install
+
+    - name: Upload workspace
+      uses: actions/upload-artifact@v2
+      with:
+        name: workspace
+        path: ${{github.workspace}}
+      
+  build-stdblas:
+    runs-on: ubuntu-latest
+    needs: configure-stdblas
+    
+    steps:
+    
+    - name: Download workspace
+      uses: actions/download-artifact@v2
+      with:
+        name: workspace
+        path: ${{github.workspace}}
+        
+    - name: Build
+      working-directory: ${{github.workspace}}/stdblas-build
+      shell: bash
+      run: make
+      
+    - name: Tar files
+      working-directory: ${{github.workspace}}
+      shell: bash
+      run: tar -cvf stdblas.tar *
+
+    - name: Upload workspace
+      uses: actions/upload-artifact@v2
+      with:
+        name: stdblas
+        path: ${{github.workspace}}/stdblas.tar
+        
+  test-stdBLAS:
+    runs-on: ubuntu-latest
+    needs: build-stdblas
+    
+    steps:
+    
+    - name: Download workspace
+      uses: actions/download-artifact@v2
+      with:
+        name: stdblas
+        path: ${{github.workspace}}
+        
+    - name: Untar files
+      working-directory: ${{github.workspace}}
+      shell: bash
+      run: tar -xvf stdblas.tar
+        
+    - name: Test
+      working-directory: ${{github.workspace}}/stdblas-build
+      shell: bash
+      run: ctest --output-on-failure
+      
+  install-stdBLAS:
+    runs-on: ubuntu-latest
+    needs: build-stdblas
+    
+    steps:
+    
+    - name: Download workspace
+      uses: actions/download-artifact@v2
+      with:
+        name: stdblas
+        path: ${{github.workspace}}
+        
+    - name: Untar files
+      working-directory: ${{github.workspace}}
+      shell: bash
+      run: tar -xvf stdblas.tar
+        
+    - name: Install
+      working-directory: ${{github.workspace}}/stdblas-build
+      shell: bash
+      run: make install
