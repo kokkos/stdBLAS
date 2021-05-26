@@ -91,7 +91,6 @@ endif()
 ################################################################################
 
 find_package(mdspan REQUIRED)
-find_package(MDArray REQUIRED)
 
 find_package(BLAS)
 option(LINALG_ENABLE_BLAS
@@ -111,7 +110,6 @@ add_library(linalg INTERFACE)
 add_library(std::linalg ALIAS linalg)
 
 target_link_libraries(linalg INTERFACE std::mdspan)
-target_link_libraries(linalg INTERFACE std::mdarray)
 
 target_include_directories(linalg INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

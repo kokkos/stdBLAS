@@ -2,7 +2,7 @@
 
 ## Requirements
 
-  - CMake >= 3.12 (requirement of mdarray)
+  - CMake >= 3.12
   - C++14 or greater compiler (requirement of mdspan)
 
 ## Build instructions
@@ -12,6 +12,3 @@
    - (master appears to work)
 2. Download and install mdspan:
    - git@github.com:kokkos/mdspan.git
-3. Download and install mdarray:
-   - git@github.com:kokkos/mdarray.git
-   - Set `CMAKE_PREFIX_PATH` to where you installed mdspan.

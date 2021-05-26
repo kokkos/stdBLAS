@@ -44,7 +44,6 @@
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATED_HPP_
 
 #include <experimental/mdspan>
-#include <experimental/mdarray>
 #include <complex>
 
 namespace std {
@@ -171,13 +170,6 @@ conjugated(basic_mdspan<EltType, Extents, Layout, Accessor> a)
   return basic_mdspan<EltType, Extents, Layout, accessor_t> (
     a.data (), a.mapping (), accessor_t (a.accessor ()));
 }
-
-#if 0
-// FIXME Must fill in see-below; see #10.
-template<class EltType, class Extents, class Layout, class Accessor>
-basic_mdspan<const EltType, Extents, Layout, <i>see-below</i> >
-conjugated(const basic_mdarray<EltType, Extents, Layout, Accessor>& a);
-#endif // 0
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0

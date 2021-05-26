@@ -76,11 +76,7 @@ void swap_rank_2(in_matrix_t x,
   }
 }
 
-// TODO add mdarray specializations; needed so that out_object_t is
-// not passed by value (which would be wrong for a container type like
-// mdarray).
-
-}
+} // end anonymous namespace
 
 template<class inout_object_1_t,
          class inout_object_2_t>

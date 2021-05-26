@@ -44,7 +44,6 @@
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_TRANSPOSED_HPP_
 
 #include <experimental/mdspan>
-#include <experimental/mdarray>
 
 namespace std {
 namespace experimental {
@@ -117,13 +116,6 @@ transposed(basic_mdspan<EltType, Extents, Layout, Accessor> a)
   return basic_mdspan<EltType, Extents, layout_type, Accessor> (
     a.data (), mapping_type (a.mapping ()), a.accessor ());
 }
-
-// FIXME Must fill in see-below; see #11.
-#if 0
-template<class EltType, class Extents, class Layout, class Accessor>
-basic_mdspan<EltType, Extents, layout_transpose<Layout>, <i>see-below</i> >
-transposed(const basic_mdarray<EltType, Extents, Layout, Accessor>& a);
-#endif // 0
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
