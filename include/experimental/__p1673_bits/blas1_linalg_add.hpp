@@ -76,11 +76,7 @@ void add_rank_2(in_matrix_1_t x,
   }
 }
 
-// TODO add mdarray specializations; needed so that out_*_t is
-// not passed by value (which would be wrong for a container type like
-// mdarray).
-
-}
+} // end anonymous namespace
 
 template<class in_object_1_t,
          class in_object_2_t,

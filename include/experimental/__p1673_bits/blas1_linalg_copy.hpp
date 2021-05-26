@@ -72,11 +72,7 @@ void copy_rank_2(in_matrix_t x,
   }
 }
 
-// TODO add mdarray specializations; needed so that out_object_t is
-// not passed by value (which would be wrong for a container type like
-// mdarray).
-
-}
+} // end anonymous namespace
 
 template<class in_object_t,
          class out_object_t>
@@ -103,8 +99,6 @@ void copy(ExecutionPolicy&& /* exec */,
 {
   copy(x, y);
 }
-
-// TODO add mdarray specializations
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0

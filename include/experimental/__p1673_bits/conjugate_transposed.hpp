@@ -60,15 +60,6 @@ conjugate_transposed(
   return conjugated(transposed(a));
 }
 
-// FIXME Must fill in see-below.
-#if 0
-template<class EltType, class Extents, class Layout, class Accessor>
-basic_mdspan<EltType, Extents, layout_transpose<Layout>,
-             <i>see-below</i> >
-conjugate_transposed(
-  const basic_mdarray<EltType, Extents, Layout, Accessor>& a)
-#endif // 0
-
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
 } // end namespace experimental

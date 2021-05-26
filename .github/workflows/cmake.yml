@@ -56,64 +56,7 @@ jobs:
       with:
         name: mdspan
         path: ${{github.workspace}}/mdspan-install
-      
-  build-mdarray:
-    runs-on: ubuntu-latest
-    needs: build-mdspan
 
-    steps:
-    - id: get-sha
-      run: echo ::set-output name=sha::$( curl https://api.github.com/repos/kokkos/mdarray/git/ref/heads/master | jq .object.sha | tr -d '"' )
- 
-    - name: Determine whether mdarray needs to be rebuilt
-      id: cache-mdarray
-      uses: actions/cache@v2
-      with:
-        path: ${{github.workspace}}/mdarray-install
-        key: mdspan-${{ steps.get-sha.outputs.sha }}
-    
-    - name: Download mdspan
-      if: steps.cache-mdarray.outputs.cache-hit != 'true'
-      uses: actions/download-artifact@v2
-      with:
-        name: mdspan
-        path: ${{github.workspace}}/mdspan-install 
-
-    - name: Create Build Environment
-      if: steps.cache-mdarray.outputs.cache-hit != 'true'
-      run: cmake -E make_directory ${{github.workspace}}/mdarray-build
-      
-    - name: Check Out
-      if: steps.cache-mdarray.outputs.cache-hit != 'true'
-      uses: actions/checkout@v2
-      with:
-        repository: kokkos/mdarray
-        path: ${{github.workspace}}/mdarray-src
-      
-    - name: Configure CMake
-      if: steps.cache-mdarray.outputs.cache-hit != 'true'
-      shell: bash
-      working-directory: ${{github.workspace}}/mdarray-build
-      run: cmake $GITHUB_WORKSPACE/mdarray-src -Dmdspan_DIR=$GITHUB_WORKSPACE/mdspan-install/lib/cmake/mdspan -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/mdarray-install
-
-    - name: Build
-      if: steps.cache-mdarray.outputs.cache-hit != 'true'
-      shell: bash
-      working-directory: ${{github.workspace}}/mdarray-build
-      run: make
-      
-    - name: Install
-      if: steps.cache-mdarray.outputs.cache-hit != 'true'
-      shell: bash
-      working-directory: ${{github.workspace}}/mdarray-build
-      run: make install
-      
-    - name: Upload
-      uses: actions/upload-artifact@v2
-      with:
-        name: mdarray
-        path: ${{github.workspace}}/mdarray-install
-        
   build-gtest:
     runs-on: ubuntu-latest
     
@@ -166,7 +109,7 @@ jobs:
 
   configure-stdblas:
     runs-on: ubuntu-latest
-    needs: [build-mdarray, build-gtest]
+    needs: [build-mdspan, build-gtest]
     
     steps:
     - name: Download mdspan
@@ -174,12 +117,6 @@ jobs:
       with:
         name: mdspan
         path: ${{github.workspace}}/mdspan-install 
-        
-    - name: Download mdarray
-      uses: actions/download-artifact@v2
-      with:
-        name: mdarray
-        path: ${{github.workspace}}/mdarray-install 
 
     - name: Download googletest
       uses: actions/download-artifact@v2
@@ -198,7 +135,7 @@ jobs:
     - name: Configure CMake
       shell: bash
       working-directory: ${{github.workspace}}/stdblas-build
-      run: cmake $GITHUB_WORKSPACE/stdblas-src -Dmdspan_DIR=$GITHUB_WORKSPACE/mdspan-install/lib/cmake/mdspan -DMDArray_DIR=$GITHUB_WORKSPACE/mdarray-install/cmake -DGTEST_ROOT=$GITHUB_WORKSPACE/gtest-install -DLINALG_ENABLE_TESTS=On -DLINALG_ENABLE_EXAMPLES=On -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/stdblas-install
+      run: cmake $GITHUB_WORKSPACE/stdblas-src -Dmdspan_DIR=$GITHUB_WORKSPACE/mdspan-install/lib/cmake/mdspan -DGTEST_ROOT=$GITHUB_WORKSPACE/gtest-install -DLINALG_ENABLE_TESTS=On -DLINALG_ENABLE_EXAMPLES=On -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/stdblas-install
 
     - name: Upload workspace
       uses: actions/upload-artifact@v2

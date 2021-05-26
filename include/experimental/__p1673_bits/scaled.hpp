@@ -44,7 +44,6 @@
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_SCALED_HPP_
 
 #include <experimental/mdspan>
-#include <experimental/mdarray>
 
 namespace std {
 namespace experimental {
@@ -133,14 +132,6 @@ scaled(ScalingFactorType scalingFactor,
   return basic_mdspan<ElementType, Extents, Layout, accessor_t> (
     a.data(), a.mapping(), accessor_t (a.accessor(), scalingFactor));
 }
-
-// FIXME Finish these (see e.g., "see-below")
-#if 0
-template<class T, class Extents, class Layout,
-         class Accessor, class S>
-basic_mdspan<const T, Extents, Layout, <i>see-below</i> >
-scaled(S s, const basic_mdarray<T, Extents, Layout, Accessor>& a);
-#endif // 0
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0

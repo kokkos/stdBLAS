@@ -72,11 +72,7 @@ void linalg_scale_rank_2(const Scalar alpha,
   }
 }
 
-// TODO add mdarray specializations; needed so that inout_object_t is
-// not passed by value (which would be wrong for a container type like
-// mdarray).
-
-}
+} // end anonymous namespace
 
 template<class Scalar,
          class inout_object_t>

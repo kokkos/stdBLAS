@@ -71,44 +71,6 @@ packed(
   typename basic_mdspan<EltType, Extents, Layout, Accessor>::index_type num_rows,
   Triangle,
   StorageOrder);
-
-         template<class EltType,
-         class Extents,
-         class Layout,
-         class Accessor,
-         class Triangle,
-         class DiagonalStorage,
-         class StorageOrder>
-constexpr basic_mdspan<const EltType,
-  <i>extents-see-returns-below</i>,
-  layout_blas_packed<
-    Triangle,
-    StorageOrder>,
-  Accessor>
-packed(
-  const basic_mdarray<EltType, Extents, Layout, Accessor>& m,
-  typename basic_mdarray<EltType, Extents, Layout, Accessor>::index_type num_rows,
-  Triangle,
-  StorageOrder);
-
-template<class EltType,
-         class Extents,
-         class Layout,
-         class Accessor,
-         class Triangle,
-         class DiagonalStorage,
-         class StorageOrder>
-constexpr basic_mdspan<EltType,
-  <i>extents-see-returns-below</i>,
-  layout_blas_triangular_packed<
-    Triangle,
-    StorageOrder>,
-  Accessor>
-packed(
-  basic_mdarray<EltType, Extents, Layout, Accessor>& m,
-  typename basic_mdarray<EltType, Extents, Layout, Accessor>::index_type num_rows,
-  Triangle,
-  StorageOrder);
 #endif // 0
 
 } // end namespace linalg
