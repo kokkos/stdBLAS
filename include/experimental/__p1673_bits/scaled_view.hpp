@@ -49,6 +49,7 @@
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
+namespace linalg {
 
 template<class Reference, class ScalingFactor>
 class scaled_scalar {
@@ -141,6 +142,7 @@ basic_mdspan<const T, Extents, Layout, <i>see-below</i> >
 scaled_view(S s, const basic_mdarray<T, Extents, Layout, Accessor>& a);
 #endif // 0
 
+} // end namespace linalg
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
 } // end namespace std

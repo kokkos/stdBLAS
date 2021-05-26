@@ -16,7 +16,7 @@ namespace {
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::basic_mdspan;
-  using std::experimental::linalg_swap;
+  using std::experimental::linalg::swap_elements;
 
   TEST(BLAS1_swap, mdspan_double)
   {
@@ -37,7 +37,7 @@ namespace {
       y(k) = y_k;
     }
 
-    linalg_swap(x, y);
+    swap_elements(x, y);
     for (ptrdiff_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k = scalar_t (k) + 1.0;
       const scalar_t y_k = scalar_t (k) + 2.0;
@@ -66,7 +66,7 @@ namespace {
       y(k) = y_k;
     }
 
-    linalg_swap(x, y);
+    swap_elements(x, y);
     for (ptrdiff_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k(real_t(k) + 4.0, -real_t(k) - 1.0);
       const scalar_t y_k(real_t(k) + 5.0, -real_t(k) - 2.0);

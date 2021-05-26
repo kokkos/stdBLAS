@@ -49,6 +49,7 @@
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
+namespace linalg {
 
 // Overwriting general matrix-vector product: y := A * x
 
@@ -440,6 +441,7 @@ void triangular_matrix_vector_product(ExecutionPolicy&& /* exec */,
   triangular_matrix_vector_product(A, t, d, x, y, z);
 }
 
+} // end namespace linalg
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
 } // end namespace std

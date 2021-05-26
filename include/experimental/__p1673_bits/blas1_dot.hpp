@@ -48,6 +48,7 @@
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
+namespace linalg {
 
 // Non-conjugated dot
 template<class in_vector_1_t,
@@ -100,6 +101,7 @@ void dotc(ExecutionPolicy&& /* exec */,
   dotc(v1, v2, result);
 }
 
+} // end namespace linalg
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
 } // end namespace std

@@ -46,13 +46,14 @@
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
+namespace linalg {
 
 namespace {
 
 template<class in_vector_t,
          class out_vector_t>
-void linalg_copy_rank_1(in_vector_t x,
-                        out_vector_t y)
+void copy_rank_1(in_vector_t x,
+                 out_vector_t y)
 {
   for (ptrdiff_t i = 0; i < y.extent(0); ++i) {
     y(i) = x(i);
@@ -61,8 +62,8 @@ void linalg_copy_rank_1(in_vector_t x,
 
 template<class in_matrix_t,
          class out_matrix_t>
-void linalg_copy_rank_2(in_matrix_t x,
-                        out_matrix_t y)
+void copy_rank_2(in_matrix_t x,
+                 out_matrix_t y)
 {
   for (ptrdiff_t j = 0; j < y.extent(1); ++j) {
     for (ptrdiff_t i = 0; i < y.extent(0); ++i) {
@@ -79,14 +80,14 @@ void linalg_copy_rank_2(in_matrix_t x,
 
 template<class in_object_t,
          class out_object_t>
-void linalg_copy(in_object_t x,
-                 out_object_t y)
+void copy(in_object_t x,
+          out_object_t y)
 {
   if constexpr (x.rank() == 1) {
-    linalg_copy_rank_1(x, y);
+    copy_rank_1(x, y);
   }
   else if constexpr (x.rank() == 2) {
-    linalg_copy_rank_2(x, y);
+    copy_rank_2(x, y);
   }
   else {
     static_assert("Not implemented");
@@ -96,15 +97,16 @@ void linalg_copy(in_object_t x,
 template<class ExecutionPolicy,
          class in_object_t,
          class out_object_t>
-void linalg_copy(ExecutionPolicy&& /* exec */,
-                 in_object_t x,
-                 out_object_t y)
+void copy(ExecutionPolicy&& /* exec */,
+          in_object_t x,
+          out_object_t y)
 {
-  linalg_copy(x, y);
+  copy(x, y);
 }
 
 // TODO add mdarray specializations
 
+} // end namespace linalg
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
 } // end namespace std

@@ -16,7 +16,7 @@ namespace {
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::basic_mdspan;
-  using std::experimental::scale;
+  using std::experimental::linalg::scale;
 
   TEST(BLAS1_scale, mdspan_double)
   {

@@ -16,7 +16,7 @@ namespace {
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::basic_mdspan;
-  using std::experimental::linalg_add;
+  using std::experimental::linalg::add;
 
   TEST(BLAS1_add, mdspan_double)
   {
@@ -39,7 +39,7 @@ namespace {
       z(k) = 0.0;
     }
 
-    linalg_add(x, y, z);
+    add(x, y, z);
     for (ptrdiff_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k = scalar_t (k) + 1.0;
       const scalar_t y_k = scalar_t (k) + 2.0;
@@ -72,7 +72,7 @@ namespace {
       z(k) = scalar_t(0.0, 0.0);
     }
 
-    linalg_add(x, y, z);
+    add(x, y, z);
     for (ptrdiff_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k(real_t(k) + 4.0, -real_t(k) - 1.0);
       const scalar_t y_k(real_t(k) + 5.0, -real_t(k) - 2.0);

@@ -46,6 +46,7 @@
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
+namespace linalg {
 
 namespace {
 
@@ -103,6 +104,7 @@ void scale(ExecutionPolicy&& /* exec */,
   scale(alpha, obj);
 }
 
+} // end namespace linalg
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
 } // end namespace std

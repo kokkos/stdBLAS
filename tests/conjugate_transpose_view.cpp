@@ -8,7 +8,7 @@ namespace {
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::basic_mdspan;
-  using std::experimental::conjugate_transpose_view;
+  using std::experimental::linalg::conjugate_transpose_view;
 
   TEST(conjugate_transpose_view, mdspan_complex_double)
   {

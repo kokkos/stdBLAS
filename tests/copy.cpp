@@ -17,7 +17,7 @@ namespace {
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::basic_mdspan;
-  using std::experimental::linalg_copy;
+  using std::experimental::linalg::copy;
 
   template<class Real>
   struct MakeVectorValues {
@@ -61,7 +61,7 @@ namespace {
       y(k) = vals.second;
     }
 
-    linalg_copy(x, y);
+    copy(x, y);
     for (ptrdiff_t k = 0; k < vectorSize; ++k) {
       const auto vals = makeVectorValues<scalar_t>(k);
       // Make sure the function didn't modify the input.
@@ -89,7 +89,7 @@ namespace {
       y(k) = vals.second;
     }
 
-    linalg_copy(x, y);
+    copy(x, y);
     for (ptrdiff_t k = 0; k < vectorSize; ++k) {
       const auto vals = makeVectorValues<scalar_t>(k);
       // Make sure the function didn't modify the input.
@@ -154,7 +154,7 @@ TEST(BLAS1_copy_matrix, mdspan_double)
     }
   }
 
-  linalg_copy(A, B);
+  copy(A, B);
   for (ptrdiff_t j = 0; j < numCols; ++j) {
     for (ptrdiff_t i = 0; i < numRows; ++i) {
       const auto vals = makeMatrixValues<scalar_t>(i, j, numRows);
@@ -187,7 +187,7 @@ TEST(BLAS1_copy_matrix, mdspan_complex_double)
     }
   }
 
-  linalg_copy(A, B);
+  copy(A, B);
   for (ptrdiff_t j = 0; j < numCols; ++j) {
     for (ptrdiff_t i = 0; i < numRows; ++i) {
       const auto vals = makeMatrixValues<scalar_t>(i, j, numRows);

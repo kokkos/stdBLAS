@@ -18,8 +18,8 @@ namespace {
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::layout_left;
-  using std::experimental::matrix_product;
-  using std::experimental::transpose_view;
+  using std::experimental::linalg::matrix_product;
+  using std::experimental::linalg::transpose_view;
   using std::cout;
   using std::endl;
 

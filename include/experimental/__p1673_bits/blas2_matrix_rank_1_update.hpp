@@ -46,6 +46,7 @@
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
+namespace linalg {
 
 // Nonsymmetric non-conjugated rank-1 update
 
@@ -183,6 +184,7 @@ void hermitian_matrix_rank_1_update(
   hermitian_matrix_rank_1_update(x, A, t);
 }
 
+} // end namespace linalg
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
 } // end namespace std

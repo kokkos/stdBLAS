@@ -46,6 +46,7 @@
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
+namespace linalg {
 
 #ifdef LINALG_ENABLE_BLAS
 namespace {
@@ -786,6 +787,7 @@ void hermitian_matrix_product(
   hermitian_matrix_product(A, t, s, B, E, C);
 }
 
+} // end namespace linalg
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
 } // end namespace std

@@ -48,12 +48,13 @@
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
+namespace linalg {
 
 namespace {
 
 template<class in_vector_t,
          class out_vector_t>
-void linalg_swap_rank_1(in_vector_t x,
+void swap_rank_1(in_vector_t x,
                         out_vector_t y)
 {
   using std::swap;
@@ -64,7 +65,7 @@ void linalg_swap_rank_1(in_vector_t x,
 
 template<class in_matrix_t,
          class out_matrix_t>
-void linalg_swap_rank_2(in_matrix_t x,
+void swap_rank_2(in_matrix_t x,
                         out_matrix_t y)
 {
   using std::swap;
@@ -83,14 +84,14 @@ void linalg_swap_rank_2(in_matrix_t x,
 
 template<class inout_object_1_t,
          class inout_object_2_t>
-void linalg_swap(inout_object_1_t v1,
-                 inout_object_2_t v2)
+void swap_elements(inout_object_1_t v1,
+                   inout_object_2_t v2)
 {
   if constexpr (v1.rank() == 1) {
-    linalg_swap_rank_1(v1, v2);
+    swap_rank_1(v1, v2);
   }
   else if constexpr (v1.rank() == 2) {
-    linalg_swap_rank_2(v1, v2);
+    swap_rank_2(v1, v2);
   }
   else {
     static_assert("Not implemented");
@@ -100,13 +101,14 @@ void linalg_swap(inout_object_1_t v1,
 template<class ExecutionPolicy,
          class inout_object_1_t,
          class inout_object_2_t>
-void linalg_swap(ExecutionPolicy&& /* exec */,
-                 inout_object_1_t v1,
-                 inout_object_2_t v2)
+void swap_elements(ExecutionPolicy&& /* exec */,
+                   inout_object_1_t v1,
+                   inout_object_2_t v2)
 {
-  linalg_swap(v1, v2);
+  swap(v1, v2);
 }
 
+} // end namespace linalg
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
 } // end namespace std
