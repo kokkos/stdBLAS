@@ -105,7 +105,7 @@ void swap_elements(ExecutionPolicy&& /* exec */,
                    inout_object_1_t v1,
                    inout_object_2_t v2)
 {
-  swap(v1, v2);
+  swap_elements(v1, v2);
 }
 
 } // end namespace linalg
