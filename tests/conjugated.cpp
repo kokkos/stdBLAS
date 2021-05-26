@@ -7,9 +7,9 @@ namespace {
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::basic_mdspan;
-  using std::experimental::linalg::conjugate_view;
+  using std::experimental::linalg::conjugated;
 
-  TEST(conjugate_view, mdspan_complex_double)
+  TEST(conjugated, mdspan_complex_double)
   {
     using real_t = double;
     using scalar_t = std::complex<real_t>;
@@ -40,12 +40,12 @@ namespace {
       accessor_conj_t accessor3 (y.accessor ());
     }
 
-    auto y_conj = conjugate_view (y);
+    auto y_conj = conjugated (y);
     for (ptrdiff_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k(real_t(k) + 1.0, real_t(k) + 1.0);
       EXPECT_EQ( x(k), x_k );
 
-      // Make sure that conjugate_view doesn't modify the entries of
+      // Make sure that conjugated doesn't modify the entries of
       // the original thing.
       const scalar_t y_k (real_t(k) + 2.0, real_t(k) + 2.0);
       EXPECT_EQ( y(k), y_k );

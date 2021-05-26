@@ -86,7 +86,7 @@ void dotc(in_vector_1_t v1,
           in_vector_2_t v2,
           Scalar& result)
 {
-  dot(v1, conjugate_view(v2), result);
+  dot(v1, conjugated(v2), result);
 }
 
 template<class ExecutionPolicy,

@@ -7,9 +7,9 @@ namespace {
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::basic_mdspan;
-  using std::experimental::linalg::scaled_view;
+  using std::experimental::linalg::scaled;
 
-  TEST(scaled_view, mdspan_double_scalar_float)
+  TEST(scaled, mdspan_double_scalar_float)
   {
     using vector_element_type = double;
     using scaling_factor_type = float;
@@ -43,12 +43,12 @@ namespace {
       scaled_accessor_t accessor1 (y.accessor (), scalingFactor);
     }
 
-    auto y_scaled = scaled_view (scalingFactor, y);
+    auto y_scaled = scaled (scalingFactor, y);
     for (ptrdiff_t k = 0; k < vectorSize; ++k) {
       const vector_element_type x_k = vector_element_type(k) + 1.0;
       EXPECT_EQ( x(k), x_k );
 
-      // Make sure that scaled_view doesn't modify the entries of the
+      // Make sure that scaled doesn't modify the entries of the
       // original thing.
       const vector_element_type y_k = vector_element_type(k) + 2.0;
       EXPECT_EQ( y(k), y_k );

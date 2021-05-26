@@ -19,7 +19,7 @@ namespace {
   using std::experimental::extents;
   using std::experimental::layout_left;
   using std::experimental::linalg::matrix_product;
-  using std::experimental::linalg::transpose_view;
+  using std::experimental::linalg::transposed;
   using std::cout;
   using std::endl;
 
@@ -164,8 +164,8 @@ namespace {
                << ")^T * "
                << "B_t(" << B_t.extent(0) << " x " << B_t.extent(1)
                << ")^T" << endl;
-          matrix_product(transpose_view(A_t),
-                         transpose_view(B_t), C3);
+          matrix_product(transposed(A_t),
+                         transposed(B_t), C3);
           for (ptrdiff_t j = 0; j < C_numCols; ++j) {
             for (ptrdiff_t i = 0; i < C_numRows; ++i) {
               EXPECT_DOUBLE_EQ(C3(i,j), C(i,j)) << "Matrices differ at index (" 
@@ -174,8 +174,8 @@ namespace {
           }
 
           {
-            auto A_tt = transpose_view(A_t);
-            auto B_tt = transpose_view(B_t);
+            auto A_tt = transposed(A_t);
+            auto B_tt = transposed(B_t);
             EXPECT_EQ(A_tt.extent(0), A.extent(0));
             EXPECT_EQ(A_t.extent(0), A.extent(1));
             EXPECT_EQ(A_t.extent(1), A.extent(0));
@@ -194,7 +194,7 @@ namespace {
             }
           }
 
-          cout << " Compare using hand-rolled transpose_view loop"
+          cout << " Compare using hand-rolled transposed loop"
                << endl;
 
           for (ptrdiff_t j = 0; j < C_numCols; ++j) {
@@ -210,8 +210,8 @@ namespace {
                << ")^T * "
                << "B_t(" << B_t.extent(0) << " x " << B_t.extent(1)
                << ")^T" << endl;
-          matrix_product(scaled_view(scalar_t(2.0), transpose_view(A_t)),
-                         transpose_view(B_t), C3);
+          matrix_product(scaled(scalar_t(2.0), transposed(A_t)),
+                         transposed(B_t), C3);
 
           for (ptrdiff_t j = 0; j < C_numCols; ++j) {
             for (ptrdiff_t i = 0; i < C_numRows; ++i) {

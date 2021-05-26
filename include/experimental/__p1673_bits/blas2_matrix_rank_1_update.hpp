@@ -88,7 +88,7 @@ void matrix_rank_1_update_c(
   in_vector_2_t y,
   inout_matrix_t A)
 {
-  matrix_rank_1_update(x, conjugate_view(y), A);
+  matrix_rank_1_update(x, conjugated(y), A);
 }
 
 template<class ExecutionPolicy,
