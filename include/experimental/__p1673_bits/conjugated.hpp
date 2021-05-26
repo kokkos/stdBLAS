@@ -40,8 +40,8 @@
 //@HEADER
 */
 
-#ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATE_VIEW_HPP_
-#define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATE_VIEW_HPP_
+#ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATED_HPP_
+#define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATED_HPP_
 
 #include <experimental/mdspan>
 #include <experimental/mdarray>
@@ -165,7 +165,7 @@ private:
 template<class EltType, class Extents, class Layout, class Accessor>
 basic_mdspan<EltType, Extents, Layout,
              accessor_conjugate<Accessor, EltType>>
-conjugate_view(basic_mdspan<EltType, Extents, Layout, Accessor> a)
+conjugated(basic_mdspan<EltType, Extents, Layout, Accessor> a)
 {
   using accessor_t = accessor_conjugate<Accessor, EltType>;
   return basic_mdspan<EltType, Extents, Layout, accessor_t> (
@@ -176,7 +176,7 @@ conjugate_view(basic_mdspan<EltType, Extents, Layout, Accessor> a)
 // FIXME Must fill in see-below; see #10.
 template<class EltType, class Extents, class Layout, class Accessor>
 basic_mdspan<const EltType, Extents, Layout, <i>see-below</i> >
-conjugate_view(const basic_mdarray<EltType, Extents, Layout, Accessor>& a);
+conjugated(const basic_mdarray<EltType, Extents, Layout, Accessor>& a);
 #endif // 0
 
 } // end namespace linalg
@@ -184,4 +184,4 @@ conjugate_view(const basic_mdarray<EltType, Extents, Layout, Accessor>& a);
 } // end namespace experimental
 } // end namespace std
 
-#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATE_VIEW_HPP_
+#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATED_HPP_

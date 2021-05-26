@@ -11,7 +11,7 @@ namespace {
   using std::experimental::extents;
   using std::experimental::layout_left;
   using std::experimental::linalg::matrix_vector_product;
-  using std::experimental::linalg::transpose_view;
+  using std::experimental::linalg::transposed;
   using std::cout;
   using std::endl;
 

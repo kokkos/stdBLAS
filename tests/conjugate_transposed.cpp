@@ -1,5 +1,6 @@
 #include <experimental/linalg>
 #include <experimental/mdspan>
+#include <complex>
 #include <vector>
 #include "gtest/gtest.h"
 
@@ -7,12 +8,13 @@ namespace {
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::basic_mdspan;
-  using std::experimental::linalg::transpose_view;
+  using std::experimental::linalg::conjugate_transposed;
 
-  TEST(transpose_view, mdspan_double)
+  TEST(conjugate_transposed, mdspan_complex_double)
   {
+    using std::conj;
     using real_t = double;
-    using scalar_t = double;
+    using scalar_t = std::complex<real_t>;
     using matrix_dynamic_t =
       basic_mdspan<scalar_t, extents<dynamic_extent, dynamic_extent>>;
     constexpr ptrdiff_t dim = 5;
@@ -28,36 +30,36 @@ namespace {
 
     for (ptrdiff_t i = 0; i < dim; ++i) {
       for (ptrdiff_t j = 0; j < dim; ++j) {
-        const scalar_t i_val = scalar_t(i) + 1.0;
-        // If we generalize this test so scalar_t can be complex, then
-        // we'll need the intermediate ptrdiff_t -> real_t conversion.
-        const scalar_t j_val = scalar_t(real_t(dim)) * (scalar_t(j) + 1.0);
-        const scalar_t val = i_val + j_val;
+        const real_t i_val_re (real_t(i) + 1.0);
+        const scalar_t i_val (i_val_re, i_val_re);
+        const real_t j_val_re = real_t(j) + 1.0;
+        const scalar_t j_val (j_val_re, j_val_re);
+        const scalar_t val = i_val + real_t(dim) * j_val;
 
         A(i,j) = val;
         B(i,j) = -val;
       }
     }
 
-    auto A_t = transpose_view (A);
-    auto B_t = transpose_view (B);
+    auto A_h = conjugate_transposed (A);
+    auto B_h = conjugate_transposed (B);
 
     for (ptrdiff_t i = 0; i < dim; ++i) {
       for (ptrdiff_t j = 0; j < dim; ++j) {
-        const scalar_t i_val = scalar_t(i) + 1.0;
-        // If we generalize this test so scalar_t can be complex, then
-        // we'll need the intermediate ptrdiff_t -> real_t conversion.
-        const scalar_t j_val = scalar_t(real_t(dim)) * (scalar_t(j) + 1.0);
-        const scalar_t val = i_val + j_val;
+        const real_t i_val_re (real_t(i) + 1.0);
+        const scalar_t i_val (i_val_re, i_val_re);
+        const real_t j_val_re = real_t(j) + 1.0;
+        const scalar_t j_val (j_val_re, j_val_re);
+        const scalar_t val = i_val + real_t(dim) * j_val;
 
         EXPECT_EQ( A(i,j), val );
         EXPECT_EQ( B(i,j), -val );
 
-        EXPECT_EQ( A_t(j,i), val );
-        EXPECT_EQ( B_t(j,i), -val );
+        EXPECT_EQ( A_h(j,i), conj(val) );
+        EXPECT_EQ( B_h(j,i), -conj(val) );
 
-        EXPECT_EQ( A_t(j,i), A(i,j) );
-        EXPECT_EQ( B_t(j,i), B(i,j) );
+        EXPECT_EQ( A_h(j,i), conj(A(i,j)) );
+        EXPECT_EQ( B_h(j,i), conj(B(i,j)) );
       }
     }
   }

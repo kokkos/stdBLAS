@@ -40,8 +40,8 @@
 //@HEADER
 */
 
-#ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_SCALED_VIEW_HPP_
-#define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_SCALED_VIEW_HPP_
+#ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_SCALED_HPP_
+#define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_SCALED_HPP_
 
 #include <experimental/mdspan>
 #include <experimental/mdarray>
@@ -126,8 +126,8 @@ template<class ElementType,
          class ScalingFactorType>
 basic_mdspan<ElementType, Extents, Layout,
              accessor_scaled<Accessor, ScalingFactorType>>
-scaled_view(ScalingFactorType scalingFactor,
-            const basic_mdspan<ElementType, Extents, Layout, Accessor>& a)
+scaled(ScalingFactorType scalingFactor,
+       const basic_mdspan<ElementType, Extents, Layout, Accessor>& a)
 {
   using accessor_t = accessor_scaled<Accessor, ScalingFactorType>;
   return basic_mdspan<ElementType, Extents, Layout, accessor_t> (
@@ -139,7 +139,7 @@ scaled_view(ScalingFactorType scalingFactor,
 template<class T, class Extents, class Layout,
          class Accessor, class S>
 basic_mdspan<const T, Extents, Layout, <i>see-below</i> >
-scaled_view(S s, const basic_mdarray<T, Extents, Layout, Accessor>& a);
+scaled(S s, const basic_mdarray<T, Extents, Layout, Accessor>& a);
 #endif // 0
 
 } // end namespace linalg
@@ -147,4 +147,4 @@ scaled_view(S s, const basic_mdarray<T, Extents, Layout, Accessor>& a);
 } // end namespace experimental
 } // end namespace std
 
-#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_SCALED_VIEW_HPP_
+#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_SCALED_HPP_

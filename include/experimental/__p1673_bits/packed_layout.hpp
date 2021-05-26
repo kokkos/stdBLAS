@@ -40,33 +40,75 @@
 //@HEADER
 */
 
-#ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATE_TRANSPOSE_VIEW_HPP_
-#define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATE_TRANSPOSE_VIEW_HPP_
+#ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_PACKED_LAYOUT_HPP_
+#define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_PACKED_LAYOUT_HPP_
 
-#include "conjugate_view.hpp"
-#include "transpose_view.hpp"
+#include <experimental/mdspan>
+#include "layout_triangle.hpp"
 
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
-template<class EltType, class Extents, class Layout, class Accessor>
-basic_mdspan<EltType, Extents, layout_transpose<Layout>,
-             accessor_conjugate<Accessor, EltType>>
-conjugate_transpose_view(
-  basic_mdspan<EltType, Extents, Layout, Accessor> a)
-{
-  return conjugate_view(transpose_view(a));
-}
+// TODO declarations need extents-see-returns-below defined
 
-// FIXME Must fill in see-below.
 #if 0
-template<class EltType, class Extents, class Layout, class Accessor>
-basic_mdspan<EltType, Extents, layout_transpose<Layout>,
-             <i>see-below</i> >
-conjugate_transpose_view(
-  const basic_mdarray<EltType, Extents, Layout, Accessor>& a)
+template<class EltType,
+         class Extents,
+         class Layout,
+         class Accessor,
+         class Triangle,
+         class StorageOrder>
+constexpr basic_mdspan<EltType,
+  <i>extents-see-returns-below</i>,
+  layout_blas_packed<
+    Triangle,
+    StorageOrder>,
+  Accessor>
+packed(
+  const basic_mdspan<EltType, Extents, Layout, Accessor>& m,
+  typename basic_mdspan<EltType, Extents, Layout, Accessor>::index_type num_rows,
+  Triangle,
+  StorageOrder);
+
+         template<class EltType,
+         class Extents,
+         class Layout,
+         class Accessor,
+         class Triangle,
+         class DiagonalStorage,
+         class StorageOrder>
+constexpr basic_mdspan<const EltType,
+  <i>extents-see-returns-below</i>,
+  layout_blas_packed<
+    Triangle,
+    StorageOrder>,
+  Accessor>
+packed(
+  const basic_mdarray<EltType, Extents, Layout, Accessor>& m,
+  typename basic_mdarray<EltType, Extents, Layout, Accessor>::index_type num_rows,
+  Triangle,
+  StorageOrder);
+
+template<class EltType,
+         class Extents,
+         class Layout,
+         class Accessor,
+         class Triangle,
+         class DiagonalStorage,
+         class StorageOrder>
+constexpr basic_mdspan<EltType,
+  <i>extents-see-returns-below</i>,
+  layout_blas_triangular_packed<
+    Triangle,
+    StorageOrder>,
+  Accessor>
+packed(
+  basic_mdarray<EltType, Extents, Layout, Accessor>& m,
+  typename basic_mdarray<EltType, Extents, Layout, Accessor>::index_type num_rows,
+  Triangle,
+  StorageOrder);
 #endif // 0
 
 } // end namespace linalg
@@ -74,4 +116,4 @@ conjugate_transpose_view(
 } // end namespace experimental
 } // end namespace std
 
-#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATE_TRANSPOSE_VIEW_HPP_
+#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_PACKED_LAYOUT_HPP_

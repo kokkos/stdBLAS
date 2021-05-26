@@ -40,8 +40,8 @@
 //@HEADER
 */
 
-#ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_TRANSPOSE_VIEW_HPP_
-#define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_TRANSPOSE_VIEW_HPP_
+#ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_TRANSPOSED_HPP_
+#define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_TRANSPOSED_HPP_
 
 #include <experimental/mdspan>
 #include <experimental/mdarray>
@@ -110,7 +110,7 @@ public:
 
 template<class EltType, class Extents, class Layout, class Accessor>
 basic_mdspan<EltType, Extents, layout_transpose<Layout>, Accessor>
-transpose_view(basic_mdspan<EltType, Extents, Layout, Accessor> a)
+transposed(basic_mdspan<EltType, Extents, Layout, Accessor> a)
 {
   using layout_type = layout_transpose<Layout>;
   using mapping_type = typename layout_type::template mapping<Extents>;
@@ -122,7 +122,7 @@ transpose_view(basic_mdspan<EltType, Extents, Layout, Accessor> a)
 #if 0
 template<class EltType, class Extents, class Layout, class Accessor>
 basic_mdspan<EltType, Extents, layout_transpose<Layout>, <i>see-below</i> >
-transpose_view(const basic_mdarray<EltType, Extents, Layout, Accessor>& a);
+transposed(const basic_mdarray<EltType, Extents, Layout, Accessor>& a);
 #endif // 0
 
 } // end namespace linalg
@@ -130,4 +130,4 @@ transpose_view(const basic_mdarray<EltType, Extents, Layout, Accessor>& a);
 } // end namespace experimental
 } // end namespace std
 
-#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_TRANSPOSE_VIEW_HPP_
+#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_TRANSPOSED_HPP_
