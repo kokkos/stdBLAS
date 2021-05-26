@@ -65,6 +65,7 @@
 #include "__p1673_bits/blas1_vector_norm2.hpp"
 #include "__p1673_bits/blas1_vector_abs_sum.hpp"
 #include "__p1673_bits/blas1_vector_idx_abs_max.hpp"
+#include "__p1673_bits/blas1_vector_sum_of_squares.hpp"
 #include "__p1673_bits/blas2_matrix_vector_product.hpp"
 #include "__p1673_bits/blas2_matrix_vector_solve.hpp"
 #include "__p1673_bits/blas2_matrix_rank_1_update.hpp"

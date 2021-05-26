@@ -40,10 +40,9 @@
 //@HEADER
 */
 
-#ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_VECTOR_NORM2_HPP_
-#define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_VECTOR_NORM2_HPP_
+#ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_VECTOR_SUM_OF_SQUARES_HPP_
+#define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_VECTOR_SUM_OF_SQUARES_HPP_
 
-#include "blas1_vector_sum_of_squares.hpp"
 #include <cmath>
 #include <cstdlib>
 
@@ -52,34 +51,59 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
+// Scaled sum of squares of a vector's elements
+template<class Scalar>
+struct sum_of_squares_result {
+  Scalar scaling_factor;
+  Scalar scaled_sum_of_squares;
+};
+
 template<class in_vector_t,
          class Scalar>
-void vector_norm2(in_vector_t x,
-                  Scalar& result)
+sum_of_squares_result<Scalar> vector_sum_of_squares(
+    in_vector_t x,
+    sum_of_squares_result<Scalar> init)
 {
-  using std::sqrt;
+  using std::abs;
 
-  // Initialize the sum of squares result
-  sum_of_squares_result<Scalar> ssq_init;
-  ssq_init.scaling_factor = 0.0;
-  ssq_init.scaled_sum_of_squares = 1.0;
+  if (x.extent(0) == 0) {
+    return init;
+  }
 
-  // Compute the sum of squares using an algorithm that avoids
-  // underflow and overflow by scaling
-  auto ssq_res = vector_sum_of_squares(x, ssq_init);
+  // Rescaling, as in the Reference BLAS DNRM2 implementation, avoids
+  // unwarranted overflow or underflow.
 
-  // Combine the scaling factor and ssq to the result
-  result = ssq_res.scaling_factor * sqrt(ssq_res.scaled_sum_of_squares);
+  Scalar scale = init.scaling_factor;
+  Scalar ssq = init.scaled_sum_of_squares;
+  for (ptrdiff_t i = 0; i < x.extent(0); ++i) {
+    if (abs(x(i)) != 0.0) {
+      const auto absxi = abs(x(i));
+      const auto quotient = scale / absxi;
+      if (scale < absxi) {
+          ssq = Scalar(1.0) + ssq * quotient * quotient;
+          scale = absxi;
+      }
+      else {
+        ssq = ssq + quotient * quotient;
+      }
+    }
+  }
+  
+  sum_of_squares_result<Scalar> result;
+  result.scaled_sum_of_squares = ssq;
+  result.scaling_factor = scale;
+  return result;
 }
 
 template<class ExecutionPolicy,
          class in_vector_t,
          class Scalar>
-void vector_norm2(ExecutionPolicy&& /* exec */,
-                  in_vector_t v,
-                  Scalar& result)
+sum_of_squares_result<Scalar> vector_sum_of_squares(
+  ExecutionPolicy&& /* exec */,
+  in_vector_t v,
+  sum_of_squares_result<Scalar> init)
 {
-  vector_norm2(v, result);
+  return vector_sum_of_squares(v, init);
 }
 
 } // end namespace linalg
@@ -87,4 +111,4 @@ void vector_norm2(ExecutionPolicy&& /* exec */,
 } // end namespace experimental
 } // end namespace std
 
-#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_VECTOR_NORM2_HPP_
+#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_VECTOR_SUM_OF_SQUARES_HPP_
