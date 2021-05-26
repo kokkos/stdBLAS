@@ -55,6 +55,7 @@
 #include "__p1673_bits/conjugate_transposed.hpp"
 #include "__p1673_bits/blas1_givens.hpp"
 #include "__p1673_bits/blas1_linalg_swap.hpp"
+#include "__p1673_bits/blas1_matrix_frob_norm.hpp"
 #include "__p1673_bits/blas1_scale.hpp"
 #include "__p1673_bits/blas1_linalg_copy.hpp"
 #include "__p1673_bits/blas1_linalg_add.hpp"
