@@ -1,4 +1,4 @@
- /*
+/*
 //@HEADER
 // ************************************************************************
 //
@@ -6,8 +6,7 @@
 //              Copyright (2019) Sandia Corporation
 //
 // Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
-// the U.S. Government retains certain rights in this software.
-//
+// the U.S. Government retains certain rights in this software. //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
@@ -41,34 +40,77 @@
 //@HEADER
 */
 
-#pragma once
+#ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_MATRIX_ONE_NORM_HPP_
+#define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_MATRIX_ONE_NORM_HPP_
 
-#include "__p1673_bits/linalg_config.h"
-#include "__p1673_bits/maybe_static_size.hpp"
-#include "__p1673_bits/layout_blas_general.hpp"
-#include "__p1673_bits/layout_tags.hpp"
-#include "__p1673_bits/layout_triangle.hpp"
-#include "__p1673_bits/packed_layout.hpp"
-#include "__p1673_bits/scaled.hpp"
-#include "__p1673_bits/conjugated.hpp"
-#include "__p1673_bits/transposed.hpp"
-#include "__p1673_bits/conjugate_transposed.hpp"
-#include "__p1673_bits/blas1_givens.hpp"
-#include "__p1673_bits/blas1_linalg_swap.hpp"
-#include "__p1673_bits/blas1_matrix_frob_norm.hpp"
-#include "__p1673_bits/blas1_matrix_inf_norm.hpp"
-#include "__p1673_bits/blas1_matrix_one_norm.hpp"
-#include "__p1673_bits/blas1_scale.hpp"
-#include "__p1673_bits/blas1_linalg_copy.hpp"
-#include "__p1673_bits/blas1_linalg_add.hpp"
-#include "__p1673_bits/blas1_dot.hpp"
-#include "__p1673_bits/blas1_vector_norm2.hpp"
-#include "__p1673_bits/blas1_vector_abs_sum.hpp"
-#include "__p1673_bits/blas1_vector_idx_abs_max.hpp"
-#include "__p1673_bits/blas2_matrix_vector_product.hpp"
-#include "__p1673_bits/blas2_matrix_vector_solve.hpp"
-#include "__p1673_bits/blas2_matrix_rank_1_update.hpp"
-#include "__p1673_bits/blas2_matrix_rank_2_update.hpp"
-#include "__p1673_bits/blas3_matrix_product.hpp"
-#include "__p1673_bits/blas3_matrix_rank2k_update.hpp"
-#include "__p1673_bits/blas3_triangular_matrix_matrix_solve.hpp"
+#include <cmath>
+#include <cstdlib>
+
+namespace std {
+namespace experimental {
+inline namespace __p1673_version_0 {
+namespace linalg {
+
+template<class in_matrix_t,
+         class Scalar>
+Scalar matrix_one_norm(in_matrix_t A,
+                       Scalar init)
+{
+  using std::abs;
+  using std::max;
+
+  // Handle special cases.
+  auto result = init;
+  if (A.extent(0) == 0 || A.extent(1) == 0) {
+    return result;
+  }
+  else if(A.extent(0) == ptrdiff_t(1) && A.extent(1) == ptrdiff_t(1)) {
+    result += abs(A(0, 0));
+    return result;
+  }
+
+  // These loops can be rearranged for optimal memory access patterns,
+  // but it would require dynamic memory allocation.
+  for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
+    auto col_sum = init;
+    for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
+      col_sum += abs(A(i,j));
+    }
+    result = max(col_sum, result);
+  }
+  return result;
+}
+
+template<class ExecutionPolicy,
+         class in_matrix_t,
+         class Scalar>
+Scalar matrix_one_norm(ExecutionPolicy&& exec,
+                       in_matrix_t A,
+                       Scalar init)
+{
+  return matrix_one_norm(A, init);
+}
+
+// TODO: Implement auto functions
+#if 0
+template<class in_matrix_t>
+auto matrix_one_norm(in_matrix_t A)
+{
+ 
+}
+
+template<class ExecutionPolicy,
+         class in_matrix_t>
+auto matrix_one_norm(ExecutionPolicy&& exec,
+                     in_matrix_t A)
+{
+
+}
+#endif
+
+} // end namespace linalg
+} // end inline namespace __p1673_version_0
+} // end namespace experimental
+} // end namespace std
+
+#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_MATRIX_ONE_NORM_HPP_
