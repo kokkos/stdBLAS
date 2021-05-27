@@ -1,11 +1,17 @@
+find_package(GTest REQUIRED)
 
 macro(linalg_add_test name)
   add_executable(${name} ${name}.cpp)
-  target_link_libraries(${name} linalg GTest::GTest GTest::Main ${BLAS_LIBRARIES})
+  if(BLAS_FOUND)
+    target_link_libraries(${name} linalg GTest::GTest GTest::Main ${BLAS_LIBRARIES})
+  else()
+    # BLAS_LIBRARIES is literally "FALSE" if the BLAS was not found.
+    # Linking against that causes linker errors involving "FALSE.lib".
+    # Thus, we exclude BLAS_LIBRARIES completely if the BLAS was not found.
+    target_link_libraries(${name} linalg GTest::GTest GTest::Main)
+  endif()
   add_test(${name} ${name})
 endmacro()
-
-find_package(GTest REQUIRED)
 
 linalg_add_test(add)
 linalg_add_test(conjugate_transposed)

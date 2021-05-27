@@ -97,15 +97,10 @@ namespace {
     }
   }
 
-  //TEST(matrix_one_norm, mdspan_int)
-  //{
-  //  test_matrix_one_norm<int>();
-  //} 
-
-  //TEST(matrix_one_norm, mdspan_unsigned_int)
-  //{
-  //  test_matrix_one_norm<unsigned int>();
-  //}
+  TEST(matrix_one_norm, mdspan_int)
+  {
+    test_matrix_one_norm<int>();
+  }
 
   TEST(matrix_one_norm, mdspan_double)
   {
