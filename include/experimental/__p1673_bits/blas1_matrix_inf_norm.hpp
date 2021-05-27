@@ -53,7 +53,7 @@ namespace linalg {
 
 template<class in_matrix_t,
          class Scalar>
-Scalar matrix_one_norm(in_matrix_t A,
+Scalar matrix_inf_norm(in_matrix_t A,
                        Scalar init)
 {
   using std::abs;
