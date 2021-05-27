@@ -43,17 +43,21 @@ namespace {
   real_t<ElementType>
   fill_matrix(basic_matrix_t<ElementType, Layout> A, const ElementType startVal)
   {
+    using std::abs;
+    using std::max;
     const std::size_t A_numRows = A.extent(0);
     const std::size_t A_numCols = A.extent(1);
 
     real_t<ElementType> maxColNorm{};
-    for (std::size_t j = 0; j < A_numCols; ++j) {
-      for (std::size_t i = 0; i < A_numRows; ++i) {
+    for (std::size_t i = 0; i < A_numRows; ++i) {
+      real_t<ElementType> curColOneNorm{};
+      for (std::size_t j = 0; j < A_numCols; ++j) {
         const auto A_ij = (ElementType(i)+startVal) +
           (ElementType(j)+startVal) * ElementType(A_numRows);
         A(i,j) = A_ij;
-        maxColNorm = std::max(maxColNorm, std::abs(A_ij));
+        curColOneNorm += abs(A_ij);
       }
+      maxColNorm = std::max(maxColNorm, curColOneNorm);
     }
     return maxColNorm;
   }
@@ -82,7 +86,9 @@ namespace {
         cout << "Computed matrix_one_norm: " << computedResult << endl
              << "Expected matrix_one_norm: " << expectedResult << endl;
         if constexpr (std::is_floating_point_v<real_t<scalar_t>>) {
-          const real_t<scalar_t> tolerance = 10.0 * A_numRows * A_numCols * std::numeric_limits<real_t<scalar_t>>::epsilon();
+          // Matrix one-norm tolerance depends only on the number of rows,
+          // since the only operations that might round are the column sums.
+          const real_t<scalar_t> tolerance = 10.0 * A_numRows * std::numeric_limits<real_t<scalar_t>>::epsilon();
           EXPECT_NEAR( computedResult, expectedResult, tolerance );
         } else {
           EXPECT_EQ( computedResult, expectedResult );
