@@ -65,6 +65,7 @@ namespace {
   template<class Scalar>
   void test_matrix_one_norm()
   {
+    using std::abs;
     using scalar_t = Scalar;
     using std::experimental::layout_left;
     using matrix_t = basic_matrix_t<scalar_t, layout_left>;
@@ -81,17 +82,26 @@ namespace {
         // I'm building right now with MSVC 2019 16.7.0.
         matrix_t A(storage.data(), ptrdiff_t(A_numRows), ptrdiff_t(A_numCols));
 
-        const real_t<scalar_t> expectedResult = fill_matrix(A, scalar_t(real_t<scalar_t>(1)));
-        const real_t<scalar_t> computedResult = matrix_one_norm(A, real_t<scalar_t>{});
-        cout << "Computed matrix_one_norm: " << computedResult << endl
+        const auto startVal = scalar_t(real_t<scalar_t>(1.0));
+        const real_t<scalar_t> expectedResult = fill_matrix(A, startVal);
+        const real_t<scalar_t> maxMatrixValueAbs = real_t<scalar_t>(A_numRows * A_numCols) + abs(startVal);
+        const real_t<scalar_t> computedTwoArgResult = matrix_one_norm(A, real_t<scalar_t>{});
+        const real_t<scalar_t> computedOneArgResult = matrix_one_norm(A);
+        cout << "Computed matrix_one_norm(2 args): " << computedTwoArgResult << endl
+             << "Computed matrix_one_norm(1 arg): " << computedOneArgResult << endl
              << "Expected matrix_one_norm: " << expectedResult << endl;
         if constexpr (std::is_floating_point_v<real_t<scalar_t>>) {
           // Matrix one-norm tolerance depends only on the number of rows,
           // since the only operations that might round are the column sums.
-          const real_t<scalar_t> tolerance = 10.0 * A_numRows * std::numeric_limits<real_t<scalar_t>>::epsilon();
-          EXPECT_NEAR( computedResult, expectedResult, tolerance );
+          //
+          // Use the max abs matrix element as a multiplier.
+          const auto multiplier = maxMatrixValueAbs < abs(startVal) ? abs(startVal) : maxMatrixValueAbs;
+          const real_t<scalar_t> tolerance = multiplier * A_numRows * std::numeric_limits<real_t<scalar_t>>::epsilon();
+          EXPECT_NEAR( computedTwoArgResult, expectedResult, tolerance );
+          EXPECT_NEAR( computedOneArgResult, expectedResult, tolerance );
         } else {
-          EXPECT_EQ( computedResult, expectedResult );
+          EXPECT_EQ( computedTwoArgResult, expectedResult );
+          EXPECT_EQ( computedOneArgResult, expectedResult );
         }
       }
     }

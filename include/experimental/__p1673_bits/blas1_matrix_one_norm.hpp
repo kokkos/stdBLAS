@@ -91,22 +91,31 @@ Scalar matrix_one_norm(ExecutionPolicy&& exec,
   return matrix_one_norm(A, init);
 }
 
-// TODO: Implement auto functions
-#if 0
+namespace detail {
+
+  // The point of this is to do correct ADL for abs,
+  // without exposing "using std::abs" in the outer namespace.
+  using std::abs;
+  template<class in_matrix_t>
+  auto matrix_one_norm_return_type_deducer(in_matrix_t A) -> decltype(abs(A(0,0)));
+
+} // namespace detail
+
 template<class in_matrix_t>
-auto matrix_one_norm(in_matrix_t A)
+auto matrix_one_norm(in_matrix_t A) -> decltype(detail::matrix_one_norm_return_type_deducer(A))
 {
- 
+  using return_t = decltype(detail::matrix_one_norm_return_type_deducer(A));
+  return matrix_one_norm(A, return_t{});
 }
 
 template<class ExecutionPolicy,
          class in_matrix_t>
 auto matrix_one_norm(ExecutionPolicy&& exec,
-                     in_matrix_t A)
+                     in_matrix_t A) -> decltype(detail::matrix_one_norm_return_type_deducer(A))
 {
-
+  using return_t = decltype(detail::matrix_one_norm_return_type_deducer(A));
+  return matrix_one_norm(exec, A, return_t{});
 }
-#endif
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
