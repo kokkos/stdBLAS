@@ -49,9 +49,9 @@ namespace {
     const std::size_t A_numCols = A.extent(1);
 
     real_t<ElementType> maxColNorm{};
-    for (std::size_t i = 0; i < A_numRows; ++i) {
+    for (std::size_t j = 0; j < A_numCols; ++j) {
       real_t<ElementType> curColOneNorm{};
-      for (std::size_t j = 0; j < A_numCols; ++j) {
+      for (std::size_t i = 0; i < A_numRows; ++i) {
         const auto A_ij = (ElementType(i)+startVal) +
           (ElementType(j)+startVal) * ElementType(A_numRows);
         A(i,j) = A_ij;
