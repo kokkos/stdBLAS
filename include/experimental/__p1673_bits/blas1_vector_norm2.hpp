@@ -54,32 +54,31 @@ namespace linalg {
 
 template<class in_vector_t,
          class Scalar>
-void vector_norm2(in_vector_t x,
-                  Scalar& result)
+Scalar vector_norm2(in_vector_t x,
+                    Scalar init)
 {
-  using std::sqrt;
-
   // Initialize the sum of squares result
   sum_of_squares_result<Scalar> ssq_init;
-  ssq_init.scaling_factor = 0.0;
+  ssq_init.scaling_factor = Scalar{};
+  // FIXME (Hoemmen 2021/05/27) We'll need separate versions of this
+  // for types whose "one" we don't know how to construct.
   ssq_init.scaled_sum_of_squares = 1.0;
 
   // Compute the sum of squares using an algorithm that avoids
-  // underflow and overflow by scaling
+  // underflow and overflow by scaling.
   auto ssq_res = vector_sum_of_squares(x, ssq_init);
-
-  // Combine the scaling factor and ssq to the result
-  result = ssq_res.scaling_factor * sqrt(ssq_res.scaled_sum_of_squares);
+  using std::sqrt;
+  return init + ssq_res.scaling_factor * sqrt(ssq_res.scaled_sum_of_squares);
 }
 
 template<class ExecutionPolicy,
          class in_vector_t,
          class Scalar>
-void vector_norm2(ExecutionPolicy&& /* exec */,
-                  in_vector_t v,
-                  Scalar& result)
+Scalar vector_norm2(ExecutionPolicy&& /* exec */,
+                    in_vector_t v,
+                    Scalar init)
 {
-  vector_norm2(v, result);
+  return vector_norm2(v, init);
 }
 
 } // end namespace linalg
