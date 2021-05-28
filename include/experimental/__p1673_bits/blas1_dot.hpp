@@ -97,7 +97,7 @@ Scalar dotc(ExecutionPolicy&& /* exec */,
             in_vector_2_t v2,
             Scalar init)
 {
-  return dotc(v1, v2, result);
+  return dotc(v1, v2, init);
 }
 
 } // end namespace linalg
