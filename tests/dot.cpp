@@ -53,10 +53,17 @@ namespace {
       expectedDotResult += x_k * y_k;
     }
 
-    const scalar_t dotResult = dot(x, y, scalar_t{});
-    const scalar_t dotResultPlusOne = dot(x, y, scalar_t{} + scalar_t(1.0));
+    const auto dotResult = dot(x, y, scalar_t{});
+    static_assert( std::is_same_v<std::remove_const_t<decltype(dotResult)>, scalar_t> );
     EXPECT_EQ( dotResult, expectedDotResult );
+
+    const auto dotResultPlusOne = dot(x, y, scalar_t{} + scalar_t(1.0));
+    static_assert( std::is_same_v<std::remove_const_t<decltype(dotResultPlusOne)>, scalar_t> );
     EXPECT_EQ( dotResultPlusOne, expectedDotResult + scalar_t(1.0) );
+
+    const auto dotResultTwoArg = dot(x, y);
+    static_assert( std::is_same_v<std::remove_const_t<decltype(dotResultTwoArg)>, scalar_t> );
+    EXPECT_EQ( dotResultTwoArg, expectedDotResult );
 
 #ifdef LINALG_ENABLE_BLAS
     const scalar_t blasResult =
@@ -102,11 +109,21 @@ namespace {
       expectedConjDotResult += x_k * conj (y_k);
     }
 
-    const scalar_t dotResult = dot(x, y, scalar_t{});
+    const auto dotResult = dot(x, y, scalar_t{});
+    static_assert( std::is_same_v<std::remove_const_t<decltype(dotResult)>, scalar_t> );
     EXPECT_EQ( dotResult, expectedDotResult );
 
-    const scalar_t conjDotResult = dotc(x, y, scalar_t{});
+    const auto conjDotResult = dotc(x, y, scalar_t{});
+    static_assert( std::is_same_v<std::remove_const_t<decltype(conjDotResult)>, scalar_t> );
     EXPECT_EQ( conjDotResult, expectedConjDotResult );
+
+    const auto dotResultTwoArg = dot(x, y);
+    static_assert( std::is_same_v<std::remove_const_t<decltype(dotResultTwoArg)>, scalar_t> );
+    EXPECT_EQ( dotResultTwoArg, expectedDotResult );
+
+    const auto conjDotResultTwoArg = dotc(x, y);
+    static_assert( std::is_same_v<std::remove_const_t<decltype(conjDotResultTwoArg)>, scalar_t> );
+    EXPECT_EQ( conjDotResultTwoArg, expectedConjDotResult );
 
     //scalar_t dotResultPar {};
     // See note above.
