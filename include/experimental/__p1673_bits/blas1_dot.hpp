@@ -54,27 +54,26 @@ namespace linalg {
 template<class in_vector_1_t,
          class in_vector_2_t,
          class Scalar>
-void dot(in_vector_1_t v1,
-         in_vector_2_t v2,
-         Scalar& result)
+Scalar dot(in_vector_1_t v1,
+           in_vector_2_t v2,
+           Scalar init)
 {
-  Scalar myResult {};
   for (size_t k = 0; k < v1.extent(0); ++k) {
-    myResult += v1(k) * v2(k);
+    init += v1(k) * v2(k);
   }
-  result = myResult;
+  return init;
 }
 
 template<class ExecutionPolicy,
          class in_vector_1_t,
          class in_vector_2_t,
          class Scalar>
-void dot(ExecutionPolicy&& /* exec */,
-         in_vector_1_t v1,
-         in_vector_2_t v2,
-         Scalar& result)
+Scalar dot(ExecutionPolicy&& /* exec */,
+           in_vector_1_t v1,
+           in_vector_2_t v2,
+           Scalar init)
 {
-  dot (v1, v2, result);
+  return dot(v1, v2, init);
 }
 
 // Conjugated dot
@@ -82,23 +81,23 @@ void dot(ExecutionPolicy&& /* exec */,
 template<class in_vector_1_t,
          class in_vector_2_t,
          class Scalar>
-void dotc(in_vector_1_t v1,
-          in_vector_2_t v2,
-          Scalar& result)
+Scalar dotc(in_vector_1_t v1,
+            in_vector_2_t v2,
+            Scalar init)
 {
-  dot(v1, conjugated(v2), result);
+  return dot(v1, conjugated(v2), init);
 }
 
 template<class ExecutionPolicy,
          class in_vector_1_t,
          class in_vector_2_t,
          class Scalar>
-void dotc(ExecutionPolicy&& /* exec */,
-          in_vector_1_t v1,
-          in_vector_2_t v2,
-          Scalar& result)
+Scalar dotc(ExecutionPolicy&& /* exec */,
+            in_vector_1_t v1,
+            in_vector_2_t v2,
+            Scalar init)
 {
-  dotc(v1, v2, result);
+  return dotc(v1, v2, result);
 }
 
 } // end namespace linalg
