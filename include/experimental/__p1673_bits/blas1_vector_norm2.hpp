@@ -52,10 +52,16 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
-template<class in_vector_t,
+// FIXME (Hoemmen 2021/05/28) Latest version of P0009 (mdspan) uses size_t
+// instead of ptrdiff_t, but the implementation hasn't changed yet.
+template<class ElementType,
+         ptrdiff_t ext0,
+         class Layout,
+         class Accessor,
          class Scalar>
-Scalar vector_norm2(in_vector_t x,
-                    Scalar init)
+Scalar vector_norm2(
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x,
+  Scalar init)
 {
   // Initialize the sum of squares result
   sum_of_squares_result<Scalar> ssq_init;
@@ -72,13 +78,58 @@ Scalar vector_norm2(in_vector_t x,
 }
 
 template<class ExecutionPolicy,
-         class in_vector_t,
+         class ElementType,
+         ptrdiff_t ext0,
+         class Layout,
+         class Accessor,
          class Scalar>
-Scalar vector_norm2(ExecutionPolicy&& /* exec */,
-                    in_vector_t v,
-                    Scalar init)
+Scalar vector_norm2(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x,
+  Scalar init)
 {
-  return vector_norm2(v, init);
+  return vector_norm2(x, init);
+}
+
+namespace vector_norm2_detail {
+  using std::abs;
+
+  // The point of this is to do correct ADL for abs,
+  // without exposing "using std::abs" in the outer namespace.
+  template<
+    class ElementType,
+    ptrdiff_t ext0,
+    class Layout,
+    class Accessor>
+  auto vector_norm2_return_type_deducer(
+    std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x)
+  -> decltype(abs(x(0)) * abs(x(0)));
+} // namespace vector_norm2_detail
+
+template<class ElementType,
+         ptrdiff_t ext0,
+         class Layout,
+         class Accessor>
+auto vector_norm2(
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x)
+-> decltype(vector_norm2_detail::vector_norm2_return_type_deducer(x))
+{
+  using return_t = decltype(vector_norm2_detail::vector_norm2_return_type_deducer(x));
+  return vector_norm2(x, return_t{});
+}
+
+template<class ExecutionPolicy,
+         class ElementType,
+         ptrdiff_t ext0,
+         class Layout,
+         class Accessor>
+auto vector_norm2(
+  ExecutionPolicy&& exec,
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x)
+-> decltype(vector_norm2_detail::vector_norm2_return_type_deducer(x))
+{
+  using return_t = decltype(vector_norm2_detail::vector_norm2_return_type_deducer(x));
+  return vector_norm2(exec, x, return_t{});
 }
 
 } // end namespace linalg

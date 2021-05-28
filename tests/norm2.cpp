@@ -51,6 +51,11 @@ namespace {
     // Make sure that init always gets added to the result.
     const mag_t normResultPlusOne = vector_norm2(x, mag_t(1.0));
     EXPECT_EQ( expectedNormResult + mag_t(1.0), normResultPlusOne );
+
+    // Test 'auto' overload.
+    const auto normResultAuto = vector_norm2(x);
+    static_assert( std::is_same_v<std::remove_const_t<decltype(normResultAuto)>, mag_t> );
+    EXPECT_EQ( expectedNormResult, normResultAuto );
   }
 
   TEST(BLAS1_norm2, mdspan_one)
@@ -78,6 +83,11 @@ namespace {
     // Make sure that init always gets added to the result.
     const mag_t normResultPlusOne = vector_norm2(x, mag_t(1.0));
     EXPECT_EQ( expectedNormResult + mag_t(1.0), normResultPlusOne );
+
+    // Test 'auto' overload.
+    const auto normResultAuto = vector_norm2(x);
+    static_assert( std::is_same_v<std::remove_const_t<decltype(normResultAuto)>, mag_t> );
+    EXPECT_EQ( expectedNormResult, normResultAuto );
   }
 
   TEST(BLAS1_norm2, mdspan_double)
@@ -109,6 +119,11 @@ namespace {
     static_assert( std::is_same_v<std::remove_const_t<decltype(normResult)>, mag_t> );
     const mag_t expectedNormResult = sqrt(expectedNormResultSquared);
     EXPECT_NEAR( expectedNormResult, normResult, tol );
+
+    // Test 'auto' overload.
+    const auto normResultAuto = vector_norm2(x);
+    static_assert( std::is_same_v<std::remove_const_t<decltype(normResultAuto)>, mag_t> );
+    EXPECT_NEAR( expectedNormResult, normResultAuto, tol );
 
 #ifdef LINALG_ENABLE_BLAS
     const mag_t blasResult =
@@ -145,5 +160,10 @@ namespace {
     static_assert( std::is_same_v<std::remove_const_t<decltype(normResult)>, mag_t> );
     const mag_t expectedNormResult = sqrt(expectedNormResultSquared);
     EXPECT_NEAR( expectedNormResult, normResult, tol );
+
+    // Test 'auto' overload.
+    const auto normResultAuto = vector_norm2(x);
+    static_assert( std::is_same_v<std::remove_const_t<decltype(normResultAuto)>, mag_t> );
+    EXPECT_NEAR( expectedNormResult, normResultAuto, tol );
   }
 }
