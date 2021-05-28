@@ -51,10 +51,15 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
-template<class in_matrix_t,
-         class Scalar>
-Scalar matrix_inf_norm(in_matrix_t A,
-                       Scalar init)
+  template<
+    class ElementType,
+    class Extents,
+    class Layout,
+    class Accessor,
+    class Scalar>
+Scalar matrix_inf_norm(
+  std::experimental::basic_mdspan<ElementType, Extents, Layout, Accessor> A,
+  Scalar init)
 {
   using std::abs;
   using std::max;
@@ -80,31 +85,60 @@ Scalar matrix_inf_norm(in_matrix_t A,
 }
 
 template<class ExecutionPolicy,
-         class in_matrix_t,
-         class Scalar>
-Scalar matrix_inf_norm(ExecutionPolicy&& exec,
-                       in_matrix_t A,
+  class ElementType,
+  class Extents,
+  class Layout,
+  class Accessor,
+  class Scalar>
+Scalar matrix_inf_norm(ExecutionPolicy&& /* exec */,
+                       std::experimental::basic_mdspan<ElementType, Extents, Layout, Accessor> A,
                        Scalar init)
 {
   return matrix_inf_norm(A, init);
 }
 
-// TODO: Implement auto functions
-#if 0
-template<class in_matrix_t>
-auto matrix_inf_norm(in_matrix_t A)
-{
- 
+namespace matrix_inf_norm_detail {
+
+  using std::abs;
+  
+  // The point of this is to do correct ADL for abs,
+  // without exposing "using std::abs" in the outer namespace.
+  template<
+    class ElementType,
+    class Extents,
+    class Layout,
+    class Accessor>
+  auto matrix_inf_norm_return_type_deducer(
+    std::experimental::basic_mdspan<ElementType, Extents, Layout, Accessor> A) -> decltype(abs(A(0,0)));
+
+} // namespace matrix_inf_norm_detail
+
+template<
+  class ElementType,
+  class Extents,
+  class Layout,
+  class Accessor>
+auto matrix_inf_norm(
+  std::experimental::basic_mdspan<ElementType, Extents, Layout, Accessor> A)
+-> decltype(matrix_inf_norm_detail::matrix_inf_norm_return_type_deducer(A))
+{ 
+  using return_t = decltype(matrix_inf_norm_detail::matrix_inf_norm_return_type_deducer(A));
+  return matrix_inf_norm(A, return_t{});
 }
 
 template<class ExecutionPolicy,
-         class in_matrix_t>
-auto matrix_inf_norm(ExecutionPolicy&& exec,
-                     in_matrix_t A)
+         class ElementType,
+         class Extents,
+         class Layout,
+         class Accessor>
+auto matrix_inf_norm(
+  ExecutionPolicy&& exec,
+  std::experimental::basic_mdspan<ElementType, Extents, Layout, Accessor> A)
+-> decltype(matrix_inf_norm_detail::matrix_inf_norm_return_type_deducer(A))
 {
-
+  using return_t = decltype(matrix_inf_norm_detail::matrix_inf_norm_return_type_deducer(A));
+  return matrix_inf_norm(exec, A, return_t{});
 }
-#endif
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0

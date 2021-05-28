@@ -53,24 +53,25 @@ namespace linalg {
 
 template<class in_vector_t,
          class Scalar>
-void vector_abs_sum(in_vector_t v,
-                    Scalar& result)
+Scalar vector_abs_sum(in_vector_t v,
+                      Scalar init)
 {
-  result = 0.0;
-  for (ptrdiff_t i = 0; i < v.extent(0); ++i) {
+  const ptrdiff_t numElt = v.extent(0);
+  for (ptrdiff_t i = 0; i < numElt; ++i) {
     using std::abs;
-    result += abs(v(i));
+    init += abs(v(i));
   }
+  return init;
 }
 
 template<class ExecutionPolicy,
          class in_vector_t,
          class Scalar>
-void vector_abs_sum(ExecutionPolicy&& /* exec */,
-                    in_vector_t v,
-                    Scalar& result)
+Scalar vector_abs_sum(ExecutionPolicy&& /* exec */,
+                      in_vector_t v,
+                      Scalar init)
 {
-  vector_abs_sum(v, result);
+  return vector_abs_sum(v, init);
 }
 
 } // end namespace linalg

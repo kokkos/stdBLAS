@@ -8,10 +8,7 @@
 #include <iostream>
 
 namespace {
-  //using std::experimental::basic_mdspan;
-  //using std::experimental::dynamic_extent;
-  //using std::experimental::extents;
-  using std::experimental::linalg::matrix_one_norm;
+  using std::experimental::linalg::matrix_inf_norm;
   using std::cout;
   using std::endl;
   
@@ -36,7 +33,7 @@ namespace {
   template<class Scalar>
   using real_t = typename Magnitude<Scalar>::type;
 
-  // Returns the one-norm of the matrix, after filling it.
+  // Returns the inf-norm of the matrix, after filling it.
   //
   // TODO add requires clause to constrain Layout to be unique.
   template<class ElementType, class Layout>
@@ -48,22 +45,22 @@ namespace {
     const std::size_t A_numRows = A.extent(0);
     const std::size_t A_numCols = A.extent(1);
 
-    real_t<ElementType> maxColNorm{};
-    for (std::size_t j = 0; j < A_numCols; ++j) {
-      real_t<ElementType> curColOneNorm{};
-      for (std::size_t i = 0; i < A_numRows; ++i) {
+    real_t<ElementType> maxRowNorm{};
+    for (std::size_t i = 0; i < A_numRows; ++i) {
+      real_t<ElementType> curRowOneNorm{};
+      for (std::size_t j = 0; j < A_numCols; ++j) {
         const auto A_ij = (ElementType(i)+startVal) +
           (ElementType(j)+startVal) * ElementType(A_numRows);
         A(i,j) = A_ij;
-        curColOneNorm += abs(A_ij);
+        curRowOneNorm += abs(A_ij);
       }
-      maxColNorm = std::max(maxColNorm, curColOneNorm);
+      maxRowNorm = std::max(maxRowNorm, curRowOneNorm);
     }
-    return maxColNorm;
+    return maxRowNorm;
   }
 
   template<class Scalar>
-  void test_matrix_one_norm()
+  void test_matrix_inf_norm()
   {
     using std::abs;
     using scalar_t = Scalar;
@@ -85,13 +82,13 @@ namespace {
         const auto startVal = scalar_t(real_t<scalar_t>(1.0));
         const real_t<scalar_t> expectedResult = fill_matrix(A, startVal);
         const real_t<scalar_t> maxMatrixValueAbs = real_t<scalar_t>(A_numRows * A_numCols) + abs(startVal);
-        const real_t<scalar_t> computedTwoArgResult = matrix_one_norm(A, real_t<scalar_t>{});
-        const real_t<scalar_t> computedOneArgResult = matrix_one_norm(A);
-        cout << "Computed matrix_one_norm(2 args): " << computedTwoArgResult << endl
-             << "Computed matrix_one_norm(1 arg): " << computedOneArgResult << endl
-             << "Expected matrix_one_norm: " << expectedResult << endl;
+        const real_t<scalar_t> computedTwoArgResult = matrix_inf_norm(A, real_t<scalar_t>{});
+        const real_t<scalar_t> computedOneArgResult = matrix_inf_norm(A);
+        cout << "Computed matrix_inf_norm(2 args): " << computedTwoArgResult << endl
+             << "Computed matrix_inf_norm(1 arg): " << computedOneArgResult << endl
+             << "Expected matrix_inf_norm: " << expectedResult << endl;
         if constexpr (std::is_floating_point_v<real_t<scalar_t>>) {
-          // Matrix one-norm tolerance depends only on the number of rows,
+          // Matrix inf-norm tolerance depends only on the number of rows,
           // since the only operations that might round are the column sums.
           //
           // Use the max abs matrix element as a multiplier.
@@ -107,18 +104,18 @@ namespace {
     }
   }
 
-  TEST(matrix_one_norm, mdspan_int)
+  TEST(matrix_inf_norm, mdspan_int)
   {
-    test_matrix_one_norm<int>();
+    test_matrix_inf_norm<int>();
   }
 
-  TEST(matrix_one_norm, mdspan_double)
+  TEST(matrix_inf_norm, mdspan_double)
   {
-    test_matrix_one_norm<double>();
+    test_matrix_inf_norm<double>();
   }
 
-  TEST(matrix_one_norm, mdspan_complex_float)
+  TEST(matrix_inf_norm, mdspan_complex_float)
   {
-    test_matrix_one_norm<std::complex<float>>();
+    test_matrix_inf_norm<std::complex<float>>();
   }
 }

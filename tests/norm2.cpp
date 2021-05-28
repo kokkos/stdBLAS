@@ -9,6 +9,7 @@
 //      |          ^~~~~~~~~~~~~~~~~~~~~
 
 //#include <execution>
+#include <type_traits>
 #include <vector>
 #include "gtest/gtest.h"
 
@@ -42,10 +43,14 @@ namespace {
     vector_t x(storage.data(), vectorSize);
 
     // Testing for absolute equality
-    mag_t normResult {};
-    vector_norm2(x, normResult);
-    const mag_t expectedNormResult = mag_t(0.0);
+    const auto normResult = vector_norm2(x, mag_t{});
+    static_assert( std::is_same_v<std::remove_const_t<decltype(normResult)>, mag_t> );
+    const mag_t expectedNormResult{};
     EXPECT_EQ( expectedNormResult, normResult );
+
+    // Make sure that init always gets added to the result.
+    const mag_t normResultPlusOne = vector_norm2(x, mag_t(1.0));
+    EXPECT_EQ( expectedNormResult + mag_t(1.0), normResultPlusOne );
   }
 
   TEST(BLAS1_norm2, mdspan_one)
@@ -65,10 +70,14 @@ namespace {
     x[0] = (-5, -3);
 
     // Testing for absolute equality
-    mag_t normResult {};
-    vector_norm2(x, normResult);
+    const auto normResult = vector_norm2(x, mag_t{});
+    static_assert( std::is_same_v<std::remove_const_t<decltype(normResult)>, mag_t> );
     const mag_t expectedNormResult = abs( x[0] );
     EXPECT_EQ( expectedNormResult, normResult );
+
+    // Make sure that init always gets added to the result.
+    const mag_t normResultPlusOne = vector_norm2(x, mag_t(1.0));
+    EXPECT_EQ( expectedNormResult + mag_t(1.0), normResultPlusOne );
   }
 
   TEST(BLAS1_norm2, mdspan_double)
@@ -96,8 +105,8 @@ namespace {
       expectedNormResultSquared += x_k * x_k;
     }
 
-    mag_t normResult {};
-    vector_norm2(x, normResult);
+    const auto normResult = vector_norm2(x, mag_t{});
+    static_assert( std::is_same_v<std::remove_const_t<decltype(normResult)>, mag_t> );
     const mag_t expectedNormResult = sqrt(expectedNormResultSquared);
     EXPECT_NEAR( expectedNormResult, normResult, tol );
 
@@ -132,8 +141,8 @@ namespace {
       expectedNormResultSquared += abs(x_k) * abs(x_k);
     }
 
-    mag_t normResult {};
-    vector_norm2(x, normResult);
+    const auto normResult = vector_norm2(x, mag_t{});
+    static_assert( std::is_same_v<std::remove_const_t<decltype(normResult)>, mag_t> );
     const mag_t expectedNormResult = sqrt(expectedNormResultSquared);
     EXPECT_NEAR( expectedNormResult, normResult, tol );
   }
