@@ -134,7 +134,7 @@ template<class ExecutionPolicy,
 auto matrix_inf_norm(
   ExecutionPolicy&& exec,
   std::experimental::basic_mdspan<ElementType, Extents, Layout, Accessor> A)
--> decltype(detail::matrix_inf_norm_return_type_deducer(A))
+-> decltype(matrix_inf_norm_detail::matrix_inf_norm_return_type_deducer(A))
 {
   using return_t = decltype(matrix_inf_norm_detail::matrix_inf_norm_return_type_deducer(A));
   return matrix_inf_norm(exec, A, return_t{});
