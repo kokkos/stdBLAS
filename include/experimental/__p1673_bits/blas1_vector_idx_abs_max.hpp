@@ -48,11 +48,16 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
-template<class in_vector_t>
-ptrdiff_t vector_idx_abs_max(in_vector_t v)
+// FIXME (Hoemmen 2021/05/28) Latest version of P0009 (mdspan) uses size_t
+// instead of ptrdiff_t, but the implementation hasn't changed yet.
+template<class ElementType,
+         ptrdiff_t ext0,
+         class Layout,
+         class Accessor>
+ptrdiff_t vector_idx_abs_max(
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
 {
   using std::abs;
-  using element_type = typename in_vector_t::element_type;
   using magnitude_type = decltype(abs(v(0)));
 
   if (v.extent(0) == 0) {
@@ -69,11 +74,14 @@ ptrdiff_t vector_idx_abs_max(in_vector_t v)
   return maxInd; // FIXME check for NaN "never less than" stuff
 }
 
-
 template<class ExecutionPolicy,
-         class in_vector_t>
-ptrdiff_t vector_idx_abs_max(ExecutionPolicy&& /* exec */,
-                             in_vector_t v)
+         class ElementType,
+         ptrdiff_t ext0,
+         class Layout,
+         class Accessor>
+ptrdiff_t vector_idx_abs_max(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
 {
   return vector_idx_abs_max(v);
 }
