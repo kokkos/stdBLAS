@@ -50,24 +50,34 @@ namespace linalg {
 
 namespace {
 
-template<class Scalar,
-         class inout_vector_t>
-void linalg_scale_rank_1(const Scalar alpha,
-                         inout_vector_t x)
+// FIXME (Hoemmen 2021/05/28) Latest version of P0009 (mdspan) uses size_t
+// instead of ptrdiff_t, but the implementation hasn't changed yet.
+template<class ElementType,
+         ptrdiff_t ext0,
+         class Layout,
+         class Accessor,
+         class Scalar>
+void linalg_scale_rank_1(
+  const Scalar alpha,
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x)
 {
   for (ptrdiff_t i = 0; i < x.extent(0); ++i) {
     x(i) *= alpha;
   }
 }
 
-template<class Scalar,
-         class inout_matrix_t>
-void linalg_scale_rank_2(const Scalar alpha,
-                        inout_matrix_t x)
+template<class ElementType,
+         class Extents,
+         class Layout,
+         class Accessor,
+         class Scalar>
+void linalg_scale_rank_2(
+  const Scalar alpha,
+  std::experimental::basic_mdspan<ElementType, Extents, Layout, Accessor> A)
 {
-  for (ptrdiff_t j = 0; j < x.extent(1); ++j) {
-    for (ptrdiff_t i = 0; i < x.extent(0); ++i) {
-      x(i,j) *= alpha;
+  for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
+    for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
+      A(i,j) *= alpha;
     }
   }
 }
