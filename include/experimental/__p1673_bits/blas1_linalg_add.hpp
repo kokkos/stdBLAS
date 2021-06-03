@@ -50,24 +50,46 @@ namespace linalg {
 
 namespace {
 
-template<class in_vector_1_t,
-         class in_vector_2_t,
-         class out_vector_t>
-void add_rank_1(in_vector_1_t x,
-                in_vector_2_t y,
-                out_vector_t z)
+// FIXME (Hoemmen 2021/05/28) Latest version of P0009 (mdspan) uses size_t
+// instead of ptrdiff_t, but the implementation hasn't changed yet.
+template<class ElementType_x,
+         ptrdiff_t ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         ptrdiff_t ext_y,
+         class Layout_y,
+         class Accessor_y,
+         class ElementType_z,
+         ptrdiff_t ext_z,
+         class Layout_z,
+         class Accessor_z>
+void add_rank_1(
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y,
+  std::experimental::basic_mdspan<ElementType_z, std::experimental::extents<ext_z>, Layout_z, Accessor_z> z)
 {
   for (ptrdiff_t i = 0; i < z.extent(0); ++i) {
     z(i) = x(i) + y(i);
   }
 }
 
-template<class in_matrix_1_t,
-         class in_matrix_2_t,
-         class out_matrix_t>
-void add_rank_2(in_matrix_1_t x,
-                in_matrix_2_t y,
-                out_matrix_t z)
+template<class ElementType_x,
+         ptrdiff_t numRows_x, ptrdiff_t numCols_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         ptrdiff_t numRows_y, ptrdiff_t numCols_y,
+         class Layout_y,
+         class Accessor_y,
+         class ElementType_z,
+         ptrdiff_t numRows_z, ptrdiff_t numCols_z,
+         class Layout_z,
+         class Accessor_z>
+void add_rank_2(
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<numRows_x, numCols_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<numRows_y, numCols_y>, Layout_y, Accessor_y> y,
+  std::experimental::basic_mdspan<ElementType_z, std::experimental::extents<numRows_z, numCols_z>, Layout_z, Accessor_z> z)
 {
   for (ptrdiff_t j = 0; j < x.extent(1); ++j) {
     for (ptrdiff_t i = 0; i < x.extent(0); ++i) {
@@ -78,12 +100,22 @@ void add_rank_2(in_matrix_1_t x,
 
 } // end anonymous namespace
 
-template<class in_object_1_t,
-         class in_object_2_t,
-         class out_object_t>
-void add(in_object_1_t x,
-         in_object_2_t y,
-         out_object_t z)
+template<class ElementType_x,
+         class Extents_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         class Extents_y,
+         class Layout_y,
+         class Accessor_y,
+         class ElementType_z,
+         class Extents_z,
+         class Layout_z,
+         class Accessor_z>
+void add(  
+  std::experimental::basic_mdspan<ElementType_x, Extents_x, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, Extents_y, Layout_y, Accessor_y> y,
+  std::experimental::basic_mdspan<ElementType_z, Extents_z, Layout_z, Accessor_z> z)
 {
   if constexpr (z.rank() == 1) {
     add_rank_1 (x, y, z);
@@ -97,13 +129,23 @@ void add(in_object_1_t x,
 }
 
 template<class ExecutionPolicy,
-         class in_object_1_t,
-         class in_object_2_t,
-         class out_object_t>
-void add(ExecutionPolicy&& /* exec */,
-         in_object_1_t x,
-         in_object_2_t y,
-         out_object_t z)
+         class ElementType_x,
+         class Extents_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         class Extents_y,
+         class Layout_y,
+         class Accessor_y,
+         class ElementType_z,
+         class Extents_z,
+         class Layout_z,
+         class Accessor_z>
+void add(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::basic_mdspan<ElementType_x, Extents_x, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, Extents_y, Layout_y, Accessor_y> y,
+  std::experimental::basic_mdspan<ElementType_z, Extents_z, Layout_z, Accessor_z> z)
 {
   add(x, y, z);
 }
