@@ -51,10 +51,15 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
-template<class in_matrix_t,
-         class Scalar>
-Scalar matrix_frob_norm(in_matrix_t A,
-                        Scalar init)
+template<
+    class ElementType,
+    class Extents,
+    class Layout,
+    class Accessor,
+    class Scalar>
+Scalar matrix_frob_norm(
+  std::experimental::basic_mdspan<ElementType, Extents, Layout, Accessor> A,
+  Scalar init)
 {
   using std::abs;
   using std::sqrt;
@@ -92,10 +97,13 @@ Scalar matrix_frob_norm(in_matrix_t A,
 }
 
 template<class ExecutionPolicy,
-         class in_matrix_t,
-         class Scalar>
-Scalar matrix_frob_norm(ExecutionPolicy&& exec,
-                        in_matrix_t A,
+  class ElementType,
+  class Extents,
+  class Layout,
+  class Accessor,
+  class Scalar>
+Scalar matrix_frob_norm(ExecutionPolicy&& /* exec */,
+                        std::experimental::basic_mdspan<ElementType, Extents, Layout, Accessor> A,
                         Scalar init)
 {
   return matrix_frob_norm(A, init);
