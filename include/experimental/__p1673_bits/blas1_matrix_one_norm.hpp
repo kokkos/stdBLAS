@@ -51,10 +51,15 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
-template<class in_matrix_t,
-         class Scalar>
-Scalar matrix_one_norm(in_matrix_t A,
-                       Scalar init)
+template<
+    class ElementType,
+    class Extents,
+    class Layout,
+    class Accessor,
+    class Scalar>
+Scalar matrix_one_norm(
+  std::experimental::basic_mdspan<ElementType, Extents, Layout, Accessor> A,
+  Scalar init)
 {
   using std::abs;
   using std::max;
@@ -82,38 +87,57 @@ Scalar matrix_one_norm(in_matrix_t A,
 }
 
 template<class ExecutionPolicy,
-         class in_matrix_t,
-         class Scalar>
-Scalar matrix_one_norm(ExecutionPolicy&& exec,
-                       in_matrix_t A,
+  class ElementType,
+  class Extents,
+  class Layout,
+  class Accessor,
+  class Scalar>
+Scalar matrix_one_norm(ExecutionPolicy&& /* exec */,
+                       std::experimental::basic_mdspan<ElementType, Extents, Layout, Accessor> A,
                        Scalar init)
 {
   return matrix_one_norm(A, init);
 }
 
-namespace detail {
+namespace matrix_one_norm_detail {
 
   // The point of this is to do correct ADL for abs,
   // without exposing "using std::abs" in the outer namespace.
   using std::abs;
-  template<class in_matrix_t>
-  auto matrix_one_norm_return_type_deducer(in_matrix_t A) -> decltype(abs(A(0,0)));
+    template<
+    class ElementType,
+    class Extents,
+    class Layout,
+    class Accessor>
+  auto matrix_one_norm_return_type_deducer(
+    std::experimental::basic_mdspan<ElementType, Extents, Layout, Accessor> A) -> decltype(abs(A(0,0)));
 
-} // namespace detail
+} // namespace matrix_one_norm_detail
 
-template<class in_matrix_t>
-auto matrix_one_norm(in_matrix_t A) -> decltype(detail::matrix_one_norm_return_type_deducer(A))
-{
-  using return_t = decltype(detail::matrix_one_norm_return_type_deducer(A));
+template<
+  class ElementType,
+  class Extents,
+  class Layout,
+  class Accessor>
+auto matrix_one_norm(
+  std::experimental::basic_mdspan<ElementType, Extents, Layout, Accessor> A)
+-> decltype(matrix_one_norm_detail::matrix_one_norm_return_type_deducer(A))
+{ 
+  using return_t = decltype(matrix_one_norm_detail::matrix_one_norm_return_type_deducer(A));
   return matrix_one_norm(A, return_t{});
 }
 
 template<class ExecutionPolicy,
-         class in_matrix_t>
-auto matrix_one_norm(ExecutionPolicy&& exec,
-                     in_matrix_t A) -> decltype(detail::matrix_one_norm_return_type_deducer(A))
+         class ElementType,
+         class Extents,
+         class Layout,
+         class Accessor>
+auto matrix_one_norm(
+  ExecutionPolicy&& exec,
+  std::experimental::basic_mdspan<ElementType, Extents, Layout, Accessor> A)
+-> decltype(matrix_one_norm_detail::matrix_one_norm_return_type_deducer(A))
 {
-  using return_t = decltype(detail::matrix_one_norm_return_type_deducer(A));
+  using return_t = decltype(matrix_one_norm_detail::matrix_one_norm_return_type_deducer(A));
   return matrix_one_norm(exec, A, return_t{});
 }
 
