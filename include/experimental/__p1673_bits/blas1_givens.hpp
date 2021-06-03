@@ -344,12 +344,20 @@ label20:
   }
 }
 
-template<class inout_vector_1_t,
-         class inout_vector_2_t,
+// FIXME (Hoemmen 2021/05/28) Latest version of P0009 (mdspan) uses size_t
+// instead of ptrdiff_t, but the implementation hasn't changed yet.
+template<class ElementType1,
+         ptrdiff_t ext1,
+         class Layout1,
+         class Accessor1,
+         class ElementType2,
+         ptrdiff_t ext2,
+         class Layout2,
+         class Accessor2,
          class Real>
 void givens_rotation_apply(
-  inout_vector_1_t x,
-  inout_vector_2_t y,
+  std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
+  std::experimental::basic_mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
   const Real c,
   const Real s)
 {
@@ -361,25 +369,37 @@ void givens_rotation_apply(
 }
 
 template<class ExecutionPolicy,
-         class inout_vector_1_t,
-         class inout_vector_2_t,
+         class ElementType1,
+         ptrdiff_t ext1,
+         class Layout1,
+         class Accessor1,
+         class ElementType2,
+         ptrdiff_t ext2,
+         class Layout2,
+         class Accessor2,
          class Real>
 void givens_rotation_apply(
   ExecutionPolicy&& /* exec */,
-  inout_vector_1_t x,
-  inout_vector_2_t y,
+  std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
+  std::experimental::basic_mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
   const Real c,
   const Real s)
 {
   givens_rotation_apply(x, y, c, s);
 }
 
-template<class inout_vector_1_t,
-         class inout_vector_2_t,
+template<class ElementType1,
+         ptrdiff_t ext1,
+         class Layout1,
+         class Accessor1,
+         class ElementType2,
+         ptrdiff_t ext2,
+         class Layout2,
+         class Accessor2,
          class Real>
 void givens_rotation_apply(
-  inout_vector_1_t x,
-  inout_vector_2_t y,
+  std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
+  std::experimental::basic_mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
   const Real c,
   const complex<Real> s)
 {
@@ -392,13 +412,19 @@ void givens_rotation_apply(
 }
 
 template<class ExecutionPolicy,
-         class inout_vector_1_t,
-         class inout_vector_2_t,
+         class ElementType1,
+         ptrdiff_t ext1,
+         class Layout1,
+         class Accessor1,
+         class ElementType2,
+         ptrdiff_t ext2,
+         class Layout2,
+         class Accessor2,
          class Real>
 void givens_rotation_apply(
   ExecutionPolicy&& /* exec */,
-  inout_vector_1_t x,
-  inout_vector_2_t y,
+  std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
+  std::experimental::basic_mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
   const Real c,
   const complex<Real> s)
 {
