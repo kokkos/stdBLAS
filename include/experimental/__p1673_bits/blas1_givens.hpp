@@ -45,6 +45,7 @@
 
 #include <cmath>
 #include <complex>
+#include <concepts>
 
 namespace std {
 namespace experimental {
@@ -83,7 +84,7 @@ namespace linalg {
 // DSQRT -> sqrt (Real input and return value)
 // slapy2(real(fs), aimag(fs)) -> hypot(real(fs), imag(fs))
 
-template<class Real>
+template<std::floating_point Real>
 void givens_rotation_setup(const Real f,
                            const Real g,
                            Real& cs,
@@ -190,7 +191,7 @@ void givens_rotation_setup(const Real f,
 }
 
 namespace impl {
-template<class Real>
+template<std::floating_point Real>
 Real abs1(const complex<Real>& ff) {
   using std::abs;
   using std::imag;
@@ -200,7 +201,7 @@ Real abs1(const complex<Real>& ff) {
   return max(abs(real(ff)), abs(imag(ff)));
 }
 
-template<class Real>
+template<std::floating_point Real>
 Real abssq(const complex<Real>& ff) {
   using std::imag;
   using std::real;
@@ -209,7 +210,7 @@ Real abssq(const complex<Real>& ff) {
 }
 }
 
-template<class Real>
+template<std::floating_point Real>
 void givens_rotation_setup(const complex<Real>& f,
                            const complex<Real>& g,
                            Real& cs,
@@ -354,7 +355,7 @@ template<class ElementType1,
          ptrdiff_t ext2,
          class Layout2,
          class Accessor2,
-         class Real>
+         std::floating_point Real>
 void givens_rotation_apply(
   std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
   std::experimental::basic_mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
@@ -377,7 +378,7 @@ template<class ExecutionPolicy,
          ptrdiff_t ext2,
          class Layout2,
          class Accessor2,
-         class Real>
+         std::floating_point Real>
 void givens_rotation_apply(
   ExecutionPolicy&& /* exec */,
   std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
@@ -396,7 +397,7 @@ template<class ElementType1,
          ptrdiff_t ext2,
          class Layout2,
          class Accessor2,
-         class Real>
+         std::floating_point Real>
 void givens_rotation_apply(
   std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
   std::experimental::basic_mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
@@ -420,7 +421,7 @@ template<class ExecutionPolicy,
          ptrdiff_t ext2,
          class Layout2,
          class Accessor2,
-         class Real>
+         std::floating_point Real>
 void givens_rotation_apply(
   ExecutionPolicy&& /* exec */,
   std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
