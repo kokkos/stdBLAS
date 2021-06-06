@@ -9,6 +9,11 @@ env:
 jobs:
   build-mdspan:
     runs-on: ubuntu-latest
+    container:
+      image: amklinv/stdblas:latest
+    defaults:
+      run:
+        shell: bash
 
     steps:
 
@@ -19,132 +24,77 @@ jobs:
       id: cache-mdspan
       uses: actions/cache@v2
       with:
-        path: ${{github.workspace}}/mdspan-install
+        path: mdspan-install
         key: mdspan-${{ steps.get-sha.outputs.sha }}
  
     - name: Create Build Environment
       if: steps.cache-mdspan.outputs.cache-hit != 'true'
-      run: cmake -E make_directory ${{github.workspace}}/mdspan-build
+      run: cmake -E make_directory mdspan-build
       
     - name: Check Out
       if: steps.cache-mdspan.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         repository: kokkos/mdspan
-        path: ${{github.workspace}}/mdspan-src
+        path: mdspan-src
       
     - name: Configure CMake
       if: steps.cache-mdspan.outputs.cache-hit != 'true'
-      shell: bash
-      working-directory: ${{github.workspace}}/mdspan-build
+      working-directory: mdspan-build
       run: cmake $GITHUB_WORKSPACE/mdspan-src -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/mdspan-install
       
     - name: Build
       if: steps.cache-mdspan.outputs.cache-hit != 'true'
-      shell: bash
-      working-directory: ${{github.workspace}}/mdspan-build
+      working-directory: mdspan-build
       run: make
       
     - name: Install
       if: steps.cache-mdspan.outputs.cache-hit != 'true'
-      shell: bash
-      working-directory: ${{github.workspace}}/mdspan-build
+      working-directory: mdspan-build
       run: make install
       
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
         name: mdspan
-        path: ${{github.workspace}}/mdspan-install
-
-  build-gtest:
-    runs-on: ubuntu-latest
-    
-    steps:
-
-    - id: get-sha
-      run: echo ::set-output name=sha::$( curl https://api.github.com/repos/google/googletest/git/ref/heads/master | jq .object.sha | tr -d '"' )
- 
-    - name: Determine whether gtest needs to be rebuilt
-      id: cache-gtest
-      uses: actions/cache@v2
-      with:
-        path: ${{github.workspace}}/gtest-install
-        key: gtest-${{ steps.get-sha.outputs.sha }}
- 
-    - name: Create Build Environment
-      if: steps.cache-gtest.outputs.cache-hit != 'true'
-      run: cmake -E make_directory ${{github.workspace}}/gtest-build
-      
-    - name: Check Out
-      if: steps.cache-gtest.outputs.cache-hit != 'true'
-      uses: actions/checkout@v2
-      with:
-        repository: google/googletest
-        path: ${{github.workspace}}/gtest-src
-      
-    - name: Configure CMake
-      if: steps.cache-gtest.outputs.cache-hit != 'true'
-      shell: bash
-      working-directory: ${{github.workspace}}/gtest-build
-      run: cmake $GITHUB_WORKSPACE/gtest-src -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/gtest-install
-      
-    - name: Build
-      if: steps.cache-gtest.outputs.cache-hit != 'true'
-      shell: bash
-      working-directory: ${{github.workspace}}/gtest-build
-      run: make
-      
-    - name: Install
-      if: steps.cache-gtest.outputs.cache-hit != 'true'
-      shell: bash
-      working-directory: ${{github.workspace}}/gtest-build
-      run: make install
-      
-    - name: Upload
-      uses: actions/upload-artifact@v2
-      with:
-        name: gtest
-        path: ${{github.workspace}}/gtest-install
+        path: mdspan-install
 
   configure-stdblas:
     runs-on: ubuntu-latest
-    needs: [build-mdspan, build-gtest]
+    container:
+      image: amklinv/mdspan-dependencies:latest
+    needs: build-mdspan
     
     steps:
     - name: Download mdspan
       uses: actions/download-artifact@v2
       with:
         name: mdspan
-        path: ${{github.workspace}}/mdspan-install 
-
-    - name: Download googletest
-      uses: actions/download-artifact@v2
-      with:
-        name: gtest
-        path: ${{github.workspace}}/gtest-install 
+        path: mdspan-install 
         
     - name: Create Build Environment
-      run: cmake -E make_directory ${{github.workspace}}/stdblas-build
+      run: cmake -E make_directory stdblas-build
         
     - name: Check Out
       uses: actions/checkout@v2
       with:
-        path: ${{github.workspace}}/stdblas-src
+        path: stdblas-src
         
     - name: Configure CMake
       shell: bash
-      working-directory: ${{github.workspace}}/stdblas-build
-      run: cmake $GITHUB_WORKSPACE/stdblas-src -Dmdspan_DIR=$GITHUB_WORKSPACE/mdspan-install/lib/cmake/mdspan -DGTEST_ROOT=$GITHUB_WORKSPACE/gtest-install -DLINALG_ENABLE_TESTS=On -DLINALG_ENABLE_EXAMPLES=On -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/stdblas-install
+      working-directory: stdblas-build
+      run: cmake $GITHUB_WORKSPACE/stdblas-src -Dmdspan_DIR=$GITHUB_WORKSPACE/mdspan-install/lib/cmake/mdspan -DLINALG_ENABLE_TESTS=On -DLINALG_ENABLE_EXAMPLES=On -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/stdblas-install
 
     - name: Upload workspace
       uses: actions/upload-artifact@v2
       with:
         name: workspace
-        path: ${{github.workspace}}
+        path: .
       
   build-stdblas:
     runs-on: ubuntu-latest
+    container:
+      image: amklinv/mdspan-dependencies:latest
     needs: configure-stdblas
     
     steps:
@@ -153,15 +103,14 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: workspace
-        path: ${{github.workspace}}
+        path: .
         
     - name: Build
-      working-directory: ${{github.workspace}}/stdblas-build
+      working-directory: stdblas-build
       shell: bash
       run: make
       
     - name: Tar files
-      working-directory: ${{github.workspace}}
       shell: bash
       run: tar -cvf stdblas.tar *
 
@@ -169,10 +118,12 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: stdblas
-        path: ${{github.workspace}}/stdblas.tar
+        path: stdblas.tar
         
   test-stdBLAS:
     runs-on: ubuntu-latest
+    container:
+      image: amklinv/mdspan-dependencies:latest
     needs: build-stdblas
     
     steps:
@@ -181,20 +132,21 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: stdblas
-        path: ${{github.workspace}}
+        path: .
         
     - name: Untar files
-      working-directory: ${{github.workspace}}
       shell: bash
       run: tar -xvf stdblas.tar
         
     - name: Test
-      working-directory: ${{github.workspace}}/stdblas-build
+      working-directory: stdblas-build
       shell: bash
       run: ctest --output-on-failure
       
   install-stdBLAS:
     runs-on: ubuntu-latest
+    container:
+      image: amklinv/mdspan-dependencies:latest
     needs: build-stdblas
     
     steps:
@@ -203,14 +155,13 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: stdblas
-        path: ${{github.workspace}}
+        path: .
         
     - name: Untar files
-      working-directory: ${{github.workspace}}
       shell: bash
       run: tar -xvf stdblas.tar
         
     - name: Install
-      working-directory: ${{github.workspace}}/stdblas-build
+      working-directory: stdblas-build
       shell: bash
       run: make install
