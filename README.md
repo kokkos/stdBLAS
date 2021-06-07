@@ -7,7 +7,7 @@ You can find the latest revision of P1673 at wg21.link/p1673.
 ## Requirements
 
   - CMake >= 3.17 (earlier versions may work, but are not tested)
-  - C++ build environment that supports C++17 or greater
+  - C++ build environment that supports C++20
 
 ## Tested compilers
 
@@ -15,7 +15,8 @@ We run github's automated tests on every pull request.
 Automated tests use "ubuntu-latest",
 which presumably defaults to a fairly new GCC.
 
-MSVC 2019 16.7.0 is able to build and run tests and examples as of 2021/05/27.
+Before we started requiring concepts, MSVC 2019 16.7.0 was able to build and run tests and examples as of 2021/05/27.
+We will start testing on MSVC 2019 16.10 soon, which claims full support for C++20.
 
 ## Brief build instructions
 
