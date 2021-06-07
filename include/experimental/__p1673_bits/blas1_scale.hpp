@@ -67,13 +67,13 @@ void linalg_scale_rank_1(
 }
 
 template<class ElementType,
-         class Extents,
+         ptrdiff_t numRows, ptrdiff_t numCols,
          class Layout,
          class Accessor,
          class Scalar>
 void linalg_scale_rank_2(
   const Scalar alpha,
-  std::experimental::basic_mdspan<ElementType, Extents, Layout, Accessor> A)
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A)
 {
   for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
     for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
@@ -85,9 +85,12 @@ void linalg_scale_rank_2(
 } // end anonymous namespace
 
 template<class Scalar,
-         class inout_object_t>
+         class ElementType,
+         ptrdiff_t ... ext,
+         class Layout,
+         class Accessor>
 void scale(const Scalar alpha,
-           inout_object_t x)
+           std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext ...>, Layout, Accessor> x)
 {
   if constexpr (x.rank() == 1) {
     linalg_scale_rank_1(alpha, x);
@@ -102,12 +105,16 @@ void scale(const Scalar alpha,
 
 template<class ExecutionPolicy,
          class Scalar,
-         class inout_object_t>
-void scale(ExecutionPolicy&& /* exec */,
-           const Scalar alpha,
-           inout_object_t obj)
+         class ElementType,
+         ptrdiff_t ... ext,
+         class Layout,
+         class Accessor>
+void scale(
+  ExecutionPolicy&& /* exec */,
+  const Scalar alpha,
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext ...>, Layout, Accessor> x)
 {
-  scale(alpha, obj);
+  scale(alpha, x);
 }
 
 } // end namespace linalg
