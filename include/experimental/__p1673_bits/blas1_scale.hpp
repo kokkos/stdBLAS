@@ -50,10 +50,8 @@ namespace linalg {
 
 namespace {
 
-// FIXME (Hoemmen 2021/05/28) Latest version of P0009 (mdspan) uses size_t
-// instead of ptrdiff_t, but the implementation hasn't changed yet.
 template<class ElementType,
-         ptrdiff_t ext0,
+         extents<>::size_type ext0,
          class Layout,
          class Accessor,
          class Scalar>
@@ -61,13 +59,14 @@ void linalg_scale_rank_1(
   const Scalar alpha,
   std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x)
 {
-  for (ptrdiff_t i = 0; i < x.extent(0); ++i) {
+  for (extents<>::size_type i = 0; i < x.extent(0); ++i) {
     x(i) *= alpha;
   }
 }
 
 template<class ElementType,
-         ptrdiff_t numRows, ptrdiff_t numCols,
+         extents<>::size_type numRows, 
+         extents<>::size_type numCols,
          class Layout,
          class Accessor,
          class Scalar>
@@ -75,8 +74,9 @@ void linalg_scale_rank_2(
   const Scalar alpha,
   std::experimental::basic_mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A)
 {
-  for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-    for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
+  using size_type = typename extents<>::size_type;
+  for (size_type j = 0; j < A.extent(1); ++j) {
+    for (size_type i = 0; i < A.extent(0); ++i) {
       A(i,j) *= alpha;
     }
   }
@@ -86,7 +86,7 @@ void linalg_scale_rank_2(
 
 template<class Scalar,
          class ElementType,
-         ptrdiff_t ... ext,
+         extents<>::size_type ... ext,
          class Layout,
          class Accessor>
 void scale(const Scalar alpha,
@@ -106,7 +106,7 @@ void scale(const Scalar alpha,
 template<class ExecutionPolicy,
          class Scalar,
          class ElementType,
-         ptrdiff_t ... ext,
+         extents<>::size_type ... ext,
          class Layout,
          class Accessor>
 void scale(

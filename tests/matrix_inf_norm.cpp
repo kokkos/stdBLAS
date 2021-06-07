@@ -19,7 +19,7 @@ namespace {
       std::experimental::dynamic_extent,
       std::experimental::dynamic_extent>,
     Layout,
-    std::experimental::accessor_basic<ElementType>>;
+    std::experimental::default_accessor<ElementType>>;
 
   template<class Scalar>
   struct Magnitude {

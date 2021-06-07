@@ -60,13 +60,14 @@ void symmetric_matrix_rank_2_update(
   inout_matrix_t A,
   Triangle /* t */)
 {
+  using size_type = typename extents<>::size_type;
   constexpr bool lower_tri =
     std::is_same_v<Triangle, lower_triangle_t>;
-  for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-    const ptrdiff_t i_lower = lower_tri ? j : ptrdiff_t(0);
-    const ptrdiff_t i_upper = lower_tri ? A.extent(0) : j+1;
+  for (size_type j = 0; j < A.extent(1); ++j) {
+    const size_type i_lower = lower_tri ? j : size_type(0);
+    const size_type i_upper = lower_tri ? A.extent(0) : j+1;
 
-    for (ptrdiff_t i = i_lower; i < i_upper; ++i) {
+    for (size_type i = i_lower; i < i_upper; ++i) {
       A(i,j) += x(i) * y(j) + y(i) * x(j);
     }
   }
@@ -100,14 +101,15 @@ void hermitian_matrix_rank_2_update(
   Triangle /* t */)
 {
   using std::conj;
+  using size_type = typename extents<>::size_type;
 
   constexpr bool lower_tri =
     std::is_same_v<Triangle, lower_triangle_t>;
-  for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-    const ptrdiff_t i_lower = lower_tri ? j : ptrdiff_t(0);
-    const ptrdiff_t i_upper = lower_tri ? A.extent(0) : j+1;
+  for (size_type j = 0; j < A.extent(1); ++j) {
+    const size_type i_lower = lower_tri ? j : size_type(0);
+    const size_type i_upper = lower_tri ? A.extent(0) : j+1;
 
-    for (ptrdiff_t i = i_lower; i < i_upper; ++i) {
+    for (size_type i = i_lower; i < i_upper; ++i) {
       A(i,j) += x(i) * conj(y(j)) + y(i) * conj(x(j));
     }
   }

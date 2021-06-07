@@ -345,14 +345,12 @@ label20:
   }
 }
 
-// FIXME (Hoemmen 2021/05/28) Latest version of P0009 (mdspan) uses size_t
-// instead of ptrdiff_t, but the implementation hasn't changed yet.
 template<class ElementType1,
-         ptrdiff_t ext1,
+         extents<>::size_type ext1,
          class Layout1,
          class Accessor1,
          class ElementType2,
-         ptrdiff_t ext2,
+         extents<>::size_type ext2,
          class Layout2,
          class Accessor2,
          std::floating_point Real>
@@ -362,7 +360,7 @@ void givens_rotation_apply(
   const Real c,
   const Real s)
 {
-  for (ptrdiff_t i = 0; i < x.extent(0); ++i) {
+  for (extents<>::size_type i = 0; i < x.extent(0); ++i) {
     const auto dtemp = c * x(i) + s * y(i);
     y(i) = c * y(i) - s * x(i);
     x(i) = dtemp;
@@ -371,11 +369,11 @@ void givens_rotation_apply(
 
 template<class ExecutionPolicy,
          class ElementType1,
-         ptrdiff_t ext1,
+         extents<>::size_type ext1,
          class Layout1,
          class Accessor1,
          class ElementType2,
-         ptrdiff_t ext2,
+         extents<>::size_type ext2,
          class Layout2,
          class Accessor2,
          std::floating_point Real>
@@ -390,11 +388,11 @@ void givens_rotation_apply(
 }
 
 template<class ElementType1,
-         ptrdiff_t ext1,
+         extents<>::size_type ext1,
          class Layout1,
          class Accessor1,
          class ElementType2,
-         ptrdiff_t ext2,
+         extents<>::size_type ext2,
          class Layout2,
          class Accessor2,
          std::floating_point Real>
@@ -405,7 +403,7 @@ void givens_rotation_apply(
   const complex<Real> s)
 {
   using std::conj;
-  for (ptrdiff_t i = 0; i < x.extent(0); ++i) {
+  for (extents<>::size_type i = 0; i < x.extent(0); ++i) {
     const auto dtemp = c * x(i) + s * y(i);
     y(i) = c * y(i) - conj(s) * x(i);
     x(i) = dtemp;
@@ -414,11 +412,11 @@ void givens_rotation_apply(
 
 template<class ExecutionPolicy,
          class ElementType1,
-         ptrdiff_t ext1,
+         extents<>::size_type ext1,
          class Layout1,
          class Accessor1,
          class ElementType2,
-         ptrdiff_t ext2,
+         extents<>::size_type ext2,
          class Layout2,
          class Accessor2,
          std::floating_point Real>

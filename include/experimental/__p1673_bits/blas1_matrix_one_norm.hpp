@@ -53,7 +53,8 @@ namespace linalg {
 
 template<
     class ElementType,
-    ptrdiff_t numRows, ptrdiff_t numCols,
+    extents<>::size_type numRows, 
+    extents<>::size_type numCols,
     class Layout,
     class Accessor,
     class Scalar>
@@ -63,22 +64,23 @@ Scalar matrix_one_norm(
 {
   using std::abs;
   using std::max;
+  using size_type = typename extents<>::size_type;
 
   // Handle special cases.
   auto result = init;
   if (A.extent(0) == 0 || A.extent(1) == 0) {
     return result;
   }
-  else if(A.extent(0) == ptrdiff_t(1) && A.extent(1) == ptrdiff_t(1)) {
+  else if(A.extent(0) == size_type(1) && A.extent(1) == size_type(1)) {
     result += abs(A(0, 0));
     return result;
   }
 
   // These loops can be rearranged for optimal memory access patterns,
   // but it would require dynamic memory allocation.
-  for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
+  for (size_type j = 0; j < A.extent(1); ++j) {
     auto col_sum = init;
-    for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
+    for (size_type i = 0; i < A.extent(0); ++i) {
       col_sum += abs(A(i,j));
     }
     result = max(col_sum, result);
@@ -89,7 +91,8 @@ Scalar matrix_one_norm(
 template<
   class ExecutionPolicy,
   class ElementType,
-  ptrdiff_t numRows, ptrdiff_t numCols,
+  extents<>::size_type numRows, 
+  extents<>::size_type numCols,
   class Layout,
   class Accessor,
   class Scalar>
@@ -106,9 +109,10 @@ namespace matrix_one_norm_detail {
   // The point of this is to do correct ADL for abs,
   // without exposing "using std::abs" in the outer namespace.
   using std::abs;
+  using size_type = typename extents<>::size_type;
   template<
     class ElementType,
-    ptrdiff_t numRows, ptrdiff_t numCols,
+    size_type numRows, size_type numCols,
     class Layout,
     class Accessor>
   auto matrix_one_norm_return_type_deducer(
@@ -118,7 +122,7 @@ namespace matrix_one_norm_detail {
 
 template<
   class ElementType,
-  ptrdiff_t numRows, ptrdiff_t numCols,
+  extents<>::size_type numRows, extents<>::size_type numCols,
   class Layout,
   class Accessor>
 auto matrix_one_norm(
@@ -131,7 +135,8 @@ auto matrix_one_norm(
 
 template<class ExecutionPolicy,
          class ElementType,
-         ptrdiff_t numRows, ptrdiff_t numCols,
+         extents<>::size_type numRows, 
+         extents<>::size_type numCols,
          class Layout,
          class Accessor>
 auto matrix_one_norm(

@@ -58,10 +58,8 @@ struct sum_of_squares_result {
   Scalar scaled_sum_of_squares;
 };
 
-// FIXME (Hoemmen 2021/05/28) Latest version of P0009 (mdspan) uses size_t
-// instead of ptrdiff_t, but the implementation hasn't changed yet.
 template<class ElementType,
-         ptrdiff_t ext0,
+         extents<>::size_type ext0,
          class Layout,
          class Accessor,
          class Scalar>
@@ -80,7 +78,7 @@ sum_of_squares_result<Scalar> vector_sum_of_squares(
 
   Scalar scale = init.scaling_factor;
   Scalar ssq = init.scaled_sum_of_squares;
-  for (ptrdiff_t i = 0; i < x.extent(0); ++i) {
+  for (extents<>::size_type i = 0; i < x.extent(0); ++i) {
     if (abs(x(i)) != 0.0) {
       const auto absxi = abs(x(i));
       const auto quotient = scale / absxi;
@@ -102,7 +100,7 @@ sum_of_squares_result<Scalar> vector_sum_of_squares(
 
 template<class ExecutionPolicy,
          class ElementType,
-         ptrdiff_t ext0,
+         extents<>::size_type ext0,
          class Layout,
          class Accessor,
          class Scalar>

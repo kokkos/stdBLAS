@@ -60,9 +60,11 @@ void matrix_vector_product(in_matrix_t A,
                            in_vector_t x,
                            out_vector_t y)
 {
-  for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
+  using size_type = typename extents<>::size_type;
+
+  for (size_type i = 0; i < A.extent(0); ++i) {
     y(i) = typename out_vector_t::value_type{};
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
       y(i) += A(i,j) * x(j);
     }
   }
@@ -91,9 +93,11 @@ void matrix_vector_product(in_matrix_t A,
                            in_vector_2_t y,
                            out_vector_t z)
 {
-  for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
+  using size_type = typename extents<>::size_type;
+
+  for (size_type i = 0; i < A.extent(0); ++i) {
     y(i) = z(i);
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
       y(i) += A(i,j) * x(j);
     }
   }
@@ -124,13 +128,15 @@ void symmetric_matrix_vector_product(in_matrix_t A,
                                      in_vector_t x,
                                      out_vector_t y)
 {
-  for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
+  using size_type = typename extents<>::size_type;
+
+  for (size_type i = 0; i < A.extent(0); ++i) {
     y(i) = typename out_vector_t::value_type{};
   }
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      for (ptrdiff_t i = j; i < A.extent(0); ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      for (size_type i = j; i < A.extent(0); ++i) {
         const auto A_ij = A(i,j);
         y(i) += A_ij * x(j);
         y(j) += A_ij * x(i);
@@ -138,8 +144,8 @@ void symmetric_matrix_vector_product(in_matrix_t A,
     }
   }
   else {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      for (ptrdiff_t i = 0; i <= j; ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      for (size_type i = 0; i <= j; ++i) {
         const auto A_ij = A(i,j);
         y(i) += A_ij * x(j);
         y(j) += A_ij * x(i);
@@ -175,13 +181,15 @@ void symmetric_matrix_vector_product(in_matrix_t A,
                                      in_vector_2_t y,
                                      out_vector_t z)
 {
-  for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
+  using size_type = typename extents<>::size_type;
+
+  for (size_type i = 0; i < A.extent(0); ++i) {
     z(i) = y(i);
   }
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      for (ptrdiff_t i = j; i < A.extent(0); ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      for (size_type i = j; i < A.extent(0); ++i) {
         const auto A_ij = A(i,j);
         z(i) += A_ij * x(j);
         z(j) += A_ij * x(i);
@@ -189,8 +197,8 @@ void symmetric_matrix_vector_product(in_matrix_t A,
     }
   }
   else {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      for (ptrdiff_t i = 0; i <= j; ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      for (size_type i = 0; i <= j; ++i) {
         const auto A_ij = A(i,j);
         z(i) += A_ij * x(j);
         z(j) += A_ij * x(i);
@@ -226,14 +234,16 @@ void hermitian_matrix_vector_product(in_matrix_t A,
                                      in_vector_t x,
                                      out_vector_t y)
 {
-  for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
+  using size_type = typename extents<>::size_type;
+
+  for (size_type i = 0; i < A.extent(0); ++i) {
     y(i) = typename out_vector_t::value_type{};
   }
 
   using std::conj;
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      for (ptrdiff_t i = j; i < A.extent(0); ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      for (size_type i = j; i < A.extent(0); ++i) {
         const auto A_ij = A(i,j);
         y(i) += A_ij * x(j);
         y(j) += conj(A_ij) * x(i);
@@ -241,8 +251,8 @@ void hermitian_matrix_vector_product(in_matrix_t A,
     }
   }
   else {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      for (ptrdiff_t i = 0; i <= j; ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      for (size_type i = 0; i <= j; ++i) {
         const auto A_ij = A(i,j);
         y(i) += A_ij * x(j);
         y(j) += conj(A_ij) * x(i);
@@ -278,14 +288,16 @@ void hermitian_matrix_vector_product(in_matrix_t A,
                                      in_vector_2_t y,
                                      out_vector_t z)
 {
-  for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
+  using size_type = typename extents<>::size_type;
+
+  for (size_type i = 0; i < A.extent(0); ++i) {
     z(i) = y(i);
   }
 
   using std::conj;
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      for (ptrdiff_t i = j; i < A.extent(0); ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      for (size_type i = j; i < A.extent(0); ++i) {
         const auto A_ij = A(i,j);
         z(i) += A_ij * x(j);
         z(j) += conj(A_ij) * x(i);
@@ -293,8 +305,8 @@ void hermitian_matrix_vector_product(in_matrix_t A,
     }
   }
   else {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      for (ptrdiff_t i = 0; i <= j; ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      for (size_type i = 0; i <= j; ++i) {
         const auto A_ij = A(i,j);
         z(i) += A_ij * x(j);
         z(j) += conj(A_ij) * x(i);
@@ -332,16 +344,18 @@ void triangular_matrix_vector_product(in_matrix_t A,
                                       in_vector_t x,
                                       out_vector_t y)
 {
-  for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
+  using size_type = typename extents<>::size_type;
+
+  for (size_type i = 0; i < A.extent(0); ++i) {
     y(i) = typename out_vector_t::value_type{};
   }
   constexpr bool explicitDiagonal =
     std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      const ptrdiff_t i_lower = explicitDiagonal ? j : j + ptrdiff_t(1);
-      for (ptrdiff_t i = i_lower; i < A.extent(0); ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      const size_type i_lower = explicitDiagonal ? j : j + size_type(1);
+      for (size_type i = i_lower; i < A.extent(0); ++i) {
         y(i) += A(i,j) * x(j);
       }
       if constexpr (! explicitDiagonal) {
@@ -350,9 +364,9 @@ void triangular_matrix_vector_product(in_matrix_t A,
     }
   }
   else {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      const ptrdiff_t i_upper = explicitDiagonal ? j : j - ptrdiff_t(1);
-      for (ptrdiff_t i = 0; i <= i_upper; ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      const size_type i_upper = explicitDiagonal ? j : j - size_type(1);
+      for (size_type i = 0; i <= i_upper; ++i) {
         y(i) += A(i,j) * x(j);
       }
       if constexpr (! explicitDiagonal) {
@@ -393,16 +407,18 @@ void triangular_matrix_vector_product(in_matrix_t A,
                                       in_vector_2_t y,
                                       out_vector_t z)
 {
-  for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
+  using size_type = typename extents<>::size_type;
+
+  for (size_type i = 0; i < A.extent(0); ++i) {
     z(i) = y(i);
   }
   constexpr bool explicitDiagonal =
     std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      const ptrdiff_t i_lower = explicitDiagonal ? j : j + ptrdiff_t(1);
-      for (ptrdiff_t i = i_lower; i < A.extent(0); ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      const size_type i_lower = explicitDiagonal ? j : j + size_type(1);
+      for (size_type i = i_lower; i < A.extent(0); ++i) {
         z(i) += A(i,j) * x(j);
       }
       if constexpr (! explicitDiagonal) {
@@ -411,9 +427,9 @@ void triangular_matrix_vector_product(in_matrix_t A,
     }
   }
   else {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      const ptrdiff_t i_upper = explicitDiagonal ? j : j - ptrdiff_t(1);
-      for (ptrdiff_t i = 0; i <= i_upper; ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      const size_type i_upper = explicitDiagonal ? j : j - size_type(1);
+      for (size_type i = 0; i <= i_upper; ++i) {
         z(i) += A(i,j) * x(j);
       }
       if constexpr (! explicitDiagonal) {

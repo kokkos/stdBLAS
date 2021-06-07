@@ -58,8 +58,9 @@ void matrix_rank_1_update(
   in_vector_2_t y,
   inout_matrix_t A)
 {
-  for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
+  using size_type = typename extents<>::size_type;
+  for (size_type i = 0; i < A.extent(0); ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
       A(i,j) += x(i) * y(j);
     }
   }
@@ -114,16 +115,17 @@ void symmetric_matrix_rank_1_update(
   inout_matrix_t A,
   Triangle /* t */)
 {
+  using size_type = typename extents<>::size_type;
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      for (ptrdiff_t i = j; i < A.extent(0); ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      for (size_type i = j; i < A.extent(0); ++i) {
         A(i,j) += x(i) * x(j);
       }
     }
   }
   else {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      for (ptrdiff_t i = 0; i <= j; ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      for (size_type i = 0; i <= j; ++i) {
         A(i,j) += x(i) * x(j);
       }
     }
@@ -154,17 +156,18 @@ void hermitian_matrix_rank_1_update(
   Triangle /* t */)
 {
   using std::conj;
+  using size_type = typename extents<>::size_type;
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      for (ptrdiff_t i = j; i < A.extent(0); ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      for (size_type i = j; i < A.extent(0); ++i) {
         A(i,j) += x(i) * conj(x(j));
       }
     }
   }
   else {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      for (ptrdiff_t i = 0; i <= j; ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      for (size_type i = 0; i <= j; ++i) {
         A(i,j) += x(i) * conj(x(j));
       }
     }

@@ -48,24 +48,23 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
-// FIXME (Hoemmen 2021/05/28) Latest version of P0009 (mdspan) uses size_t
-// instead of ptrdiff_t, but the implementation hasn't changed yet.
 template<class ElementType,
-         ptrdiff_t ext0,
+         extents<>::size_type ext0,
          class Layout,
          class Accessor>
-ptrdiff_t vector_idx_abs_max(
+extents<>::size_type vector_idx_abs_max(
   std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
 {
   using std::abs;
+  using size_type = typename extents<>::size_type;
   using magnitude_type = decltype(abs(v(0)));
 
   if (v.extent(0) == 0) {
     return -1;
   }
-  ptrdiff_t maxInd = 0;
+  size_type maxInd = 0;
   magnitude_type maxVal = abs(v(0));
-  for (ptrdiff_t i = 1; i < v.extent(0); ++i) {
+  for (size_type i = 1; i < v.extent(0); ++i) {
     if (maxVal < abs(v(i))) {
       maxVal = abs(v(i));
       maxInd = i;
@@ -76,10 +75,10 @@ ptrdiff_t vector_idx_abs_max(
 
 template<class ExecutionPolicy,
          class ElementType,
-         ptrdiff_t ext0,
+         extents<>::size_type ext0,
          class Layout,
          class Accessor>
-ptrdiff_t vector_idx_abs_max(
+extents<>::size_type vector_idx_abs_max(
   ExecutionPolicy&& /* exec */,
   std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
 {

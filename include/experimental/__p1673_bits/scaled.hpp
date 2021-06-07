@@ -84,12 +84,12 @@ public:
   accessor_scaled(Accessor a, S sval) :
     acc_(a), scale_factor_(sval) {}
 
-  reference access(pointer p, ptrdiff_t i) const noexcept {
+  reference access(pointer p, extents<>::size_type i) const noexcept {
     return reference(acc_.access(p,i), scale_factor_);
   }
 
   typename offset_policy::pointer
-  offset(pointer p, ptrdiff_t i) const noexcept {
+  offset(pointer p, extents<>::size_type i) const noexcept {
     return acc_.offset(p,i);
   }
 

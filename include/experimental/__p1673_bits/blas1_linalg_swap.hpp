@@ -52,14 +52,12 @@ namespace linalg {
 
 namespace {
 
-// FIXME (Hoemmen 2021/05/28) Latest version of P0009 (mdspan) uses size_t
-// instead of ptrdiff_t, but the implementation hasn't changed yet.
 template<class ElementType_x,
-         ptrdiff_t ext_x,
+         extents<>::size_type ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         ptrdiff_t ext_y,
+         extents<>::size_type ext_y,
          class Layout_y,
          class Accessor_y>
 void swap_rank_1(
@@ -67,17 +65,21 @@ void swap_rank_1(
   std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y)
 {
   using std::swap;
-  for (ptrdiff_t i = 0; i < y.extent(0); ++i) {
+  using size_type = typename extents<>::size_type;
+
+  for (size_type i = 0; i < y.extent(0); ++i) {
     swap(x(i), y(i));
   }
 }
 
 template<class ElementType_x,
-         ptrdiff_t numRows_x, ptrdiff_t numCols_x,
+         extents<>::size_type numRows_x, 
+         extents<>::size_type numCols_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         ptrdiff_t numRows_y, ptrdiff_t numCols_y,
+         extents<>::size_type numRows_y, 
+         extents<>::size_type numCols_y,
          class Layout_y,
          class Accessor_y>
 void swap_rank_2(
@@ -85,8 +87,10 @@ void swap_rank_2(
   std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<numRows_y, numCols_y>, Layout_y, Accessor_y> y)
 {
   using std::swap;
-  for (ptrdiff_t j = 0; j < y.extent(1); ++j) {
-    for (ptrdiff_t i = 0; i < y.extent(0); ++i) {
+  using size_type = typename extents<>::size_type;
+
+  for (size_type j = 0; j < y.extent(1); ++j) {
+    for (size_type i = 0; i < y.extent(0); ++i) {
       swap(x(i,j), y(i,j));
     }
   }
@@ -95,11 +99,11 @@ void swap_rank_2(
 } // end anonymous namespace
 
 template<class ElementType_x,
-         ptrdiff_t ... ext_x,
+         extents<>::size_type ... ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         ptrdiff_t ... ext_y,
+         extents<>::size_type ... ext_y,
          class Layout_y,
          class Accessor_y>
   requires (sizeof...(ext_x) == sizeof...(ext_y))
@@ -120,11 +124,11 @@ void swap_elements(
 
 template<class ExecutionPolicy,
          class ElementType_x,
-         ptrdiff_t ... ext_x,
+         extents<>::size_type ... ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         ptrdiff_t ... ext_y,
+         extents<>::size_type ... ext_y,
          class Layout_y,
          class Accessor_y>
   requires (sizeof...(ext_x) == sizeof...(ext_y))
