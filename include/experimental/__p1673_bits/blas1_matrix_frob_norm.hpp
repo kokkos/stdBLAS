@@ -53,12 +53,12 @@ namespace linalg {
 
 template<
     class ElementType,
-    class Extents,
+    ptrdiff_t numRows, ptrdiff_t numCols,
     class Layout,
     class Accessor,
     class Scalar>
 Scalar matrix_frob_norm(
-  std::experimental::basic_mdspan<ElementType, Extents, Layout, Accessor> A,
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A,
   Scalar init)
 {
   using std::abs;
@@ -98,13 +98,14 @@ Scalar matrix_frob_norm(
 
 template<class ExecutionPolicy,
   class ElementType,
-  class Extents,
+  ptrdiff_t numRows, ptrdiff_t numCols,
   class Layout,
   class Accessor,
   class Scalar>
-Scalar matrix_frob_norm(ExecutionPolicy&& /* exec */,
-                        std::experimental::basic_mdspan<ElementType, Extents, Layout, Accessor> A,
-                        Scalar init)
+Scalar matrix_frob_norm(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A,
+  Scalar init)
 {
   return matrix_frob_norm(A, init);
 }
