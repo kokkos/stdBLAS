@@ -53,12 +53,12 @@ namespace linalg {
 
 template<
     class ElementType,
-    class Extents,
+    ptrdiff_t numRows, ptrdiff_t numCols,
     class Layout,
     class Accessor,
     class Scalar>
 Scalar matrix_one_norm(
-  std::experimental::basic_mdspan<ElementType, Extents, Layout, Accessor> A,
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A,
   Scalar init)
 {
   using std::abs;
@@ -86,15 +86,17 @@ Scalar matrix_one_norm(
   return result;
 }
 
-template<class ExecutionPolicy,
+template<
+  class ExecutionPolicy,
   class ElementType,
-  class Extents,
+  ptrdiff_t numRows, ptrdiff_t numCols,
   class Layout,
   class Accessor,
   class Scalar>
-Scalar matrix_one_norm(ExecutionPolicy&& /* exec */,
-                       std::experimental::basic_mdspan<ElementType, Extents, Layout, Accessor> A,
-                       Scalar init)
+Scalar matrix_one_norm(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A,
+  Scalar init)
 {
   return matrix_one_norm(A, init);
 }
@@ -104,23 +106,23 @@ namespace matrix_one_norm_detail {
   // The point of this is to do correct ADL for abs,
   // without exposing "using std::abs" in the outer namespace.
   using std::abs;
-    template<
+  template<
     class ElementType,
-    class Extents,
+    ptrdiff_t numRows, ptrdiff_t numCols,
     class Layout,
     class Accessor>
   auto matrix_one_norm_return_type_deducer(
-    std::experimental::basic_mdspan<ElementType, Extents, Layout, Accessor> A) -> decltype(abs(A(0,0)));
+    std::experimental::basic_mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A) -> decltype(abs(A(0,0)));
 
 } // namespace matrix_one_norm_detail
 
 template<
   class ElementType,
-  class Extents,
+  ptrdiff_t numRows, ptrdiff_t numCols,
   class Layout,
   class Accessor>
 auto matrix_one_norm(
-  std::experimental::basic_mdspan<ElementType, Extents, Layout, Accessor> A)
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A)
 -> decltype(matrix_one_norm_detail::matrix_one_norm_return_type_deducer(A))
 { 
   using return_t = decltype(matrix_one_norm_detail::matrix_one_norm_return_type_deducer(A));
@@ -129,12 +131,12 @@ auto matrix_one_norm(
 
 template<class ExecutionPolicy,
          class ElementType,
-         class Extents,
+         ptrdiff_t numRows, ptrdiff_t numCols,
          class Layout,
          class Accessor>
 auto matrix_one_norm(
   ExecutionPolicy&& exec,
-  std::experimental::basic_mdspan<ElementType, Extents, Layout, Accessor> A)
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A)
 -> decltype(matrix_one_norm_detail::matrix_one_norm_return_type_deducer(A))
 {
   using return_t = decltype(matrix_one_norm_detail::matrix_one_norm_return_type_deducer(A));
