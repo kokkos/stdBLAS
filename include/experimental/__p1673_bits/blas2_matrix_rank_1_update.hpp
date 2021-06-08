@@ -50,13 +50,23 @@ namespace linalg {
 
 // Nonsymmetric non-conjugated rank-1 update
 
-template<class in_vector_1_t,
-         class in_vector_2_t,
-         class inout_matrix_t>
+template<class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ext_y,
+         class Layout_y,
+         class Accessor_y,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A>
 void matrix_rank_1_update(
-  in_vector_1_t x,
-  in_vector_2_t y,
-  inout_matrix_t A)
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A)
 {
   using size_type = typename extents<>::size_type;
   for (size_type i = 0; i < A.extent(0); ++i) {
@@ -67,52 +77,89 @@ void matrix_rank_1_update(
 }
 
 template<class ExecutionPolicy,
-         class in_vector_1_t,
-         class in_vector_2_t,
-         class inout_matrix_t>
+         class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ext_y,
+         class Layout_y,
+         class Accessor_y,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A>
 void matrix_rank_1_update(
   ExecutionPolicy&& /* exec */,
-  in_vector_1_t x,
-  in_vector_2_t y,
-  inout_matrix_t A)
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A)
 {
   matrix_rank_1_update(x, y, A);
 }
 
 // Nonsymmetric conjugated rank-1 update
 
-template<class in_vector_1_t,
-         class in_vector_2_t,
-         class inout_matrix_t>
+template<class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ext_y,
+         class Layout_y,
+         class Accessor_y,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A>
 void matrix_rank_1_update_c(
-  in_vector_1_t x,
-  in_vector_2_t y,
-  inout_matrix_t A)
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A)
 {
   matrix_rank_1_update(x, conjugated(y), A);
 }
 
 template<class ExecutionPolicy,
-         class in_vector_1_t,
-         class in_vector_2_t,
-         class inout_matrix_t>
+         class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ext_y,
+         class Layout_y,
+         class Accessor_y,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A>
 void matrix_rank_1_update_c(
   ExecutionPolicy&& /* exec */,
-  in_vector_1_t x,
-  in_vector_2_t y,
-  inout_matrix_t A)
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A)
 {
   matrix_rank_1_update_c(x, y, A);
 }
 
 // Rank-1 update of a Symmetric matrix
 
-template<class in_vector_t,
-         class inout_matrix_t,
+template<class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
          class Triangle>
 void symmetric_matrix_rank_1_update(
-  in_vector_t x,
-  inout_matrix_t A,
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle /* t */)
 {
   using size_type = typename extents<>::size_type;
@@ -133,13 +180,20 @@ void symmetric_matrix_rank_1_update(
 }
 
 template<class ExecutionPolicy,
-         class in_vector_t,
-         class inout_matrix_t,
+         class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
          class Triangle>
 void symmetric_matrix_rank_1_update(
   ExecutionPolicy&& /* exec */,
-  in_vector_t x,
-  inout_matrix_t A,
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t)
 {
   symmetric_matrix_rank_1_update(x, A, t);
@@ -147,12 +201,19 @@ void symmetric_matrix_rank_1_update(
 
 // Rank-1 update of a Hermitian matrix
 
-template<class in_vector_t,
-         class inout_matrix_t,
+template<class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
          class Triangle>
 void hermitian_matrix_rank_1_update(
-  in_vector_t x,
-  inout_matrix_t A,
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle /* t */)
 {
   using std::conj;
@@ -175,13 +236,20 @@ void hermitian_matrix_rank_1_update(
 }
 
 template<class ExecutionPolicy,
-         class in_vector_t,
-         class inout_matrix_t,
+         class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
          class Triangle>
 void hermitian_matrix_rank_1_update(
   ExecutionPolicy&& /* exec */,
-  in_vector_t x,
-  inout_matrix_t A,
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t)
 {
   hermitian_matrix_rank_1_update(x, A, t);
