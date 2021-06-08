@@ -433,7 +433,7 @@ void matrix_product(
     using size_type = typename extents<>::size_type;
     for(size_type i = 0; i < C.extent(0); ++i) {
       for(size_type j = 0; j < C.extent(1); ++j) {
-        C(i,j) = typename out_matrix_t::value_type{};
+        C(i,j) = ElementType_C{};
         for(size_type k = 0; k < A.extent(1); ++k) {
           C(i,j) += A(i,k) * B(k,j);
         }
