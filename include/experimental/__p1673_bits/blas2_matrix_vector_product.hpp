@@ -526,7 +526,7 @@ void triangular_matrix_vector_product(
   }
   else {
     for (size_type j = 0; j < A.extent(1); ++j) {
-      const size_type i_upper = explicitDiagonal ? j : j - size_type(1);
+      const ptrdiff_t i_upper = explicitDiagonal ? j : j - size_type(1);
       for (size_type i = 0; i <= i_upper; ++i) {
         y(i) += A(i,j) * x(j);
       }
@@ -614,7 +614,7 @@ void triangular_matrix_vector_product(
   }
   else {
     for (size_type j = 0; j < A.extent(1); ++j) {
-      const size_type i_upper = explicitDiagonal ? j : j - size_type(1);
+      const ptrdiff_t i_upper = explicitDiagonal ? j : j - size_type(1);
       for (size_type i = 0; i <= i_upper; ++i) {
         z(i) += A(i,j) * x(j);
       }

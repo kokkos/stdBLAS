@@ -82,7 +82,8 @@ void trsm_upper_triangular_left_side(
   for (size_type k = 0; k < B_num_cols; ++k) {
     // One advantage of using signed index types is that you can write
     // descending loops with zero-based indices.
-    for (size_type i = A_num_rows - 1; i >= 0; --i) {
+    // (AMK 6/8/21) i can't be a nonnegative type because the loop would be infinite
+    for (ptrdiff_t i = A_num_rows - 1; i >= 0; --i) {
       // TODO this would be a great opportunity for an implementer to
       // add value, by accumulating in extended precision (or at least
       // in a type with the max precision of X and B).
