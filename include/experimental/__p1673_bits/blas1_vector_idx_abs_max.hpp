@@ -52,7 +52,7 @@ template<class ElementType,
          extents<>::size_type ext0,
          class Layout,
          class Accessor>
-extents<>::size_type vector_idx_abs_max(
+extents<>::size_type idx_abs_max(
   std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
 {
   using std::abs;
@@ -78,11 +78,11 @@ template<class ExecutionPolicy,
          extents<>::size_type ext0,
          class Layout,
          class Accessor>
-extents<>::size_type vector_idx_abs_max(
+extents<>::size_type idx_abs_max(
   ExecutionPolicy&& /* exec */,
   std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
 {
-  return vector_idx_abs_max(v);
+  return idx_abs_max(v);
 }
 
 } // end namespace linalg
