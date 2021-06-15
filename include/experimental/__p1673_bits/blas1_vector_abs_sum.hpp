@@ -82,6 +82,48 @@ Scalar vector_abs_sum(
   return vector_abs_sum(v, init);
 }
 
+namespace vector_abs_detail {
+  using std::abs;
+
+  // The point of this is to do correct ADL for abs,
+  // without exposing "using std::abs" in the outer namespace.
+  template<
+    class ElementType,
+    extents<>::size_type ext0,
+    class Layout,
+    class Accessor>
+  auto vector_abs_return_type_deducer(
+    std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x)
+  -> decltype(abs(x(0)));
+} // namespace vector_abs_detail
+
+
+template<class ElementType,
+         extents<>::size_type ext0,
+         class Layout,
+         class Accessor>
+auto vector_abs_sum(
+  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x)
+-> decltype(vector_abs_detail::vector_abs_return_type_deducer(x))
+{
+  using return_t = decltype(vector_abs_detail::vector_abs_return_type_deducer(x));
+  return vector_abs_sum(x, return_t{});
+}
+
+template<class ExecutionPolicy,
+         class ElementType,
+         extents<>::size_type ext0,
+         class Layout,
+         class Accessor>
+auto vector_abs_sum(
+  ExecutionPolicy&& exec,
+  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x)
+-> decltype(vector_abs_detail::vector_abs_return_type_deducer(x))
+{
+  using return_t = decltype(vector_abs_detail::vector_abs_return_type_deducer(x));
+  return vector_abs_sum(exec, x, return_t{});
+}
+
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
