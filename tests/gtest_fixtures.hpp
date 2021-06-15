@@ -48,19 +48,20 @@
 #include "gtest/gtest.h"
 #include <vector>
 
-  using scalar_t = double;
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::mdspan;
-  using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
+  using dbl_vector_t = mdspan<double, extents<dynamic_extent>>;
+  using cpx_vector_t = mdspan<std::complex<double>, extents<dynamic_extent>>;
   constexpr ptrdiff_t NROWS(10);
 
-  // This vector has an infinity norm of 4.6
+  // 1-norm:   4.6
+  // inf-norm: 0.9
   class unsigned_double_vector : public ::testing::Test {
     protected:
       unsigned_double_vector() :
-        storage(NROWS),
-        v(storage.data(), NROWS)
+        storage(10),
+        v(storage.data(), 10)
       {
         v(0) = 0.5;  
         v(1) = 0.2;  
@@ -74,16 +75,17 @@
         v(9) = 0.9;
       }
     
-      std::vector<scalar_t> storage;
-      vector_t v;
+      std::vector<double> storage;
+      dbl_vector_t v;
   }; // end class unsigned_double_vector
 
-  // This vector has an infinity norm of 4.6
+  // 1-norm:   4.6
+  // inf-norm: 0.9
   class signed_double_vector : public ::testing::Test {
     protected:
       signed_double_vector() :
-        storage(NROWS),
-        v(storage.data(), NROWS)
+        storage(10),
+        v(storage.data(), 10)
       {
         v(0) =  0.5;  
         v(1) =  0.2;  
@@ -97,8 +99,28 @@
         v(9) = -0.9;
       }
     
-      std::vector<scalar_t> storage;
-      vector_t v;
+      std::vector<double> storage;
+      dbl_vector_t v;
+  }; // end class signed_double_vector
+
+  // 1-norm:   3.5188912597625004
+  // 2-norm:   1.6673332000533068
+  // inf-norm: 1.063014581273465
+  class signed_complex_vector : public ::testing::Test {
+    protected:
+      signed_complex_vector() :
+        storage(5),
+        v(storage.data(), 5)
+      {
+        v(0) = std::complex<double>( 0.5,  0.2);
+        v(1) = std::complex<double>( 0.1,  0.4);
+        v(2) = std::complex<double>(-0.8, -0.7);
+        v(3) = std::complex<double>(-0.3,  0.5);
+        v(4) = std::complex<double>( 0.2, -0.9);
+      }
+    
+      std::vector<std::complex<double>> storage;
+      cpx_vector_t v;
   }; // end class signed_double_vector
 
 #endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_FIXTURES_HPP_
