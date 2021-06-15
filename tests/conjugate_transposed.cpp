@@ -7,7 +7,7 @@
 namespace {
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
-  using std::experimental::basic_mdspan;
+  using std::experimental::mdspan;
   using std::experimental::linalg::conjugate_transposed;
 
   TEST(conjugate_transposed, mdspan_complex_double)
@@ -16,10 +16,10 @@ namespace {
     using real_t = double;
     using scalar_t = std::complex<real_t>;
     using matrix_dynamic_t =
-      basic_mdspan<scalar_t, extents<dynamic_extent, dynamic_extent>>;
+      mdspan<scalar_t, extents<dynamic_extent, dynamic_extent>>;
     constexpr ptrdiff_t dim = 5;
     using matrix_static_t =
-      basic_mdspan<scalar_t, extents<dim, dim>>;
+      mdspan<scalar_t, extents<dim, dim>>;
 
     constexpr ptrdiff_t storageSize = ptrdiff_t(dim*dim);
     std::vector<scalar_t> A_storage (storageSize);

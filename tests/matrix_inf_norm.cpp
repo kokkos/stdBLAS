@@ -13,7 +13,7 @@ namespace {
   using std::endl;
   
   template<class ElementType, class Layout>
-  using basic_matrix_t = std::experimental::basic_mdspan<
+  using basic_matrix_t = std::experimental::mdspan<
     ElementType, 
     std::experimental::extents<
       std::experimental::dynamic_extent,

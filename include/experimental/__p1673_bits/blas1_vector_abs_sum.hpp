@@ -57,7 +57,7 @@ template<class ElementType,
          class Accessor,
          class Scalar>
 Scalar vector_abs_sum(
-  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v,
+  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v,
   Scalar init)
 {
   const extents<>::size_type numElt = v.extent(0);
@@ -76,7 +76,7 @@ template<class ExecutionPolicy,
          class Scalar>
 Scalar vector_abs_sum(
   ExecutionPolicy&& /* exec */,
-  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v,
+  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v,
   Scalar init)
 {
   return vector_abs_sum(v, init);

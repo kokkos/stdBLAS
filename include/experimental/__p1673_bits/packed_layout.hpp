@@ -60,15 +60,15 @@ template<class EltType,
          class Accessor,
          class Triangle,
          class StorageOrder>
-constexpr basic_mdspan<EltType,
+constexpr mdspan<EltType,
   <i>extents-see-returns-below</i>,
   layout_blas_packed<
     Triangle,
     StorageOrder>,
   Accessor>
 packed(
-  const basic_mdspan<EltType, Extents, Layout, Accessor>& m,
-  typename basic_mdspan<EltType, Extents, Layout, Accessor>::index_type num_rows,
+  const mdspan<EltType, Extents, Layout, Accessor>& m,
+  typename mdspan<EltType, Extents, Layout, Accessor>::index_type num_rows,
   Triangle,
   StorageOrder);
 #endif // 0

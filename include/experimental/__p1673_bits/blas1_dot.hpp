@@ -59,8 +59,8 @@ template<class ElementType1,
          class Layout2,
          class Accessor2,
          class Scalar>
-Scalar dot(std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> v1,
-           std::experimental::basic_mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2,
+Scalar dot(std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> v1,
+           std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2,
            Scalar init)
 {
   for (size_t k = 0; k < v1.extent(0); ++k) {
@@ -81,8 +81,8 @@ template<class ExecutionPolicy,
          class Scalar>
 Scalar dot(
   ExecutionPolicy&& /* exec */,
-  std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> v1,
-  std::experimental::basic_mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2,
+  std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> v1,
+  std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2,
   Scalar init)
 {
   return dot(v1, v2, init);
@@ -100,8 +100,8 @@ template<class ElementType1,
          class Accessor2,
          class Scalar>
 Scalar dotc(
-  std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> v1,
-  std::experimental::basic_mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2,
+  std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> v1,
+  std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2,
   Scalar init)
 {
   return dot(v1, conjugated(v2), init);
@@ -119,8 +119,8 @@ template<class ExecutionPolicy,
          class Scalar>
 Scalar dotc(
   ExecutionPolicy&& /* exec */,
-  std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> v1,
-  std::experimental::basic_mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2,
+  std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> v1,
+  std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2,
   Scalar init)
 {
   return dotc(v1, v2, init);
@@ -141,8 +141,8 @@ namespace dot_detail {
     class Layout2,
     class Accessor2>
   auto dot_return_type_deducer(
-    std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
-    std::experimental::basic_mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y)
+    std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
+    std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y)
   -> decltype(x(0) * y(0));
 } // namespace dot_detail
 
@@ -155,8 +155,8 @@ template<class ElementType1,
          class Layout2,
          class Accessor2>
 auto dot(
-  std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> v1,
-  std::experimental::basic_mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2)
+  std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> v1,
+  std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2)
 -> decltype(dot_detail::dot_return_type_deducer(v1, v2))
 {
   using return_t = decltype(dot_detail::dot_return_type_deducer(v1, v2));
@@ -172,8 +172,8 @@ template<class ElementType1,
          class Layout2,
          class Accessor2>
 auto dotc(
-  std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> v1,
-  std::experimental::basic_mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2)
+  std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> v1,
+  std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2)
 -> decltype(dot_detail::dot_return_type_deducer(v1, v2))
 {
   using return_t = decltype(dot_detail::dot_return_type_deducer(v1, v2));
@@ -191,8 +191,8 @@ template<class ExecutionPolicy,
          class Accessor2>
 auto dot(
   ExecutionPolicy&& exec,
-  std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> v1,
-  std::experimental::basic_mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2)
+  std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> v1,
+  std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2)
 -> decltype(dot_detail::dot_return_type_deducer(v1, v2))
 {
   using return_t = decltype(dot_detail::dot_return_type_deducer(v1, v2));
@@ -210,8 +210,8 @@ template<class ExecutionPolicy,
          class Accessor2>
 auto dotc(
   ExecutionPolicy&& exec,
-  std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> v1,
-  std::experimental::basic_mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2)
+  std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> v1,
+  std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2)
 -> decltype(dot_detail::dot_return_type_deducer(v1, v2))
 {
   using return_t = decltype(dot_detail::dot_return_type_deducer(v1, v2));

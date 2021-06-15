@@ -58,7 +58,7 @@ template<class ElementType,
          class Accessor,
          class Scalar>
 Scalar vector_norm2(
-  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x,
+  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x,
   Scalar init)
 {
   // Initialize the sum of squares result
@@ -83,7 +83,7 @@ template<class ExecutionPolicy,
          class Scalar>
 Scalar vector_norm2(
   ExecutionPolicy&& /* exec */,
-  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x,
+  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x,
   Scalar init)
 {
   return vector_norm2(x, init);
@@ -100,7 +100,7 @@ namespace vector_norm2_detail {
     class Layout,
     class Accessor>
   auto vector_norm2_return_type_deducer(
-    std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x)
+    std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x)
   -> decltype(abs(x(0)) * abs(x(0)));
 } // namespace vector_norm2_detail
 
@@ -109,7 +109,7 @@ template<class ElementType,
          class Layout,
          class Accessor>
 auto vector_norm2(
-  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x)
+  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x)
 -> decltype(vector_norm2_detail::vector_norm2_return_type_deducer(x))
 {
   using return_t = decltype(vector_norm2_detail::vector_norm2_return_type_deducer(x));
@@ -123,7 +123,7 @@ template<class ExecutionPolicy,
          class Accessor>
 auto vector_norm2(
   ExecutionPolicy&& exec,
-  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x)
+  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x)
 -> decltype(vector_norm2_detail::vector_norm2_return_type_deducer(x))
 {
   using return_t = decltype(vector_norm2_detail::vector_norm2_return_type_deducer(x));

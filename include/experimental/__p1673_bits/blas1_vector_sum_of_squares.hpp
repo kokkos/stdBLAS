@@ -64,7 +64,7 @@ template<class ElementType,
          class Accessor,
          class Scalar>
 sum_of_squares_result<Scalar> vector_sum_of_squares(
-  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x,
+  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x,
   sum_of_squares_result<Scalar> init)
 {
   using std::abs;
@@ -106,7 +106,7 @@ template<class ExecutionPolicy,
          class Scalar>
 sum_of_squares_result<Scalar> vector_sum_of_squares(
   ExecutionPolicy&& /* exec */,
-  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v,
+  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v,
   sum_of_squares_result<Scalar> init)
 {
   return vector_sum_of_squares(v, init);

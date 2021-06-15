@@ -123,13 +123,13 @@ template<class ElementType,
          class Layout,
          class Accessor,
          class ScalingFactorType>
-basic_mdspan<ElementType, Extents, Layout,
+mdspan<ElementType, Extents, Layout,
              accessor_scaled<Accessor, ScalingFactorType>>
 scaled(ScalingFactorType scalingFactor,
-       const basic_mdspan<ElementType, Extents, Layout, Accessor>& a)
+       const mdspan<ElementType, Extents, Layout, Accessor>& a)
 {
   using accessor_t = accessor_scaled<Accessor, ScalingFactorType>;
-  return basic_mdspan<ElementType, Extents, Layout, accessor_t> (
+  return mdspan<ElementType, Extents, Layout, accessor_t> (
     a.data(), a.mapping(), accessor_t (a.accessor(), scalingFactor));
 }
 

@@ -108,12 +108,12 @@ public:
 };
 
 template<class EltType, class Extents, class Layout, class Accessor>
-basic_mdspan<EltType, Extents, layout_transpose<Layout>, Accessor>
-transposed(basic_mdspan<EltType, Extents, Layout, Accessor> a)
+mdspan<EltType, Extents, layout_transpose<Layout>, Accessor>
+transposed(mdspan<EltType, Extents, Layout, Accessor> a)
 {
   using layout_type = layout_transpose<Layout>;
   using mapping_type = typename layout_type::template mapping<Extents>;
-  return basic_mdspan<EltType, Extents, layout_type, Accessor> (
+  return mdspan<EltType, Extents, layout_type, Accessor> (
     a.data (), mapping_type (a.mapping ()), a.accessor ());
 }
 

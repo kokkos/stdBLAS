@@ -63,9 +63,9 @@ template<class ElementType_x,
          class Layout_z,
          class Accessor_z>
 void add_rank_1(
-  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::basic_mdspan<ElementType_z, std::experimental::extents<ext_z>, Layout_z, Accessor_z> z)
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y,
+  std::experimental::mdspan<ElementType_z, std::experimental::extents<ext_z>, Layout_z, Accessor_z> z)
 {
   for (extents<>::size_type i = 0; i < z.extent(0); ++i) {
     z(i) = x(i) + y(i);
@@ -88,9 +88,9 @@ template<class ElementType_x,
          class Layout_z,
          class Accessor_z>
 void add_rank_2(
-  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<numRows_x, numCols_x>, Layout_x, Accessor_x> x,
-  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<numRows_y, numCols_y>, Layout_y, Accessor_y> y,
-  std::experimental::basic_mdspan<ElementType_z, std::experimental::extents<numRows_z, numCols_z>, Layout_z, Accessor_z> z)
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<numRows_x, numCols_x>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<numRows_y, numCols_y>, Layout_y, Accessor_y> y,
+  std::experimental::mdspan<ElementType_z, std::experimental::extents<numRows_z, numCols_z>, Layout_z, Accessor_z> z)
 {
   using size_type = typename extents<>::size_type;
 
@@ -117,9 +117,9 @@ template<class ElementType_x,
          class Accessor_z>
   requires (sizeof...(ext_x) == sizeof...(ext_y) && sizeof...(ext_x) == sizeof...(ext_z))
 void add(  
-  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
-  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y,
-  std::experimental::basic_mdspan<ElementType_z, std::experimental::extents<ext_z ...>, Layout_z, Accessor_z> z)
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y,
+  std::experimental::mdspan<ElementType_z, std::experimental::extents<ext_z ...>, Layout_z, Accessor_z> z)
 {
   if constexpr (z.rank() == 1) {
     add_rank_1 (x, y, z);
@@ -148,9 +148,9 @@ template<class ExecutionPolicy,
   requires (sizeof...(ext_x) == sizeof...(ext_y) && sizeof...(ext_x) == sizeof...(ext_z))
 void add(
   ExecutionPolicy&& /* exec */,
-  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
-  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y,
-  std::experimental::basic_mdspan<ElementType_z, std::experimental::extents<ext_z ...>, Layout_z, Accessor_z> z)
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y,
+  std::experimental::mdspan<ElementType_z, std::experimental::extents<ext_z ...>, Layout_z, Accessor_z> z)
 {
   add(x, y, z);
 }

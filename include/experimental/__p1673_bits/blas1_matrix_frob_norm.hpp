@@ -59,7 +59,7 @@ template<
     class Accessor,
     class Scalar>
 Scalar matrix_frob_norm(
-  std::experimental::basic_mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A,
+  std::experimental::mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A,
   Scalar init)
 {
   using std::abs;
@@ -107,7 +107,7 @@ template<class ExecutionPolicy,
   class Scalar>
 Scalar matrix_frob_norm(
   ExecutionPolicy&& /* exec */,
-  std::experimental::basic_mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A,
+  std::experimental::mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A,
   Scalar init)
 {
   return matrix_frob_norm(A, init);

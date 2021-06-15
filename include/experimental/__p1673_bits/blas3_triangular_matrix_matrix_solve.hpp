@@ -67,10 +67,10 @@ template<class ElementType_A,
          class Layout_X,
          class Accessor_X>
 void trsm_upper_triangular_left_side(
-  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   DiagonalStorage d,
-  std::experimental::basic_mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
-  std::experimental::basic_mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   constexpr bool explicit_diagonal =
     std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
@@ -120,10 +120,10 @@ template<class ElementType_A,
          class Layout_X,
          class Accessor_X>
 void trsm_lower_triangular_left_side(
-  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   DiagonalStorage d,
-  std::experimental::basic_mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
-  std::experimental::basic_mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   constexpr bool explicit_diagonal =
     std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
@@ -168,10 +168,10 @@ template<class ElementType_A,
          class Layout_X,
          class Accessor_X>
 void trsm_upper_triangular_right_side(
-  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   DiagonalStorage d,
-  std::experimental::basic_mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
-  std::experimental::basic_mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   constexpr bool explicit_diagonal =
     std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
@@ -214,10 +214,10 @@ template<class ElementType_A,
          class Layout_X,
          class Accessor_X>
 void trsm_lower_triangular_right_side(
-  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   DiagonalStorage d,
-  std::experimental::basic_mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
-  std::experimental::basic_mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   constexpr bool explicit_diagonal =
     std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
@@ -265,12 +265,12 @@ template<class ElementType_A,
          class Layout_X,
          class Accessor_X>
 void triangular_matrix_matrix_solve(
-  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
   Side s,
-  std::experimental::basic_mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
-  std::experimental::basic_mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   if (std::is_same_v<Side, left_side_t>) {
     if (std::is_same_v<Triangle, lower_triangle_t>) {
@@ -311,12 +311,12 @@ template<class ExecutionPolicy,
          class Accessor_X>
 void triangular_matrix_matrix_solve(
   ExecutionPolicy&& /* exec */,
-  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
   Side s,
-  std::experimental::basic_mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
-  std::experimental::basic_mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   triangular_matrix_matrix_solve(A, t, d, s, B, X);
 }

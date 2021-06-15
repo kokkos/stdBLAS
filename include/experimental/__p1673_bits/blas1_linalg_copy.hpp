@@ -59,8 +59,8 @@ template<class ElementType_x,
          class Layout_y,
          class Accessor_y>
 void copy_rank_1(
-  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y)
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y)
 {
   for (extents<>::size_type i = 0; i < y.extent(0); ++i) {
     y(i) = x(i);
@@ -78,8 +78,8 @@ template<class ElementType_x,
          class Layout_y,
          class Accessor_y>
 void copy_rank_2(
-  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<numRows_x, numCols_x>, Layout_x, Accessor_x> x,
-  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<numRows_y, numCols_y>, Layout_y, Accessor_y> y)
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<numRows_x, numCols_x>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<numRows_y, numCols_y>, Layout_y, Accessor_y> y)
 {
   using size_type = typename extents<>::size_type;
 
@@ -102,8 +102,8 @@ template<class ElementType_x,
          class Accessor_y>
   requires (sizeof...(ext_x) == sizeof...(ext_y))
 void copy(  
-  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
-  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y)
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y)
 {
   if constexpr (x.rank() == 1) {
     copy_rank_1(x, y);
@@ -128,8 +128,8 @@ template<class ExecutionPolicy,
   requires (sizeof...(ext_x) == sizeof...(ext_y))
 void copy(
   ExecutionPolicy&& /* exec */,
-  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
-  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y)
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y)
 {
   copy(x, y);
 }

@@ -6,7 +6,7 @@
 namespace {
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
-  using std::experimental::basic_mdspan;
+  using std::experimental::mdspan;
   using std::experimental::linalg::scaled;
 
   TEST(scaled, mdspan_double_scalar_float)
@@ -15,7 +15,7 @@ namespace {
     using scaling_factor_type = float;
 
     using vector_t =
-      basic_mdspan<vector_element_type, extents<dynamic_extent>>;
+      mdspan<vector_element_type, extents<dynamic_extent>>;
 
     constexpr ptrdiff_t vectorSize (5);
     constexpr ptrdiff_t storageSize = ptrdiff_t (2) * vectorSize;

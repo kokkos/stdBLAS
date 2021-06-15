@@ -16,7 +16,7 @@
 namespace {
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
-  using std::experimental::basic_mdspan;
+  using std::experimental::mdspan;
   using std::experimental::linalg::copy;
 
   template<class Real>
@@ -46,7 +46,7 @@ namespace {
   TEST(BLAS1_copy_vector, mdspan_double)
   {
     using scalar_t = double;
-    using vector_t = basic_mdspan<scalar_t, extents<dynamic_extent>>;
+    using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
 
     constexpr ptrdiff_t vectorSize(5);
     constexpr ptrdiff_t storageSize = ptrdiff_t(2) * vectorSize;
@@ -74,7 +74,7 @@ namespace {
   {
     using real_t = double;
     using scalar_t = std::complex<real_t>;
-    using vector_t = basic_mdspan<scalar_t, extents<dynamic_extent>>;
+    using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
 
     constexpr ptrdiff_t vectorSize(5);
     constexpr ptrdiff_t storageSize = ptrdiff_t(2) * vectorSize;
@@ -136,7 +136,7 @@ makeMatrixValues(const ptrdiff_t i, const ptrdiff_t j, const ptrdiff_t numRows) 
 TEST(BLAS1_copy_matrix, mdspan_double)
 {
   using scalar_t = double;
-  using matrix_t = basic_mdspan<scalar_t, extents<dynamic_extent, dynamic_extent>>;
+  using matrix_t = mdspan<scalar_t, extents<dynamic_extent, dynamic_extent>>;
 
   constexpr ptrdiff_t numRows(5);
   constexpr ptrdiff_t numCols(4);
@@ -169,7 +169,7 @@ TEST(BLAS1_copy_matrix, mdspan_complex_double)
 {
   using real_t = double;
   using scalar_t = std::complex<real_t>;
-  using matrix_t = basic_mdspan<scalar_t, extents<dynamic_extent, dynamic_extent>>;
+  using matrix_t = mdspan<scalar_t, extents<dynamic_extent, dynamic_extent>>;
 
   constexpr ptrdiff_t numRows(5);
   constexpr ptrdiff_t numCols(4);

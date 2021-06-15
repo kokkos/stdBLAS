@@ -166,12 +166,12 @@ private:
 };
 
 template<class EltType, class Extents, class Layout, class Accessor>
-basic_mdspan<EltType, Extents, Layout,
+mdspan<EltType, Extents, Layout,
              accessor_conjugate<Accessor, EltType>>
-conjugated(basic_mdspan<EltType, Extents, Layout, Accessor> a)
+conjugated(mdspan<EltType, Extents, Layout, Accessor> a)
 {
   using accessor_t = accessor_conjugate<Accessor, EltType>;
-  return basic_mdspan<EltType, Extents, Layout, accessor_t> (
+  return mdspan<EltType, Extents, Layout, accessor_t> (
     a.data (), a.mapping (), accessor_t (a.accessor ()));
 }
 

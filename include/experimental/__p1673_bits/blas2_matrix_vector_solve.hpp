@@ -67,10 +67,10 @@ template<class ElementType_A,
          class Layout_X,
          class Accessor_X>
 void trsv_upper_triangular_left_side(
-  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   DiagonalStorage d,
-  std::experimental::basic_mdspan<ElementType_B, std::experimental::extents<ext_B>, Layout_B, Accessor_B> B,
-  std::experimental::basic_mdspan<ElementType_X, std::experimental::extents<ext_X>, Layout_X, Accessor_X> X)
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<ext_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<ext_X>, Layout_X, Accessor_X> X)
 {
   constexpr bool explicit_diagonal =
     std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
@@ -116,10 +116,10 @@ template<class ElementType_A,
          class Layout_X,
          class Accessor_X>
 void trsv_lower_triangular_left_side(
-  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   DiagonalStorage d,
-  std::experimental::basic_mdspan<ElementType_B, std::experimental::extents<ext_B>, Layout_B, Accessor_B> B,
-  std::experimental::basic_mdspan<ElementType_X, std::experimental::extents<ext_X>, Layout_X, Accessor_X> X)
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<ext_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<ext_X>, Layout_X, Accessor_X> X)
 {
   constexpr bool explicit_diagonal =
     std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
@@ -165,11 +165,11 @@ template<class ElementType_A,
          class Layout_X,
          class Accessor_X>
 void triangular_matrix_vector_solve(
-  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
-  std::experimental::basic_mdspan<ElementType_B, std::experimental::extents<ext_B>, Layout_B, Accessor_B> b,
-  std::experimental::basic_mdspan<ElementType_X, std::experimental::extents<ext_X>, Layout_X, Accessor_X> x)
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<ext_B>, Layout_B, Accessor_B> b,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<ext_X>, Layout_X, Accessor_X> x)
 {
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     trsv_lower_triangular_left_side(A, d, b, x);
@@ -197,11 +197,11 @@ template<class ExecutionPolicy,
          class Accessor_X>
 void triangular_matrix_vector_solve(
   ExecutionPolicy&& /* exec */,
-  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
-  std::experimental::basic_mdspan<ElementType_B, std::experimental::extents<ext_B>, Layout_B, Accessor_B> b,
-  std::experimental::basic_mdspan<ElementType_X, std::experimental::extents<ext_X>, Layout_X, Accessor_X> x)
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<ext_B>, Layout_B, Accessor_B> b,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<ext_X>, Layout_X, Accessor_X> x)
 {
   triangular_matrix_vector_solve(A, t, d, b, x);
 }

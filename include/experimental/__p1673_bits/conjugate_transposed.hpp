@@ -52,10 +52,10 @@ inline namespace __p1673_version_0 {
 namespace linalg {
 
 template<class EltType, class Extents, class Layout, class Accessor>
-basic_mdspan<EltType, Extents, layout_transpose<Layout>,
+mdspan<EltType, Extents, layout_transpose<Layout>,
              accessor_conjugate<Accessor, EltType>>
 conjugate_transposed(
-  basic_mdspan<EltType, Extents, Layout, Accessor> a)
+  mdspan<EltType, Extents, Layout, Accessor> a)
 {
   return conjugated(transposed(a));
 }
