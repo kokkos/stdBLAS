@@ -57,7 +57,7 @@ template<class ElementType,
          class Scalar>
 void linalg_scale_rank_1(
   const Scalar alpha,
-  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x)
+  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x)
 {
   for (extents<>::size_type i = 0; i < x.extent(0); ++i) {
     x(i) *= alpha;
@@ -72,7 +72,7 @@ template<class ElementType,
          class Scalar>
 void linalg_scale_rank_2(
   const Scalar alpha,
-  std::experimental::basic_mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A)
+  std::experimental::mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A)
 {
   using size_type = typename extents<>::size_type;
   for (size_type j = 0; j < A.extent(1); ++j) {
@@ -90,7 +90,7 @@ template<class Scalar,
          class Layout,
          class Accessor>
 void scale(const Scalar alpha,
-           std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext ...>, Layout, Accessor> x)
+           std::experimental::mdspan<ElementType, std::experimental::extents<ext ...>, Layout, Accessor> x)
 {
   if constexpr (x.rank() == 1) {
     linalg_scale_rank_1(alpha, x);
@@ -112,7 +112,7 @@ template<class ExecutionPolicy,
 void scale(
   ExecutionPolicy&& /* exec */,
   const Scalar alpha,
-  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext ...>, Layout, Accessor> x)
+  std::experimental::mdspan<ElementType, std::experimental::extents<ext ...>, Layout, Accessor> x)
 {
   scale(alpha, x);
 }

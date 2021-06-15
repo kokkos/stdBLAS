@@ -53,7 +53,7 @@ template<class ElementType,
          class Layout,
          class Accessor>
 extents<>::size_type vector_idx_abs_max(
-  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
+  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
 {
   using std::abs;
   using size_type = typename extents<>::size_type;
@@ -80,7 +80,7 @@ template<class ExecutionPolicy,
          class Accessor>
 extents<>::size_type vector_idx_abs_max(
   ExecutionPolicy&& /* exec */,
-  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
+  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
 {
   return vector_idx_abs_max(v);
 }

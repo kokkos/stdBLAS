@@ -27,7 +27,7 @@ double dnrm2_wrapper(const int N, const double* X, const int INCX)
 namespace {
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
-  using std::experimental::basic_mdspan;
+  using std::experimental::mdspan;
   using std::experimental::linalg::vector_norm2;
 
   TEST(BLAS1_norm2, mdspan_zero)
@@ -36,7 +36,7 @@ namespace {
 
     using mag_t = double;
     using scalar_t = double;
-    using vector_t = basic_mdspan<scalar_t, extents<dynamic_extent>>;
+    using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
 
     constexpr ptrdiff_t vectorSize(0);
     std::vector<scalar_t> storage(vectorSize);
@@ -66,7 +66,7 @@ namespace {
     using real_t = double;
     using mag_t = real_t;
     using scalar_t = std::complex<real_t>;
-    using vector_t = basic_mdspan<scalar_t, extents<dynamic_extent>>;
+    using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
 
     constexpr ptrdiff_t vectorSize(1);
     std::vector<scalar_t> storage(vectorSize);
@@ -96,7 +96,7 @@ namespace {
     using std::sqrt;
     using mag_t = double;
     using scalar_t = double;
-    using vector_t = basic_mdspan<scalar_t, extents<dynamic_extent>>;
+    using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
 
     constexpr ptrdiff_t vectorSize(5);
     constexpr mag_t tol =
@@ -137,7 +137,7 @@ namespace {
     using real_t = double;
     using mag_t = real_t;
     using scalar_t = std::complex<real_t>;
-    using vector_t = basic_mdspan<scalar_t, extents<dynamic_extent>>;
+    using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
 
     constexpr ptrdiff_t vectorSize(5);
     // Complex numbers use more arithmetic than their real analogs.

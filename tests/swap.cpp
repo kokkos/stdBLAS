@@ -15,13 +15,13 @@
 namespace {
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
-  using std::experimental::basic_mdspan;
+  using std::experimental::mdspan;
   using std::experimental::linalg::swap_elements;
 
   TEST(BLAS1_swap, mdspan_double)
   {
     using scalar_t = double;
-    using vector_t = basic_mdspan<scalar_t, extents<dynamic_extent>>;
+    using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
 
     constexpr ptrdiff_t vectorSize(5);
     constexpr ptrdiff_t storageSize = ptrdiff_t(2) * vectorSize;
@@ -50,7 +50,7 @@ namespace {
   {
     using real_t = double;
     using scalar_t = std::complex<real_t>;
-    using vector_t = basic_mdspan<scalar_t, extents<dynamic_extent>>;
+    using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
 
     constexpr ptrdiff_t vectorSize(5);
     constexpr ptrdiff_t storageSize = ptrdiff_t(2) * vectorSize;

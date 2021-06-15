@@ -354,8 +354,8 @@ template<class ElementType1,
          class Accessor2,
          std::floating_point Real>
 void givens_rotation_apply(
-  std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
-  std::experimental::basic_mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
+  std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
+  std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
   const Real c,
   const Real s)
 {
@@ -378,8 +378,8 @@ template<class ExecutionPolicy,
          std::floating_point Real>
 void givens_rotation_apply(
   ExecutionPolicy&& /* exec */,
-  std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
-  std::experimental::basic_mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
+  std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
+  std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
   const Real c,
   const Real s)
 {
@@ -396,8 +396,8 @@ template<class ElementType1,
          class Accessor2,
          std::floating_point Real>
 void givens_rotation_apply(
-  std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
-  std::experimental::basic_mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
+  std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
+  std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
   const Real c,
   const complex<Real> s)
 {
@@ -421,8 +421,8 @@ template<class ExecutionPolicy,
          std::floating_point Real>
 void givens_rotation_apply(
   ExecutionPolicy&& /* exec */,
-  std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
-  std::experimental::basic_mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
+  std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
+  std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
   const Real c,
   const complex<Real> s)
 {

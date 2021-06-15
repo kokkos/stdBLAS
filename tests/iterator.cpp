@@ -15,7 +15,7 @@ namespace {
   using std::experimental::layout_left;
   using std::experimental::layout_right;
   using std::experimental::layout_stride; // does compile
-  using std::experimental::basic_mdspan;
+  using std::experimental::mdspan;
   using std::experimental::subspan;
 
   template<class ElementType,
@@ -33,19 +33,19 @@ namespace {
     public std::iterator<
       std::random_access_iterator_tag,   // iterator_category
       ElementType, // value_type
-      typename basic_mdspan<ElementType,
+      typename mdspan<ElementType,
                             extents<extent>,
                             Layout, Accessor>::difference_type,
-      typename basic_mdspan<ElementType,
+      typename mdspan<ElementType,
                             extents<extent>,
                             Layout, Accessor>::pointer,
-      typename basic_mdspan<ElementType,
+      typename mdspan<ElementType,
                             extents<extent>,
                             Layout, Accessor>::reference>
   {
   public:
     using extents_t = extents<extent>;
-    using mdspan_t = basic_mdspan<
+    using mdspan_t = mdspan<
       ElementType, extents_t, Layout, Accessor>;
     using iterator = MdspanRandomAccessIterator<
       ElementType, extents_t, Layout, Accessor>;
@@ -132,7 +132,7 @@ namespace {
            class Layout,
            class Accessor>
   MdspanRandomAccessIterator<ElementType, Extents, Layout, Accessor>
-  begin(basic_mdspan<ElementType, Extents, Layout, Accessor> x)
+  begin(mdspan<ElementType, Extents, Layout, Accessor> x)
   {
     using iterator =
       MdspanRandomAccessIterator<ElementType, Extents, Layout, Accessor>;
@@ -143,9 +143,9 @@ namespace {
            class Extents,
            class Accessor>
   ElementType*
-  // typename basic_mdspan<
+  // typename mdspan<
   //   ElementType, Extents, layout_right, Accessor>::pointer
-  begin(basic_mdspan<ElementType, Extents, layout_right, Accessor> x)
+  begin(mdspan<ElementType, Extents, layout_right, Accessor> x)
   {
     return x.data();
   }
@@ -155,7 +155,7 @@ namespace {
            class Layout,
            class Accessor>
   MdspanRandomAccessIterator<ElementType, Extents, Layout, Accessor>
-  end(basic_mdspan<ElementType, Extents, Layout, Accessor> x)
+  end(mdspan<ElementType, Extents, Layout, Accessor> x)
   {
     using iterator =
       MdspanRandomAccessIterator<ElementType, Extents, Layout, Accessor>;
@@ -165,9 +165,9 @@ namespace {
   template<class ElementType,
            class Extents,
            class Accessor>
-  typename basic_mdspan<
+  typename mdspan<
     ElementType, Extents, layout_right, Accessor>::pointer
-  end(basic_mdspan<ElementType, Extents, layout_right, Accessor> x)
+  end(mdspan<ElementType, Extents, layout_right, Accessor> x)
   {
     return x.data() + x.extent(0);
   }
@@ -180,7 +180,7 @@ namespace {
     using layout_type = typename SpanType::layout_type;
     using accessor_type = typename SpanType::accessor_type;
 
-    using mdspan_type = basic_mdspan<
+    using mdspan_type = mdspan<
       element_type, extents_type, layout_type, accessor_type>;
     static_assert(mdspan_type::rank() == 1);
     using pointer = typename mdspan_type::pointer;
@@ -242,9 +242,9 @@ namespace {
            class Layout,
            class Accessor>
   bool testRotateSort (
-    basic_mdspan<ElementType, extents<extent>, Layout, Accessor> x)
+    mdspan<ElementType, extents<extent>, Layout, Accessor> x)
   {
-    using mdspan_t = basic_mdspan<
+    using mdspan_t = mdspan<
       ElementType, extents<extent>, Layout, Accessor>;
     using scalar_t = ElementType;
 
@@ -271,7 +271,7 @@ namespace {
     //using layout_t = layout_stride; // doesn't compile; why?
     using layout_t = layout_right;
     using extents_t = extents<dynamic_extent, dynamic_extent>;
-    using matrix_t = basic_mdspan<scalar_t, extents_t, layout_t>;
+    using matrix_t = mdspan<scalar_t, extents_t, layout_t>;
 
     constexpr ptrdiff_t dim(5);
     constexpr ptrdiff_t storageSize(dim * dim);
@@ -430,7 +430,7 @@ namespace {
   //   using scalar_t = real_t;
   //   using layout_t = layout_left;
   //   using extents_t = extents<dynamic_extent>;
-  //   using vector_t = basic_mdspan<scalar_t, extents_t, layout_t>;
+  //   using vector_t = mdspan<scalar_t, extents_t, layout_t>;
 
   //   constexpr ptrdiff_t vectorSize(10);
   //   constexpr ptrdiff_t storageSize(10);

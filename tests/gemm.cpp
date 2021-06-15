@@ -14,7 +14,7 @@
 #include <iostream>
 
 namespace {
-  using std::experimental::basic_mdspan;
+  using std::experimental::mdspan;
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::layout_left;
@@ -78,7 +78,7 @@ namespace {
     using real_t = typename Magnitude<Scalar>::type;
 
     using extents_t = extents<dynamic_extent, dynamic_extent>;
-    using matrix_t = basic_mdspan<scalar_t, extents_t, layout_left>;
+    using matrix_t = mdspan<scalar_t, extents_t, layout_left>;
 
     constexpr ptrdiff_t maxDim = 7;
     constexpr ptrdiff_t storageSize(7*maxDim*maxDim);
