@@ -72,7 +72,7 @@ namespace {
     std::vector<scalar_t> storage(vectorSize);
     vector_t x(storage.data(), vectorSize);
 
-    x[0] = (-5, -3);
+    x[0] = -3;
 
     // Testing for absolute equality
     const auto normResult = vector_norm2(x, mag_t{});

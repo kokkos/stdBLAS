@@ -318,7 +318,7 @@ extractScalingFactor (const in_matrix_t& A,
   else if constexpr (std::is_same_v<acc_t, scaled_acc_t_2>) {
     return A.accessor().scale_factor();
   }
-  else if constexpr (std::is_same_v<acc_t, scaled_acc_t_2>) {
+  else if constexpr (std::is_same_v<acc_t, scaled_acc_t_3>) {
     return A.accessor().nested_accessor().scale_factor();
   }
   else {

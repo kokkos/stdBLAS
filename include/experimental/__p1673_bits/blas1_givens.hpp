@@ -117,7 +117,6 @@ void givens_rotation_setup(const Real f,
     pow(base, int(log(safmin / eps) / log(base) / two));
   const Real safmx2 = Real(1.0) / safmn2;
 
-  Real z, scale;
   if (g == 0.0) { // includes the case f == g == 0
     cs = 1.0;
     sn = 0.0;

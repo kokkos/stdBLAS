@@ -187,7 +187,7 @@ namespace {
             for (ptrdiff_t j = 0; j < C_numCols; ++j) {
               for (ptrdiff_t i = 0; i < C_numRows; ++i) {
                 C(i,j) = scalar_t(0.0); // this works even for complex
-                for (ptrdiff_t k = 0; k < A_tt.extent(1); ++k) {
+                for (extents<>::size_type k = 0; k < A_tt.extent(1); ++k) {
                   C(i,j) += A_tt(i,k) * B_tt(k,j);
                 }
               }

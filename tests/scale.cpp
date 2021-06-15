@@ -27,7 +27,6 @@ namespace {
     constexpr ptrdiff_t storageSize = vectorSize;
     std::vector<scalar_t> storage(storageSize);
 
-    const scalar_t scaleFactor = 5.0;
     vector_t x(storage.data(), vectorSize);
 
     {
