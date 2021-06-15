@@ -50,14 +50,12 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
-// FIXME (Hoemmen 2021/05/28) Latest version of P0009 (mdspan) uses size_t
-// instead of ptrdiff_t, but the implementation hasn't changed yet.
 template<class ElementType1,
-         ptrdiff_t ext1,
+         extents<>::size_type ext1,
          class Layout1,
          class Accessor1,
          class ElementType2,
-         ptrdiff_t ext2,
+         extents<>::size_type ext2,
          class Layout2,
          class Accessor2,
          class Scalar>
@@ -73,11 +71,11 @@ Scalar dot(std::experimental::basic_mdspan<ElementType1, std::experimental::exte
 
 template<class ExecutionPolicy,
          class ElementType1,
-         ptrdiff_t ext1,
+         extents<>::size_type ext1,
          class Layout1,
          class Accessor1,
          class ElementType2,
-         ptrdiff_t ext2,
+         extents<>::size_type ext2,
          class Layout2,
          class Accessor2,
          class Scalar>
@@ -93,11 +91,11 @@ Scalar dot(
 // Conjugated dot
 
 template<class ElementType1,
-         ptrdiff_t ext1,
+         extents<>::size_type ext1,
          class Layout1,
          class Accessor1,
          class ElementType2,
-         ptrdiff_t ext2,
+         extents<>::size_type ext2,
          class Layout2,
          class Accessor2,
          class Scalar>
@@ -111,11 +109,11 @@ Scalar dotc(
 
 template<class ExecutionPolicy,
          class ElementType1,
-         ptrdiff_t ext1,
+         extents<>::size_type ext1,
          class Layout1,
          class Accessor1,
          class ElementType2,
-         ptrdiff_t ext2,
+         extents<>::size_type ext2,
          class Layout2,
          class Accessor2,
          class Scalar>
@@ -135,11 +133,11 @@ namespace dot_detail {
   // without exposing "using std::abs" in the outer namespace.
   template<
     class ElementType1,
-    ptrdiff_t ext1,
+    extents<>::size_type ext1,
     class Layout1,
     class Accessor1,
     class ElementType2,
-    ptrdiff_t ext2,
+    extents<>::size_type ext2,
     class Layout2,
     class Accessor2>
   auto dot_return_type_deducer(
@@ -149,11 +147,11 @@ namespace dot_detail {
 } // namespace dot_detail
 
 template<class ElementType1,
-         ptrdiff_t ext1,
+         extents<>::size_type ext1,
          class Layout1,
          class Accessor1,
          class ElementType2,
-         ptrdiff_t ext2,
+         extents<>::size_type ext2,
          class Layout2,
          class Accessor2>
 auto dot(
@@ -166,11 +164,11 @@ auto dot(
 }
 
 template<class ElementType1,
-         ptrdiff_t ext1,
+         extents<>::size_type ext1,
          class Layout1,
          class Accessor1,
          class ElementType2,
-         ptrdiff_t ext2,
+         extents<>::size_type ext2,
          class Layout2,
          class Accessor2>
 auto dotc(
@@ -184,11 +182,11 @@ auto dotc(
 
 template<class ExecutionPolicy,
          class ElementType1,
-         ptrdiff_t ext1,
+         extents<>::size_type ext1,
          class Layout1,
          class Accessor1,
          class ElementType2,
-         ptrdiff_t ext2,
+         extents<>::size_type ext2,
          class Layout2,
          class Accessor2>
 auto dot(
@@ -203,11 +201,11 @@ auto dot(
 
 template<class ExecutionPolicy,
          class ElementType1,
-         ptrdiff_t ext1,
+         extents<>::size_type ext1,
          class Layout1,
          class Accessor1,
          class ElementType2,
-         ptrdiff_t ext2,
+         extents<>::size_type ext2,
          class Layout2,
          class Accessor2>
 auto dotc(

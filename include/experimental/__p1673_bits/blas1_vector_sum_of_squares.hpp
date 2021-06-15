@@ -58,11 +58,14 @@ struct sum_of_squares_result {
   Scalar scaled_sum_of_squares;
 };
 
-template<class in_vector_t,
+template<class ElementType,
+         extents<>::size_type ext0,
+         class Layout,
+         class Accessor,
          class Scalar>
 sum_of_squares_result<Scalar> vector_sum_of_squares(
-    in_vector_t x,
-    sum_of_squares_result<Scalar> init)
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x,
+  sum_of_squares_result<Scalar> init)
 {
   using std::abs;
 
@@ -75,7 +78,7 @@ sum_of_squares_result<Scalar> vector_sum_of_squares(
 
   Scalar scale = init.scaling_factor;
   Scalar ssq = init.scaled_sum_of_squares;
-  for (ptrdiff_t i = 0; i < x.extent(0); ++i) {
+  for (extents<>::size_type i = 0; i < x.extent(0); ++i) {
     if (abs(x(i)) != 0.0) {
       const auto absxi = abs(x(i));
       const auto quotient = scale / absxi;
@@ -96,11 +99,14 @@ sum_of_squares_result<Scalar> vector_sum_of_squares(
 }
 
 template<class ExecutionPolicy,
-         class in_vector_t,
+         class ElementType,
+         extents<>::size_type ext0,
+         class Layout,
+         class Accessor,
          class Scalar>
 sum_of_squares_result<Scalar> vector_sum_of_squares(
   ExecutionPolicy&& /* exec */,
-  in_vector_t v,
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v,
   sum_of_squares_result<Scalar> init)
 {
   return vector_sum_of_squares(v, init);

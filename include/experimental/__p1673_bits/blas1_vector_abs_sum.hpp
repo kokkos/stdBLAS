@@ -51,13 +51,17 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
-template<class in_vector_t,
+template<class ElementType,
+         extents<>::size_type ext0,
+         class Layout,
+         class Accessor,
          class Scalar>
-Scalar vector_abs_sum(in_vector_t v,
-                      Scalar init)
+Scalar vector_abs_sum(
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v,
+  Scalar init)
 {
-  const ptrdiff_t numElt = v.extent(0);
-  for (ptrdiff_t i = 0; i < numElt; ++i) {
+  const extents<>::size_type numElt = v.extent(0);
+  for (extents<>::size_type i = 0; i < numElt; ++i) {
     using std::abs;
     init += abs(v(i));
   }
@@ -65,11 +69,15 @@ Scalar vector_abs_sum(in_vector_t v,
 }
 
 template<class ExecutionPolicy,
-         class in_vector_t,
+         class ElementType,
+         extents<>::size_type ext0,
+         class Layout,
+         class Accessor,
          class Scalar>
-Scalar vector_abs_sum(ExecutionPolicy&& /* exec */,
-                      in_vector_t v,
-                      Scalar init)
+Scalar vector_abs_sum(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v,
+  Scalar init)
 {
   return vector_abs_sum(v, init);
 }

@@ -58,7 +58,7 @@ namespace linalg {
 
 namespace __layout_blas_general_impl {
 
-template <class BaseLayout, ptrdiff_t StaticLDA>
+template <class BaseLayout, extents<>::size_type StaticLDA>
 class __layout_blas_impl {
 private:
 
@@ -71,7 +71,7 @@ public: // but not really
 private:
   using __extents_type = decltype(std::declval<BaseLayout const&>().extents());
 
-  template <class, ptrdiff_t>
+  template <class, extents<>::size_type>
   friend class __layout_blas_impl;
 
 public:
@@ -92,7 +92,7 @@ public:
 
   MDSPAN_FUNCTION_REQUIRES(
     (MDSPAN_INLINE_FUNCTION constexpr),
-    __layout_blas_impl, (__extents_type const& exts, ptrdiff_t lda), noexcept,
+    __layout_blas_impl, (__extents_type const& exts, extents<>::size_type lda), noexcept,
     /* requires */ (!__lda_t::is_static)
   ) : _base_layout(exts),
       __lda(lda)
@@ -101,7 +101,7 @@ public:
   // TODO noexcept specification
   // TODO throw if rhs is dynamic LDA and doesn't match static lhs
   MDSPAN_TEMPLATE_REQUIRES(
-    class OtherExtents, ptrdiff_t OtherLDA, /* requires */ (
+    class OtherExtents, extents<>::size_type OtherLDA, /* requires */ (
       _MDSPAN_TRAIT(is_convertible, OtherExtents, __extents_type)
       && (
         !__layout_blas_impl<OtherExtents, OtherLDA>::__lda_t::is_static
@@ -120,7 +120,7 @@ public:
   // TODO noexcept specification
   // TODO throw if rhs is dynamic LDA and doesn't match static lhs
   MDSPAN_TEMPLATE_REQUIRES(
-    class OtherExtents, ptrdiff_t OtherLDA,
+    class OtherExtents, extents<>::size_type OtherLDA,
     /* requires */ (
       _MDSPAN_TRAIT(is_convertible, OtherExtents, __extents_type)
       && (
@@ -140,7 +140,7 @@ public:
 
   template <class... Integral>
   MDSPAN_FORCE_INLINE_FUNCTION
-  constexpr ptrdiff_t operator()(Integral... idxs) const noexcept {
+  constexpr extents<>::size_type operator()(Integral... idxs) const noexcept {
     return __lda.value * _base_layout(idxs...);
   }
 
@@ -155,22 +155,22 @@ public:
   MDSPAN_INLINE_FUNCTION constexpr __extents_type extents() const noexcept { return _base_layout.extents(); }
 
   MDSPAN_INLINE_FUNCTION
-  constexpr ptrdiff_t required_span_size() const noexcept {
+  constexpr __extents_type::size_type required_span_size() const noexcept {
     return _base_layout.required_span_size() * __lda.value;
   }
 
   MDSPAN_INLINE_FUNCTION
-  constexpr ptrdiff_t stride(size_t r) const noexcept {
+  constexpr __extents_type::size_type stride(size_t r) const noexcept {
     return _base_layout.stride(r) * __lda.value;
   }
 
-  template<class OtherExtents, ptrdiff_t OtherLDA>
+  template<class OtherExtents, __extents_type::size_type OtherLDA>
   MDSPAN_INLINE_FUNCTION
   friend constexpr bool operator==(__layout_blas_impl const& a, __layout_blas_impl<OtherExtents, OtherLDA> const& b) noexcept {
     return a.extents() == b.extents() && a.__lda == b.__lda;
   }
 
-  template<class OtherExtents, ptrdiff_t OtherLDA>
+  template<class OtherExtents, __extents_type::size_type OtherLDA>
   MDSPAN_INLINE_FUNCTION
   friend constexpr bool operator!=(__layout_blas_impl const& a, __layout_blas_impl<OtherExtents, OtherLDA> const& b) noexcept {
     return a.extents() != b.extents() || a.__lda != b.__lda;
@@ -179,7 +179,7 @@ public:
   // Needed to work with subspan()
   template <size_t N>
   struct __static_stride_workaround {
-    static constexpr ptrdiff_t value = __lda_t::is_static ?
+    static constexpr __extents_type::size_type value = __lda_t::is_static ?
       (BaseLayout::template __static_stride_workaround<N>::value == dynamic_extent ? dynamic_extent :
         (__lda_t::value_static * BaseLayout::template __static_stride_workaround<N>::value)
       ) : dynamic_extent;

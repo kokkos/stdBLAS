@@ -51,7 +51,7 @@ inline namespace __p1673_version_0 {
 namespace linalg {
 
 namespace {
-  template<ptrdiff_t ext0, ptrdiff_t ext1>
+  template<extents<>::size_type ext0, extents<>::size_type ext1>
   extents<ext1, ext0> transpose_extents (extents<ext0, ext1> e)
   {
     return extents<ext1, ext0> (e.extent(1), e.extent(0));
@@ -75,7 +75,7 @@ public:
     // TODO insert other standard mapping things
 
     // for non-batched layouts
-    ptrdiff_t operator() (ptrdiff_t i, ptrdiff_t j) const {
+    Extents::size_type operator() (Extents::size_type i, Extents::size_type j) const {
       return nested_mapping(j, i);
     }
 
@@ -93,7 +93,7 @@ public:
       return nested_mapping.is_strided();
     }
 
-    constexpr ptrdiff_t stride(size_t r) const noexcept {
+    constexpr Extents::size_type stride(size_t r) const noexcept {
       // FIXME this only works for rank 2
       return nested_mapping.stride(size_t(1) - r);
     }

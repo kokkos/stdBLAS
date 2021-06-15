@@ -52,10 +52,8 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
-// FIXME (Hoemmen 2021/05/28) Latest version of P0009 (mdspan) uses size_t
-// instead of ptrdiff_t, but the implementation hasn't changed yet.
 template<class ElementType,
-         ptrdiff_t ext0,
+         extents<>::size_type ext0,
          class Layout,
          class Accessor,
          class Scalar>
@@ -79,7 +77,7 @@ Scalar vector_norm2(
 
 template<class ExecutionPolicy,
          class ElementType,
-         ptrdiff_t ext0,
+         extents<>::size_type ext0,
          class Layout,
          class Accessor,
          class Scalar>
@@ -98,7 +96,7 @@ namespace vector_norm2_detail {
   // without exposing "using std::abs" in the outer namespace.
   template<
     class ElementType,
-    ptrdiff_t ext0,
+    extents<>::size_type ext0,
     class Layout,
     class Accessor>
   auto vector_norm2_return_type_deducer(
@@ -107,7 +105,7 @@ namespace vector_norm2_detail {
 } // namespace vector_norm2_detail
 
 template<class ElementType,
-         ptrdiff_t ext0,
+         extents<>::size_type ext0,
          class Layout,
          class Accessor>
 auto vector_norm2(
@@ -120,7 +118,7 @@ auto vector_norm2(
 
 template<class ExecutionPolicy,
          class ElementType,
-         ptrdiff_t ext0,
+         extents<>::size_type ext0,
          class Layout,
          class Accessor>
 auto vector_norm2(

@@ -50,23 +50,37 @@ namespace linalg {
 
 // Rank-2k update of a symmetric matrix
 
-template<class in_matrix_1_t,
-         class in_matrix_2_t,
-         class inout_matrix_t,
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class ElementType_B,
+         extents<>::size_type numRows_B,
+         extents<>::size_type numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C,
          class Triangle>
 void symmetric_matrix_rank_2k_update(
-  in_matrix_1_t A,
-  in_matrix_2_t B,
-  inout_matrix_t C,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::basic_mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::basic_mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle /* t */)
 {
   constexpr bool lower_tri =
     std::is_same_v<Triangle, lower_triangle_t>;
-  for (ptrdiff_t j = 0; j < C.extent(1); ++j) {
-    const ptrdiff_t i_lower = lower_tri ? j : ptrdiff_t(0);
-    const ptrdiff_t i_upper = lower_tri ? C.extent(0) : j+1;
-    for (ptrdiff_t i = i_lower; i < i_upper; ++i) {
-      for (ptrdiff_t k = 0; k < A.extent(1); ++k) {
+  using size_type = typename extents<>::size_type;
+
+  for (size_type j = 0; j < C.extent(1); ++j) {
+    const size_type i_lower = lower_tri ? j : size_type(0);
+    const size_type i_upper = lower_tri ? C.extent(0) : j+1;
+    for (size_type i = i_lower; i < i_upper; ++i) {
+      for (size_type k = 0; k < A.extent(1); ++k) {
         C(i,j) += A(i,k)*B(j,k) + B(i,k)*A(j,k);
       }
     }
@@ -74,15 +88,27 @@ void symmetric_matrix_rank_2k_update(
 }
 
 template<class ExecutionPolicy,
-         class in_matrix_1_t,
-         class in_matrix_2_t,
-         class inout_matrix_t,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class ElementType_B,
+         extents<>::size_type numRows_B,
+         extents<>::size_type numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C,
          class Triangle>
 void symmetric_matrix_rank_2k_update(
   ExecutionPolicy&& /* exec */,
-  in_matrix_1_t A,
-  in_matrix_2_t B,
-  inout_matrix_t C,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::basic_mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::basic_mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle t)
 {
   symmetric_matrix_rank_2k_update(A, B, C, t);
@@ -90,24 +116,38 @@ void symmetric_matrix_rank_2k_update(
 
 // Rank-2k update of a Hermitian matrix
 
-template<class in_matrix_1_t,
-         class in_matrix_2_t,
-         class inout_matrix_t,
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class ElementType_B,
+         extents<>::size_type numRows_B,
+         extents<>::size_type numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C,
          class Triangle>
 void hermitian_matrix_rank_2k_update(
-  in_matrix_1_t A,
-  in_matrix_2_t B,
-  inout_matrix_t C,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::basic_mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::basic_mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle /* t */)
 {
   using std::conj;
   constexpr bool lower_tri =
     std::is_same_v<Triangle, lower_triangle_t>;
-  for (ptrdiff_t j = 0; j < C.extent(1); ++j) {
-    const ptrdiff_t i_lower = lower_tri ? j : ptrdiff_t(0);
-    const ptrdiff_t i_upper = lower_tri ? C.extent(0) : j+1;
-    for (ptrdiff_t i = i_lower; i < i_upper; ++i) {
-      for (ptrdiff_t k = 0; k < A.extent(1); ++k) {
+  using size_type = typename extents<>::size_type;
+
+  for (size_type j = 0; j < C.extent(1); ++j) {
+    const size_type i_lower = lower_tri ? j : size_type(0);
+    const size_type i_upper = lower_tri ? C.extent(0) : j+1;
+    for (size_type i = i_lower; i < i_upper; ++i) {
+      for (size_type k = 0; k < A.extent(1); ++k) {
         C(i,j) += A(i,k) * conj(B(j,k)) + B(i,k) * conj(A(j,k));
       }
     }
@@ -115,15 +155,27 @@ void hermitian_matrix_rank_2k_update(
 }
 
 template<class ExecutionPolicy,
-         class in_matrix_1_t,
-         class in_matrix_2_t,
-         class inout_matrix_t,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class ElementType_B,
+         extents<>::size_type numRows_B,
+         extents<>::size_type numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C,
          class Triangle>
 void hermitian_matrix_rank_2k_update(
   ExecutionPolicy&& /* exec */,
-  in_matrix_1_t A,
-  in_matrix_2_t B,
-  inout_matrix_t C,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::basic_mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::basic_mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle t)
 {
   hermitian_matrix_rank_2k_update(A, B, C, t);

@@ -50,23 +50,41 @@ namespace linalg {
 
 namespace {
 
-template<class in_vector_t,
-         class out_vector_t>
-void copy_rank_1(in_vector_t x,
-                 out_vector_t y)
+template<class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ext_y,
+         class Layout_y,
+         class Accessor_y>
+void copy_rank_1(
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y)
 {
-  for (ptrdiff_t i = 0; i < y.extent(0); ++i) {
+  for (extents<>::size_type i = 0; i < y.extent(0); ++i) {
     y(i) = x(i);
   }
 }
 
-template<class in_matrix_t,
-         class out_matrix_t>
-void copy_rank_2(in_matrix_t x,
-                 out_matrix_t y)
+template<class ElementType_x,
+         extents<>::size_type numRows_x, 
+         extents<>::size_type numCols_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type numRows_y, 
+         extents<>::size_type numCols_y,
+         class Layout_y,
+         class Accessor_y>
+void copy_rank_2(
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<numRows_x, numCols_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<numRows_y, numCols_y>, Layout_y, Accessor_y> y)
 {
-  for (ptrdiff_t j = 0; j < y.extent(1); ++j) {
-    for (ptrdiff_t i = 0; i < y.extent(0); ++i) {
+  using size_type = typename extents<>::size_type;
+
+  for (size_type j = 0; j < y.extent(1); ++j) {
+    for (size_type i = 0; i < y.extent(0); ++i) {
       y(i,j) = x(i,j);
     }
   }
@@ -74,10 +92,18 @@ void copy_rank_2(in_matrix_t x,
 
 } // end anonymous namespace
 
-template<class in_object_t,
-         class out_object_t>
-void copy(in_object_t x,
-          out_object_t y)
+template<class ElementType_x,
+         extents<>::size_type ... ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ... ext_y,
+         class Layout_y,
+         class Accessor_y>
+  requires (sizeof...(ext_x) == sizeof...(ext_y))
+void copy(  
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y)
 {
   if constexpr (x.rank() == 1) {
     copy_rank_1(x, y);
@@ -91,11 +117,19 @@ void copy(in_object_t x,
 }
 
 template<class ExecutionPolicy,
-         class in_object_t,
-         class out_object_t>
-void copy(ExecutionPolicy&& /* exec */,
-          in_object_t x,
-          out_object_t y)
+         class ElementType_x,
+         extents<>::size_type ... ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ... ext_y,
+         class Layout_y,
+         class Accessor_y>
+  requires (sizeof...(ext_x) == sizeof...(ext_y))
+void copy(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y)
 {
   copy(x, y);
 }

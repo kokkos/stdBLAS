@@ -43,6 +43,7 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_MAYBE_STATIC_SIZE_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_MAYBE_STATIC_SIZE_HPP_
 
+#include <experimental/__p0009_bits/extents.hpp>
 #include <experimental/__p0009_bits/macros.hpp>
 #include <experimental/__p0009_bits/dynamic_extent.hpp>
 
@@ -84,8 +85,8 @@ struct __maybe_static_value<T, DynSentinel, DynSentinel> {
   static constexpr auto value_static = DynSentinel;
 };
 
-template <ptrdiff_t StaticSize, ptrdiff_t Sentinel=dynamic_extent>
-using __maybe_static_extent = __maybe_static_value<ptrdiff_t, StaticSize, Sentinel>;
+template <extents<>::size_type StaticSize, extents<>::size_type Sentinel=dynamic_extent>
+using __maybe_static_extent = __maybe_static_value<extents<>::size_type, StaticSize, Sentinel>;
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0

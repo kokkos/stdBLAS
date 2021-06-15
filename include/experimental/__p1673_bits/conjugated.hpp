@@ -92,6 +92,8 @@ auto operator* (const T1 x, const conjugated_scalar<T2> y) {
 
 template<class Accessor, class T>
 class accessor_conjugate {
+private:
+  using size_type = typename extents<>::size_type;
 public:
   using element_type  = typename Accessor::element_type;
   using pointer       = typename Accessor::pointer;
@@ -102,11 +104,11 @@ public:
 
   accessor_conjugate(Accessor a) : acc(a) {}
 
-  reference access(pointer p, ptrdiff_t i) const noexcept {
+  reference access(pointer p, size_type i) const noexcept {
     return reference(acc.access(p, i));
   }
 
-  typename offset_policy::pointer offset(pointer p, ptrdiff_t i) const noexcept {
+  typename offset_policy::pointer offset(pointer p, size_type i) const noexcept {
     return acc.offset(p, i);
   }
 
@@ -119,6 +121,8 @@ private:
 
 template<class Accessor, class T>
 class accessor_conjugate<Accessor, std::complex<T>> {
+private:
+  using size_type = typename extents<>::size_type;
 public:
   // FIXME If BLAS functions want to strip off accessor_conjugate for
   // optimization, they will need a way to work with th underlying
@@ -137,11 +141,11 @@ public:
 
   accessor_conjugate(Accessor a) : acc(a) {}
 
-  reference access(pointer p, ptrdiff_t i) const noexcept {
+  reference access(pointer p, size_type i) const noexcept {
     return reference(acc.access(p, i));
   }
 
-  typename offset_policy::pointer offset(pointer p, ptrdiff_t i) const noexcept {
+  typename offset_policy::pointer offset(pointer p, size_type i) const noexcept {
     return acc.offset(p,i);
   }
 

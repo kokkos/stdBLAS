@@ -48,19 +48,23 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
-template<class in_vector_t>
-ptrdiff_t vector_idx_abs_max(in_vector_t v)
+template<class ElementType,
+         extents<>::size_type ext0,
+         class Layout,
+         class Accessor>
+extents<>::size_type vector_idx_abs_max(
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
 {
   using std::abs;
-  using element_type = typename in_vector_t::element_type;
+  using size_type = typename extents<>::size_type;
   using magnitude_type = decltype(abs(v(0)));
 
   if (v.extent(0) == 0) {
     return -1;
   }
-  ptrdiff_t maxInd = 0;
+  size_type maxInd = 0;
   magnitude_type maxVal = abs(v(0));
-  for (ptrdiff_t i = 1; i < v.extent(0); ++i) {
+  for (size_type i = 1; i < v.extent(0); ++i) {
     if (maxVal < abs(v(i))) {
       maxVal = abs(v(i));
       maxInd = i;
@@ -69,11 +73,14 @@ ptrdiff_t vector_idx_abs_max(in_vector_t v)
   return maxInd; // FIXME check for NaN "never less than" stuff
 }
 
-
 template<class ExecutionPolicy,
-         class in_vector_t>
-ptrdiff_t vector_idx_abs_max(ExecutionPolicy&& /* exec */,
-                             in_vector_t v)
+         class ElementType,
+         extents<>::size_type ext0,
+         class Layout,
+         class Accessor>
+extents<>::size_type vector_idx_abs_max(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
 {
   return vector_idx_abs_max(v);
 }

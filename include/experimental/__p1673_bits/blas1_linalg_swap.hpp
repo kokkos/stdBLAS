@@ -52,25 +52,45 @@ namespace linalg {
 
 namespace {
 
-template<class in_vector_t,
-         class out_vector_t>
-void swap_rank_1(in_vector_t x,
-                        out_vector_t y)
+template<class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ext_y,
+         class Layout_y,
+         class Accessor_y>
+void swap_rank_1(
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y)
 {
   using std::swap;
-  for (ptrdiff_t i = 0; i < y.extent(0); ++i) {
+  using size_type = typename extents<>::size_type;
+
+  for (size_type i = 0; i < y.extent(0); ++i) {
     swap(x(i), y(i));
   }
 }
 
-template<class in_matrix_t,
-         class out_matrix_t>
-void swap_rank_2(in_matrix_t x,
-                        out_matrix_t y)
+template<class ElementType_x,
+         extents<>::size_type numRows_x, 
+         extents<>::size_type numCols_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type numRows_y, 
+         extents<>::size_type numCols_y,
+         class Layout_y,
+         class Accessor_y>
+void swap_rank_2(
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<numRows_x, numCols_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<numRows_y, numCols_y>, Layout_y, Accessor_y> y)
 {
   using std::swap;
-  for (ptrdiff_t j = 0; j < y.extent(1); ++j) {
-    for (ptrdiff_t i = 0; i < y.extent(0); ++i) {
+  using size_type = typename extents<>::size_type;
+
+  for (size_type j = 0; j < y.extent(1); ++j) {
+    for (size_type i = 0; i < y.extent(0); ++i) {
       swap(x(i,j), y(i,j));
     }
   }
@@ -78,16 +98,24 @@ void swap_rank_2(in_matrix_t x,
 
 } // end anonymous namespace
 
-template<class inout_object_1_t,
-         class inout_object_2_t>
-void swap_elements(inout_object_1_t v1,
-                   inout_object_2_t v2)
+template<class ElementType_x,
+         extents<>::size_type ... ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ... ext_y,
+         class Layout_y,
+         class Accessor_y>
+  requires (sizeof...(ext_x) == sizeof...(ext_y))
+void swap_elements(
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y)
 {
-  if constexpr (v1.rank() == 1) {
-    swap_rank_1(v1, v2);
+  if constexpr (x.rank() == 1) {
+    swap_rank_1(x, y);
   }
-  else if constexpr (v1.rank() == 2) {
-    swap_rank_2(v1, v2);
+  else if constexpr (x.rank() == 2) {
+    swap_rank_2(x, y);
   }
   else {
     static_assert("Not implemented");
@@ -95,13 +123,21 @@ void swap_elements(inout_object_1_t v1,
 }
 
 template<class ExecutionPolicy,
-         class inout_object_1_t,
-         class inout_object_2_t>
-void swap_elements(ExecutionPolicy&& /* exec */,
-                   inout_object_1_t v1,
-                   inout_object_2_t v2)
+         class ElementType_x,
+         extents<>::size_type ... ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ... ext_y,
+         class Layout_y,
+         class Accessor_y>
+  requires (sizeof...(ext_x) == sizeof...(ext_y))
+void swap_elements(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y)
 {
-  swap_elements(v1, v2);
+  swap_elements(x, y);
 }
 
 } // end namespace linalg

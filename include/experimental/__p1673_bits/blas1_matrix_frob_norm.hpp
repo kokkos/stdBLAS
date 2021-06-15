@@ -51,20 +51,27 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
-template<class in_matrix_t,
-         class Scalar>
-Scalar matrix_frob_norm(in_matrix_t A,
-                        Scalar init)
+template<
+    class ElementType,
+    extents<>::size_type numRows, 
+    extents<>::size_type numCols,
+    class Layout,
+    class Accessor,
+    class Scalar>
+Scalar matrix_frob_norm(
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A,
+  Scalar init)
 {
   using std::abs;
   using std::sqrt;
+  using size_type = typename extents<>::size_type;
 
   // Handle special cases.
   auto result = init;
   if (A.extent(0) == 0 || A.extent(1) == 0) {
     return result;
   }
-  else if(A.extent(0) == ptrdiff_t(1) && A.extent(1) == ptrdiff_t(1)) {
+  else if(A.extent(0) == size_type(1) && A.extent(1) == size_type(1)) {
     result += abs(A(0, 0));
     return result;
   }
@@ -72,8 +79,8 @@ Scalar matrix_frob_norm(in_matrix_t A,
   // Rescaling avoids unwarranted overflow or underflow.
   Scalar scale = 0.0;
   Scalar ssq = 1.0;
-  for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
+  for (size_type i = 0; i < A.extent(0); ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
       const auto absaij = abs(A(i,j));
       if (absaij != 0.0) {
         const auto quotient = scale / absaij;
@@ -92,11 +99,16 @@ Scalar matrix_frob_norm(in_matrix_t A,
 }
 
 template<class ExecutionPolicy,
-         class in_matrix_t,
-         class Scalar>
-Scalar matrix_frob_norm(ExecutionPolicy&& exec,
-                        in_matrix_t A,
-                        Scalar init)
+  class ElementType,
+  extents<>::size_type numRows, 
+  extents<>::size_type numCols,
+  class Layout,
+  class Accessor,
+  class Scalar>
+Scalar matrix_frob_norm(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A,
+  Scalar init)
 {
   return matrix_frob_norm(A, init);
 }

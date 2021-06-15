@@ -53,84 +53,151 @@ namespace linalg {
 
 // Overwriting general matrix-vector product: y := A * x
 
-template<class in_vector_t,
-         class in_matrix_t,
-         class out_vector_t>
-void matrix_vector_product(in_matrix_t A,
-                           in_vector_t x,
-                           out_vector_t y)
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ext_y,
+         class Layout_y,
+         class Accessor_y>
+void matrix_vector_product(
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y)
 {
-  for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
-    y(i) = typename out_vector_t::value_type{};
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
+  using size_type = typename extents<>::size_type;
+
+  for (size_type i = 0; i < A.extent(0); ++i) {
+    y(i) = ElementType_y{};
+    for (size_type j = 0; j < A.extent(1); ++j) {
       y(i) += A(i,j) * x(j);
     }
   }
 }
 
 template<class ExecutionPolicy,
-         class in_vector_t,
-         class in_matrix_t,
-         class out_vector_t>
-void matrix_vector_product(ExecutionPolicy&& /* exec */,
-                           in_matrix_t A,
-                           in_vector_t x,
-                           out_vector_t y)
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ext_y,
+         class Layout_y,
+         class Accessor_y>
+void matrix_vector_product(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y)
 {
   matrix_vector_product(A, x, y);
 }
 
 // Updating general matrix-vector product: z := y + A * x
 
-template<class in_vector_1_t,
-         class in_matrix_t,
-         class in_vector_2_t,
-         class out_vector_t>
-void matrix_vector_product(in_matrix_t A,
-                           in_vector_1_t x,
-                           in_vector_2_t y,
-                           out_vector_t z)
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ext_y,
+         class Layout_y,
+         class Accessor_y,
+         class ElementType_z,
+         extents<>::size_type ext_z,
+         class Layout_z,
+         class Accessor_z>
+void matrix_vector_product(
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y,
+  std::experimental::basic_mdspan<ElementType_z, std::experimental::extents<ext_z>, Layout_z, Accessor_z> z)
 {
-  for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
+  using size_type = typename extents<>::size_type;
+
+  for (size_type i = 0; i < A.extent(0); ++i) {
     y(i) = z(i);
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
       y(i) += A(i,j) * x(j);
     }
   }
 }
 
 template<class ExecutionPolicy,
-         class in_vector_1_t,
-         class in_matrix_t,
-         class in_vector_2_t,
-         class out_vector_t>
-void matrix_vector_product(ExecutionPolicy&& /* exec */,
-                           in_matrix_t A,
-                           in_vector_1_t x,
-                           in_vector_2_t y,
-                           out_vector_t z)
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ext_y,
+         class Layout_y,
+         class Accessor_y,
+         class ElementType_z,
+         extents<>::size_type ext_z,
+         class Layout_z,
+         class Accessor_z>
+void matrix_vector_product(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y,
+  std::experimental::basic_mdspan<ElementType_z, std::experimental::extents<ext_z>, Layout_z, Accessor_z> z)
 {
   matrix_vector_product(A, x, y, z);
 }
 
 // Overwriting symmetric matrix-vector product: y := A * x
 
-template<class in_matrix_t,
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
          class Triangle,
-         class in_vector_t,
-         class out_vector_t>
-void symmetric_matrix_vector_product(in_matrix_t A,
-                                     Triangle t,
-                                     in_vector_t x,
-                                     out_vector_t y)
+         class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ext_y,
+         class Layout_y,
+         class Accessor_y>
+void symmetric_matrix_vector_product(
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y)
 {
-  for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
-    y(i) = typename out_vector_t::value_type{};
+  using size_type = typename extents<>::size_type;
+
+  for (size_type i = 0; i < A.extent(0); ++i) {
+    y(i) = ElementType_y{};
   }
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      for (ptrdiff_t i = j; i < A.extent(0); ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      for (size_type i = j; i < A.extent(0); ++i) {
         const auto A_ij = A(i,j);
         y(i) += A_ij * x(j);
         y(j) += A_ij * x(i);
@@ -138,8 +205,8 @@ void symmetric_matrix_vector_product(in_matrix_t A,
     }
   }
   else {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      for (ptrdiff_t i = 0; i <= j; ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      for (size_type i = 0; i <= j; ++i) {
         const auto A_ij = A(i,j);
         y(i) += A_ij * x(j);
         y(j) += A_ij * x(i);
@@ -149,39 +216,66 @@ void symmetric_matrix_vector_product(in_matrix_t A,
 }
 
 template<class ExecutionPolicy,
-         class in_matrix_t,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
          class Triangle,
-         class in_vector_t,
-         class out_vector_t>
-void symmetric_matrix_vector_product(ExecutionPolicy&& /* exec */,
-                                     in_matrix_t A,
-                                     Triangle t,
-                                     in_vector_t x,
-                                     out_vector_t y)
+         class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ext_y,
+         class Layout_y,
+         class Accessor_y>
+void symmetric_matrix_vector_product(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y)
 {
   symmetric_matrix_vector_product(A, t, x, y);
 }
 
 // Updating symmetric matrix-vector product: z := y + A * x
 
-template<class in_matrix_t,
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
          class Triangle,
-         class in_vector_1_t,
-         class in_vector_2_t,
-         class out_vector_t>
-void symmetric_matrix_vector_product(in_matrix_t A,
-                                     Triangle t,
-                                     in_vector_1_t x,
-                                     in_vector_2_t y,
-                                     out_vector_t z)
+         class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ext_y,
+         class Layout_y,
+         class Accessor_y,
+         class ElementType_z,
+         extents<>::size_type ext_z,
+         class Layout_z,
+         class Accessor_z>
+void symmetric_matrix_vector_product(
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y,
+  std::experimental::basic_mdspan<ElementType_z, std::experimental::extents<ext_z>, Layout_z, Accessor_z> z)
 {
-  for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
+  using size_type = typename extents<>::size_type;
+
+  for (size_type i = 0; i < A.extent(0); ++i) {
     z(i) = y(i);
   }
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      for (ptrdiff_t i = j; i < A.extent(0); ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      for (size_type i = j; i < A.extent(0); ++i) {
         const auto A_ij = A(i,j);
         z(i) += A_ij * x(j);
         z(j) += A_ij * x(i);
@@ -189,8 +283,8 @@ void symmetric_matrix_vector_product(in_matrix_t A,
     }
   }
   else {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      for (ptrdiff_t i = 0; i <= j; ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      for (size_type i = 0; i <= j; ++i) {
         const auto A_ij = A(i,j);
         z(i) += A_ij * x(j);
         z(j) += A_ij * x(i);
@@ -200,40 +294,67 @@ void symmetric_matrix_vector_product(in_matrix_t A,
 }
 
 template<class ExecutionPolicy,
-         class in_matrix_t,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
          class Triangle,
-         class in_vector_1_t,
-         class in_vector_2_t,
-         class out_vector_t>
-void symmetric_matrix_vector_product(ExecutionPolicy&& /* exec */,
-                                     in_matrix_t A,
-                                     Triangle t,
-                                     in_vector_1_t x,
-                                     in_vector_2_t y,
-                                     out_vector_t z)
+         class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ext_y,
+         class Layout_y,
+         class Accessor_y,
+         class ElementType_z,
+         extents<>::size_type ext_z,
+         class Layout_z,
+         class Accessor_z>
+void symmetric_matrix_vector_product(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y,
+  std::experimental::basic_mdspan<ElementType_z, std::experimental::extents<ext_z>, Layout_z, Accessor_z> z)
 {
   symmetric_matrix_vector_product(A, t, x, y, z);
 }
 
 // Overwriting Hermitian matrix-vector product: y := A * x
 
-template<class in_matrix_t,
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
          class Triangle,
-         class in_vector_t,
-         class out_vector_t>
-void hermitian_matrix_vector_product(in_matrix_t A,
-                                     Triangle t,
-                                     in_vector_t x,
-                                     out_vector_t y)
+         class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ext_y,
+         class Layout_y,
+         class Accessor_y>
+void hermitian_matrix_vector_product(
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y)
 {
-  for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
-    y(i) = typename out_vector_t::value_type{};
+  using size_type = typename extents<>::size_type;
+
+  for (size_type i = 0; i < A.extent(0); ++i) {
+    y(i) = ElementType_y{};
   }
 
   using std::conj;
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      for (ptrdiff_t i = j; i < A.extent(0); ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      for (size_type i = j; i < A.extent(0); ++i) {
         const auto A_ij = A(i,j);
         y(i) += A_ij * x(j);
         y(j) += conj(A_ij) * x(i);
@@ -241,8 +362,8 @@ void hermitian_matrix_vector_product(in_matrix_t A,
     }
   }
   else {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      for (ptrdiff_t i = 0; i <= j; ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      for (size_type i = 0; i <= j; ++i) {
         const auto A_ij = A(i,j);
         y(i) += A_ij * x(j);
         y(j) += conj(A_ij) * x(i);
@@ -252,40 +373,67 @@ void hermitian_matrix_vector_product(in_matrix_t A,
 }
 
 template<class ExecutionPolicy,
-         class in_matrix_t,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
          class Triangle,
-         class in_vector_t,
-         class out_vector_t>
-void hermitian_matrix_vector_product(ExecutionPolicy&& /* exec */,
-                                     in_matrix_t A,
-                                     Triangle t,
-                                     in_vector_t x,
-                                     out_vector_t y)
+         class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ext_y,
+         class Layout_y,
+         class Accessor_y>
+void hermitian_matrix_vector_product(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y)
 {
   hermitian_matrix_vector_product(A, t, x, y);
 }
 
 // Updating Hermitian matrix-vector product: z := y + A * x
 
-template<class in_matrix_t,
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
          class Triangle,
-         class in_vector_1_t,
-         class in_vector_2_t,
-         class out_vector_t>
-void hermitian_matrix_vector_product(in_matrix_t A,
-                                     Triangle t,
-                                     in_vector_1_t x,
-                                     in_vector_2_t y,
-                                     out_vector_t z)
+         class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ext_y,
+         class Layout_y,
+         class Accessor_y,
+         class ElementType_z,
+         extents<>::size_type ext_z,
+         class Layout_z,
+         class Accessor_z>
+void hermitian_matrix_vector_product(
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y,
+  std::experimental::basic_mdspan<ElementType_z, std::experimental::extents<ext_z>, Layout_z, Accessor_z> z)
 {
-  for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
+  using size_type = typename extents<>::size_type;
+
+  for (size_type i = 0; i < A.extent(0); ++i) {
     z(i) = y(i);
   }
 
   using std::conj;
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      for (ptrdiff_t i = j; i < A.extent(0); ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      for (size_type i = j; i < A.extent(0); ++i) {
         const auto A_ij = A(i,j);
         z(i) += A_ij * x(j);
         z(j) += conj(A_ij) * x(i);
@@ -293,8 +441,8 @@ void hermitian_matrix_vector_product(in_matrix_t A,
     }
   }
   else {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      for (ptrdiff_t i = 0; i <= j; ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      for (size_type i = 0; i <= j; ++i) {
         const auto A_ij = A(i,j);
         z(i) += A_ij * x(j);
         z(j) += conj(A_ij) * x(i);
@@ -304,44 +452,71 @@ void hermitian_matrix_vector_product(in_matrix_t A,
 }
 
 template<class ExecutionPolicy,
-         class in_matrix_t,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
          class Triangle,
-         class in_vector_1_t,
-         class in_vector_2_t,
-         class out_vector_t>
-void hermitian_matrix_vector_product(ExecutionPolicy&& /* exec */,
-                                     in_matrix_t A,
-                                     Triangle t,
-                                     in_vector_1_t x,
-                                     in_vector_2_t y,
-                                     out_vector_t z)
+         class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ext_y,
+         class Layout_y,
+         class Accessor_y,
+         class ElementType_z,
+         extents<>::size_type ext_z,
+         class Layout_z,
+         class Accessor_z>
+void hermitian_matrix_vector_product(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y,
+  std::experimental::basic_mdspan<ElementType_z, std::experimental::extents<ext_z>, Layout_z, Accessor_z> z)
 {
   hermitian_matrix_vector_product(A, t, x, y, z);
 }
 
 // Overwriting triangular matrix-vector product: y := A * x
 
-template<class in_matrix_t,
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
          class Triangle,
          class DiagonalStorage,
-         class in_vector_t,
-         class out_vector_t>
-void triangular_matrix_vector_product(in_matrix_t A,
-                                      Triangle t,
-                                      DiagonalStorage d,
-                                      in_vector_t x,
-                                      out_vector_t y)
+         class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ext_y,
+         class Layout_y,
+         class Accessor_y>
+void triangular_matrix_vector_product(
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  DiagonalStorage d,
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y)
 {
-  for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
-    y(i) = typename out_vector_t::value_type{};
+  using size_type = typename extents<>::size_type;
+
+  for (size_type i = 0; i < A.extent(0); ++i) {
+    y(i) = ElementType_y{};
   }
   constexpr bool explicitDiagonal =
     std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      const ptrdiff_t i_lower = explicitDiagonal ? j : j + ptrdiff_t(1);
-      for (ptrdiff_t i = i_lower; i < A.extent(0); ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      const size_type i_lower = explicitDiagonal ? j : j + size_type(1);
+      for (size_type i = i_lower; i < A.extent(0); ++i) {
         y(i) += A(i,j) * x(j);
       }
       if constexpr (! explicitDiagonal) {
@@ -351,7 +526,7 @@ void triangular_matrix_vector_product(in_matrix_t A,
   }
   else {
     for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      const ptrdiff_t i_upper = explicitDiagonal ? j : j - ptrdiff_t(1);
+      const ptrdiff_t i_upper = explicitDiagonal ? j : j - 1;
       for (ptrdiff_t i = 0; i <= i_upper; ++i) {
         y(i) += A(i,j) * x(j);
       }
@@ -363,46 +538,73 @@ void triangular_matrix_vector_product(in_matrix_t A,
 }
 
 template<class ExecutionPolicy,
-         class in_matrix_t,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
          class Triangle,
          class DiagonalStorage,
-         class in_vector_t,
-         class out_vector_t>
-void triangular_matrix_vector_product(ExecutionPolicy&& /* exec */,
-                                      in_matrix_t A,
-                                      Triangle t,
-                                      DiagonalStorage d,
-                                      in_vector_t x,
-                                      out_vector_t y)
+         class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ext_y,
+         class Layout_y,
+         class Accessor_y>
+void triangular_matrix_vector_product(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  DiagonalStorage d,
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y)
 {
   triangular_matrix_vector_product(A, t, d, x, y);
 }
 
 // Updating triangular matrix-vector product: z := y + A * x
 
-template<class in_matrix_t,
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
          class Triangle,
          class DiagonalStorage,
-         class in_vector_1_t,
-         class in_vector_2_t,
-         class out_vector_t>
-void triangular_matrix_vector_product(in_matrix_t A,
-                                      Triangle t,
-                                      DiagonalStorage d,
-                                      in_vector_1_t x,
-                                      in_vector_2_t y,
-                                      out_vector_t z)
+         class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ext_y,
+         class Layout_y,
+         class Accessor_y,
+         class ElementType_z,
+         extents<>::size_type ext_z,
+         class Layout_z,
+         class Accessor_z>
+void triangular_matrix_vector_product(
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  DiagonalStorage d,
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y,
+  std::experimental::basic_mdspan<ElementType_z, std::experimental::extents<ext_z>, Layout_z, Accessor_z> z)
 {
-  for (ptrdiff_t i = 0; i < A.extent(0); ++i) {
+  using size_type = typename extents<>::size_type;
+
+  for (size_type i = 0; i < A.extent(0); ++i) {
     z(i) = y(i);
   }
   constexpr bool explicitDiagonal =
     std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      const ptrdiff_t i_lower = explicitDiagonal ? j : j + ptrdiff_t(1);
-      for (ptrdiff_t i = i_lower; i < A.extent(0); ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      const size_type i_lower = explicitDiagonal ? j : j + size_type(1);
+      for (size_type i = i_lower; i < A.extent(0); ++i) {
         z(i) += A(i,j) * x(j);
       }
       if constexpr (! explicitDiagonal) {
@@ -411,9 +613,9 @@ void triangular_matrix_vector_product(in_matrix_t A,
     }
   }
   else {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      const ptrdiff_t i_upper = explicitDiagonal ? j : j - ptrdiff_t(1);
-      for (ptrdiff_t i = 0; i <= i_upper; ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      const ptrdiff_t i_upper = explicitDiagonal ? j : j - size_type(1);
+      for (size_type i = 0; i <= i_upper; ++i) {
         z(i) += A(i,j) * x(j);
       }
       if constexpr (! explicitDiagonal) {
@@ -424,19 +626,33 @@ void triangular_matrix_vector_product(in_matrix_t A,
 }
 
 template<class ExecutionPolicy,
-         class in_matrix_t,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
          class Triangle,
          class DiagonalStorage,
-         class in_vector_1_t,
-         class in_vector_2_t,
-         class out_vector_t>
-void triangular_matrix_vector_product(ExecutionPolicy&& /* exec */,
-                                      in_matrix_t A,
-                                      Triangle t,
-                                      DiagonalStorage d,
-                                      in_vector_1_t x,
-                                      in_vector_2_t y,
-                                      out_vector_t z)
+         class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ext_y,
+         class Layout_y,
+         class Accessor_y,
+         class ElementType_z,
+         extents<>::size_type ext_z,
+         class Layout_z,
+         class Accessor_z>
+void triangular_matrix_vector_product(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  DiagonalStorage d,
+  std::experimental::basic_mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::basic_mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y,
+  std::experimental::basic_mdspan<ElementType_z, std::experimental::extents<ext_z>, Layout_z, Accessor_z> z)
 {
   triangular_matrix_vector_product(A, t, d, x, y, z);
 }

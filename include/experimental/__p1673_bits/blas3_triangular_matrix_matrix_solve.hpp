@@ -50,25 +50,39 @@ namespace linalg {
 
 namespace {
 
-template<class in_matrix_t,
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
          class DiagonalStorage,
-         class in_object_t,
-         class out_object_t>
+         class ElementType_B,
+         extents<>::size_type numRows_B,
+         extents<>::size_type numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_X,
+         extents<>::size_type numRows_X,
+         extents<>::size_type numCols_X,
+         class Layout_X,
+         class Accessor_X>
 void trsm_upper_triangular_left_side(
-  in_matrix_t A,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   DiagonalStorage d,
-  in_object_t B,
-  out_object_t X)
+  std::experimental::basic_mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::basic_mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   constexpr bool explicit_diagonal =
     std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
+  using size_type = typename extents<>::size_type;
 
-  const ptrdiff_t A_num_rows = A.extent(0);
-  const ptrdiff_t B_num_cols = B.extent(1);
+  const size_type A_num_rows = A.extent(0);
+  const size_type B_num_cols = B.extent(1);
 
-  for (ptrdiff_t k = 0; k < B_num_cols; ++k) {
+  for (size_type k = 0; k < B_num_cols; ++k) {
     // One advantage of using signed index types is that you can write
     // descending loops with zero-based indices.
+    // (AMK 6/8/21) i can't be a nonnegative type because the loop would be infinite
     for (ptrdiff_t i = A_num_rows - 1; i >= 0; --i) {
       // TODO this would be a great opportunity for an implementer to
       // add value, by accumulating in extended precision (or at least
@@ -76,7 +90,7 @@ void trsm_upper_triangular_left_side(
       using sum_type = decltype (B(i,k) - A(0,0) * X(0,0));
       //using sum_type = typename out_object_t::element_type;
       const sum_type t (B(i,k));
-      for (ptrdiff_t j = i + 1; j < A_num_rows; ++j) {
+      for (size_type j = i + 1; j < A_num_rows; ++j) {
         t = t - A(i,j) * X(j,k);
       }
       if constexpr (explicit_diagonal) {
@@ -89,30 +103,42 @@ void trsm_upper_triangular_left_side(
   }
 }
 
-template<class in_matrix_t,
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
          class DiagonalStorage,
-         class in_object_t,
-         class out_object_t>
+         class ElementType_B,
+         extents<>::size_type numRows_B,
+         extents<>::size_type numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_X,
+         extents<>::size_type numRows_X,
+         extents<>::size_type numCols_X,
+         class Layout_X,
+         class Accessor_X>
 void trsm_lower_triangular_left_side(
-  in_matrix_t A,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   DiagonalStorage d,
-  in_object_t B,
-  out_object_t X)
+  std::experimental::basic_mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::basic_mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   constexpr bool explicit_diagonal =
     std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
+  using size_type = typename extents<>::size_type;
 
-  const ptrdiff_t A_num_rows = A.extent(0);
-  const ptrdiff_t B_num_cols = B.extent(1);
+  const size_type A_num_rows = A.extent(0);
+  const size_type B_num_cols = B.extent(1);
 
-  for (ptrdiff_t k = 0; k < B_num_cols; ++k) {
-    for (ptrdiff_t i = 0; i < A_num_rows; ++i) {
+  for (size_type k = 0; k < B_num_cols; ++k) {
+    for (size_type i = 0; i < A_num_rows; ++i) {
       // TODO this would be a great opportunity for an implementer to
       // add value, by accumulating in extended precision (or at least
       // in a type with the max precision of X and B).
-      using x_element_type = typename out_object_t::element_type;
-      const x_element_type t (B(i,k));
-      for (ptrdiff_t j = 0; j < i; ++j) {
+      const ElementType_X t (B(i,k));
+      for (size_type j = 0; j < i; ++j) {
         t = t - A(i,j) * X(j,k);
       }
       if constexpr (explicit_diagonal) {
@@ -125,27 +151,40 @@ void trsm_lower_triangular_left_side(
   }
 }
 
-template<class in_matrix_t,
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
          class DiagonalStorage,
-         class in_object_t,
-         class out_object_t>
+         class ElementType_B,
+         extents<>::size_type numRows_B,
+         extents<>::size_type numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_X,
+         extents<>::size_type numRows_X,
+         extents<>::size_type numCols_X,
+         class Layout_X,
+         class Accessor_X>
 void trsm_upper_triangular_right_side(
-  in_matrix_t A,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   DiagonalStorage d,
-  in_object_t B,
-  out_object_t X)
+  std::experimental::basic_mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::basic_mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   constexpr bool explicit_diagonal =
     std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
+  using size_type = typename extents<>::size_type;
 
-  const ptrdiff_t B_num_rows = B.extent(0);
-  const ptrdiff_t A_num_cols = A.extent(1);
+  const size_type B_num_rows = B.extent(0);
+  const size_type A_num_cols = A.extent(1);
 
-  for (ptrdiff_t i = 0; i < B_num_rows; ++i) {
-    for (ptrdiff_t j = 0; j < A_num_cols; ++j) {
+  for (size_type i = 0; i < B_num_rows; ++i) {
+    for (size_type j = 0; j < A_num_cols; ++j) {
       using sum_type = decltype (B(i,j) - A(0,0) * X(0,0));
       const sum_type t (B(i,j));
-      for (ptrdiff_t k = 0; k < j; ++j) {
+      for (size_type k = 0; k < j; ++j) {
         t = t - X(i,k) * A(k,j);
       }
       if constexpr (explicit_diagonal) {
@@ -158,28 +197,41 @@ void trsm_upper_triangular_right_side(
   }
 }
 
-template<class in_matrix_t,
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
          class DiagonalStorage,
-         class in_object_t,
-         class out_object_t>
+         class ElementType_B,
+         extents<>::size_type numRows_B,
+         extents<>::size_type numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_X,
+         extents<>::size_type numRows_X,
+         extents<>::size_type numCols_X,
+         class Layout_X,
+         class Accessor_X>
 void trsm_lower_triangular_right_side(
-  in_matrix_t A,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   DiagonalStorage d,
-  in_object_t B,
-  out_object_t X)
+  std::experimental::basic_mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::basic_mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   constexpr bool explicit_diagonal =
     std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
+  using size_type = typename extents<>::size_type;
 
-  const ptrdiff_t B_num_rows = B.extent(0);
-  const ptrdiff_t A_num_rows = A.extent(0);
-  const ptrdiff_t A_num_cols = A.extent(1);
+  const size_type B_num_rows = B.extent(0);
+  const size_type A_num_rows = A.extent(0);
+  const size_type A_num_cols = A.extent(1);
 
-  for (ptrdiff_t i = 0; i < B_num_rows; ++i) {
-    for (ptrdiff_t j = 0; j < A_num_cols; ++j) {
+  for (size_type i = 0; i < B_num_rows; ++i) {
+    for (size_type j = 0; j < A_num_cols; ++j) {
       using sum_type = decltype (B(i,j) - A(0,0) * X(0,0));
       const sum_type t (B(i,j));
-      for (ptrdiff_t k = j + 1; k < A_num_rows; ++j) {
+      for (size_type k = j + 1; k < A_num_rows; ++j) {
         t = t - X(i,k) * A(k,j);
       }
       if constexpr (explicit_diagonal) {
@@ -192,21 +244,33 @@ void trsm_lower_triangular_right_side(
   }
 }
 
-}
+} // end anonymous namespace
 
-template<class in_matrix_t,
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
          class Triangle,
          class DiagonalStorage,
          class Side,
-         class in_object_t,
-         class out_object_t>
+         class ElementType_B,
+         extents<>::size_type numRows_B,
+         extents<>::size_type numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_X,
+         extents<>::size_type numRows_X,
+         extents<>::size_type numCols_X,
+         class Layout_X,
+         class Accessor_X>
 void triangular_matrix_matrix_solve(
-  in_matrix_t A,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
   Side s,
-  in_object_t B,
-  out_object_t X)
+  std::experimental::basic_mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::basic_mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   if (std::is_same_v<Side, left_side_t>) {
     if (std::is_same_v<Triangle, lower_triangle_t>) {
@@ -227,20 +291,32 @@ void triangular_matrix_matrix_solve(
 }
 
 template<class ExecutionPolicy,
-         class in_matrix_t,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
          class Triangle,
          class DiagonalStorage,
          class Side,
-         class in_object_t,
-         class out_object_t>
+         class ElementType_B,
+         extents<>::size_type numRows_B,
+         extents<>::size_type numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_X,
+         extents<>::size_type numRows_X,
+         extents<>::size_type numCols_X,
+         class Layout_X,
+         class Accessor_X>
 void triangular_matrix_matrix_solve(
   ExecutionPolicy&& /* exec */,
-  in_matrix_t A,
+  std::experimental::basic_mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
   Side s,
-  in_object_t B,
-  out_object_t X)
+  std::experimental::basic_mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::basic_mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   triangular_matrix_matrix_solve(A, t, d, s, B, X);
 }

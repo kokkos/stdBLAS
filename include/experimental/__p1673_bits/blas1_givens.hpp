@@ -45,6 +45,7 @@
 
 #include <cmath>
 #include <complex>
+#include <concepts>
 
 namespace std {
 namespace experimental {
@@ -83,7 +84,7 @@ namespace linalg {
 // DSQRT -> sqrt (Real input and return value)
 // slapy2(real(fs), aimag(fs)) -> hypot(real(fs), imag(fs))
 
-template<class Real>
+template<std::floating_point Real>
 void givens_rotation_setup(const Real f,
                            const Real g,
                            Real& cs,
@@ -116,7 +117,6 @@ void givens_rotation_setup(const Real f,
     pow(base, int(log(safmin / eps) / log(base) / two));
   const Real safmx2 = Real(1.0) / safmn2;
 
-  Real z, scale;
   if (g == 0.0) { // includes the case f == g == 0
     cs = 1.0;
     sn = 0.0;
@@ -190,7 +190,7 @@ void givens_rotation_setup(const Real f,
 }
 
 namespace impl {
-template<class Real>
+template<std::floating_point Real>
 Real abs1(const complex<Real>& ff) {
   using std::abs;
   using std::imag;
@@ -200,7 +200,7 @@ Real abs1(const complex<Real>& ff) {
   return max(abs(real(ff)), abs(imag(ff)));
 }
 
-template<class Real>
+template<std::floating_point Real>
 Real abssq(const complex<Real>& ff) {
   using std::imag;
   using std::real;
@@ -209,7 +209,7 @@ Real abssq(const complex<Real>& ff) {
 }
 }
 
-template<class Real>
+template<std::floating_point Real>
 void givens_rotation_setup(const complex<Real>& f,
                            const complex<Real>& g,
                            Real& cs,
@@ -344,16 +344,22 @@ label20:
   }
 }
 
-template<class inout_vector_1_t,
-         class inout_vector_2_t,
-         class Real>
+template<class ElementType1,
+         extents<>::size_type ext1,
+         class Layout1,
+         class Accessor1,
+         class ElementType2,
+         extents<>::size_type ext2,
+         class Layout2,
+         class Accessor2,
+         std::floating_point Real>
 void givens_rotation_apply(
-  inout_vector_1_t x,
-  inout_vector_2_t y,
+  std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
+  std::experimental::basic_mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
   const Real c,
   const Real s)
 {
-  for (ptrdiff_t i = 0; i < x.extent(0); ++i) {
+  for (extents<>::size_type i = 0; i < x.extent(0); ++i) {
     const auto dtemp = c * x(i) + s * y(i);
     y(i) = c * y(i) - s * x(i);
     x(i) = dtemp;
@@ -361,30 +367,42 @@ void givens_rotation_apply(
 }
 
 template<class ExecutionPolicy,
-         class inout_vector_1_t,
-         class inout_vector_2_t,
-         class Real>
+         class ElementType1,
+         extents<>::size_type ext1,
+         class Layout1,
+         class Accessor1,
+         class ElementType2,
+         extents<>::size_type ext2,
+         class Layout2,
+         class Accessor2,
+         std::floating_point Real>
 void givens_rotation_apply(
   ExecutionPolicy&& /* exec */,
-  inout_vector_1_t x,
-  inout_vector_2_t y,
+  std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
+  std::experimental::basic_mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
   const Real c,
   const Real s)
 {
   givens_rotation_apply(x, y, c, s);
 }
 
-template<class inout_vector_1_t,
-         class inout_vector_2_t,
-         class Real>
+template<class ElementType1,
+         extents<>::size_type ext1,
+         class Layout1,
+         class Accessor1,
+         class ElementType2,
+         extents<>::size_type ext2,
+         class Layout2,
+         class Accessor2,
+         std::floating_point Real>
 void givens_rotation_apply(
-  inout_vector_1_t x,
-  inout_vector_2_t y,
+  std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
+  std::experimental::basic_mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
   const Real c,
   const complex<Real> s)
 {
   using std::conj;
-  for (ptrdiff_t i = 0; i < x.extent(0); ++i) {
+  for (extents<>::size_type i = 0; i < x.extent(0); ++i) {
     const auto dtemp = c * x(i) + s * y(i);
     y(i) = c * y(i) - conj(s) * x(i);
     x(i) = dtemp;
@@ -392,13 +410,19 @@ void givens_rotation_apply(
 }
 
 template<class ExecutionPolicy,
-         class inout_vector_1_t,
-         class inout_vector_2_t,
-         class Real>
+         class ElementType1,
+         extents<>::size_type ext1,
+         class Layout1,
+         class Accessor1,
+         class ElementType2,
+         extents<>::size_type ext2,
+         class Layout2,
+         class Accessor2,
+         std::floating_point Real>
 void givens_rotation_apply(
   ExecutionPolicy&& /* exec */,
-  inout_vector_1_t x,
-  inout_vector_2_t y,
+  std::experimental::basic_mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
+  std::experimental::basic_mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
   const Real c,
   const complex<Real> s)
 {

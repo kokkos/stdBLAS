@@ -50,24 +50,34 @@ namespace linalg {
 
 namespace {
 
-template<class Scalar,
-         class inout_vector_t>
-void linalg_scale_rank_1(const Scalar alpha,
-                         inout_vector_t x)
+template<class ElementType,
+         extents<>::size_type ext0,
+         class Layout,
+         class Accessor,
+         class Scalar>
+void linalg_scale_rank_1(
+  const Scalar alpha,
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x)
 {
-  for (ptrdiff_t i = 0; i < x.extent(0); ++i) {
+  for (extents<>::size_type i = 0; i < x.extent(0); ++i) {
     x(i) *= alpha;
   }
 }
 
-template<class Scalar,
-         class inout_matrix_t>
-void linalg_scale_rank_2(const Scalar alpha,
-                        inout_matrix_t x)
+template<class ElementType,
+         extents<>::size_type numRows, 
+         extents<>::size_type numCols,
+         class Layout,
+         class Accessor,
+         class Scalar>
+void linalg_scale_rank_2(
+  const Scalar alpha,
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A)
 {
-  for (ptrdiff_t j = 0; j < x.extent(1); ++j) {
-    for (ptrdiff_t i = 0; i < x.extent(0); ++i) {
-      x(i,j) *= alpha;
+  using size_type = typename extents<>::size_type;
+  for (size_type j = 0; j < A.extent(1); ++j) {
+    for (size_type i = 0; i < A.extent(0); ++i) {
+      A(i,j) *= alpha;
     }
   }
 }
@@ -75,9 +85,12 @@ void linalg_scale_rank_2(const Scalar alpha,
 } // end anonymous namespace
 
 template<class Scalar,
-         class inout_object_t>
+         class ElementType,
+         extents<>::size_type ... ext,
+         class Layout,
+         class Accessor>
 void scale(const Scalar alpha,
-           inout_object_t x)
+           std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext ...>, Layout, Accessor> x)
 {
   if constexpr (x.rank() == 1) {
     linalg_scale_rank_1(alpha, x);
@@ -92,12 +105,16 @@ void scale(const Scalar alpha,
 
 template<class ExecutionPolicy,
          class Scalar,
-         class inout_object_t>
-void scale(ExecutionPolicy&& /* exec */,
-           const Scalar alpha,
-           inout_object_t obj)
+         class ElementType,
+         extents<>::size_type ... ext,
+         class Layout,
+         class Accessor>
+void scale(
+  ExecutionPolicy&& /* exec */,
+  const Scalar alpha,
+  std::experimental::basic_mdspan<ElementType, std::experimental::extents<ext ...>, Layout, Accessor> x)
 {
-  scale(alpha, obj);
+  scale(alpha, x);
 }
 
 } // end namespace linalg
