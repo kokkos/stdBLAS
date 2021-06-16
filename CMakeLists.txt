@@ -108,6 +108,9 @@ export(TARGETS linalg
 )
 
 install(DIRECTORY include/experimental DESTINATION include)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/experimental/__p1673_bits/linalg_config.h
+    DESTINATION include/experimental/__p1673_bits
+)
 
 include(CMakePackageConfigHelpers)
 configure_package_config_file(cmake/LinAlgConfig.cmake.in
