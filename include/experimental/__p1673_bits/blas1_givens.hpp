@@ -359,6 +359,10 @@ void givens_rotation_apply(
   const Real c,
   const Real s)
 {
+  static_assert(x.static_extent(0) == dynamic_extent ||
+                y.static_extent(0) == dynamic_extent ||
+                x.static_extent(0) == y.static_extent(0));
+
   for (extents<>::size_type i = 0; i < x.extent(0); ++i) {
     const auto dtemp = c * x(i) + s * y(i);
     y(i) = c * y(i) - s * x(i);
@@ -401,6 +405,10 @@ void givens_rotation_apply(
   const Real c,
   const complex<Real> s)
 {
+  static_assert(x.static_extent(0) == dynamic_extent ||
+                y.static_extent(0) == dynamic_extent ||
+                x.static_extent(0) == y.static_extent(0));
+
   using std::conj;
   for (extents<>::size_type i = 0; i < x.extent(0); ++i) {
     const auto dtemp = c * x(i) + s * y(i);

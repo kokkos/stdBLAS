@@ -64,6 +64,10 @@ void swap_rank_1(
   std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
   std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y)
 {
+  static_assert(x.static_extent(0) == dynamic_extent ||
+                y.static_extent(0) == dynamic_extent ||
+                x.static_extent(0) == y.static_extent(0));
+
   using std::swap;
   using size_type = typename extents<>::size_type;
 
@@ -86,6 +90,13 @@ void swap_rank_2(
   std::experimental::mdspan<ElementType_x, std::experimental::extents<numRows_x, numCols_x>, Layout_x, Accessor_x> x,
   std::experimental::mdspan<ElementType_y, std::experimental::extents<numRows_y, numCols_y>, Layout_y, Accessor_y> y)
 {
+  static_assert(x.static_extent(0) == dynamic_extent ||
+                y.static_extent(0) == dynamic_extent ||
+                x.static_extent(0) == y.static_extent(0));
+  static_assert(x.static_extent(1) == dynamic_extent ||
+                y.static_extent(1) == dynamic_extent ||
+                x.static_extent(1) == y.static_extent(1));
+
   using std::swap;
   using size_type = typename extents<>::size_type;
 
@@ -111,10 +122,10 @@ void swap_elements(
   std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
   std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y)
 {
-  if constexpr (x.rank() == 1) {
+  if constexpr (x.rank() == 1 && y.rank() == 1) {
     swap_rank_1(x, y);
   }
-  else if constexpr (x.rank() == 2) {
+  else if constexpr (x.rank() == 2 && y.rank() == 2) {
     swap_rank_2(x, y);
   }
   else {

@@ -62,6 +62,10 @@ void copy_rank_1(
   std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
   std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y)
 {
+  static_assert(x.static_extent(0) == dynamic_extent ||
+                y.static_extent(0) == dynamic_extent ||
+                x.static_extent(0) == y.static_extent(0));
+
   for (extents<>::size_type i = 0; i < y.extent(0); ++i) {
     y(i) = x(i);
   }
@@ -81,6 +85,13 @@ void copy_rank_2(
   std::experimental::mdspan<ElementType_x, std::experimental::extents<numRows_x, numCols_x>, Layout_x, Accessor_x> x,
   std::experimental::mdspan<ElementType_y, std::experimental::extents<numRows_y, numCols_y>, Layout_y, Accessor_y> y)
 {
+  static_assert(x.static_extent(0) == dynamic_extent ||
+                y.static_extent(0) == dynamic_extent ||
+                x.static_extent(0) == y.static_extent(0));
+  static_assert(x.static_extent(1) == dynamic_extent ||
+                y.static_extent(1) == dynamic_extent ||
+                x.static_extent(1) == y.static_extent(1));
+
   using size_type = typename extents<>::size_type;
 
   for (size_type j = 0; j < y.extent(1); ++j) {

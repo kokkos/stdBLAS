@@ -66,6 +66,7 @@ template<class ElementType_A,
          extents<>::size_type ext_y,
          class Layout_y,
          class Accessor_y>
+  requires (Layout_A::is_always_unique())
 void matrix_vector_product(
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
@@ -123,6 +124,7 @@ template<class ElementType_A,
          extents<>::size_type ext_z,
          class Layout_z,
          class Accessor_z>
+  requires (Layout_A::is_always_unique())
 void matrix_vector_product(
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
@@ -183,6 +185,7 @@ template<class ElementType_A,
          extents<>::size_type ext_y,
          class Layout_y,
          class Accessor_y>
+  requires (Layout_A::is_always_unique())
 void symmetric_matrix_vector_product(
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
@@ -260,6 +263,7 @@ template<class ElementType_A,
          extents<>::size_type ext_z,
          class Layout_z,
          class Accessor_z>
+  requires (Layout_A::is_always_unique())
 void symmetric_matrix_vector_product(
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
@@ -339,6 +343,7 @@ template<class ElementType_A,
          extents<>::size_type ext_y,
          class Layout_y,
          class Accessor_y>
+  requires (Layout_A::is_always_unique())
 void hermitian_matrix_vector_product(
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
@@ -387,6 +392,7 @@ template<class ExecutionPolicy,
          extents<>::size_type ext_y,
          class Layout_y,
          class Accessor_y>
+  requires (Layout_A::is_always_unique())
 void hermitian_matrix_vector_product(
   ExecutionPolicy&& /* exec */,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
@@ -417,6 +423,7 @@ template<class ElementType_A,
          extents<>::size_type ext_z,
          class Layout_z,
          class Accessor_z>
+  requires (Layout_A::is_always_unique())
 void hermitian_matrix_vector_product(
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
@@ -498,6 +505,7 @@ template<class ElementType_A,
          extents<>::size_type ext_y,
          class Layout_y,
          class Accessor_y>
+  requires (Layout_A::is_always_unique())
 void triangular_matrix_vector_product(
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
@@ -585,6 +593,7 @@ template<class ElementType_A,
          extents<>::size_type ext_z,
          class Layout_z,
          class Accessor_z>
+  requires (Layout_A::is_always_unique())
 void triangular_matrix_vector_product(
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
