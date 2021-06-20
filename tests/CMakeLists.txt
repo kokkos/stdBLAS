@@ -1,4 +1,20 @@
-find_package(GTest REQUIRED)
+find_package(GTest)
+if (NOT GTest_FOUND)
+  message(STATUS "No installed GTest found, fetching from Github")
+  include(FetchContent)
+  FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG        7153098229e88295f9655ff1d3b0e2fa9eada5f8
+  )
+  FetchContent_GetProperties(googletest)
+  if(NOT googletest_POPULATED)
+    FetchContent_Populate(googletest)
+    add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR} EXCLUDE_FROM_ALL)
+  endif()
+  add_library(GTest::Main ALIAS gtest_main)
+  add_library(GTest::GTest ALIAS gtest)
+endif()
 
 macro(linalg_add_test name)
   add_executable(${name} ${name}.cpp)
