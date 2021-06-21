@@ -71,7 +71,7 @@ if (NOT mdspan_FOUND)
   FetchContent_Declare(
     mdspan
     GIT_REPOSITORY https://github.com/kokkos/mdspan.git
-    GIT_TAG        5694f21c39f3b948d06a0c63b9c219bf802e28a8
+    GIT_TAG        stable
   )
   FetchContent_GetProperties(mdspan)
   if(NOT mdspan_POPULATED)

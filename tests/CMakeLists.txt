@@ -5,7 +5,7 @@ if (NOT GTest_FOUND)
   FetchContent_Declare(
     googletest
     GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG        7153098229e88295f9655ff1d3b0e2fa9eada5f8
+    GIT_TAG        release-1.11.0
   )
   # need to set the variables in CACHE due to CMP0077
   set(gtest_disable_pthreads ON CACHE INTERNAL "")
