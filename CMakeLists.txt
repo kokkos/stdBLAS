@@ -64,7 +64,21 @@ endif()
 
 ################################################################################
 
-find_package(mdspan REQUIRED)
+find_package(mdspan QUIET)
+if (NOT mdspan_FOUND)
+  message(STATUS "No installed mdspan found, fetching from Github")
+  include(FetchContent)
+  FetchContent_Declare(
+    mdspan
+    GIT_REPOSITORY https://github.com/kokkos/mdspan.git
+    GIT_TAG        stable
+  )
+  FetchContent_GetProperties(mdspan)
+  if(NOT mdspan_POPULATED)
+    FetchContent_Populate(mdspan)
+    add_subdirectory(${mdspan_SOURCE_DIR} ${mdspan_BINARY_DIR} EXCLUDE_FROM_ALL)
+  endif()
+endif()
 
 find_package(BLAS)
 option(LINALG_ENABLE_BLAS
