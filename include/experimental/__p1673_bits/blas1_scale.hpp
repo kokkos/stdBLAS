@@ -92,14 +92,13 @@ template<class Scalar,
 void scale(const Scalar alpha,
            std::experimental::mdspan<ElementType, std::experimental::extents<ext ...>, Layout, Accessor> x)
 {
+  static_assert(x.rank() <= 2);
+
   if constexpr (x.rank() == 1) {
     linalg_scale_rank_1(alpha, x);
   }
   else if constexpr (x.rank() == 2) {
     linalg_scale_rank_2(alpha, x);
-  }
-  else if constexpr (x.rank() > 2) {
-    static_assert(false);
   }
 }
 

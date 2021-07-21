@@ -151,14 +151,13 @@ void add(
   std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y,
   std::experimental::mdspan<ElementType_z, std::experimental::extents<ext_z ...>, Layout_z, Accessor_z> z)
 {
+  static_assert(z.rank() <= 2);
+  
   if constexpr (z.rank() == 1) {
     add_rank_1 (x, y, z);
   }
   else if constexpr (z.rank() == 2) {
     add_rank_2 (x, y, z);
-  }
-  else if constexpr (z.rank() > 2) {
-    static_assert(false);
   }
 }
 

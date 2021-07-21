@@ -116,14 +116,13 @@ void copy(
   std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
   std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y)
 {
+  static_assert (x.rank() <= 2);
+  
   if constexpr (x.rank() == 1) {
     copy_rank_1(x, y);
   }
   else if constexpr (x.rank() == 2) {
     copy_rank_2(x, y);
-  }
-  else if constexpr (x.rank() > 2) {
-    static_assert(false);
   }
 }
 
