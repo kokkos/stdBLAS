@@ -98,8 +98,8 @@ void scale(const Scalar alpha,
   else if constexpr (x.rank() == 2) {
     linalg_scale_rank_2(alpha, x);
   }
-  else {
-    static_assert("Not implemented");
+  else if constexpr (x.rank() > 2) {
+    static_assert(false);
   }
 }
 

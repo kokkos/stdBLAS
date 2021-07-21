@@ -122,8 +122,8 @@ void copy(
   else if constexpr (x.rank() == 2) {
     copy_rank_2(x, y);
   }
-  else {
-    static_assert("Not implemented");
+  else if constexpr (x.rank() > 2) {
+    static_assert(false);
   }
 }
 

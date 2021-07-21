@@ -128,8 +128,8 @@ void swap_elements(
   else if constexpr (x.rank() == 2 && y.rank() == 2) {
     swap_rank_2(x, y);
   }
-  else {
-    static_assert("Not implemented");
+  else if constexpr (x.rank() > 2 || y.rank() > 2) {
+    static_assert(false);
   }
 }
 

@@ -157,8 +157,8 @@ void add(
   else if constexpr (z.rank() == 2) {
     add_rank_2 (x, y, z);
   }
-  else {
-    static_assert("Not implemented");
+  else if constexpr (z.rank() > 2) {
+    static_assert(false);
   }
 }
 
