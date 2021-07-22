@@ -67,6 +67,16 @@ void add_rank_1(
   std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y,
   std::experimental::mdspan<ElementType_z, std::experimental::extents<ext_z>, Layout_z, Accessor_z> z)
 {
+  static_assert(x.static_extent(0) == dynamic_extent ||
+                z.static_extent(0) == dynamic_extent ||
+                x.static_extent(0) == z.static_extent(0));
+  static_assert(y.static_extent(0) == dynamic_extent ||
+                z.static_extent(0) == dynamic_extent ||
+                y.static_extent(0) == z.static_extent(0));
+  static_assert(x.static_extent(0) == dynamic_extent ||
+                y.static_extent(0) == dynamic_extent ||
+                x.static_extent(0) == y.static_extent(0));
+
   for (extents<>::size_type i = 0; i < z.extent(0); ++i) {
     z(i) = x(i) + y(i);
   }
@@ -92,6 +102,26 @@ void add_rank_2(
   std::experimental::mdspan<ElementType_y, std::experimental::extents<numRows_y, numCols_y>, Layout_y, Accessor_y> y,
   std::experimental::mdspan<ElementType_z, std::experimental::extents<numRows_z, numCols_z>, Layout_z, Accessor_z> z)
 {
+  static_assert(x.static_extent(0) == dynamic_extent ||
+                z.static_extent(0) == dynamic_extent ||
+                x.static_extent(0) == z.static_extent(0));
+  static_assert(y.static_extent(0) == dynamic_extent ||
+                z.static_extent(0) == dynamic_extent ||
+                y.static_extent(0) == z.static_extent(0));
+  static_assert(x.static_extent(0) == dynamic_extent ||
+                y.static_extent(0) == dynamic_extent ||
+                x.static_extent(0) == y.static_extent(0));
+
+  static_assert(x.static_extent(1) == dynamic_extent ||
+                z.static_extent(1) == dynamic_extent ||
+                x.static_extent(1) == z.static_extent(1));
+  static_assert(y.static_extent(1) == dynamic_extent ||
+                z.static_extent(1) == dynamic_extent ||
+                y.static_extent(1) == z.static_extent(1));
+  static_assert(x.static_extent(1) == dynamic_extent ||
+                y.static_extent(1) == dynamic_extent ||
+                x.static_extent(1) == y.static_extent(1));
+
   using size_type = typename extents<>::size_type;
 
   for (size_type j = 0; j < x.extent(1); ++j) {
@@ -121,14 +151,13 @@ void add(
   std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y,
   std::experimental::mdspan<ElementType_z, std::experimental::extents<ext_z ...>, Layout_z, Accessor_z> z)
 {
+  static_assert(z.rank() <= 2);
+  
   if constexpr (z.rank() == 1) {
     add_rank_1 (x, y, z);
   }
   else if constexpr (z.rank() == 2) {
     add_rank_2 (x, y, z);
-  }
-  else {
-    static_assert("Not implemented");
   }
 }
 

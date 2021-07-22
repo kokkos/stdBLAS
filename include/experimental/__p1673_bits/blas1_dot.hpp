@@ -63,6 +63,10 @@ Scalar dot(std::experimental::mdspan<ElementType1, std::experimental::extents<ex
            std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2,
            Scalar init)
 {
+  static_assert(v1.static_extent(0) == dynamic_extent ||
+                v2.static_extent(0) == dynamic_extent ||
+                v1.static_extent(0) == v2.static_extent(0));
+  
   for (size_t k = 0; k < v1.extent(0); ++k) {
     init += v1(k) * v2(k);
   }
