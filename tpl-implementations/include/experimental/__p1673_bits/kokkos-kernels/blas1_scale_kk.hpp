@@ -1,8 +1,7 @@
 
 #include<experimental/mdspan>
-#include<experimental/linalg>
 #include<KokkosBlas.hpp>
-#include<exec_policy_wrapper_kk.hpp>
+
 namespace KokkosKernelsSTD {
 template<class ExecSpace,
          class Scalar,

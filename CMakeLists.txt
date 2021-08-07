@@ -104,7 +104,7 @@ if(LINALG_ENABLE_KOKKOS)
   target_link_libraries(linalg INTERFACE Kokkos::kokkos)
   target_link_libraries(linalg INTERFACE Kokkos::kokkoskernels)
   target_include_directories(linalg INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tpl-implementations/kokkos-kernels/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tpl-implementations/include>
   )
 endif()
 

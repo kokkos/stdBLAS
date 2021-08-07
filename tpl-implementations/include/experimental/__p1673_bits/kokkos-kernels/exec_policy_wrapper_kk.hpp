@@ -1,5 +1,5 @@
-#ifndef EXEC_POLICY_WRAPPER_HPP_
-#define EXEC_POLICY_WRAPPER_HPP_
+#ifndef __LINALG_KOKKOSKERNELS_EXEC_POLICY_WRAPPER_KK_HPP_
+#define __LINALG_KOKKOSKERNELS_EXEC_POLICY_WRAPPER_KK_HPP_
 #include<Kokkos_Core.hpp>
 #include<execution>
 namespace KokkosKernelsSTD {
