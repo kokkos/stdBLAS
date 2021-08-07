@@ -2,3 +2,5 @@
 
 #cmakedefine LINALG_ENABLE_BLAS
 #cmakedefine LINALG_ENABLE_CONCEPTS
+#cmakedefine LINALG_ENABLE_KOKKOS
+#cmakedefine LINALG_ENABLE_KOKKOS_DEFAULT

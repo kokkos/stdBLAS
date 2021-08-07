@@ -98,6 +98,15 @@ add_library(linalg INTERFACE)
 add_library(std::linalg ALIAS linalg)
 
 target_link_libraries(linalg INTERFACE std::mdspan)
+if(LINALG_ENABLE_KOKKOS)
+  find_package(Kokkos)
+  find_package(KokkosKernels)
+  target_link_libraries(linalg INTERFACE Kokkos::kokkos)
+  target_link_libraries(linalg INTERFACE Kokkos::kokkoskernels)
+  target_include_directories(linalg INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tpl-implementations/kokkos-kernels/include>
+  )
+endif()
 
 target_include_directories(linalg INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
