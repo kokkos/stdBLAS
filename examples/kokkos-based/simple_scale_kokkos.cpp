@@ -11,7 +11,8 @@ int main(int argc, char* argv[]) {
     Kokkos::View<double*> a_view("A",N);
     double* a_ptr = a_view.data();
 
-    // std::experimental::mdspan a(a_ptr,N); // Requires CDAT
+    // Requires CTAD working, GCC 11.1 works but some others are buggy
+    // std::experimental::mdspan a(a_ptr,N);
     std::experimental::mdspan<double,std::experimental::extents<std::experimental::dynamic_extent>> a(a_ptr,N);
     for(int i=0; i<a.extent(0); i++) a(i) = i;
 

@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
     std::vector<double> a_vec(N);
     double* a_ptr = a_vec.data();
 
-    // If CDAT works correctly this could be mdspan a(a_ptr,N);
+    // Requires CTAD working, GCC 11.1 works but some others are buggy
     std::experimental::mdspan<double,std::experimental::extents<std::experimental::dynamic_extent>> a(a_ptr,N);
     for(int i=0; i<a.extent(0); i++) a(i) = i;
 

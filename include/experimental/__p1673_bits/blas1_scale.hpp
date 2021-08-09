@@ -90,7 +90,7 @@ template<class Scalar,
          extents<>::size_type ... ext,
          class Layout,
          class Accessor>
-void linalg_scale(std::execution::sequenced_policy, const Scalar alpha,
+void linalg_scale(std::experimental::linalg::impl::inline_exec_t&& /* exec */, const Scalar alpha,
            std::experimental::mdspan<ElementType, std::experimental::extents<ext ...>, Layout, Accessor> x)
 {
   static_assert(x.rank() <= 2);
@@ -103,13 +103,16 @@ void linalg_scale(std::execution::sequenced_policy, const Scalar alpha,
   }
 }
 
-template <typename Exec, typename Scalar, typename mdspan, typename = void>
-struct is_custom_scale_available : std::false_type {};
+template <typename Exec, typename Scalar, typename x_t, typename = void>
+struct is_custom_scale_avail : std::false_type {};
 
-template <typename Exec, typename Scalar, typename mdspan>
-struct is_custom_scale_available<Exec,Scalar,mdspan,
-                   std::void_t<decltype(scale(std::declval<Exec>(), std::declval<Scalar>(), std::declval<mdspan>())) >> {
-                   static constexpr bool value = !std::is_same<Exec,std::execution::sequenced_policy>::value;
+template <typename Exec, typename Scalar, typename x_t>
+struct is_custom_scale_avail<Exec,Scalar,x_t,
+                   std::void_t<decltype(scale(
+                              std::declval<Exec>(),
+                              std::declval<Scalar>(),
+                              std::declval<x_t>())) >> {
+                   static constexpr bool value = !std::is_same<Exec,std::experimental::linalg::impl::inline_exec_t>::value;
 };
 } // end anonymous namespace
 
@@ -127,14 +130,14 @@ void scale(
   std::experimental::mdspan<ElementType, std::experimental::extents<ext ...>, Layout, Accessor> x)
 {
   // Call custom overload if available else call std implementation
-  if constexpr(is_custom_scale_available<
-      decltype(execpolicy_mapper(std::declval<ExecutionPolicy>())),
-      Scalar,
-      std::experimental::mdspan<ElementType, std::experimental::extents<ext ...>, Layout, Accessor>
+  if constexpr(is_custom_scale_avail<
+      decltype(execpolicy_mapper(exec)),
+      decltype(alpha),
+      decltype(x)
      >::value) {
     scale(execpolicy_mapper(exec), alpha, x);
   } else {
-    linalg_scale(std::execution::seq,alpha,x);
+    linalg_scale(std::experimental::linalg::impl::inline_exec_t(), alpha, x);
   }
 }
 
@@ -146,7 +149,7 @@ template<class Scalar,
 void scale(const Scalar alpha,
            std::experimental::mdspan<ElementType, std::experimental::extents<ext ...>, Layout, Accessor> x)
 {
-  scale(std::execution::seq, alpha, x);
+  scale(std::experimental::linalg::impl::default_exec_t(), alpha, x);
 }
 
 } // end namespace linalg
