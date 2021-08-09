@@ -132,10 +132,8 @@ void scale(
       Scalar,
       std::experimental::mdspan<ElementType, std::experimental::extents<ext ...>, Layout, Accessor>
      >::value) {
-    printf("Calling custom scale\n");
     scale(execpolicy_mapper(exec), alpha, x);
   } else {
-    printf("Calling std scale\n");
     linalg_scale(std::execution::seq,alpha,x);
   }
 }
