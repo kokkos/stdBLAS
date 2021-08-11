@@ -545,6 +545,7 @@ template<class ElementType_A,
          class Layout_A,
          class Accessor_A,
          class Triangle,
+         class DiagonalStorage,
          class ElementType_B,
          extents<>::size_type numRows_B,
          extents<>::size_type numCols_B,
@@ -558,17 +559,24 @@ template<class ElementType_A,
 void triangular_matrix_left_product(
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
+  DiagonalStorage d,
   std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   using size_type = typename extents<>::size_type;
+  constexpr bool explicitDiagonal =
+    std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (size_type j = 0; j < C.extent(1); ++j) {
       for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
-        for (size_type k = 0; k <= i; ++k) {
+        const size_type k_upper = explicitDiagonal ? i : i - size_type(1);
+        for (size_type k = 0; k <= k_upper; ++k) {
           C(i,j) += A(i,k) * B(k,j);
+        }
+        if constexpr (! explicitDiagonal) {
+          C(i,j) += /* 1 times */ B(i,j);
         }
       }
     }
@@ -577,8 +585,12 @@ void triangular_matrix_left_product(
     for (size_type j = 0; j < C.extent(1); ++j) {
       for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
-        for (size_type k = i; k < A.extent(1); ++k) {
+        const size_type k_lower = explicitDiagonal ? i : i + size_type(1);
+        for (size_type k = k_lower; k < C.extent(0); ++k) {
           C(i,j) += A(i,k) * B(k,j);
+        }
+        if constexpr (! explicitDiagonal) {
+          C(i,j) += /* 1 times */ B(i,j);
         }
       }
     }
@@ -592,6 +604,7 @@ template<class ExecutionPolicy,
          class Layout_A,
          class Accessor_A,
          class Triangle,
+         class DiagonalStorage,
          class ElementType_B,
          extents<>::size_type numRows_B,
          extents<>::size_type numCols_B,
@@ -606,10 +619,11 @@ void triangular_matrix_left_product(
   ExecutionPolicy&& /* exec */,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
+  DiagonalStorage d,
   std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  triangular_matrix_left_product (A, t, B, C);
+  triangular_matrix_left_product (A, t, d, B, C);
 }
 
 template<class ElementType_A,
@@ -618,6 +632,7 @@ template<class ElementType_A,
          class Layout_A,
          class Accessor_A,
          class Triangle,
+         class DiagonalStorage,
          class ElementType_B,
          extents<>::size_type numRows_B,
          extents<>::size_type numCols_B,
@@ -631,27 +646,38 @@ template<class ElementType_A,
 void triangular_matrix_right_product(
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
+  DiagonalStorage d,
   std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   using size_type = typename extents<>::size_type;
+  constexpr bool explicitDiagonal =
+    std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (size_type j = 0; j < C.extent(1); ++j) {
+      const size_type k_lower = explicitDiagonal ? j : j + size_type(1);
       for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
-        for (size_type k = 0; k <= j; ++k) {
+        for (size_type k = k_lower; k < C.extent(1); ++k) {
           C(i,j) += B(i,k) * A(k,j);
+        }
+        if constexpr (! explicitDiagonal) {
+          C(i,j) += /* 1 times */ B(i,j);
         }
       }
     }
   }
   else { // upper_triangle_t
     for (size_type j = 0; j < C.extent(1); ++j) {
+      const size_type k_upper = explicitDiagonal ? j : j - size_type(1);
       for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
-        for (size_type k = j; k < A.extent(1); ++k) {
+        for (size_type k = 0; k < k_upper; ++k) {
           C(i,j) += B(i,k) * A(k,j);
+        }
+        if constexpr (! explicitDiagonal) {
+          C(i,j) += /* 1 times */ B(i,j);
         }
       }
     }
@@ -665,6 +691,7 @@ template<class ExecutionPolicy,
          class Layout_A,
          class Accessor_A,
          class Triangle,
+         class DiagonalStorage,
          class ElementType_B,
          extents<>::size_type numRows_B,
          extents<>::size_type numCols_B,
@@ -679,10 +706,11 @@ void triangular_matrix_right_product(
   ExecutionPolicy&& /* exec */,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
+  DiagonalStorage d,
   std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  triangular_matrix_right_product (A, t, B, C);
+  triangular_matrix_right_product (A, t, d, B, C);
 }
 
 // Updating triangular matrix-matrix product
