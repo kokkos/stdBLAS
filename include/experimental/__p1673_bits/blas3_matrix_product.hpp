@@ -571,7 +571,7 @@ void triangular_matrix_left_product(
     for (size_type j = 0; j < C.extent(1); ++j) {
       for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
-        const size_type k_upper = explicitDiagonal ? i : i - size_type(1);
+        const ptrdiff_t k_upper = explicitDiagonal ? i : i - size_type(1);
         for (size_type k = 0; k <= k_upper; ++k) {
           C(i,j) += A(i,k) * B(k,j);
         }
@@ -670,7 +670,7 @@ void triangular_matrix_right_product(
   }
   else { // upper_triangle_t
     for (size_type j = 0; j < C.extent(1); ++j) {
-      const size_type k_upper = explicitDiagonal ? j : j - size_type(1);
+      const ptrdiff_t k_upper = explicitDiagonal ? j : j - size_type(1);
       for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
         for (size_type k = 0; k < k_upper; ++k) {
