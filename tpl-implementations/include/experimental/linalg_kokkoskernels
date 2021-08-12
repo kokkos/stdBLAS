@@ -1,0 +1,2 @@
+#pragma once
+#include "__p1673_bits/kokkos-kernels/blas1_scale_kk.hpp"

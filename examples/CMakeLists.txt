@@ -5,3 +5,6 @@ function(linalg_add_example EXENAME)
 endfunction(linalg_add_example)
 
 add_subdirectory(hello_world)
+if(LINALG_ENABLE_KOKKOS)
+  add_subdirectory(kokkos-based)
+endif()

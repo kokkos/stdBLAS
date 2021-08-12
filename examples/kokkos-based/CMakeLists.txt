@@ -1,0 +1,1 @@
+linalg_add_example(simple_scale_kokkos)
