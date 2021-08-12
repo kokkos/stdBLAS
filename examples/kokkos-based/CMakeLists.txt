@@ -1,1 +1,3 @@
+
 linalg_add_example(simple_scale_kokkos)
+linalg_add_example(matrix_vector_product_kokkos)
