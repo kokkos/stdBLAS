@@ -52,6 +52,20 @@ inline namespace __p1673_version_0 {
 namespace linalg {
 
 // Overwriting general matrix-vector product: y := A * x
+namespace {
+template <typename Exec, typename A_t, typename x_t, typename y_t, typename = void>
+struct is_custom_matrix_vector_product_avail : std::false_type {};
+
+template <typename Exec, typename A_t, typename x_t, typename y_t>
+struct is_custom_matrix_vector_product_avail<Exec, A_t, x_t, y_t,
+                   std::void_t<decltype(matrix_vector_product(
+                              std::declval<Exec>(),
+                              std::declval<A_t>(),
+                              std::declval<x_t>(),
+                              std::declval<y_t>())) >> {
+                   static constexpr bool value = !std::is_same<Exec,std::experimental::linalg::impl::inline_exec_t>::value;
+};
+
 
 template<class ElementType_A,
          extents<>::size_type numRows_A,
@@ -67,7 +81,8 @@ template<class ElementType_A,
          class Layout_y,
          class Accessor_y>
   requires (Layout_A::template mapping<extents<numRows_A, numCols_A> >::is_always_unique())
-void matrix_vector_product(
+void linalg_matrix_vector_product(
+  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
   std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y)
@@ -81,6 +96,8 @@ void matrix_vector_product(
     }
   }
 }
+
+} // end anonymous namespace
 
 template<class ExecutionPolicy,
          class ElementType_A,
@@ -97,12 +114,41 @@ template<class ExecutionPolicy,
          class Layout_y,
          class Accessor_y>
 void matrix_vector_product(
-  ExecutionPolicy&& /* exec */,
+  ExecutionPolicy&& exec,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
   std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y)
 {
-  matrix_vector_product(A, x, y);
+  if constexpr(is_custom_matrix_vector_product_avail<
+       decltype(execpolicy_mapper(std::declval<ExecutionPolicy>())),
+       decltype(A),
+       decltype(x),
+       decltype(y)>::value) {
+    matrix_vector_product(execpolicy_mapper(exec), A, x, y);
+  } else {
+    linalg_matrix_vector_product(std::experimental::linalg::impl::inline_exec_t(), A, x, y);
+  }
+}
+
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class ElementType_x,
+         extents<>::size_type ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ext_y,
+         class Layout_y,
+         class Accessor_y>
+void matrix_vector_product(
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y)
+{
+  matrix_vector_product(std::experimental::linalg::impl::default_exec_t(), A, x, y);
 }
 
 // Updating general matrix-vector product: z := y + A * x
