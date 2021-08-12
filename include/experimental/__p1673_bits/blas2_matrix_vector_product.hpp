@@ -180,9 +180,9 @@ void matrix_vector_product(
   using size_type = typename extents<>::size_type;
 
   for (size_type i = 0; i < A.extent(0); ++i) {
-    y(i) = z(i);
+    z(i) = y(i);
     for (size_type j = 0; j < A.extent(1); ++j) {
-      y(i) += A(i,j) * x(j);
+      z(i) += A(i,j) * x(j);
     }
   }
 }
