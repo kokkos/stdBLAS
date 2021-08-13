@@ -572,7 +572,7 @@ void triangular_matrix_left_product(
       for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
         const ptrdiff_t k_upper = explicitDiagonal ? i : i - size_type(1);
-        for (size_type k = 0; k <= k_upper; ++k) {
+        for (ptrdiff_t k = 0; k <= k_upper; ++k) {
           C(i,j) += A(i,k) * B(k,j);
         }
         if constexpr (! explicitDiagonal) {
@@ -714,6 +714,120 @@ void triangular_matrix_right_product(
 }
 
 // Updating triangular matrix-matrix product
+
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class DiagonalStorage,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void triangular_matrix_left_product(
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle /* t */,
+  DiagonalStorage /* d */,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  using size_type = typename extents<>::size_type;
+  constexpr bool explicitDiagonal =
+    std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
+
+  if constexpr (std::is_same_v<Triangle, upper_triangle_t>) {
+    for (size_type j=0; j < C.extent(1); ++j) {
+      for (size_type k=0; k < C.extent(0); ++k) {
+        for (size_type i=0; i < k; ++i) {
+          C(i,j) += C(k,j)*A(i,k);
+        }
+        if constexpr (explicitDiagonal) {
+          C(k,j) *= A(k,k);
+        }
+      }
+    }
+  }
+  else { // lower_triangle_t
+    for (size_type j=0; j < C.extent(1); ++j) {
+      for (ptrdiff_t k=C.extent(0)-1; k >= 0; --k) {
+        for (size_type i=k+1; i < C.extent(0); i++) {
+          C(i,j) += C(k,j)*A(i,k);
+        }
+        if constexpr (explicitDiagonal) {
+          C(k,j) *= A(k,k);
+        }
+      }
+    }
+  }
+}
+
+template<class ExecutionPolicy,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class DiagonalStorage,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void triangular_matrix_left_product(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  DiagonalStorage d,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  triangular_matrix_left_product (A, t, d, C);
+}
+
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class DiagonalStorage,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void triangular_matrix_right_product(
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle /* t */,
+  DiagonalStorage /* d */,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+}
+
+template<class ExecutionPolicy,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class DiagonalStorage,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void triangular_matrix_right_product(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  DiagonalStorage d,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  triangular_matrix_right_product (A, t, d, C);
+}
 
 // Overwriting symmetric matrix-matrix product
 
