@@ -673,7 +673,7 @@ void triangular_matrix_right_product(
       const ptrdiff_t k_upper = explicitDiagonal ? j : j - size_type(1);
       for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
-        for (size_type k = 0; k < k_upper; ++k) {
+        for (ptrdiff_t k = 0; k <= k_upper; ++k) {
           C(i,j) += B(i,k) * A(k,j);
         }
         if constexpr (! explicitDiagonal) {
@@ -804,6 +804,38 @@ void triangular_matrix_right_product(
   DiagonalStorage /* d */,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
+  using size_type = typename extents<>::size_type;
+  constexpr bool explicitDiagonal =
+    std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
+
+  if constexpr (std::is_same_v<Triangle, upper_triangle_t>) {
+    for (ptrdiff_t j=C.extent(1)-1; j >= 0; --j) {
+      if constexpr (explicitDiagonal) {
+        for(size_type i=0; i < C.extent(0); ++i) {
+          C(i,j) *= A(j,j);
+        }
+      }
+      for (ptrdiff_t k=0; k < j; k++) {
+        for(size_type i=0; i < C.extent(0); ++i) {
+          C(i,j) += A(k,j)*C(i,k);
+        }
+      }
+    }
+  }
+  else { // lower_triangle_t
+    for (size_type j=0; j < C.extent(1); ++j) {
+      if constexpr (explicitDiagonal) {
+        for (size_type i=0; i < C.extent(0); ++i) {
+          C(i,j) *= A(j,j);
+        }
+      }
+      for (size_type k=j+1; k < C.extent(1); ++k) {
+        for (size_type i=0; i < C.extent(0); i++) {
+          C(i,j) += A(k,j)*C(i,k);
+        }
+      }
+    }
+  }
 }
 
 template<class ExecutionPolicy,
