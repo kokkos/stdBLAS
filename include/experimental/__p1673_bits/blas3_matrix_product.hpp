@@ -571,7 +571,7 @@ void triangular_matrix_left_product(
     for (size_type j = 0; j < C.extent(1); ++j) {
       for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
-        const ptrdiff_t k_upper = explicitDiagonal ? i : i - size_type(1);
+        const ptrdiff_t k_upper = explicitDiagonal ? i : i - ptrdiff_t(1);
         for (ptrdiff_t k = 0; k <= k_upper; ++k) {
           C(i,j) += A(i,k) * B(k,j);
         }
@@ -585,7 +585,7 @@ void triangular_matrix_left_product(
     for (size_type j = 0; j < C.extent(1); ++j) {
       for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
-        const size_type k_lower = explicitDiagonal ? i : i + size_type(1);
+        const size_type k_lower = explicitDiagonal ? i : i + 1;
         for (size_type k = k_lower; k < C.extent(0); ++k) {
           C(i,j) += A(i,k) * B(k,j);
         }
@@ -656,7 +656,7 @@ void triangular_matrix_right_product(
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (size_type j = 0; j < C.extent(1); ++j) {
-      const size_type k_lower = explicitDiagonal ? j : j + size_type(1);
+      const size_type k_lower = explicitDiagonal ? j : j + 1;
       for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
         for (size_type k = k_lower; k < C.extent(1); ++k) {
@@ -670,7 +670,7 @@ void triangular_matrix_right_product(
   }
   else { // upper_triangle_t
     for (size_type j = 0; j < C.extent(1); ++j) {
-      const ptrdiff_t k_upper = explicitDiagonal ? j : j - size_type(1);
+      const ptrdiff_t k_upper = explicitDiagonal ? j : j - ptrdiff_t(1);
       for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
         for (ptrdiff_t k = 0; k <= k_upper; ++k) {
