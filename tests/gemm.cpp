@@ -245,7 +245,7 @@ namespace {
     /* C = A * B, where A is triangular mxm */
     using extents_t = extents<dynamic_extent, dynamic_extent>;
     using matrix_t = mdspan<double, extents_t, layout_left>;
-    double snan = std::numeric_limits<double>::signaling_NaN();
+    constexpr double snan = std::numeric_limits<double>::signaling_NaN();
 
     int m = 3, n = 2;
     std::vector<double> A_mem(m*m, snan);
@@ -310,7 +310,7 @@ TEST(BLAS3_trmm, left_lower_tri_implicit_diag)
     /* C = A * B, where A is triangular mxm */
     using extents_t = extents<dynamic_extent, dynamic_extent>;
     using matrix_t = mdspan<double, extents_t, layout_left>;
-    double snan = std::numeric_limits<double>::signaling_NaN();
+    constexpr double snan = std::numeric_limits<double>::signaling_NaN();
 
     int m = 3, n = 2;
     std::vector<double> A_mem(m*m, snan);
@@ -349,7 +349,7 @@ TEST(BLAS3_trmm, left_lower_tri_implicit_diag)
     for (ptrdiff_t j = 0; j < n; ++j) {
       for (ptrdiff_t i = 0; i < m; ++i) {
         // FIXME: Choose a more reasonable value for the tolerance
-        double tol = 1e-9;
+        constexpr double tol = 1e-9;
         EXPECT_NEAR(gs(i,j), C(i,j), tol) 
           << "Matrices differ at index (" 
           << i << "," << j << ")\n";
@@ -362,7 +362,7 @@ TEST(BLAS3_trmm, left_lower_tri_implicit_diag)
     for (ptrdiff_t j = 0; j < n; ++j) {
       for (ptrdiff_t i = 0; i < m; ++i) {
         // FIXME: Choose a more reasonable value for the tolerance
-        double tol = 1e-9;
+        constexpr double tol = 1e-9;
         EXPECT_NEAR(gs(i,j), B(i,j), tol) 
           << "Matrices differ at index (" 
           << i << "," << j << ")\n";
@@ -375,7 +375,7 @@ TEST(BLAS3_trmm, left_upper_tri_explicit_diag)
     /* C = A * B, where A is triangular mxm */
     using extents_t = extents<dynamic_extent, dynamic_extent>;
     using matrix_t = mdspan<double, extents_t, layout_left>;
-    double snan = std::numeric_limits<double>::signaling_NaN();
+    constexpr double snan = std::numeric_limits<double>::signaling_NaN();
 
     int m = 3, n = 2;
     std::vector<double> A_mem(m*m, snan);
@@ -440,7 +440,7 @@ TEST(BLAS3_trmm, left_upper_tri_implicit_diag)
     /* C = A * B, where A is triangular mxm */
     using extents_t = extents<dynamic_extent, dynamic_extent>;
     using matrix_t = mdspan<double, extents_t, layout_left>;
-    double snan = std::numeric_limits<double>::signaling_NaN();
+    constexpr double snan = std::numeric_limits<double>::signaling_NaN();
 
     int m = 3, n = 2;
     std::vector<double> A_mem(m*m, snan);
@@ -479,7 +479,7 @@ TEST(BLAS3_trmm, left_upper_tri_implicit_diag)
     for (ptrdiff_t j = 0; j < n; ++j) {
       for (ptrdiff_t i = 0; i < m; ++i) {
         // FIXME: Choose a more reasonable value for the tolerance
-        double tol = 1e-9;
+        constexpr double tol = 1e-9;
         EXPECT_NEAR(gs(i,j), C(i,j), tol) 
           << "Matrices differ at index (" 
           << i << "," << j << ")\n";
@@ -492,7 +492,7 @@ TEST(BLAS3_trmm, left_upper_tri_implicit_diag)
     for (ptrdiff_t j = 0; j < n; ++j) {
       for (ptrdiff_t i = 0; i < m; ++i) {
         // FIXME: Choose a more reasonable value for the tolerance
-        double tol = 1e-9;
+        constexpr double tol = 1e-9;
         EXPECT_NEAR(gs(i,j), B(i,j), tol) 
           << "Matrices differ at index (" 
           << i << "," << j << ")\n";
@@ -505,7 +505,7 @@ TEST(BLAS3_trmm, right_lower_tri_explicit_diag)
     /* C = B * A, where A is triangular mxm */
     using extents_t = extents<dynamic_extent, dynamic_extent>;
     using matrix_t = mdspan<double, extents_t, layout_left>;
-    double snan = std::numeric_limits<double>::signaling_NaN();
+    constexpr double snan = std::numeric_limits<double>::signaling_NaN();
 
     int m = 3, n = 2;
     std::vector<double> A_mem(m*m, snan);
@@ -570,7 +570,7 @@ TEST(BLAS3_trmm, right_lower_tri_implicit_diag)
     /* C = A * B, where A is triangular mxm */
     using extents_t = extents<dynamic_extent, dynamic_extent>;
     using matrix_t = mdspan<double, extents_t, layout_left>;
-    double snan = std::numeric_limits<double>::signaling_NaN();
+    constexpr double snan = std::numeric_limits<double>::signaling_NaN();
 
     int m = 3, n = 2;
     std::vector<double> A_mem(m*m, snan);
@@ -609,7 +609,7 @@ TEST(BLAS3_trmm, right_lower_tri_implicit_diag)
     for (ptrdiff_t j = 0; j < m; ++j) {
       for (ptrdiff_t i = 0; i < n; ++i) {
         // FIXME: Choose a more reasonable value for the tolerance
-        double tol = 1e-9;
+        constexpr double tol = 1e-9;
         EXPECT_NEAR(gs(i,j), C(i,j), tol) 
           << "Matrices differ at index (" 
           << i << "," << j << ")\n";
@@ -622,7 +622,7 @@ TEST(BLAS3_trmm, right_lower_tri_implicit_diag)
     for (ptrdiff_t j = 0; j < m; ++j) {
       for (ptrdiff_t i = 0; i < n; ++i) {
         // FIXME: Choose a more reasonable value for the tolerance
-        double tol = 1e-9;
+        constexpr double tol = 1e-9;
         EXPECT_NEAR(gs(i,j), B(i,j), tol) 
           << "Matrices differ at index (" 
           << i << "," << j << ")\n";
@@ -635,7 +635,7 @@ TEST(BLAS3_trmm, right_upper_tri_explicit_diag)
     /* C = B*A, where A is triangular mxm */
     using extents_t = extents<dynamic_extent, dynamic_extent>;
     using matrix_t = mdspan<double, extents_t, layout_left>;
-    double snan = std::numeric_limits<double>::signaling_NaN();
+    constexpr double snan = std::numeric_limits<double>::signaling_NaN();
 
     int m = 3, n = 2;
     std::vector<double> A_mem(m*m, snan);
@@ -700,7 +700,7 @@ TEST(BLAS3_trmm, right_upper_tri_implicit_diag)
     /* C = B * A, where A is triangular mxm */
     using extents_t = extents<dynamic_extent, dynamic_extent>;
     using matrix_t = mdspan<double, extents_t, layout_left>;
-    double snan = std::numeric_limits<double>::signaling_NaN();
+    constexpr double snan = std::numeric_limits<double>::signaling_NaN();
 
     int m = 3, n = 2;
     std::vector<double> A_mem(m*m, snan);
@@ -739,7 +739,7 @@ TEST(BLAS3_trmm, right_upper_tri_implicit_diag)
     for (ptrdiff_t j = 0; j < m; ++j) {
       for (ptrdiff_t i = 0; i < n; ++i) {
         // FIXME: Choose a more reasonable value for the tolerance
-        double tol = 1e-9;
+        constexpr double tol = 1e-9;
         EXPECT_NEAR(gs(i,j), C(i,j), tol) 
           << "Matrices differ at index (" 
           << i << "," << j << ")\n";
@@ -752,7 +752,7 @@ TEST(BLAS3_trmm, right_upper_tri_implicit_diag)
     for (ptrdiff_t j = 0; j < m; ++j) {
       for (ptrdiff_t i = 0; i < n; ++i) {
         // FIXME: Choose a more reasonable value for the tolerance
-        double tol = 1e-9;
+        constexpr double tol = 1e-9;
         EXPECT_NEAR(gs(i,j), B(i,j), tol) 
           << "Matrices differ at index (" 
           << i << "," << j << ")\n";
