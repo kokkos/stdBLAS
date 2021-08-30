@@ -741,10 +741,10 @@ void triangular_matrix_left_product(
     for (size_type j=0; j < C.extent(1); ++j) {
       for (size_type k=0; k < C.extent(0); ++k) {
         for (size_type i=0; i < k; ++i) {
-          C(i,j) += C(k,j)*A(i,k);
+          C(i,j) += A(i,k) * C(k,j);
         }
         if constexpr (explicitDiagonal) {
-          C(k,j) *= A(k,k);
+          C(k,j) = A(k,k) * C(k,j);
         }
       }
     }
@@ -753,10 +753,10 @@ void triangular_matrix_left_product(
     for (size_type j=0; j < C.extent(1); ++j) {
       for (size_type k=C.extent(0); k > 0; --k) {
         for (size_type i=k; i < C.extent(0); i++) {
-          C(i,j) += C(k-1,j)*A(i,k-1);
+          C(i,j) += A(i,k-1) * C(k-1,j);
         }
         if constexpr (explicitDiagonal) {
-          C(k-1,j) *= A(k-1,k-1);
+          C(k-1,j) = A(k-1,k-1) * C(k-1,j);
         }
       }
     }
@@ -812,12 +812,12 @@ void triangular_matrix_right_product(
     for (size_type j=C.extent(1); j > 0; --j) {
       if constexpr (explicitDiagonal) {
         for(size_type i=0; i < C.extent(0); ++i) {
-          C(i,j-1) *= A(j-1,j-1);
+          C(i,j-1) = C(i,j-1) * A(j-1,j-1);
         }
       }
       for (size_type k=0; k < j-1; k++) {
         for(size_type i=0; i < C.extent(0); ++i) {
-          C(i,j-1) += A(k,j-1)*C(i,k);
+          C(i,j-1) += C(i,k) * A(k,j-1);
         }
       }
     }
@@ -826,12 +826,12 @@ void triangular_matrix_right_product(
     for (size_type j=0; j < C.extent(1); ++j) {
       if constexpr (explicitDiagonal) {
         for (size_type i=0; i < C.extent(0); ++i) {
-          C(i,j) *= A(j,j);
+          C(i,j) = C(i,j) * A(j,j);
         }
       }
       for (size_type k=j+1; k < C.extent(1); ++k) {
         for (size_type i=0; i < C.extent(0); i++) {
-          C(i,j) += A(k,j)*C(i,k);
+          C(i,j) += C(i,k) * A(k,j);
         }
       }
     }
