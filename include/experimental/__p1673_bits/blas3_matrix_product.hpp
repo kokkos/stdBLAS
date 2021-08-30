@@ -751,12 +751,12 @@ void triangular_matrix_left_product(
   }
   else { // lower_triangle_t
     for (size_type j=0; j < C.extent(1); ++j) {
-      for (ptrdiff_t k=C.extent(0)-1; k >= 0; --k) {
-        for (size_type i=k+1; i < C.extent(0); i++) {
-          C(i,j) += C(k,j)*A(i,k);
+      for (size_type k=C.extent(0); k > 0; --k) {
+        for (size_type i=k; i < C.extent(0); i++) {
+          C(i,j) += C(k-1,j)*A(i,k-1);
         }
         if constexpr (explicitDiagonal) {
-          C(k,j) *= A(k,k);
+          C(k-1,j) *= A(k-1,k-1);
         }
       }
     }
@@ -809,15 +809,15 @@ void triangular_matrix_right_product(
     std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
 
   if constexpr (std::is_same_v<Triangle, upper_triangle_t>) {
-    for (ptrdiff_t j=C.extent(1)-1; j >= 0; --j) {
+    for (size_type j=C.extent(1); j > 0; --j) {
       if constexpr (explicitDiagonal) {
         for(size_type i=0; i < C.extent(0); ++i) {
-          C(i,j) *= A(j,j);
+          C(i,j-1) *= A(j-1,j-1);
         }
       }
-      for (ptrdiff_t k=0; k < j; k++) {
+      for (size_type k=0; k < j-1; k++) {
         for(size_type i=0; i < C.extent(0); ++i) {
-          C(i,j) += A(k,j)*C(i,k);
+          C(i,j-1) += A(k,j-1)*C(i,k);
         }
       }
     }
