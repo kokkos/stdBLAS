@@ -889,20 +889,22 @@ void symmetric_matrix_left_product(
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (size_type j = 0; j < C.extent(1); ++j) {
-      for (size_type i = j; i < C.extent(0); ++i) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
         for (size_type k = 0; k < A.extent(1); ++k) {
-          C(i,j) += A(i,k) * B(k,j);
+          ElementType_A aik = i <= k ? A(k,i) : A(i,k);
+          C(i,j) += aik * B(k,j);
         }
       }
     }
   }
   else { // upper_triangle_t
     for (size_type j = 0; j < C.extent(1); ++j) {
-      for (size_type i = 0; i <= j; ++i) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
         for (size_type k = 0; k < A.extent(1); ++k) {
-          C(i,j) += A(i,k) * B(k,j);
+          ElementType_A aik = i >= k ? A(k,i) : A(i,k);
+          C(i,j) += aik * B(k,j);
         }
       }
     }
@@ -962,20 +964,22 @@ void symmetric_matrix_right_product(
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (size_type j = 0; j < C.extent(1); ++j) {
-      for (size_type i = j; i < C.extent(0); ++i) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
         for (size_type k = 0; k < A.extent(1); ++k) {
-          C(i,j) += B(i,k) * A(k,j);
+          ElementType_A akj = j <= k ? A(k,j) : A(j,k);
+          C(i,j) += B(i,k) * akj;
         }
       }
     }
   }
   else { // upper_triangle_t
     for (size_type j = 0; j < C.extent(1); ++j) {
-      for (size_type i = 0; i <= j; ++i) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
         for (size_type k = 0; k < A.extent(1); ++k) {
-          C(i,j) += B(i,k) * A(k,j);
+          ElementType_A akj = j >= k ? A(k,j) : A(j,k);
+          C(i,j) += B(i,k) * akj;
         }
       }
     }
