@@ -1,4 +1,7 @@
 
+#ifndef LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_KOKKOSKERNELS_MDSPANTOVIEW_MAPPER_HPP_
+#define LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_KOKKOSKERNELS_MDSPANTOVIEW_MAPPER_HPP_
+
 namespace KokkosKernelsSTD {
 namespace Impl {
 
@@ -34,3 +37,4 @@ mdspan_to_view(const MDSpan& a) {
 }
 } // namespace Impl
 } // namespac KokkosKernelsSTD
+#endif
