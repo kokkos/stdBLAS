@@ -78,15 +78,12 @@ struct is_custom_dot_avail<
 
 } // end anonymous namespace
 
-<<<<<<< HEAD
-=======
 
 // ------------
 // PUBLIC API:
 // ------------
 
 // dot, with init value
->>>>>>> dot: customization point to Kokkos-kernels and example
 template<class ExecutionPolicy,
          class ElementType1,
          extents<>::size_type ext1,
@@ -103,12 +100,9 @@ Scalar dot(
   std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2,
   Scalar init)
 {
-<<<<<<< HEAD
   static_assert(v1.static_extent(0) == dynamic_extent ||
                 v2.static_extent(0) == dynamic_extent ||
                 v1.static_extent(0) == v2.static_extent(0));
-=======
->>>>>>> dot: customization point to Kokkos-kernels and example
 
   constexpr bool use_custom = is_custom_dot_avail<
     decltype(execpolicy_mapper(exec)), decltype(v1), decltype(v2), Scalar
@@ -141,10 +135,6 @@ Scalar dot(std::experimental::mdspan<ElementType1, std::experimental::extents<ex
   return dot(std::experimental::linalg::impl::default_exec_t(), v1, v2, init);
 }
 
-<<<<<<< HEAD
-=======
-// Conjugated dot, with init value
->>>>>>> dot: customization point to Kokkos-kernels and example
 template<class ElementType1,
          extents<>::size_type ext1,
          class Layout1,
@@ -201,8 +191,6 @@ namespace dot_detail {
   -> decltype(x(0) * y(0));
 } // namespace dot_detail
 
-
-// dot, without init value
 template<class ElementType1,
          extents<>::size_type ext1,
          class Layout1,
@@ -239,10 +227,6 @@ auto dot(
   return dot(exec, v1, v2, return_t{});
 }
 
-<<<<<<< HEAD
-=======
-// Conjugated dot, without init value
->>>>>>> dot: customization point to Kokkos-kernels and example
 template<class ElementType1,
          extents<>::size_type ext1,
          class Layout1,
@@ -256,14 +240,9 @@ auto dotc(
   std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2)
   -> decltype(dot_detail::dot_return_type_deducer(conjugated(v1), v2))
 {
-<<<<<<< HEAD
   using return_t = decltype(dot_detail::dot_return_type_deducer(conjugated(v1), v2));
-=======
-  using return_t = decltype(dot_detail::dot_return_type_deducer(v1, v2));
->>>>>>> dot: customization point to Kokkos-kernels and example
   return dotc(v1, v2, return_t{});
 }
-
 
 template<class ExecutionPolicy,
          class ElementType1,
