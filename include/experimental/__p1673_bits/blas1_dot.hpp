@@ -185,6 +185,8 @@ namespace dot_detail {
   -> decltype(x(0) * y(0));
 } // namespace dot_detail
 
+
+// dot, without init value
 template<class ElementType1,
          extents<>::size_type ext1,
          class Layout1,
@@ -237,6 +239,7 @@ auto dotc(
   using return_t = decltype(dot_detail::dot_return_type_deducer(conjugated(v1), v2));
   return dotc(v1, v2, return_t{});
 }
+
 
 template<class ExecutionPolicy,
          class ElementType1,
