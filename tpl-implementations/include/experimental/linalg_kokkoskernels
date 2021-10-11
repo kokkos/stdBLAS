@@ -2,5 +2,6 @@
 #include<experimental/mdspan>
 #include<KokkosBlas.hpp>
 #include "__p1673_bits/kokkos-kernels/mdspan_to_view_mapper_kk.hpp"
+#include "__p1673_bits/kokkos-kernels/blas1_dot_kk.hpp"
 #include "__p1673_bits/kokkos-kernels/blas1_scale_kk.hpp"
 #include "__p1673_bits/kokkos-kernels/blas2_matrix_vector_product_kk.hpp"
