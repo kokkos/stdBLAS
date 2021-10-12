@@ -83,17 +83,17 @@ void add_rank_1(
 }
 
 template<class ElementType_x,
-         extents<>::size_type numRows_x, 
+         extents<>::size_type numRows_x,
          extents<>::size_type numCols_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         extents<>::size_type numRows_y, 
+         extents<>::size_type numRows_y,
          extents<>::size_type numCols_y,
          class Layout_y,
          class Accessor_y,
          class ElementType_z,
-         extents<>::size_type numRows_z, 
+         extents<>::size_type numRows_z,
          extents<>::size_type numCols_z,
          class Layout_z,
          class Accessor_z>
@@ -131,35 +131,32 @@ void add_rank_2(
   }
 }
 
+template <class Exec, class x_t, class y_t, class z_t, class = void>
+struct is_custom_add_avail : std::false_type {};
+
+template <class Exec, class x_t, class y_t, class z_t>
+struct is_custom_add_avail<
+  Exec, x_t, y_t, z_t,
+  std::void_t<
+    decltype(add
+	     (std::declval<Exec>(),
+	      std::declval<x_t>(),
+	      std::declval<y_t>(),
+	      std::declval<z_t>()
+	      )
+	     )
+    >
+  >
+{
+  static constexpr bool value = !std::is_same<Exec,std::experimental::linalg::impl::inline_exec_t>::value;
+};
+
 } // end anonymous namespace
 
-template<class ElementType_x,
-         extents<>::size_type ... ext_x,
-         class Layout_x,
-         class Accessor_x,
-         class ElementType_y,
-         extents<>::size_type ... ext_y,
-         class Layout_y,
-         class Accessor_y,
-         class ElementType_z,
-         extents<>::size_type ... ext_z,
-         class Layout_z,
-         class Accessor_z>
-  requires (sizeof...(ext_x) == sizeof...(ext_y) && sizeof...(ext_x) == sizeof...(ext_z))
-void add(  
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_z, std::experimental::extents<ext_z ...>, Layout_z, Accessor_z> z)
-{
-  static_assert(z.rank() <= 2);
-  
-  if constexpr (z.rank() == 1) {
-    add_rank_1 (x, y, z);
-  }
-  else if constexpr (z.rank() == 2) {
-    add_rank_2 (x, y, z);
-  }
-}
+
+// ------------
+// PUBLIC API:
+// ------------
 
 template<class ExecutionPolicy,
          class ElementType_x,
@@ -176,12 +173,55 @@ template<class ExecutionPolicy,
          class Accessor_z>
   requires (sizeof...(ext_x) == sizeof...(ext_y) && sizeof...(ext_x) == sizeof...(ext_z))
 void add(
-  ExecutionPolicy&& /* exec */,
+  ExecutionPolicy&& exec,
   std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
   std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y,
   std::experimental::mdspan<ElementType_z, std::experimental::extents<ext_z ...>, Layout_z, Accessor_z> z)
 {
-  add(x, y, z);
+
+  constexpr bool use_custom = is_custom_add_avail<
+    decltype(execpolicy_mapper(exec)), decltype(x), decltype(y), decltype(z)
+    >::value;
+
+  if constexpr(use_custom){
+    // for the customization point, it is up to impl to check requirements
+    add(execpolicy_mapper(exec), x, y, z);
+  }
+  else
+  {
+
+    // this static assert is only here because for
+    // the default case we support rank-1 and rank2.
+    static_assert(z.rank() <= 2);
+
+    if constexpr (z.rank() == 1) {
+      add_rank_1 (x, y, z);
+    }
+    else if constexpr (z.rank() == 2) {
+      add_rank_2 (x, y, z);
+    }
+  }
+}
+
+template<class ElementType_x,
+         extents<>::size_type ... ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ... ext_y,
+         class Layout_y,
+         class Accessor_y,
+         class ElementType_z,
+         extents<>::size_type ... ext_z,
+         class Layout_z,
+         class Accessor_z>
+  requires (sizeof...(ext_x) == sizeof...(ext_y) && sizeof...(ext_x) == sizeof...(ext_z))
+void add(
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y,
+  std::experimental::mdspan<ElementType_z, std::experimental::extents<ext_z ...>, Layout_z, Accessor_z> z)
+{
+  add(std::experimental::linalg::impl::default_exec_t(), x, y, z);
 }
 
 } // end namespace linalg
