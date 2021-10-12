@@ -66,7 +66,7 @@ Scalar dot(std::experimental::mdspan<ElementType1, std::experimental::extents<ex
   static_assert(v1.static_extent(0) == dynamic_extent ||
                 v2.static_extent(0) == dynamic_extent ||
                 v1.static_extent(0) == v2.static_extent(0));
-  
+
   for (size_t k = 0; k < v1.extent(0); ++k) {
     init += v1(k) * v2(k);
   }
@@ -108,7 +108,7 @@ Scalar dotc(
   std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2,
   Scalar init)
 {
-  return dot(v1, conjugated(v2), init);
+  return dot(conjugated(v1), v2, init);
 }
 
 template<class ExecutionPolicy,
@@ -148,6 +148,20 @@ namespace dot_detail {
     std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
     std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y)
   -> decltype(x(0) * y(0));
+
+  template<
+    class ElementType1,
+    extents<>::size_type ext1,
+    class Layout1,
+    class Accessor1,
+    class ElementType2,
+    extents<>::size_type ext2,
+    class Layout2,
+    class Accessor2>
+  auto dotc_return_type_deducer(
+    std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
+    std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y)
+    -> decltype(conj(x(0)) * y(0));
 } // namespace dot_detail
 
 template<class ElementType1,
@@ -178,9 +192,9 @@ template<class ElementType1,
 auto dotc(
   std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> v1,
   std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2)
--> decltype(dot_detail::dot_return_type_deducer(v1, v2))
+-> decltype(dot_detail::dotc_return_type_deducer(v1, v2))
 {
-  using return_t = decltype(dot_detail::dot_return_type_deducer(v1, v2));
+  using return_t = decltype(dot_detail::dotc_return_type_deducer(v1, v2));
   return dotc(v1, v2, return_t{});
 }
 
@@ -216,9 +230,9 @@ auto dotc(
   ExecutionPolicy&& exec,
   std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> v1,
   std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2)
--> decltype(dot_detail::dot_return_type_deducer(v1, v2))
+-> decltype(dot_detail::dotc_return_type_deducer(v1, v2))
 {
-  using return_t = decltype(dot_detail::dot_return_type_deducer(v1, v2));
+  using return_t = decltype(dot_detail::dotc_return_type_deducer(v1, v2));
   return dotc(exec, v1, v2, return_t{});
 }
 
