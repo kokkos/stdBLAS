@@ -24,10 +24,10 @@ namespace {
   struct FillMatrix<MdspanType, int> {
     static void fill(MdspanType A, const int startVal)
     {
-      const ptrdiff_t A_numRows = A.extent(0);
-      const ptrdiff_t A_numCols = A.extent(1);
-      for (ptrdiff_t j = 0; j < A_numCols; ++j) {
-        for (ptrdiff_t i = 0; i < A_numRows; ++i) {
+      const std::size_t A_numRows = A.extent(0);
+      const std::size_t A_numCols = A.extent(1);
+      for (std::size_t j = 0; j < A_numCols; ++j) {
+        for (std::size_t i = 0; i < A_numRows; ++i) {
           A(i,j) = int((i+startVal) + (j+startVal) * A_numRows);
         }
       }
@@ -38,10 +38,10 @@ namespace {
   struct FillMatrix<MdspanType, double> {
     static void fill(MdspanType A, const double startVal)
     {
-      const ptrdiff_t A_numRows = A.extent(0);
-      const ptrdiff_t A_numCols = A.extent(1);
-      for (ptrdiff_t j = 0; j < A_numCols; ++j) {
-        for (ptrdiff_t i = 0; i < A_numRows; ++i) {
+      const std::size_t A_numRows = A.extent(0);
+      const std::size_t A_numCols = A.extent(1);
+      for (std::size_t j = 0; j < A_numCols; ++j) {
+        for (std::size_t i = 0; i < A_numRows; ++i) {
           A(i,j) = (double(i)+startVal) +
             (double(j)+startVal) * double(A_numRows);
         }
@@ -63,8 +63,8 @@ namespace {
   struct FillVector<MdspanType, int> {
     static void fill(MdspanType x, const int startVal)
     {
-      const ptrdiff_t numRows = x.extent(0);
-      for (ptrdiff_t i = 0; i < numRows; ++i) {
+      const std::size_t numRows = x.extent(0);
+      for (std::size_t i = 0; i < numRows; ++i) {
         x(i) = int(i+startVal);
       }
     }
@@ -74,8 +74,8 @@ namespace {
   struct FillVector<MdspanType, double> {
     static void fill(MdspanType x, const double startVal)
     {
-      const ptrdiff_t numRows = x.extent(0);
-      for (ptrdiff_t i = 0; i < numRows; ++i) {
+      const std::size_t numRows = x.extent(0);
+      for (std::size_t i = 0; i < numRows; ++i) {
         x(i) = double(i+startVal);
       }
     }
@@ -105,13 +105,13 @@ namespace {
     using matrix_t = mdspan<scalar_t, extents_t, layout_left>;
     using vector_t = mdspan<scalar_t, extents<dynamic_extent>, layout_left>;
 
-    constexpr ptrdiff_t maxDim = 7;
-    constexpr ptrdiff_t storageSize(maxDim*maxDim + 3*maxDim);
+    constexpr std::size_t maxDim = 7;
+    constexpr std::size_t storageSize(maxDim*maxDim + 3*maxDim);
     std::vector<scalar_t> storage(storageSize);
 
-    for (ptrdiff_t numRows : {1, 4, 7}) {
-      for (ptrdiff_t numCols : {1, 4, 7}) {
-        ptrdiff_t offset = 0;
+    for (std::size_t numRows : {1, 4, 7}) {
+      for (std::size_t numCols : {1, 4, 7}) {
+        std::size_t offset = 0;
         matrix_t A(storage.data() + offset, numRows, numCols);
         offset += numRows * numCols;
         vector_t x(storage.data() + offset, numCols);
@@ -124,27 +124,27 @@ namespace {
         fill_vector(x, scalar_t(real_t(2)));
 
         // Initialize vector to zero
-        for (ptrdiff_t i = 0; i < numRows; i++) {
+        for (std::size_t i = 0; i < numRows; i++) {
           gs(i) = scalar_t(0.0); // this works even for complex
         }
 
         // Perform matvec
-        for (ptrdiff_t j = 0; j < numCols; ++j) {
-          for (ptrdiff_t i = 0; i < numRows; ++i) {
+        for (std::size_t j = 0; j < numCols; ++j) {
+          for (std::size_t i = 0; i < numRows; ++i) {
             gs(i) += A(i,j) * x(j);
           }
         }
 
         // Fill result vector with flag values to make sure that we
         // computed everything.
-        for (ptrdiff_t j = 0; j < numRows; ++j) {
+        for (std::size_t j = 0; j < numRows; ++j) {
           y(j) = std::numeric_limits<scalar_t>::min();
         }
 
         cout << " Test y = A(" << numRows << " x " << numCols
              << ") * x = y\n";
         matrix_vector_product(A, x, y);
-        for (ptrdiff_t i = 0; i < numRows; ++i) {
+        for (std::size_t i = 0; i < numRows; ++i) {
           EXPECT_DOUBLE_EQ(y(i), gs(i)) << "Vectors differ at index " << i;
         }
       } // numCols

@@ -23,32 +23,32 @@ namespace {
     using scalar_t = double;
     using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
 
-    constexpr ptrdiff_t vectorSize(5);
-    constexpr ptrdiff_t storageSize = vectorSize;
+    constexpr std::size_t vectorSize(5);
+    constexpr std::size_t storageSize = vectorSize;
     std::vector<scalar_t> storage(storageSize);
 
     vector_t x(storage.data(), vectorSize);
 
     {
-      for (ptrdiff_t k = 0; k < vectorSize; ++k) {
+      for (std::size_t k = 0; k < vectorSize; ++k) {
         const scalar_t x_k = scalar_t (k) + 1.0;
         x(k) = x_k;
       }
       const scalar_t scaleFactor = 5.0;
       scale(scaleFactor, x);
-      for (ptrdiff_t k = 0; k < vectorSize; ++k) {
+      for (std::size_t k = 0; k < vectorSize; ++k) {
         const scalar_t x_k = scalar_t (k) + 1.0;
         EXPECT_EQ( x(k), scaleFactor * x_k );
       }
     }
     {
-      for (ptrdiff_t k = 0; k < vectorSize; ++k) {
+      for (std::size_t k = 0; k < vectorSize; ++k) {
         const scalar_t x_k = scalar_t (k) + 1.0;
         x(k) = x_k;
       }
       const float scaleFactor = 5.0;
       scale(scaleFactor, x);
-      for (ptrdiff_t k = 0; k < vectorSize; ++k) {
+      for (std::size_t k = 0; k < vectorSize; ++k) {
         const scalar_t x_k = scalar_t (k) + 1.0;
         EXPECT_EQ( x(k), scaleFactor * x_k );
       }
@@ -61,32 +61,32 @@ namespace {
     using scalar_t = std::complex<real_t>;
     using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
 
-    constexpr ptrdiff_t vectorSize(5);
-    constexpr ptrdiff_t storageSize = vectorSize;
+    constexpr std::size_t vectorSize(5);
+    constexpr std::size_t storageSize = vectorSize;
     std::vector<scalar_t> storage(storageSize);
 
     vector_t x(storage.data(), vectorSize);
 
     {
-      for (ptrdiff_t k = 0; k < vectorSize; ++k) {
+      for (std::size_t k = 0; k < vectorSize; ++k) {
         const scalar_t x_k(real_t(k) + 4.0, -real_t(k) - 1.0);
         x(k) = x_k;
       }
       const real_t scaleFactor = 5.0;
       scale(scaleFactor, x);
-      for (ptrdiff_t k = 0; k < vectorSize; ++k) {
+      for (std::size_t k = 0; k < vectorSize; ++k) {
         const scalar_t x_k(real_t(k) + 4.0, -real_t(k) - 1.0);
         EXPECT_EQ( x(k), scaleFactor * x_k );
       }
     }
     {
-      for (ptrdiff_t k = 0; k < vectorSize; ++k) {
+      for (std::size_t k = 0; k < vectorSize; ++k) {
         const scalar_t x_k(real_t(k) + 4.0, -real_t(k) - 1.0);
         x(k) = x_k;
       }
       const scalar_t scaleFactor (5.0, -1.0);
       scale(scaleFactor, x);
-      for (ptrdiff_t k = 0; k < vectorSize; ++k) {
+      for (std::size_t k = 0; k < vectorSize; ++k) {
         const scalar_t x_k(real_t(k) + 4.0, -real_t(k) - 1.0);
         EXPECT_EQ( x(k), scaleFactor * x_k );
       }
