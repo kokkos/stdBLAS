@@ -37,15 +37,15 @@ namespace {
     using scalar_t = double;
     using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
 
-    constexpr ptrdiff_t vectorSize(5);
-    constexpr ptrdiff_t storageSize = ptrdiff_t(2) * vectorSize;
+    constexpr std::size_t vectorSize(5);
+    constexpr std::size_t storageSize = std::size_t(2) * vectorSize;
     std::vector<scalar_t> storage(storageSize);
 
     vector_t x(storage.data(), vectorSize);
     vector_t y(storage.data() + vectorSize, vectorSize);
 
     scalar_t expectedDotResult{};
-    for (ptrdiff_t k = 0; k < vectorSize; ++k) {
+    for (std::size_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k = scalar_t(k) + 1.0;
       const scalar_t y_k = scalar_t(k) + 2.0;
       x(k) = x_k;
@@ -68,9 +68,9 @@ namespace {
 #ifdef LINALG_ENABLE_BLAS
     const scalar_t blasResult =
       ddot_wrapper(x.extent(0), x.data(), 1, y.data(), 1);
-    EXPECT_EQ( dotResult, blasResult );    
+    EXPECT_EQ( dotResult, blasResult );
 #endif // LINALG_ENABLE_BLAS
-    
+
     const scalar_t conjDotResult = dotc(x, y, scalar_t{});
     EXPECT_EQ( conjDotResult, expectedDotResult );
 
@@ -84,14 +84,14 @@ namespace {
     //EXPECT_EQ( dotResultPar, expectedDotResult );
   }
 
-  TEST(BLAS1_dot, mdspan_complex_double)
+  TEST(BLAS1_dot, mdspan_complex_double_test1)
   {
     using real_t = double;
     using scalar_t = std::complex<real_t>;
     using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
 
-    constexpr ptrdiff_t vectorSize(5);
-    constexpr ptrdiff_t storageSize = ptrdiff_t(2) * vectorSize;
+    constexpr std::size_t vectorSize(5);
+    constexpr std::size_t storageSize = std::size_t(2) * vectorSize;
     std::vector<scalar_t> storage(storageSize);
 
     vector_t x(storage.data(), vectorSize);
@@ -99,14 +99,14 @@ namespace {
 
     scalar_t expectedDotResult{};
     scalar_t expectedConjDotResult{};
-    for (ptrdiff_t k = 0; k < vectorSize; ++k) {
+    for (std::size_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k(real_t(k) + 1.0, real_t(k) + 1.0);
       const scalar_t y_k(real_t(k) + 2.0, real_t(k) + 2.0);
       x(k) = x_k;
       y(k) = y_k;
       expectedDotResult += x_k * y_k;
       using std::conj;
-      expectedConjDotResult += x_k * conj (y_k);
+      expectedConjDotResult += conj(x_k) * (y_k);
     }
 
     const auto dotResult = dot(x, y, scalar_t{});
@@ -133,6 +133,58 @@ namespace {
     //using fake_executor_t = int;
     //dot (fake_executor_t (), x, y, dotResultPar);
     //EXPECT_EQ( dotResultPar, expectedDotResult );
+  }
+
+  TEST(BLAS1_dot, mdspan_complex_double_test2)
+  {
+    using real_t = double;
+    using scalar_t = std::complex<real_t>;
+    using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
+
+    constexpr std::size_t vectorSize(5);
+    constexpr std::size_t storageSize = std::size_t(2) * vectorSize;
+    std::vector<scalar_t> storage(storageSize);
+
+    vector_t x(storage.data(), vectorSize);
+    vector_t y(storage.data() + vectorSize, vectorSize);
+
+    scalar_t expectedDotResult{};
+    scalar_t expectedConjDotResult{};
+    for (std::size_t k = 0; k < vectorSize; ++k)
+    {
+
+      scalar_t x_k = {};
+      scalar_t y_k = {};
+      if (k % 2 == 0){
+	x_k = scalar_t(real_t(k) + 1.0, real_t(k) + 1.0);
+	y_k = scalar_t(real_t(k) + 2.0, real_t(k) + 2.0);
+      }
+      else{
+	x_k = scalar_t(real_t(k) - 1.0, real_t(k) + 1.0);
+	y_k = scalar_t(real_t(k) + 2.0, real_t(k) - 2.0);
+      }
+      x(k) = x_k;
+      y(k) = y_k;
+      expectedDotResult += x_k * y_k;
+      using std::conj;
+      expectedConjDotResult += conj(x_k) * (y_k);
+    }
+
+    const auto dotResult = dot(x, y, scalar_t{});
+    static_assert( std::is_same_v<std::remove_const_t<decltype(dotResult)>, scalar_t> );
+    EXPECT_EQ( dotResult, expectedDotResult );
+
+    const auto conjDotResult = dotc(x, y, scalar_t{});
+    static_assert( std::is_same_v<std::remove_const_t<decltype(conjDotResult)>, scalar_t> );
+    EXPECT_EQ( conjDotResult, expectedConjDotResult );
+
+    const auto dotResultTwoArg = dot(x, y);
+    static_assert( std::is_same_v<std::remove_const_t<decltype(dotResultTwoArg)>, scalar_t> );
+    EXPECT_EQ( dotResultTwoArg, expectedDotResult );
+
+    const auto conjDotResultTwoArg = dotc(x, y);
+    static_assert( std::is_same_v<std::remove_const_t<decltype(conjDotResultTwoArg)>, scalar_t> );
+    EXPECT_EQ( conjDotResultTwoArg, expectedConjDotResult );
   }
 }
 
