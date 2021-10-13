@@ -11,10 +11,10 @@ namespace {
   using std::experimental::linalg::matrix_inf_norm;
   using std::cout;
   using std::endl;
-  
+
   template<class ElementType, class Layout>
   using basic_matrix_t = std::experimental::mdspan<
-    ElementType, 
+    ElementType,
     std::experimental::extents<
       std::experimental::dynamic_extent,
       std::experimental::dynamic_extent>,
@@ -77,7 +77,7 @@ namespace {
         // to avoid a possible bug in the current mdspan implementation,
         // and/or an MSVC bug.  I'll need to check more recent MSVC versions;
         // I'm building right now with MSVC 2019 16.7.0.
-        matrix_t A(storage.data(), ptrdiff_t(A_numRows), ptrdiff_t(A_numCols));
+        matrix_t A(storage.data(), std::size_t(A_numRows), std::size_t(A_numCols));
 
         const auto startVal = scalar_t(real_t<scalar_t>(1.0));
         const real_t<scalar_t> expectedResult = fill_matrix(A, startVal);

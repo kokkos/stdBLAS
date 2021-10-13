@@ -38,7 +38,7 @@ namespace {
     using scalar_t = double;
     using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
 
-    constexpr ptrdiff_t vectorSize(0);
+    constexpr std::size_t vectorSize(0);
     std::vector<scalar_t> storage(vectorSize);
     vector_t x(storage.data(), vectorSize);
 
@@ -68,7 +68,7 @@ namespace {
     using scalar_t = std::complex<real_t>;
     using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
 
-    constexpr ptrdiff_t vectorSize(1);
+    constexpr std::size_t vectorSize(1);
     std::vector<scalar_t> storage(vectorSize);
     vector_t x(storage.data(), vectorSize);
 
@@ -98,18 +98,18 @@ namespace {
     using scalar_t = double;
     using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
 
-    constexpr ptrdiff_t vectorSize(5);
+    constexpr std::size_t vectorSize(5);
     constexpr mag_t tol =
       mag_t(vectorSize) * std::numeric_limits<mag_t>::epsilon();
 
-    constexpr ptrdiff_t storageSize = vectorSize;
+    constexpr std::size_t storageSize = vectorSize;
     std::vector<scalar_t> storage(storageSize);
 
     vector_t x(storage.data(), vectorSize);
 
     // Set elements in descending order so the scaling triggers
     mag_t expectedNormResultSquared {};
-    for (ptrdiff_t k = vectorSize; k > 1; --k) {
+    for (std::size_t k = vectorSize; k > 1; --k) {
       const scalar_t x_k = scalar_t(k);
       x(k-1) = x_k;
       expectedNormResultSquared += x_k * x_k;
@@ -139,18 +139,18 @@ namespace {
     using scalar_t = std::complex<real_t>;
     using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
 
-    constexpr ptrdiff_t vectorSize(5);
+    constexpr std::size_t vectorSize(5);
     // Complex numbers use more arithmetic than their real analogs.
     constexpr mag_t tol = 4.0 * mag_t(vectorSize) *
       std::numeric_limits<mag_t>::epsilon();
 
-    constexpr ptrdiff_t storageSize = vectorSize;
+    constexpr std::size_t storageSize = vectorSize;
     std::vector<scalar_t> storage(storageSize);
 
     vector_t x(storage.data(), vectorSize);
 
     mag_t expectedNormResultSquared {};
-    for (ptrdiff_t k = 0; k < vectorSize; ++k) {
+    for (std::size_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k(real_t(k) + 3.0, -real_t(k) - 1.0);
       x(k) = x_k;
       expectedNormResultSquared += abs(x_k) * abs(x_k);

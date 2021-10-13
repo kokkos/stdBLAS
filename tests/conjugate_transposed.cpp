@@ -17,19 +17,19 @@ namespace {
     using scalar_t = std::complex<real_t>;
     using matrix_dynamic_t =
       mdspan<scalar_t, extents<dynamic_extent, dynamic_extent>>;
-    constexpr ptrdiff_t dim = 5;
+    constexpr std::size_t dim = 5;
     using matrix_static_t =
       mdspan<scalar_t, extents<dim, dim>>;
 
-    constexpr ptrdiff_t storageSize = ptrdiff_t(dim*dim);
+    constexpr std::size_t storageSize = std::size_t(dim*dim);
     std::vector<scalar_t> A_storage (storageSize);
     std::vector<scalar_t> B_storage (storageSize);
 
     matrix_dynamic_t A (A_storage.data (), dim, dim);
     matrix_static_t B (B_storage.data ());
 
-    for (ptrdiff_t i = 0; i < dim; ++i) {
-      for (ptrdiff_t j = 0; j < dim; ++j) {
+    for (std::size_t i = 0; i < dim; ++i) {
+      for (std::size_t j = 0; j < dim; ++j) {
         const real_t i_val_re (real_t(i) + 1.0);
         const scalar_t i_val (i_val_re, i_val_re);
         const real_t j_val_re = real_t(j) + 1.0;
@@ -44,8 +44,8 @@ namespace {
     auto A_h = conjugate_transposed (A);
     auto B_h = conjugate_transposed (B);
 
-    for (ptrdiff_t i = 0; i < dim; ++i) {
-      for (ptrdiff_t j = 0; j < dim; ++j) {
+    for (std::size_t i = 0; i < dim; ++i) {
+      for (std::size_t j = 0; j < dim; ++j) {
         const real_t i_val_re (real_t(i) + 1.0);
         const scalar_t i_val (i_val_re, i_val_re);
         const real_t j_val_re = real_t(j) + 1.0;

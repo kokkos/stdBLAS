@@ -32,10 +32,10 @@ namespace {
   struct FillMatrix<MdspanType, int> {
     static void fill(MdspanType A, const int startVal)
     {
-      const ptrdiff_t A_numRows = A.extent(0);
-      const ptrdiff_t A_numCols = A.extent(1);
-      for (ptrdiff_t j = 0; j < A_numCols; ++j) {
-        for (ptrdiff_t i = 0; i < A_numRows; ++i) {
+      const std::size_t A_numRows = A.extent(0);
+      const std::size_t A_numCols = A.extent(1);
+      for (std::size_t j = 0; j < A_numCols; ++j) {
+        for (std::size_t i = 0; i < A_numRows; ++i) {
           A(i,j) = int((i+startVal) + (j+startVal) * A_numRows);
         }
       }
@@ -46,10 +46,10 @@ namespace {
   struct FillMatrix<MdspanType, double> {
     static void fill(MdspanType A, const double startVal)
     {
-      const ptrdiff_t A_numRows = A.extent(0);
-      const ptrdiff_t A_numCols = A.extent(1);
-      for (ptrdiff_t j = 0; j < A_numCols; ++j) {
-        for (ptrdiff_t i = 0; i < A_numRows; ++i) {
+      const std::size_t A_numRows = A.extent(0);
+      const std::size_t A_numCols = A.extent(1);
+      for (std::size_t j = 0; j < A_numCols; ++j) {
+        for (std::size_t i = 0; i < A_numRows; ++i) {
           A(i,j) = (double(i)+startVal) +
             (double(j)+startVal) * double(A_numRows);
         }
@@ -80,19 +80,19 @@ namespace {
     using extents_t = extents<dynamic_extent, dynamic_extent>;
     using matrix_t = mdspan<scalar_t, extents_t, layout_left>;
 
-    constexpr ptrdiff_t maxDim = 7;
-    constexpr ptrdiff_t storageSize(7*maxDim*maxDim);
+    constexpr std::size_t maxDim = 7;
+    constexpr std::size_t storageSize(7*maxDim*maxDim);
     std::vector<scalar_t> storage(storageSize);
 
-    for (ptrdiff_t C_numRows : {1, 4, 7}) {
-      for (ptrdiff_t C_numCols : {1, 4, 7}) {
-        for (ptrdiff_t A_numCols : {1, 4, 7}) {
+    for (std::size_t C_numRows : {1, 4, 7}) {
+      for (std::size_t C_numCols : {1, 4, 7}) {
+        for (std::size_t A_numCols : {1, 4, 7}) {
 
-          const ptrdiff_t A_numRows = C_numRows;
-          const ptrdiff_t B_numRows = A_numCols;
-          const ptrdiff_t B_numCols = C_numCols;
+          const std::size_t A_numRows = C_numRows;
+          const std::size_t B_numRows = A_numCols;
+          const std::size_t B_numCols = C_numCols;
 
-          ptrdiff_t offset = 0;
+          std::size_t offset = 0;
           matrix_t A(storage.data() + offset, A_numRows, A_numCols);
           offset += A_numRows * A_numCols;
           matrix_t B(storage.data() + offset, B_numRows, B_numCols);
@@ -110,21 +110,21 @@ namespace {
 
           fill_matrix(A, scalar_t(real_t(1)));
           fill_matrix(B, scalar_t(real_t(2)));
-          for (ptrdiff_t j = 0; j < A_numCols; ++j) {
-            for (ptrdiff_t i = 0; i < A_numRows; ++i) {
+          for (std::size_t j = 0; j < A_numCols; ++j) {
+            for (std::size_t i = 0; i < A_numRows; ++i) {
               A_t(j,i) = A(i,j);
             }
           }
-          for (ptrdiff_t j = 0; j < B_numCols; ++j) {
-            for (ptrdiff_t i = 0; i < B_numRows; ++i) {
+          for (std::size_t j = 0; j < B_numCols; ++j) {
+            for (std::size_t i = 0; i < B_numRows; ++i) {
               B_t(j,i) = B(i,j);
             }
           }
 
-          for (ptrdiff_t j = 0; j < C_numCols; ++j) {
-            for (ptrdiff_t i = 0; i < C_numRows; ++i) {
+          for (std::size_t j = 0; j < C_numCols; ++j) {
+            for (std::size_t i = 0; i < C_numRows; ++i) {
               C(i,j) = scalar_t(0.0); // this works even for complex
-              for (ptrdiff_t k = 0; k < A_numCols; ++k) {
+              for (std::size_t k = 0; k < A_numCols; ++k) {
                 C(i,j) += A(i,k) * B(k,j);
               }
             }
@@ -132,8 +132,8 @@ namespace {
 
           // Fill result matrix with flag values to make sure that we
           // computed everything.
-          for (ptrdiff_t j = 0; j < C_numCols; ++j) {
-            for (ptrdiff_t i = 0; i < C_numRows; ++i) {
+          for (std::size_t j = 0; j < C_numCols; ++j) {
+            for (std::size_t i = 0; i < C_numRows; ++i) {
               C2(i,j) = std::numeric_limits<scalar_t>::min();
             }
           }
@@ -143,17 +143,17 @@ namespace {
                << ") * B(" << B_numRows << " x " << B_numCols
                << ")" << endl;
           matrix_product(A, B, C2);
-          for (ptrdiff_t j = 0; j < C_numCols; ++j) {
-            for (ptrdiff_t i = 0; i < C_numRows; ++i) {
-              EXPECT_DOUBLE_EQ(C2(i,j), C(i,j)) << "Matrices differ at index (" 
+          for (std::size_t j = 0; j < C_numCols; ++j) {
+            for (std::size_t i = 0; i < C_numRows; ++i) {
+              EXPECT_DOUBLE_EQ(C2(i,j), C(i,j)) << "Matrices differ at index ("
                   << i << "," << j << ")=\n";
             }
           }
 
           // Fill result matrix with flag values to make sure that
           // we computed everything.
-          for (ptrdiff_t j = 0; j < C_numCols; ++j) {
-            for (ptrdiff_t i = 0; i < C_numRows; ++i) {
+          for (std::size_t j = 0; j < C_numCols; ++j) {
+            for (std::size_t i = 0; i < C_numRows; ++i) {
               C3(i,j) = std::numeric_limits<scalar_t>::min();
             }
           }
@@ -166,9 +166,9 @@ namespace {
                << ")^T" << endl;
           matrix_product(transposed(A_t),
                          transposed(B_t), C3);
-          for (ptrdiff_t j = 0; j < C_numCols; ++j) {
-            for (ptrdiff_t i = 0; i < C_numRows; ++i) {
-              EXPECT_DOUBLE_EQ(C3(i,j), C(i,j)) << "Matrices differ at index (" 
+          for (std::size_t j = 0; j < C_numCols; ++j) {
+            for (std::size_t i = 0; i < C_numRows; ++i) {
+              EXPECT_DOUBLE_EQ(C3(i,j), C(i,j)) << "Matrices differ at index ("
                   << i << "," << j << ")=\n";
             }
           }
@@ -184,8 +184,8 @@ namespace {
             EXPECT_EQ(B_t.extent(1), B.extent(0));
             EXPECT_EQ(A_tt.extent(1), B_tt.extent(0));
 
-            for (ptrdiff_t j = 0; j < C_numCols; ++j) {
-              for (ptrdiff_t i = 0; i < C_numRows; ++i) {
+            for (std::size_t j = 0; j < C_numCols; ++j) {
+              for (std::size_t i = 0; i < C_numRows; ++i) {
                 C(i,j) = scalar_t(0.0); // this works even for complex
                 for (extents<>::size_type k = 0; k < A_tt.extent(1); ++k) {
                   C(i,j) += A_tt(i,k) * B_tt(k,j);
@@ -197,9 +197,9 @@ namespace {
           cout << " Compare using hand-rolled transposed loop"
                << endl;
 
-          for (ptrdiff_t j = 0; j < C_numCols; ++j) {
-            for (ptrdiff_t i = 0; i < C_numRows; ++i) {
-              EXPECT_DOUBLE_EQ(C3(i,j), C(i,j)) << "Matrices differ at index (" 
+          for (std::size_t j = 0; j < C_numCols; ++j) {
+            for (std::size_t i = 0; i < C_numRows; ++i) {
+              EXPECT_DOUBLE_EQ(C3(i,j), C(i,j)) << "Matrices differ at index ("
                 << i << "," << j << ")=\n";
             }
           }
@@ -213,10 +213,10 @@ namespace {
           matrix_product(scaled(scalar_t(2.0), transposed(A_t)),
                          transposed(B_t), C3);
 
-          for (ptrdiff_t j = 0; j < C_numCols; ++j) {
-            for (ptrdiff_t i = 0; i < C_numRows; ++i) {
-              EXPECT_DOUBLE_EQ(C3(i,j), scalar_t(2.0)*C(i,j)) 
-                << "Matrices differ at index (" 
+          for (std::size_t j = 0; j < C_numCols; ++j) {
+            for (std::size_t i = 0; i < C_numRows; ++i) {
+              EXPECT_DOUBLE_EQ(C3(i,j), scalar_t(2.0)*C(i,j))
+                << "Matrices differ at index ("
                 << i << "," << j << ")=\n";
             }
           }
