@@ -78,12 +78,6 @@ struct is_custom_dot_avail<
 
 } // end anonymous namespace
 
-
-// ------------
-// PUBLIC API:
-// ------------
-
-// dot, with init value
 template<class ExecutionPolicy,
          class ElementType1,
          extents<>::size_type ext1,
