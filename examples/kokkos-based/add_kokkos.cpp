@@ -9,7 +9,7 @@ void print_elements(const T1 & v, const std::vector<ScalarType> & gold)
     std::cout << "computed = " << v(i)
 	      << " , gold = "
 	      << gold[i]
-	      << std::endl;
+	      << "\n";
   }
 }
 

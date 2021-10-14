@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
     std::cout << "Seq result    = " << res_seq << "\n";
 
     // This forwards to KokkosKernels
-    auto res_kk = stdla::dotc(KokkosKernelsSTD::kokkos_exec<>(), a, b, init_value);
+    const auto res_kk = stdla::dotc(KokkosKernelsSTD::kokkos_exec<>(), a, b, init_value);
     std::cout << "Kokkos result = " << res_kk << "\n";
   }
   Kokkos::finalize();

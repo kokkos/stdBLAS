@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
     printf("Seq result    = %lf\n", res_seq);
 
     // This forwards to KokkosKernels
-    auto res_kk = stdla::dot(KokkosKernelsSTD::kokkos_exec<>(), a, b, init_value);
+    const auto res_kk = stdla::dot(KokkosKernelsSTD::kokkos_exec<>(), a, b, init_value);
     printf("Kokkos result = %lf\n", res_kk);
   }
   Kokkos::finalize();
