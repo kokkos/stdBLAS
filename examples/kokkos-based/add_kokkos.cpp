@@ -15,34 +15,37 @@ void print_elements(const T1 & v, const std::vector<ScalarType> & gold)
 
 int main(int argc, char* argv[])
 {
-  std::cout << "running add example calling custom kokkos" << std::endl;
-  int N = 50;
+  std::cout << "add example: calling kokkos-kernels" << std::endl;
+
+  std::size_t N = 50;
   Kokkos::initialize(argc,argv);
   {
-    Kokkos::View<double*> x_view("x",N);
-    Kokkos::View<double*> y_view("y",N);
-    Kokkos::View<double*> z_view("z",N);
+    using value_type = double;
 
-    double* x_ptr = x_view.data();
-    double* y_ptr = y_view.data();
-    double* z_ptr = z_view.data();
+    Kokkos::View<value_type*> x_view("x",N);
+    Kokkos::View<value_type*> y_view("y",N);
+    Kokkos::View<value_type*> z_view("z",N);
+
+    value_type* x_ptr = x_view.data();
+    value_type* y_ptr = y_view.data();
+    value_type* z_ptr = z_view.data();
 
     using dyn_1d_ext_type = std::experimental::extents<std::experimental::dynamic_extent>;
-    using mdspan_type  = std::experimental::mdspan<double, dyn_1d_ext_type>;
+    using mdspan_type  = std::experimental::mdspan<value_type, dyn_1d_ext_type>;
     mdspan_type x(x_ptr,N);
     mdspan_type y(y_ptr,N);
     mdspan_type z(z_ptr,N);
 
-    std::vector<double> gold(N);
+    std::vector<value_type> gold(N);
     for(int i=0; i<x.extent(0); i++){
       x(i) = i;
-      y(i) = i + (double)10;
+      y(i) = i + (value_type)10;
       z(i) = 0;
       gold[i] = x(i) + y(i);
     }
 
     namespace stdla = std::experimental::linalg;
-    const double init_value = 2.0;
+    const value_type init_value = 2.0;
 
     {
       // This goes to the base implementation
@@ -51,7 +54,7 @@ int main(int argc, char* argv[])
 
     {
       // reset z since it is modified above
-      for(int i=0; i<z.extent(0); i++){ z(i) = 0; }
+      for(std::size_t i=0; i<z.extent(0); i++){ z(i) = 0; }
 
       // This forwards to KokkosKernels
       stdla::add(KokkosKernelsSTD::kokkos_exec<>(), x,y,z);
