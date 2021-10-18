@@ -130,11 +130,12 @@ void scale(
   std::experimental::mdspan<ElementType, std::experimental::extents<ext ...>, Layout, Accessor> x)
 {
   // Call custom overload if available else call std implementation
-  if constexpr(is_custom_scale_avail<
-      decltype(execpolicy_mapper(exec)),
-      decltype(alpha),
-      decltype(x)
-     >::value) {
+
+  constexpr bool use_custom = is_custom_scale_avail<
+    decltype(execpolicy_mapper(exec)), decltype(alpha), decltype(x)
+    >::value;
+
+  if constexpr(use_custom) {
     scale(execpolicy_mapper(exec), alpha, x);
   } else {
     linalg_scale(std::experimental::linalg::impl::inline_exec_t(), alpha, x);
