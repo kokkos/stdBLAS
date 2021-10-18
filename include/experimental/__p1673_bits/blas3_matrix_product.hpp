@@ -40,6 +40,8 @@
 //@HEADER
 */
 
+#include <cassert>
+
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS3_MATRIX_PRODUCT_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS3_MATRIX_PRODUCT_HPP_
 
@@ -1043,28 +1045,7 @@ void symmetric_matrix_left_product(
   std::experimental::mdspan<ElementType_E, std::experimental::extents<numRows_E, numCols_E>, Layout_E, Accessor_E> E,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  using size_type = typename extents<>::size_type;
-
-  if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-    for (size_type j = 0; j < C.extent(1); ++j) {
-      for (size_type i = j; i < C.extent(0); ++i) {
-        C(i,j) = E(i,j);
-        for (size_type k = 0; k < A.extent(1); ++k) {
-          C(i,j) += A(i,k) * B(k,j);
-        }
-      }
-    }
-  }
-  else { // upper_triangle_t
-    for (size_type j = 0; j < C.extent(1); ++j) {
-      for (size_type i = 0; i <= j; ++i) {
-        C(i,j) = E(i,j);
-        for (size_type k = 0; k < A.extent(1); ++k) {
-          C(i,j) += A(i,k) * B(k,j);
-        }
-      }
-    }
-  }
+  assert(false);
 }
 
 template<class ExecutionPolicy,
@@ -1128,28 +1109,7 @@ void symmetric_matrix_right_product(
   std::experimental::mdspan<ElementType_E, std::experimental::extents<numRows_E, numCols_E>, Layout_E, Accessor_E> E,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  using size_type = typename extents<>::size_type;
-
-  if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-    for (size_type j = 0; j < C.extent(1); ++j) {
-      for (size_type i = j; i < C.extent(0); ++i) {
-        C(i,j) = E(i,j);
-        for (size_type k = 0; k < A.extent(1); ++k) {
-          C(i,j) += B(i,k) * A(k,j);
-        }
-      }
-    }
-  }
-  else { // upper_triangle_t
-    for (size_type j = 0; j < C.extent(1); ++j) {
-      for (size_type i = 0; i <= j; ++i) {
-        C(i,j) = E(i,j);
-        for (size_type k = 0; k < A.extent(1); ++k) {
-          C(i,j) += B(i,k) * A(k,j);
-        }
-      }
-    }
-  }
+  assert(false);
 }
 
 template<class ExecutionPolicy,
@@ -1210,23 +1170,26 @@ void hermitian_matrix_left_product(
   std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   using size_type = typename extents<>::size_type;
+  using std::conj;
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (size_type j = 0; j < C.extent(1); ++j) {
-      for (size_type i = j; i < C.extent(0); ++i) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
         for (size_type k = 0; k < A.extent(1); ++k) {
-          C(i,j) += A(i,k) * B(k,j);
+          ElementType_A aik = i <= k ? conj(A(k,i)) : A(i,k);
+          C(i,j) += aik * B(k,j);
         }
       }
     }
   }
   else { // upper_triangle_t
     for (size_type j = 0; j < C.extent(1); ++j) {
-      for (size_type i = 0; i <= j; ++i) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
         for (size_type k = 0; k < A.extent(1); ++k) {
-          C(i,j) += A(i,k) * B(k,j);
+          ElementType_A aik = i >= k ? conj(A(k,i)) : A(i,k);
+          C(i,j) += aik * B(k,j);
         }
       }
     }
@@ -1283,23 +1246,26 @@ void hermitian_matrix_right_product(
   std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   using size_type = typename extents<>::size_type;
+  using std::conj;
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (size_type j = 0; j < C.extent(1); ++j) {
-      for (size_type i = j; i < C.extent(0); ++i) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
         for (size_type k = 0; k < A.extent(1); ++k) {
-          C(i,j) += B(i,k) * A(k,j);
+          ElementType_A akj = j <= k ? A(k,j) : conj(A(j,k));
+          C(i,j) += B(i,k) * akj;
         }
       }
     }
   }
   else { // upper_triangle_t
     for (size_type j = 0; j < C.extent(1); ++j) {
-      for (size_type i = 0; i <= j; ++i) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
         for (size_type k = 0; k < A.extent(1); ++k) {
-          C(i,j) += B(i,k) * A(k,j);
+          ElementType_A akj = j >= k ? A(k,j) : conj(A(j,k));
+          C(i,j) += B(i,k) * akj;
         }
       }
     }
@@ -1362,29 +1328,8 @@ void hermitian_matrix_left_product(
   std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   std::experimental::mdspan<ElementType_E, std::experimental::extents<numRows_E, numCols_E>, Layout_E, Accessor_E> E,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
-{
-  using size_type = typename extents<>::size_type;
-
-  if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-    for (size_type j = 0; j < C.extent(1); ++j) {
-      for (size_type i = j; i < C.extent(0); ++i) {
-        C(i,j) = E(i,j);
-        for (size_type k = 0; k < A.extent(1); ++k) {
-          C(i,j) += A(i,k) * B(k,j);
-        }
-      }
-    }
-  }
-  else { // upper_triangle_t
-    for (size_type j = 0; j < C.extent(1); ++j) {
-      for (size_type i = 0; i <= j; ++i) {
-        C(i,j) = E(i,j);
-        for (size_type k = 0; k < A.extent(1); ++k) {
-          C(i,j) += A(i,k) * B(k,j);
-        }
-      }
-    }
-  }
+{ 
+  assert(false);
 }
 
 template<class ExecutionPolicy,
@@ -1448,28 +1393,7 @@ void hermitian_matrix_right_product(
   std::experimental::mdspan<ElementType_E, std::experimental::extents<numRows_E, numCols_E>, Layout_E, Accessor_E> E,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  using size_type = typename extents<>::size_type;
-
-  if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-    for (size_type j = 0; j < C.extent(1); ++j) {
-      for (size_type i = j; i < C.extent(0); ++i) {
-        C(i,j) = E(i,j);
-        for (size_type k = 0; k < A.extent(1); ++k) {
-          C(i,j) += B(i,k) * A(k,j);
-        }
-      }
-    }
-  }
-  else { // upper_triangle_t
-    for (size_type j = 0; j < C.extent(1); ++j) {
-      for (size_type i = 0; i <= j; ++i) {
-        C(i,j) = E(i,j);
-        for (size_type k = 0; k < A.extent(1); ++k) {
-          C(i,j) += B(i,k) * A(k,j);
-        }
-      }
-    }
-  }
+  assert(false);
 }
 
 template<class ExecutionPolicy,
