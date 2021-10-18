@@ -43,6 +43,7 @@ linalg_add_test(dot)
 linalg_add_test(gemm)
 linalg_add_test(gemv)
 linalg_add_test(givens)
+linalg_add_test(hemm)
 linalg_add_test(idx_abs_max)
 # (AMK 6/7/21) Temporarily removing iterator test since it doesn't build
 # [ 73%] Building CXX object tests/CMakeFiles/iterator.dir/iterator.cpp.o
