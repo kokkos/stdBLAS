@@ -18,8 +18,12 @@ namespace {
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::layout_left;
+  using std::experimental::linalg::explicit_diagonal;
+  using std::experimental::linalg::implicit_unit_diagonal;
+  using std::experimental::linalg::lower_triangle;
   using std::experimental::linalg::matrix_product;
   using std::experimental::linalg::transposed;
+  using std::experimental::linalg::upper_triangle;
   using std::cout;
   using std::endl;
 
@@ -235,4 +239,5 @@ namespace {
   {
     test_matrix_product<double>();
   }
-}
+
+} // end anonymous namespace

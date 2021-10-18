@@ -40,6 +40,8 @@
 //@HEADER
 */
 
+#include <cassert>
+
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS3_MATRIX_PRODUCT_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS3_MATRIX_PRODUCT_HPP_
 
@@ -537,7 +539,7 @@ void matrix_product(
   matrix_product(A, B, E, C);
 }
 
-// Overwriting symmetric matrix-matrix product
+// Overwriting triangular matrix-matrix product
 
 template<class ElementType_A,
          extents<>::size_type numRows_A,
@@ -545,7 +547,7 @@ template<class ElementType_A,
          class Layout_A,
          class Accessor_A,
          class Triangle,
-         class Side,
+         class DiagonalStorage,
          class ElementType_B,
          extents<>::size_type numRows_B,
          extents<>::size_type numCols_B,
@@ -556,55 +558,41 @@ template<class ElementType_A,
          extents<>::size_type numCols_C,
          class Layout_C,
          class Accessor_C>
-void symmetric_matrix_product(
+void triangular_matrix_left_product(
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
-  Triangle t,
-  Side s,
+  Triangle /* t */,
+  DiagonalStorage /* d */,
   std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   using size_type = typename extents<>::size_type;
+  constexpr bool explicitDiagonal =
+    std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
 
-  if constexpr (std::is_same_v<Side, left_side_t>) {
-    if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-      for (size_type j = 0; j < C.extent(1); ++j) {
-        for (size_type i = j; i < C.extent(0); ++i) {
-          C(i,j) = ElementType_C{};
-          for (size_type k = 0; k < A.extent(1); ++k) {
-            C(i,j) += A(i,k) * B(k,j);
-          }
+  if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = ElementType_C{};
+        const ptrdiff_t k_upper = explicitDiagonal ? i : i - ptrdiff_t(1);
+        for (ptrdiff_t k = 0; k <= k_upper; ++k) {
+          C(i,j) += A(i,k) * B(k,j);
         }
-      }
-    }
-    else { // upper_triangle_t
-      for (size_type j = 0; j < C.extent(1); ++j) {
-        for (size_type i = 0; i <= j; ++i) {
-          C(i,j) = ElementType_C{};
-          for (size_type k = 0; k < A.extent(1); ++k) {
-            C(i,j) += A(i,k) * B(k,j);
-          }
+        if constexpr (! explicitDiagonal) {
+          C(i,j) += /* 1 times */ B(i,j);
         }
       }
     }
   }
-  else { // right_side_t
-    if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-      for (size_type j = 0; j < C.extent(1); ++j) {
-        for (size_type i = j; i < C.extent(0); ++i) {
-          C(i,j) = ElementType_C{};
-          for (size_type k = 0; k < A.extent(1); ++k) {
-            C(i,j) += B(i,k) * A(k,j);
-          }
+  else { // upper_triangle_t
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = ElementType_C{};
+        const size_type k_lower = explicitDiagonal ? i : i + 1;
+        for (size_type k = k_lower; k < C.extent(0); ++k) {
+          C(i,j) += A(i,k) * B(k,j);
         }
-      }
-    }
-    else { // upper_triangle_t
-      for (size_type j = 0; j < C.extent(1); ++j) {
-        for (size_type i = 0; i <= j; ++i) {
-          C(i,j) = ElementType_C{};
-          for (size_type k = 0; k < A.extent(1); ++k) {
-            C(i,j) += B(i,k) * A(k,j);
-          }
+        if constexpr (! explicitDiagonal) {
+          C(i,j) += /* 1 times */ B(i,j);
         }
       }
     }
@@ -618,7 +606,7 @@ template<class ExecutionPolicy,
          class Layout_A,
          class Accessor_A,
          class Triangle,
-         class Side,
+         class DiagonalStorage,
          class ElementType_B,
          extents<>::size_type numRows_B,
          extents<>::size_type numCols_B,
@@ -629,15 +617,402 @@ template<class ExecutionPolicy,
          extents<>::size_type numCols_C,
          class Layout_C,
          class Accessor_C>
-void symmetric_matrix_product(
+void triangular_matrix_left_product(
   ExecutionPolicy&& /* exec */,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
-  Side s,
+  DiagonalStorage d,
   std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  symmetric_matrix_product(A, t, s, B, C);
+  triangular_matrix_left_product (A, t, d, B, C);
+}
+
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class DiagonalStorage,
+         class ElementType_B,
+         extents<>::size_type numRows_B,
+         extents<>::size_type numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void triangular_matrix_right_product(
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle /* t */,
+  DiagonalStorage /* d */,
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  using size_type = typename extents<>::size_type;
+  constexpr bool explicitDiagonal =
+    std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
+
+  if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      const size_type k_lower = explicitDiagonal ? j : j + 1;
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = ElementType_C{};
+        for (size_type k = k_lower; k < C.extent(1); ++k) {
+          C(i,j) += B(i,k) * A(k,j);
+        }
+        if constexpr (! explicitDiagonal) {
+          C(i,j) += /* 1 times */ B(i,j);
+        }
+      }
+    }
+  }
+  else { // upper_triangle_t
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      const ptrdiff_t k_upper = explicitDiagonal ? j : j - ptrdiff_t(1);
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = ElementType_C{};
+        for (ptrdiff_t k = 0; k <= k_upper; ++k) {
+          C(i,j) += B(i,k) * A(k,j);
+        }
+        if constexpr (! explicitDiagonal) {
+          C(i,j) += /* 1 times */ B(i,j);
+        }
+      }
+    }
+  }
+}
+
+template<class ExecutionPolicy,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class DiagonalStorage,
+         class ElementType_B,
+         extents<>::size_type numRows_B,
+         extents<>::size_type numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void triangular_matrix_right_product(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  DiagonalStorage d,
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  triangular_matrix_right_product (A, t, d, B, C);
+}
+
+// Updating triangular matrix-matrix product
+
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class DiagonalStorage,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void triangular_matrix_left_product(
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle /* t */,
+  DiagonalStorage /* d */,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  using size_type = typename extents<>::size_type;
+  constexpr bool explicitDiagonal =
+    std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
+
+  if constexpr (std::is_same_v<Triangle, upper_triangle_t>) {
+    for (size_type j=0; j < C.extent(1); ++j) {
+      for (size_type k=0; k < C.extent(0); ++k) {
+        for (size_type i=0; i < k; ++i) {
+          C(i,j) += A(i,k) * C(k,j);
+        }
+        if constexpr (explicitDiagonal) {
+          C(k,j) = A(k,k) * C(k,j);
+        }
+      }
+    }
+  }
+  else { // lower_triangle_t
+    for (size_type j=0; j < C.extent(1); ++j) {
+      for (size_type k=C.extent(0); k > 0; --k) {
+        for (size_type i=k; i < C.extent(0); i++) {
+          C(i,j) += A(i,k-1) * C(k-1,j);
+        }
+        if constexpr (explicitDiagonal) {
+          C(k-1,j) = A(k-1,k-1) * C(k-1,j);
+        }
+      }
+    }
+  }
+}
+
+template<class ExecutionPolicy,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class DiagonalStorage,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void triangular_matrix_left_product(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  DiagonalStorage d,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  triangular_matrix_left_product (A, t, d, C);
+}
+
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class DiagonalStorage,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void triangular_matrix_right_product(
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle /* t */,
+  DiagonalStorage /* d */,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  using size_type = typename extents<>::size_type;
+  constexpr bool explicitDiagonal =
+    std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
+
+  if constexpr (std::is_same_v<Triangle, upper_triangle_t>) {
+    for (size_type j=C.extent(1); j > 0; --j) {
+      if constexpr (explicitDiagonal) {
+        for(size_type i=0; i < C.extent(0); ++i) {
+          C(i,j-1) = C(i,j-1) * A(j-1,j-1);
+        }
+      }
+      for (size_type k=0; k < j-1; k++) {
+        for(size_type i=0; i < C.extent(0); ++i) {
+          C(i,j-1) += C(i,k) * A(k,j-1);
+        }
+      }
+    }
+  }
+  else { // lower_triangle_t
+    for (size_type j=0; j < C.extent(1); ++j) {
+      if constexpr (explicitDiagonal) {
+        for (size_type i=0; i < C.extent(0); ++i) {
+          C(i,j) = C(i,j) * A(j,j);
+        }
+      }
+      for (size_type k=j+1; k < C.extent(1); ++k) {
+        for (size_type i=0; i < C.extent(0); i++) {
+          C(i,j) += C(i,k) * A(k,j);
+        }
+      }
+    }
+  }
+}
+
+template<class ExecutionPolicy,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class DiagonalStorage,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void triangular_matrix_right_product(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  DiagonalStorage d,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  triangular_matrix_right_product (A, t, d, C);
+}
+
+// Overwriting symmetric matrix-matrix product
+
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class ElementType_B,
+         extents<>::size_type numRows_B,
+         extents<>::size_type numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void symmetric_matrix_left_product(
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle /* t */,
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  using size_type = typename extents<>::size_type;
+
+  if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = ElementType_C{};
+        for (size_type k = 0; k < A.extent(1); ++k) {
+          ElementType_A aik = i <= k ? A(k,i) : A(i,k);
+          C(i,j) += aik * B(k,j);
+        }
+      }
+    }
+  }
+  else { // upper_triangle_t
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = ElementType_C{};
+        for (size_type k = 0; k < A.extent(1); ++k) {
+          ElementType_A aik = i >= k ? A(k,i) : A(i,k);
+          C(i,j) += aik * B(k,j);
+        }
+      }
+    }
+  }
+}
+
+template<class ExecutionPolicy,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class ElementType_B,
+         extents<>::size_type numRows_B,
+         extents<>::size_type numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void symmetric_matrix_left_product(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  symmetric_matrix_left_product (A, t, B, C);
+}
+
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class ElementType_B,
+         extents<>::size_type numRows_B,
+         extents<>::size_type numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void symmetric_matrix_right_product(
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle /* t */,
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  using size_type = typename extents<>::size_type;
+
+  if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = ElementType_C{};
+        for (size_type k = 0; k < A.extent(1); ++k) {
+          ElementType_A akj = j <= k ? A(k,j) : A(j,k);
+          C(i,j) += B(i,k) * akj;
+        }
+      }
+    }
+  }
+  else { // upper_triangle_t
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = ElementType_C{};
+        for (size_type k = 0; k < A.extent(1); ++k) {
+          ElementType_A akj = j >= k ? A(k,j) : A(j,k);
+          C(i,j) += B(i,k) * akj;
+        }
+      }
+    }
+  }
+}
+
+template<class ExecutionPolicy,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class ElementType_B,
+         extents<>::size_type numRows_B,
+         extents<>::size_type numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void symmetric_matrix_right_product(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  symmetric_matrix_right_product (A, t, B, C);
 }
 
 // Updating symmetric matrix-matrix product
@@ -648,7 +1023,6 @@ template<class ElementType_A,
          class Layout_A,
          class Accessor_A,
          class Triangle,
-         class Side,
          class ElementType_B,
          extents<>::size_type numRows_B,
          extents<>::size_type numCols_B,
@@ -664,60 +1038,14 @@ template<class ElementType_A,
          extents<>::size_type numCols_C,
          class Layout_C,
          class Accessor_C>
-void symmetric_matrix_product(
+void symmetric_matrix_left_product(
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
-  Triangle t,
-  Side s,
+  Triangle /* t */,
   std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   std::experimental::mdspan<ElementType_E, std::experimental::extents<numRows_E, numCols_E>, Layout_E, Accessor_E> E,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  using size_type = typename extents<>::size_type;
-
-  if constexpr (std::is_same_v<Side, left_side_t>) {
-    if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-      for (size_type j = 0; j < C.extent(1); ++j) {
-        for (size_type i = j; i < C.extent(0); ++i) {
-          C(i,j) = E(i,j);
-          for (size_type k = 0; k < A.extent(1); ++k) {
-            C(i,j) += A(i,k) * B(k,j);
-          }
-        }
-      }
-    }
-    else { // upper_triangle_t
-      for (size_type j = 0; j < C.extent(1); ++j) {
-        for (size_type i = 0; i <= j; ++i) {
-          C(i,j) = E(i,j);
-          for (size_type k = 0; k < A.extent(1); ++k) {
-            C(i,j) += A(i,k) * B(k,j);
-          }
-        }
-      }
-    }
-  }
-  else { // right_side_t
-    if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-      for (size_type j = 0; j < C.extent(1); ++j) {
-        for (size_type i = j; i < C.extent(0); ++i) {
-          C(i,j) = E(i,j);
-          for (size_type k = 0; k < A.extent(1); ++k) {
-            C(i,j) += B(i,k) * A(k,j);
-          }
-        }
-      }
-    }
-    else { // upper_triangle_t
-      for (size_type j = 0; j < C.extent(1); ++j) {
-        for (size_type i = 0; i <= j; ++i) {
-          C(i,j) = E(i,j);
-          for (size_type k = 0; k < A.extent(1); ++k) {
-            C(i,j) += B(i,k) * A(k,j);
-          }
-        }
-      }
-    }
-  }
+  assert(false);
 }
 
 template<class ExecutionPolicy,
@@ -727,7 +1055,6 @@ template<class ExecutionPolicy,
          class Layout_A,
          class Accessor_A,
          class Triangle,
-         class Side,
          class ElementType_B,
          extents<>::size_type numRows_B,
          extents<>::size_type numCols_B,
@@ -743,16 +1070,79 @@ template<class ExecutionPolicy,
          extents<>::size_type numCols_C,
          class Layout_C,
          class Accessor_C>
-void symmetric_matrix_product(
+void symmetric_matrix_left_product(
   ExecutionPolicy&& /* exec */,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
-  Side s,
   std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   std::experimental::mdspan<ElementType_E, std::experimental::extents<numRows_E, numCols_E>, Layout_E, Accessor_E> E,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  symmetric_matrix_product(A, t, s, B, E, C);
+  symmetric_matrix_left_product (A, t, B, E, C);
+}
+
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class ElementType_B,
+         extents<>::size_type numRows_B,
+         extents<>::size_type numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_E,
+         extents<>::size_type numRows_E,
+         extents<>::size_type numCols_E,
+         class Layout_E,
+         class Accessor_E,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void symmetric_matrix_right_product(
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle /* t */,
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_E, std::experimental::extents<numRows_E, numCols_E>, Layout_E, Accessor_E> E,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  assert(false);
+}
+
+template<class ExecutionPolicy,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class ElementType_B,
+         extents<>::size_type numRows_B,
+         extents<>::size_type numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_E,
+         extents<>::size_type numRows_E,
+         extents<>::size_type numCols_E,
+         class Layout_E,
+         class Accessor_E,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void symmetric_matrix_right_product(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_E, std::experimental::extents<numRows_E, numCols_E>, Layout_E, Accessor_E> E,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  symmetric_matrix_right_product (A, t, B, E, C);
 }
 
 // Overwriting Hermitian matrix-matrix product
@@ -763,7 +1153,6 @@ template<class ElementType_A,
          class Layout_A,
          class Accessor_A,
          class Triangle,
-         class Side,
          class ElementType_B,
          extents<>::size_type numRows_B,
          extents<>::size_type numCols_B,
@@ -774,55 +1163,33 @@ template<class ElementType_A,
          extents<>::size_type numCols_C,
          class Layout_C,
          class Accessor_C>
-void hermitian_matrix_product(
+void hermitian_matrix_left_product(
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
-  Triangle t,
-  Side s,
+  Triangle /* t */,
   std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   using size_type = typename extents<>::size_type;
+  using std::conj;
 
-  if constexpr (std::is_same_v<Side, left_side_t>) {
-    if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-      for (size_type j = 0; j < C.extent(1); ++j) {
-        for (size_type i = j; i < C.extent(0); ++i) {
-          C(i,j) = ElementType_C{};
-          for (size_type k = 0; k < A.extent(1); ++k) {
-            C(i,j) += A(i,k) * B(k,j);
-          }
-        }
-      }
-    }
-    else { // upper_triangle_t
-      for (size_type j = 0; j < C.extent(1); ++j) {
-        for (size_type i = 0; i <= j; ++i) {
-          C(i,j) = ElementType_C{};
-          for (size_type k = 0; k < A.extent(1); ++k) {
-            C(i,j) += A(i,k) * B(k,j);
-          }
+  if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = ElementType_C{};
+        for (size_type k = 0; k < A.extent(1); ++k) {
+          ElementType_A aik = i <= k ? conj(A(k,i)) : A(i,k);
+          C(i,j) += aik * B(k,j);
         }
       }
     }
   }
-  else { // right_side_t
-    if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-      for (size_type j = 0; j < C.extent(1); ++j) {
-        for (size_type i = j; i < C.extent(0); ++i) {
-          C(i,j) = ElementType_C{};
-          for (size_type k = 0; k < A.extent(1); ++k) {
-            C(i,j) += B(i,k) * A(k,j);
-          }
-        }
-      }
-    }
-    else { // upper_triangle_t
-      for (size_type j = 0; j < C.extent(1); ++j) {
-        for (size_type i = 0; i <= j; ++i) {
-          C(i,j) = ElementType_C{};
-          for (size_type k = 0; k < A.extent(1); ++k) {
-            C(i,j) += B(i,k) * A(k,j);
-          }
+  else { // upper_triangle_t
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = ElementType_C{};
+        for (size_type k = 0; k < A.extent(1); ++k) {
+          ElementType_A aik = i >= k ? conj(A(k,i)) : A(i,k);
+          C(i,j) += aik * B(k,j);
         }
       }
     }
@@ -836,7 +1203,6 @@ template<class ExecutionPolicy,
          class Layout_A,
          class Accessor_A,
          class Triangle,
-         class Side,
          class ElementType_B,
          extents<>::size_type numRows_B,
          extents<>::size_type numCols_B,
@@ -847,15 +1213,90 @@ template<class ExecutionPolicy,
          extents<>::size_type numCols_C,
          class Layout_C,
          class Accessor_C>
-void hermitian_matrix_product(
+void hermitian_matrix_left_product(
   ExecutionPolicy&& /* exec */,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
-  Side s,
   std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  hermitian_matrix_product(A, t, s, B, C);
+  hermitian_matrix_left_product (A, t, B, C);
+}
+
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class ElementType_B,
+         extents<>::size_type numRows_B,
+         extents<>::size_type numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void hermitian_matrix_right_product(
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle /* t */,
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  using size_type = typename extents<>::size_type;
+  using std::conj;
+
+  if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = ElementType_C{};
+        for (size_type k = 0; k < A.extent(1); ++k) {
+          ElementType_A akj = j <= k ? A(k,j) : conj(A(j,k));
+          C(i,j) += B(i,k) * akj;
+        }
+      }
+    }
+  }
+  else { // upper_triangle_t
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = ElementType_C{};
+        for (size_type k = 0; k < A.extent(1); ++k) {
+          ElementType_A akj = j >= k ? A(k,j) : conj(A(j,k));
+          C(i,j) += B(i,k) * akj;
+        }
+      }
+    }
+  }
+}
+
+template<class ExecutionPolicy,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class ElementType_B,
+         extents<>::size_type numRows_B,
+         extents<>::size_type numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void hermitian_matrix_right_product(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  hermitian_matrix_right_product (A, t, B, C);
 }
 
 // Updating Hermitian matrix-matrix product
@@ -866,7 +1307,6 @@ template<class ElementType_A,
          class Layout_A,
          class Accessor_A,
          class Triangle,
-         class Side,
          class ElementType_B,
          extents<>::size_type numRows_B,
          extents<>::size_type numCols_B,
@@ -882,60 +1322,14 @@ template<class ElementType_A,
          extents<>::size_type numCols_C,
          class Layout_C,
          class Accessor_C>
-void hermitian_matrix_product(
+void hermitian_matrix_left_product(
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
-  Triangle t,
-  Side s,
+  Triangle /* t */,
   std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   std::experimental::mdspan<ElementType_E, std::experimental::extents<numRows_E, numCols_E>, Layout_E, Accessor_E> E,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
-{
-  using size_type = typename extents<>::size_type;
-
-  if constexpr (std::is_same_v<Side, left_side_t>) {
-    if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-      for (size_type j = 0; j < C.extent(1); ++j) {
-        for (size_type i = j; i < C.extent(0); ++i) {
-          C(i,j) = E(i,j);
-          for (size_type k = 0; k < A.extent(1); ++k) {
-            C(i,j) += A(i,k) * B(k,j);
-          }
-        }
-      }
-    }
-    else { // upper_triangle_t
-      for (size_type j = 0; j < C.extent(1); ++j) {
-        for (size_type i = 0; i <= j; ++i) {
-          C(i,j) = E(i,j);
-          for (size_type k = 0; k < A.extent(1); ++k) {
-            C(i,j) += A(i,k) * B(k,j);
-          }
-        }
-      }
-    }
-  }
-  else { // right_side_t
-    if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-      for (size_type j = 0; j < C.extent(1); ++j) {
-        for (size_type i = j; i < C.extent(0); ++i) {
-          C(i,j) = E(i,j);
-          for (size_type k = 0; k < A.extent(1); ++k) {
-            C(i,j) += B(i,k) * A(k,j);
-          }
-        }
-      }
-    }
-    else { // upper_triangle_t
-      for (size_type j = 0; j < C.extent(1); ++j) {
-        for (size_type i = 0; i <= j; ++i) {
-          C(i,j) = E(i,j);
-          for (size_type k = 0; k < A.extent(1); ++k) {
-            C(i,j) += B(i,k) * A(k,j);
-          }
-        }
-      }
-    }
-  }
+{ 
+  assert(false);
 }
 
 template<class ExecutionPolicy,
@@ -945,7 +1339,6 @@ template<class ExecutionPolicy,
          class Layout_A,
          class Accessor_A,
          class Triangle,
-         class Side,
          class ElementType_B,
          extents<>::size_type numRows_B,
          extents<>::size_type numCols_B,
@@ -961,16 +1354,79 @@ template<class ExecutionPolicy,
          extents<>::size_type numCols_C,
          class Layout_C,
          class Accessor_C>
-void hermitian_matrix_product(
+void hermitian_matrix_left_product(
   ExecutionPolicy&& /* exec */,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
-  Side s,
   std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   std::experimental::mdspan<ElementType_E, std::experimental::extents<numRows_E, numCols_E>, Layout_E, Accessor_E> E,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  hermitian_matrix_product(A, t, s, B, E, C);
+  hermitian_matrix_left_product (A, t, B, E, C);
+}
+
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class ElementType_B,
+         extents<>::size_type numRows_B,
+         extents<>::size_type numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_E,
+         extents<>::size_type numRows_E,
+         extents<>::size_type numCols_E,
+         class Layout_E,
+         class Accessor_E,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void hermitian_matrix_right_product(
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle /* t */,
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_E, std::experimental::extents<numRows_E, numCols_E>, Layout_E, Accessor_E> E,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  assert(false);
+}
+
+template<class ExecutionPolicy,
+         class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class ElementType_B,
+         extents<>::size_type numRows_B,
+         extents<>::size_type numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_E,
+         extents<>::size_type numRows_E,
+         extents<>::size_type numCols_E,
+         class Layout_E,
+         class Accessor_E,
+         class ElementType_C,
+         extents<>::size_type numRows_C,
+         extents<>::size_type numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void hermitian_matrix_right_product(
+  ExecutionPolicy&& /* exec */,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_E, std::experimental::extents<numRows_E, numCols_E>, Layout_E, Accessor_E> E,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  hermitian_matrix_right_product (A, t, B, E, C);
 }
 
 } // end namespace linalg
