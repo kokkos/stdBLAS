@@ -17,7 +17,7 @@ struct default_exec_t {};
 }
 
 
-#if defined(LINALG_ENABLE_KOKKOS) || defined(LINALG_ENABLE_KOKKOS_DEFAULT)
+#if defined(LINALG_ENABLE_KOKKOS) && defined(LINALG_ENABLE_KOKKOS_DEFAULT)
 #include <experimental/__p1673_bits/kokkos-kernels/exec_policy_wrapper_kk.hpp>
 #endif
 

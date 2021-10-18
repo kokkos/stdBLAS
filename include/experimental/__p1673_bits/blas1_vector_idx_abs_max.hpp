@@ -48,11 +48,33 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
+// begin anonymous namespace
+namespace {
+
+template <class Exec, class v_t, class = void>
+struct is_custom_idx_abs_max_avail : std::false_type {};
+
+template <class Exec, class v_t>
+struct is_custom_idx_abs_max_avail<
+  Exec, v_t,
+  std::enable_if_t<
+    std::is_integral<
+      decltype(idx_abs_max(std::declval<Exec>(),
+			   std::declval<v_t>()
+			   )
+	       )
+      >::value
+    >
+  >
+{
+  static constexpr bool value = !std::is_same<Exec,std::experimental::linalg::impl::inline_exec_t>::value;
+};
+
 template<class ElementType,
          extents<>::size_type ext0,
          class Layout,
          class Accessor>
-extents<>::size_type idx_abs_max(
+extents<>::size_type idx_abs_max_default_impl(
   std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
 {
   using std::abs;
@@ -73,16 +95,38 @@ extents<>::size_type idx_abs_max(
   return maxInd; // FIXME check for NaN "never less than" stuff
 }
 
+} // end anonymous namespace
+
 template<class ExecutionPolicy,
          class ElementType,
          extents<>::size_type ext0,
          class Layout,
          class Accessor>
 extents<>::size_type idx_abs_max(
-  ExecutionPolicy&& /* exec */,
+  ExecutionPolicy&& exec,
   std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
 {
-  return idx_abs_max(v);
+  constexpr bool use_custom = is_custom_idx_abs_max_avail<
+    decltype(execpolicy_mapper(exec)), decltype(v)
+    >::value;
+
+  if constexpr(use_custom){
+    using return_type = extents<>::size_type;
+    return return_type(idx_abs_max(execpolicy_mapper(exec), v));
+  }
+  else{
+    return idx_abs_max_default_impl(v);
+  }
+}
+
+template<class ElementType,
+         extents<>::size_type ext0,
+         class Layout,
+         class Accessor>
+extents<>::size_type idx_abs_max(
+  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
+{
+  return idx_abs_max(std::experimental::linalg::impl::default_exec_t(), v);
 }
 
 } // end namespace linalg

@@ -2,5 +2,6 @@
 linalg_add_example(add_kokkos)
 linalg_add_example(dot_kokkos)
 linalg_add_example(dotc_kokkos)
+linalg_add_example(idx_abs_max_kokkos)
 linalg_add_example(simple_scale_kokkos)
 linalg_add_example(matrix_vector_product_kokkos)
