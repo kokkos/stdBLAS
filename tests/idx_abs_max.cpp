@@ -32,4 +32,20 @@ namespace {
     EXPECT_EQ(2, idx_abs_max(v));
   }
 
+  TEST(BLAS1_idx_abs_max, trivial_case)
+  {
+    namespace stdexp = std::experimental;
+
+    constexpr auto expected = std::numeric_limits<std::size_t>::max();
+
+    std::array<double, 0> arr;
+    using extents_type = stdexp::extents<stdexp::dynamic_extent>;
+    stdexp::mdspan<double, extents_type> a(arr.data(),0);
+    EXPECT_EQ(expected, idx_abs_max(a));
+
+    using extents_type2 = stdexp::extents<0>;
+    stdexp::mdspan<double, extents_type2> b(arr.data());
+    EXPECT_EQ(expected, idx_abs_max(b));
+  }
+
 } // end anonymous namespace

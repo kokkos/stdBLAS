@@ -17,7 +17,7 @@ auto idx_abs_max(kokkos_exec<ExecSpace>,
   // note that -1 here, this is related to:
   // https://github.com/kokkos/stdBLAS/issues/114
 
-  return KokkosBlas::iamax(Impl::mdspan_to_view(v))-1;
+  return KokkosBlas::iamax(Impl::mdspan_to_view(v)) -1 ;
 }
 
 }
