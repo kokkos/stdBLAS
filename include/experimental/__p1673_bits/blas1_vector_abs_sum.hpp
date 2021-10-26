@@ -51,12 +51,39 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
+namespace
+{
+template <class Exec, class v_t, class Scalar, class = void>
+struct is_custom_vector_abs_sum_avail : std::false_type {};
+
+template <class Exec, class v_t, class Scalar>
+struct is_custom_vector_abs_sum_avail<
+  Exec, v_t, Scalar,
+  std::enable_if_t<
+    std::is_same<
+      decltype(vector_abs_sum(std::declval<Exec>(),
+			      std::declval<v_t>(),
+			      std::declval<Scalar>())
+	       ),
+      Scalar
+      >::value
+    >
+  >
+{
+  static constexpr bool value =
+    !std::is_same<Exec,
+		  std::experimental::linalg::impl::inline_exec_t
+		  >::value;
+};
+} // end anonymous namespace
+
 template<class ElementType,
          extents<>::size_type ext0,
          class Layout,
          class Accessor,
          class Scalar>
 Scalar vector_abs_sum(
+  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
   std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v,
   Scalar init)
 {
@@ -75,11 +102,33 @@ template<class ExecutionPolicy,
          class Accessor,
          class Scalar>
 Scalar vector_abs_sum(
-  ExecutionPolicy&& /* exec */,
+  ExecutionPolicy&& exec,
   std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v,
   Scalar init)
 {
-  return vector_abs_sum(v, init);
+  constexpr bool use_custom = is_custom_vector_abs_sum_avail<
+    decltype(execpolicy_mapper(exec)), decltype(v), Scalar
+    >::value;
+
+  if constexpr(use_custom){
+    return vector_abs_sum(execpolicy_mapper(exec), v, init);
+  }
+  else
+  {
+    return vector_abs_sum(std::experimental::linalg::impl::inline_exec_t(), v, init);
+  }
+}
+
+template<class ElementType,
+         extents<>::size_type ext0,
+         class Layout,
+         class Accessor,
+         class Scalar>
+Scalar vector_abs_sum(
+  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v,
+  Scalar init)
+{
+  return vector_abs_sum(std::experimental::linalg::impl::default_exec_t(), v, init);
 }
 
 namespace vector_abs_detail {

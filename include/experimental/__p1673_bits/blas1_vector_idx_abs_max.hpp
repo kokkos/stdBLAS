@@ -58,11 +58,12 @@ template <class Exec, class v_t>
 struct is_custom_idx_abs_max_avail<
   Exec, v_t,
   std::enable_if_t<
-    std::is_integral<
+    std::is_same<
       decltype(idx_abs_max(std::declval<Exec>(),
 			   std::declval<v_t>()
 			   )
-	       )
+	       ),
+      extents<>::size_type
       >::value
     >
   >

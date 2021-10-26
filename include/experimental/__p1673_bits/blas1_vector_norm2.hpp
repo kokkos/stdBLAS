@@ -52,12 +52,40 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
+namespace
+{
+template <class Exec, class x_t, class Scalar, class = void>
+struct is_custom_vector_norm2_avail : std::false_type {};
+
+template <class Exec, class x_t, class Scalar>
+struct is_custom_vector_norm2_avail<
+  Exec, x_t, Scalar,
+  std::enable_if_t<
+    std::is_same<
+      decltype(
+	       vector_norm2(std::declval<Exec>(),
+			    std::declval<x_t>(),
+			    std::declval<Scalar>())
+	       ),
+      Scalar
+      >::value
+    >
+  >
+{
+  static constexpr bool value =
+    !std::is_same<Exec,
+		  std::experimental::linalg::impl::inline_exec_t
+		  >::value;
+};
+} // end anonymous namespace
+
 template<class ElementType,
          extents<>::size_type ext0,
          class Layout,
          class Accessor,
          class Scalar>
 Scalar vector_norm2(
+  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
   std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x,
   Scalar init)
 {
@@ -82,12 +110,35 @@ template<class ExecutionPolicy,
          class Accessor,
          class Scalar>
 Scalar vector_norm2(
-  ExecutionPolicy&& /* exec */,
+  ExecutionPolicy&& exec,
   std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x,
   Scalar init)
 {
-  return vector_norm2(x, init);
+  constexpr bool use_custom = is_custom_vector_norm2_avail<
+    decltype(execpolicy_mapper(exec)), decltype(x), Scalar
+    >::value;
+
+  if constexpr(use_custom){
+    return vector_norm2(execpolicy_mapper(exec), x, init);
+  }
+  else
+  {
+    return vector_norm2(std::experimental::linalg::impl::inline_exec_t(), x, init);
+  }
 }
+
+template<class ElementType,
+         extents<>::size_type ext0,
+         class Layout,
+         class Accessor,
+         class Scalar>
+Scalar vector_norm2(
+  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x,
+  Scalar init)
+{
+  return vector_norm2(std::experimental::linalg::impl::default_exec_t(), x, init);
+}
+
 
 namespace vector_norm2_detail {
   using std::abs;
