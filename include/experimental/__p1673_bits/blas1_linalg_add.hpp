@@ -158,6 +158,37 @@ struct is_custom_add_avail<
 // PUBLIC API:
 // ------------
 
+template<class ElementType_x,
+         extents<>::size_type ... ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ... ext_y,
+         class Layout_y,
+         class Accessor_y,
+         class ElementType_z,
+         extents<>::size_type ... ext_z,
+         class Layout_z,
+         class Accessor_z>
+  requires (sizeof...(ext_x) == sizeof...(ext_y) && sizeof...(ext_x) == sizeof...(ext_z))
+void add(
+  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y,
+  std::experimental::mdspan<ElementType_z, std::experimental::extents<ext_z ...>, Layout_z, Accessor_z> z)
+{
+  // this static assert is only here because for
+  // the default case we support rank-1 and rank2.
+  static_assert(z.rank() <= 2);
+
+  if constexpr (z.rank() == 1) {
+    add_rank_1 (x, y, z);
+  }
+  else if constexpr (z.rank() == 2) {
+    add_rank_2 (x, y, z);
+  }
+}
+
 template<class ExecutionPolicy,
          class ElementType_x,
          extents<>::size_type ... ext_x,
@@ -189,17 +220,7 @@ void add(
   }
   else
   {
-
-    // this static assert is only here because for
-    // the default case we support rank-1 and rank2.
-    static_assert(z.rank() <= 2);
-
-    if constexpr (z.rank() == 1) {
-      add_rank_1 (x, y, z);
-    }
-    else if constexpr (z.rank() == 2) {
-      add_rank_2 (x, y, z);
-    }
+    add(std::experimental::linalg::impl::inline_exec_t(), x, y, z);
   }
 }
 

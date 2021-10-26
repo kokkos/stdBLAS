@@ -84,25 +84,6 @@ void linalg_scale_rank_2(
   }
 }
 
-
-template<class Scalar,
-         class ElementType,
-         extents<>::size_type ... ext,
-         class Layout,
-         class Accessor>
-void linalg_scale(std::experimental::linalg::impl::inline_exec_t&& /* exec */, const Scalar alpha,
-           std::experimental::mdspan<ElementType, std::experimental::extents<ext ...>, Layout, Accessor> x)
-{
-  static_assert(x.rank() <= 2);
-
-  if constexpr (x.rank() == 1) {
-    linalg_scale_rank_1(alpha, x);
-  }
-  else if constexpr (x.rank() == 2) {
-    linalg_scale_rank_2(alpha, x);
-  }
-}
-
 template <typename Exec, typename Scalar, typename x_t, typename = void>
 struct is_custom_scale_avail : std::false_type {};
 
@@ -116,7 +97,25 @@ struct is_custom_scale_avail<Exec,Scalar,x_t,
 };
 } // end anonymous namespace
 
+template<class Scalar,
+         class ElementType,
+         extents<>::size_type ... ext,
+         class Layout,
+         class Accessor>
+void scale(
+  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
+  const Scalar alpha,
+  std::experimental::mdspan<ElementType, std::experimental::extents<ext ...>, Layout, Accessor> x)
+{
+  static_assert(x.rank() <= 2);
 
+  if constexpr (x.rank() == 1) {
+    linalg_scale_rank_1(alpha, x);
+  }
+  else if constexpr (x.rank() == 2) {
+    linalg_scale_rank_2(alpha, x);
+  }
+}
 
 template<class ExecutionPolicy,
          class Scalar,
@@ -138,7 +137,7 @@ void scale(
   if constexpr(use_custom) {
     scale(execpolicy_mapper(exec), alpha, x);
   } else {
-    linalg_scale(std::experimental::linalg::impl::inline_exec_t(), alpha, x);
+    scale(std::experimental::linalg::impl::inline_exec_t(), alpha, x);
   }
 }
 

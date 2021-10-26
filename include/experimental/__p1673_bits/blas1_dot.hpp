@@ -78,6 +78,32 @@ struct is_custom_dot_avail<
 
 } // end anonymous namespace
 
+
+template<class ElementType1,
+         extents<>::size_type ext1,
+         class Layout1,
+         class Accessor1,
+         class ElementType2,
+         extents<>::size_type ext2,
+         class Layout2,
+         class Accessor2,
+         class Scalar>
+Scalar dot(
+  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
+  std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> v1,
+  std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2,
+  Scalar init)
+{
+  static_assert(v1.static_extent(0) == dynamic_extent ||
+                v2.static_extent(0) == dynamic_extent ||
+                v1.static_extent(0) == v2.static_extent(0));
+
+  for (size_t k = 0; k < v1.extent(0); ++k) {
+    init += v1(k) * v2(k);
+  }
+  return init;
+}
+
 template<class ExecutionPolicy,
          class ElementType1,
          extents<>::size_type ext1,
@@ -106,10 +132,7 @@ Scalar dot(
     return dot(execpolicy_mapper(exec), v1, v2, init);
   }
   else{
-    for (size_t k = 0; k < v1.extent(0); ++k) {
-      init += v1(k) * v2(k);
-    }
-    return init;
+    return dot(std::experimental::linalg::impl::inline_exec_t(), v1, v2, init);
   }
 }
 
@@ -186,7 +209,6 @@ namespace dot_detail {
 } // namespace dot_detail
 
 
-// dot, without init value
 template<class ElementType1,
          extents<>::size_type ext1,
          class Layout1,
@@ -239,7 +261,6 @@ auto dotc(
   using return_t = decltype(dot_detail::dot_return_type_deducer(conjugated(v1), v2));
   return dotc(v1, v2, return_t{});
 }
-
 
 template<class ExecutionPolicy,
          class ElementType1,

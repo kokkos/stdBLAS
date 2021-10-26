@@ -94,19 +94,34 @@ extents<>::size_type idx_abs_max_default_impl(
 
 } // end anonymous namespace
 
+// ------------
+// PUBLIC API:
+// ------------
+
+template<class ElementType,
+         extents<>::size_type ext0,
+         class Layout,
+         class Accessor>
+extents<>::size_type idx_abs_max(
+  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
+  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
+{
+  return idx_abs_max_default_impl(v);
+}
+
 template<class ExecutionPolicy,
          class ElementType,
          extents<>::size_type ext0,
          class Layout,
          class Accessor>
-extents<>::size_type idx_abs_max(
+typename extents<>::size_type idx_abs_max(
   ExecutionPolicy&& exec,
   std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
 {
 
   // if vector is empty, always retun according to our proposal
   if (v.extent(0) == 0) {
-    return std::numeric_limits<std::size_t>::max();
+    return std::numeric_limits<typename extents<>::size_type>::max();
   }
 
   constexpr bool use_custom = is_custom_idx_abs_max_avail<
@@ -114,11 +129,10 @@ extents<>::size_type idx_abs_max(
     >::value;
 
   if constexpr(use_custom){
-    using return_type = extents<>::size_type;
-    return return_type(idx_abs_max(execpolicy_mapper(exec), v));
+    return idx_abs_max(execpolicy_mapper(exec), v);
   }
   else{
-    return idx_abs_max_default_impl(v);
+    return idx_abs_max(std::experimental::linalg::impl::inline_exec_t(), v);
   }
 }
 
