@@ -11,8 +11,9 @@ template<class ExecSpace,
          std::experimental::extents<>::size_type ext0,
          class Layout,
          class Accessor>
-auto idx_abs_max(kokkos_exec<ExecSpace>,
-		 std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
+std::experimental::extents<>::size_type
+idx_abs_max(kokkos_exec<ExecSpace>,
+	    std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
 {
   // note that -1 here, this is related to:
   // https://github.com/kokkos/stdBLAS/issues/114
