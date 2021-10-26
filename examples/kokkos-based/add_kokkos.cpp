@@ -5,7 +5,7 @@
 template<class T1, class ScalarType>
 void print_elements(const T1 & v, const std::vector<ScalarType> & gold)
 {
-  for(int i=0; i<v.size(); i++){
+  for(std::size_t i=0; i<v.size(); i++){
     std::cout << "computed = " << v(i)
 	      << " , gold = "
 	      << gold[i]
@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
     mdspan_type z(z_ptr,N);
 
     std::vector<value_type> gold(N);
-    for(int i=0; i<x.extent(0); i++){
+    for(std::size_t i=0; i<x.extent(0); i++){
       x(i) = i;
       y(i) = i + (value_type)10;
       z(i) = 0;
