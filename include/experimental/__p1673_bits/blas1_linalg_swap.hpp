@@ -77,12 +77,12 @@ void swap_rank_1(
 }
 
 template<class ElementType_x,
-         extents<>::size_type numRows_x, 
+         extents<>::size_type numRows_x,
          extents<>::size_type numCols_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         extents<>::size_type numRows_y, 
+         extents<>::size_type numRows_y,
          extents<>::size_type numCols_y,
          class Layout_y,
          class Accessor_y>
@@ -107,6 +107,26 @@ void swap_rank_2(
   }
 }
 
+template <class Exec, class x_t, class y_t, class = void>
+struct is_custom_vector_swap_elements_avail : std::false_type {};
+
+template <class Exec, class x_t, class y_t>
+struct is_custom_vector_swap_elements_avail<
+  Exec, x_t, y_t,
+    std::void_t<
+      decltype(swap_elements(std::declval<Exec>(),
+			     std::declval<x_t>(),
+			     std::declval<y_t>())
+	       )
+    >
+  >
+{
+  static constexpr bool value =
+    !std::is_same<Exec,
+		  std::experimental::linalg::impl::inline_exec_t
+		  >::value;
+};
+
 } // end anonymous namespace
 
 template<class ElementType_x,
@@ -119,6 +139,7 @@ template<class ElementType_x,
          class Accessor_y>
   requires (sizeof...(ext_x) == sizeof...(ext_y))
 void swap_elements(
+  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
   std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
   std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y)
 {
@@ -143,11 +164,37 @@ template<class ExecutionPolicy,
          class Accessor_y>
   requires (sizeof...(ext_x) == sizeof...(ext_y))
 void swap_elements(
-  ExecutionPolicy&& /* exec */,
+  ExecutionPolicy&& exec,
   std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
   std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y)
 {
-  swap_elements(x, y);
+  constexpr bool use_custom = is_custom_vector_swap_elements_avail<
+    decltype(execpolicy_mapper(exec)), decltype(x), decltype(y)
+    >::value;
+
+  if constexpr(use_custom){
+    return swap_elements(execpolicy_mapper(exec), x, y);
+  }
+  else
+  {
+    return swap_elements(std::experimental::linalg::impl::inline_exec_t(), x, y);
+  }
+}
+
+template<class ElementType_x,
+         extents<>::size_type ... ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         extents<>::size_type ... ext_y,
+         class Layout_y,
+         class Accessor_y>
+  requires (sizeof...(ext_x) == sizeof...(ext_y))
+void swap_elements(
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y)
+{
+  swap_elements(std::experimental::linalg::impl::default_exec_t(), x, y);
 }
 
 } // end namespace linalg

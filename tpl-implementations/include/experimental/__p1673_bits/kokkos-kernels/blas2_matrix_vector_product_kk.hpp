@@ -1,3 +1,7 @@
+
+#ifndef LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_KOKKOSKERNELS_MATVEC_HPP_
+#define LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_KOKKOSKERNELS_MATVEC_HPP_
+
 namespace KokkosKernelsSTD {
 
 namespace {
@@ -34,3 +38,4 @@ void matrix_vector_product(
 }
 
 } // namespace KokkosKernelsSTD
+#endif

@@ -84,6 +84,33 @@ namespace linalg {
 // DSQRT -> sqrt (Real input and return value)
 // slapy2(real(fs), aimag(fs)) -> hypot(real(fs), imag(fs))
 
+
+// begin anonymous namespace
+namespace {
+template <class Exec, class x_t, class y_t, class c_t, class s_t, class = void>
+struct is_custom_givens_rotation_apply_avail : std::false_type {};
+
+template <class Exec, class x_t, class y_t, class c_t, class s_t>
+struct is_custom_givens_rotation_apply_avail<
+  Exec, x_t, y_t, c_t, s_t,
+  std::void_t<
+    decltype(givens_rotation_apply
+	     (std::declval<Exec>(),
+	      std::declval<x_t>(),
+	      std::declval<y_t>(),
+	      std::declval<const c_t>(),
+	      std::declval<const s_t>()
+	      )
+	     )
+    >
+  >
+{
+  static constexpr bool value = !std::is_same<Exec,std::experimental::linalg::impl::inline_exec_t>::value;
+};
+} // end anonymous namespace
+
+
+
 template<std::floating_point Real>
 void givens_rotation_setup(const Real f,
                            const Real g,
@@ -344,6 +371,7 @@ label20:
   }
 }
 
+// c and s are std::floating_point
 template<class ElementType1,
          extents<>::size_type ext1,
          class Layout1,
@@ -354,6 +382,7 @@ template<class ElementType1,
          class Accessor2,
          std::floating_point Real>
 void givens_rotation_apply(
+  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
   std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
   std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
   const Real c,
@@ -381,13 +410,24 @@ template<class ExecutionPolicy,
          class Accessor2,
          std::floating_point Real>
 void givens_rotation_apply(
-  ExecutionPolicy&& /* exec */,
+  ExecutionPolicy&& exec,
   std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
   std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
   const Real c,
   const Real s)
 {
-  givens_rotation_apply(x, y, c, s);
+
+  constexpr bool use_custom = is_custom_givens_rotation_apply_avail<
+    decltype(execpolicy_mapper(exec)), decltype(x), decltype(y), Real, Real
+    >::value;
+
+  if constexpr(use_custom){
+    givens_rotation_apply(execpolicy_mapper(exec), x, y, c, s);
+  }
+  else
+  {
+    givens_rotation_apply(std::experimental::linalg::impl::inline_exec_t(), x, y, c, s);
+  }
 }
 
 template<class ElementType1,
@@ -400,6 +440,28 @@ template<class ElementType1,
          class Accessor2,
          std::floating_point Real>
 void givens_rotation_apply(
+  std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
+  std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
+  const Real c,
+  const Real s)
+{
+  givens_rotation_apply(std::experimental::linalg::impl::default_exec_t(), x, y, c, s);
+}
+
+
+// c is std::floating_point
+// s is complex<std::floating_point>
+template<class ElementType1,
+         extents<>::size_type ext1,
+         class Layout1,
+         class Accessor1,
+         class ElementType2,
+         extents<>::size_type ext2,
+         class Layout2,
+         class Accessor2,
+         std::floating_point Real>
+void givens_rotation_apply(
+  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
   std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
   std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
   const Real c,
@@ -428,13 +490,42 @@ template<class ExecutionPolicy,
          class Accessor2,
          std::floating_point Real>
 void givens_rotation_apply(
-  ExecutionPolicy&& /* exec */,
+  ExecutionPolicy&& exec,
   std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
   std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
   const Real c,
   const complex<Real> s)
 {
-  givens_rotation_apply(x, y, c, s);
+
+  constexpr bool use_custom = is_custom_givens_rotation_apply_avail<
+    decltype(execpolicy_mapper(exec)), decltype(x), decltype(y), Real, complex<Real>
+    >::value;
+
+  if constexpr(use_custom){
+    givens_rotation_apply(execpolicy_mapper(exec), x, y, c, s);
+  }
+  else
+  {
+    givens_rotation_apply(std::experimental::linalg::impl::inline_exec_t(), x, y, c, s);
+  }
+}
+
+template<class ElementType1,
+         extents<>::size_type ext1,
+         class Layout1,
+         class Accessor1,
+         class ElementType2,
+         extents<>::size_type ext2,
+         class Layout2,
+         class Accessor2,
+         std::floating_point Real>
+void givens_rotation_apply(
+  std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
+  std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
+  const Real c,
+  const complex<Real> s)
+{
+  givens_rotation_apply(std::experimental::linalg::impl::default_exec_t(), x, y, c, s);
 }
 
 } // end namespace linalg

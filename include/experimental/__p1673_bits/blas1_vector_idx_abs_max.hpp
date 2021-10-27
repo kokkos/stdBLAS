@@ -48,20 +48,38 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
+// begin anonymous namespace
+namespace {
+
+template <class Exec, class v_t, class = void>
+struct is_custom_idx_abs_max_avail : std::false_type {};
+
+template <class Exec, class v_t>
+struct is_custom_idx_abs_max_avail<
+  Exec, v_t,
+  std::enable_if_t<
+    //FRizzi: maybe should use is_convertible?
+    std::is_same<
+      decltype(idx_abs_max(std::declval<Exec>(), std::declval<v_t>())),
+      extents<>::size_type
+      >::value
+    >
+  >
+{
+  static constexpr bool value = !std::is_same<Exec,std::experimental::linalg::impl::inline_exec_t>::value;
+};
+
 template<class ElementType,
          extents<>::size_type ext0,
          class Layout,
          class Accessor>
-extents<>::size_type idx_abs_max(
+extents<>::size_type idx_abs_max_default_impl(
   std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
 {
   using std::abs;
   using size_type = typename extents<>::size_type;
   using magnitude_type = decltype(abs(v(0)));
 
-  if (v.extent(0) == 0) {
-    return -1;
-  }
   size_type maxInd = 0;
   magnitude_type maxVal = abs(v(0));
   for (size_type i = 1; i < v.extent(0); ++i) {
@@ -73,16 +91,54 @@ extents<>::size_type idx_abs_max(
   return maxInd; // FIXME check for NaN "never less than" stuff
 }
 
+} // end anonymous namespace
+
+template<class ElementType,
+         extents<>::size_type ext0,
+         class Layout,
+         class Accessor>
+extents<>::size_type idx_abs_max(
+  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
+  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
+{
+  return idx_abs_max_default_impl(v);
+}
+
 template<class ExecutionPolicy,
          class ElementType,
          extents<>::size_type ext0,
          class Layout,
          class Accessor>
-extents<>::size_type idx_abs_max(
-  ExecutionPolicy&& /* exec */,
+typename extents<>::size_type idx_abs_max(
+  ExecutionPolicy&& exec,
   std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
 {
-  return idx_abs_max(v);
+
+  // if vector is empty, always retun according to our proposal
+  if (v.extent(0) == 0) {
+    return std::numeric_limits<typename extents<>::size_type>::max();
+  }
+
+  constexpr bool use_custom = is_custom_idx_abs_max_avail<
+    decltype(execpolicy_mapper(exec)), decltype(v)
+    >::value;
+
+  if constexpr(use_custom){
+    return idx_abs_max(execpolicy_mapper(exec), v);
+  }
+  else{
+    return idx_abs_max(std::experimental::linalg::impl::inline_exec_t(), v);
+  }
+}
+
+template<class ElementType,
+         extents<>::size_type ext0,
+         class Layout,
+         class Accessor>
+extents<>::size_type idx_abs_max(
+  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
+{
+  return idx_abs_max(std::experimental::linalg::impl::default_exec_t(), v);
 }
 
 } // end namespace linalg

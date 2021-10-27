@@ -27,4 +27,3 @@ int main(int argc, char* argv[]) {
     for(int i=0; i<x.extent(0); i+=5) std::cout << i << " " << x(i) << std::endl;
   }
 }
-

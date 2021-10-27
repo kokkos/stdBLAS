@@ -147,7 +147,32 @@ void trsv_lower_triangular_left_side(
   }
 }
 
+
+template <class Exec, class A_t, class Tri_t, class D_t, class B_t, class X_t, class = void>
+struct is_custom_tri_mat_vec_solve_avail : std::false_type {};
+
+template <class Exec, class A_t, class Tri_t, class D_t, class B_t, class X_t>
+struct is_custom_tri_mat_vec_solve_avail<
+  Exec, A_t, Tri_t, D_t, B_t, X_t,
+  std::void_t<
+    decltype(triangular_matrix_vector_solve
+	     (std::declval<Exec>(),
+	      std::declval<A_t>(),
+	      std::declval<Tri_t>(),
+	      std::declval<D_t>(),
+	      std::declval<B_t>(),
+	      std::declval<X_t>()
+	      )
+	     )
+    >
+  >
+{
+  static constexpr bool value =
+    !std::is_same<Exec,std::experimental::linalg::impl::inline_exec_t>::value;
+};
+
 } // end anonymous namespace
+
 
 template<class ElementType_A,
          extents<>::size_type numRows_A,
@@ -165,6 +190,7 @@ template<class ElementType_A,
          class Layout_X,
          class Accessor_X>
 void triangular_matrix_vector_solve(
+  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
@@ -196,14 +222,51 @@ template<class ExecutionPolicy,
          class Layout_X,
          class Accessor_X>
 void triangular_matrix_vector_solve(
-  ExecutionPolicy&& /* exec */,
+  ExecutionPolicy&& exec,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
   std::experimental::mdspan<ElementType_B, std::experimental::extents<ext_B>, Layout_B, Accessor_B> b,
   std::experimental::mdspan<ElementType_X, std::experimental::extents<ext_X>, Layout_X, Accessor_X> x)
 {
-  triangular_matrix_vector_solve(A, t, d, b, x);
+  constexpr bool use_custom = is_custom_tri_mat_vec_solve_avail<
+    decltype(execpolicy_mapper(exec)), decltype(A), decltype(t), decltype(d), decltype(b), decltype(x)
+    >::value;
+
+  if constexpr(use_custom){
+    triangular_matrix_vector_solve(execpolicy_mapper(exec), A, t, d, b, x);
+  }
+  else
+  {
+    triangular_matrix_vector_solve(std::experimental::linalg::impl::inline_exec_t(),
+				   A, t, d, b, x);
+  }
+}
+
+template<class ElementType_A,
+         extents<>::size_type numRows_A,
+         extents<>::size_type numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class DiagonalStorage,
+         class ElementType_B,
+         extents<>::size_type ext_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_X,
+         extents<>::size_type ext_X,
+         class Layout_X,
+         class Accessor_X>
+void triangular_matrix_vector_solve(
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  DiagonalStorage d,
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<ext_B>, Layout_B, Accessor_B> b,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<ext_X>, Layout_X, Accessor_X> x)
+{
+  triangular_matrix_vector_solve(std::experimental::linalg::impl::default_exec_t(),
+				 A, t, d, b, x);
 }
 
 } // end namespace linalg

@@ -50,7 +50,92 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
-// dot: no policy, with init value
+// begin anonymous namespace
+namespace {
+
+template <class Exec, class v1_t, class v2_t, class Scalar, class = void>
+struct is_custom_dot_avail : std::false_type {};
+
+template <class Exec, class v1_t, class v2_t, class Scalar>
+struct is_custom_dot_avail<
+  Exec, v1_t, v2_t, Scalar,
+  std::enable_if_t<
+    std::is_same<
+      decltype(dot
+	       (std::declval<Exec>(),
+		std::declval<v1_t>(),
+		std::declval<v2_t>(),
+		std::declval<Scalar>()
+		)
+	       ),
+      Scalar
+      >::value
+    >
+  >
+{
+  static constexpr bool value = !std::is_same<Exec,std::experimental::linalg::impl::inline_exec_t>::value;
+};
+
+} // end anonymous namespace
+
+
+template<class ElementType1,
+         extents<>::size_type ext1,
+         class Layout1,
+         class Accessor1,
+         class ElementType2,
+         extents<>::size_type ext2,
+         class Layout2,
+         class Accessor2,
+         class Scalar>
+Scalar dot(
+  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
+  std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> v1,
+  std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2,
+  Scalar init)
+{
+  static_assert(v1.static_extent(0) == dynamic_extent ||
+                v2.static_extent(0) == dynamic_extent ||
+                v1.static_extent(0) == v2.static_extent(0));
+
+  for (size_t k = 0; k < v1.extent(0); ++k) {
+    init += v1(k) * v2(k);
+  }
+  return init;
+}
+
+template<class ExecutionPolicy,
+         class ElementType1,
+         extents<>::size_type ext1,
+         class Layout1,
+         class Accessor1,
+         class ElementType2,
+         extents<>::size_type ext2,
+         class Layout2,
+         class Accessor2,
+         class Scalar>
+Scalar dot(
+  ExecutionPolicy&& exec ,
+  std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> v1,
+  std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2,
+  Scalar init)
+{
+  static_assert(v1.static_extent(0) == dynamic_extent ||
+                v2.static_extent(0) == dynamic_extent ||
+                v1.static_extent(0) == v2.static_extent(0));
+
+  constexpr bool use_custom = is_custom_dot_avail<
+    decltype(execpolicy_mapper(exec)), decltype(v1), decltype(v2), Scalar
+    >::value;
+
+  if constexpr(use_custom){
+    return dot(execpolicy_mapper(exec), v1, v2, init);
+  }
+  else{
+    return dot(std::experimental::linalg::impl::inline_exec_t(), v1, v2, init);
+  }
+}
+
 template<class ElementType1,
          extents<>::size_type ext1,
          class Layout1,
@@ -64,37 +149,9 @@ Scalar dot(std::experimental::mdspan<ElementType1, std::experimental::extents<ex
            std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2,
            Scalar init)
 {
-  static_assert(v1.static_extent(0) == dynamic_extent ||
-                v2.static_extent(0) == dynamic_extent ||
-                v1.static_extent(0) == v2.static_extent(0));
-
-  for (size_t k = 0; k < v1.extent(0); ++k) {
-    init += v1(k) * v2(k);
-  }
-  return init;
+  return dot(std::experimental::linalg::impl::default_exec_t(), v1, v2, init);
 }
 
-// dot: with policy, with init value
-template<class ExecutionPolicy,
-         class ElementType1,
-         extents<>::size_type ext1,
-         class Layout1,
-         class Accessor1,
-         class ElementType2,
-         extents<>::size_type ext2,
-         class Layout2,
-         class Accessor2,
-         class Scalar>
-Scalar dot(
-  ExecutionPolicy&& /* exec */,
-  std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> v1,
-  std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2,
-  Scalar init)
-{
-  return dot(v1, v2, init);
-}
-
-// conjugated dot: no policy, with init value
 template<class ElementType1,
          extents<>::size_type ext1,
          class Layout1,
@@ -112,7 +169,6 @@ Scalar dotc(
   return dot(conjugated(v1), v2, init);
 }
 
-// conjugated dot: with policy, with init value
 template<class ExecutionPolicy,
          class ElementType1,
          extents<>::size_type ext1,
@@ -124,12 +180,12 @@ template<class ExecutionPolicy,
          class Accessor2,
          class Scalar>
 Scalar dotc(
-  ExecutionPolicy&& /* exec */,
+  ExecutionPolicy&& exec,
   std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> v1,
   std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> v2,
   Scalar init)
 {
-  return dotc(v1, v2, init);
+  return dot(exec, conjugated(v1), v2, init);
 }
 
 namespace dot_detail {
@@ -152,7 +208,7 @@ namespace dot_detail {
   -> decltype(x(0) * y(0));
 } // namespace dot_detail
 
-// dot: no policy, no init value
+
 template<class ElementType1,
          extents<>::size_type ext1,
          class Layout1,
@@ -170,7 +226,6 @@ auto dot(
   return dot(v1, v2, return_t{});
 }
 
-// dot: with policy, no init value
 template<class ExecutionPolicy,
          class ElementType1,
          extents<>::size_type ext1,
@@ -190,7 +245,6 @@ auto dot(
   return dot(exec, v1, v2, return_t{});
 }
 
-// conjugated dot: no policy, no init value
 template<class ElementType1,
          extents<>::size_type ext1,
          class Layout1,
@@ -208,7 +262,6 @@ auto dotc(
   return dotc(v1, v2, return_t{});
 }
 
-// conjugated dot: with policy, no init value
 template<class ExecutionPolicy,
          class ElementType1,
          extents<>::size_type ext1,
