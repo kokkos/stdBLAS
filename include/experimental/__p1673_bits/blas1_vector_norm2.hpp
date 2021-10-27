@@ -73,9 +73,7 @@ struct is_custom_vector_norm2_avail<
   >
 {
   static constexpr bool value =
-    !std::is_same<Exec,
-		  std::experimental::linalg::impl::inline_exec_t
-		  >::value;
+    !std::is_same<Exec, std::experimental::linalg::impl::inline_exec_t>::value;
 };
 } // end anonymous namespace
 
