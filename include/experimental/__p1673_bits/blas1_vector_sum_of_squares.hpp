@@ -137,6 +137,7 @@ sum_of_squares_result<Scalar> vector_sum_of_squares(
   std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v,
   sum_of_squares_result<Scalar> init)
 {
+
   constexpr bool use_custom = is_custom_vector_sum_of_squares_avail<
     decltype(execpolicy_mapper(exec)), decltype(v), Scalar
     >::value;
