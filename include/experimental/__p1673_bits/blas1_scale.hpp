@@ -88,12 +88,15 @@ template <typename Exec, typename Scalar, typename x_t, typename = void>
 struct is_custom_scale_avail : std::false_type {};
 
 template <typename Exec, typename Scalar, typename x_t>
-struct is_custom_scale_avail<Exec,Scalar,x_t,
-                   std::void_t<decltype(scale(
-                              std::declval<Exec>(),
-                              std::declval<Scalar>(),
-                              std::declval<x_t>())) >> {
-                   static constexpr bool value = !std::is_same<Exec,std::experimental::linalg::impl::inline_exec_t>::value;
+struct is_custom_scale_avail<
+  Exec,Scalar,x_t,
+  std::void_t<decltype(scale(
+			     std::declval<Exec>(),
+			     std::declval<Scalar>(),
+			     std::declval<x_t>())) >>
+{
+  static constexpr bool value = !std::is_same
+    <Exec, std::experimental::linalg::impl::inline_exec_t>::value;
 };
 } // end anonymous namespace
 

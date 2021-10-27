@@ -154,10 +154,6 @@ struct is_custom_add_avail<
 } // end anonymous namespace
 
 
-// ------------
-// PUBLIC API:
-// ------------
-
 template<class ElementType_x,
          extents<>::size_type ... ext_x,
          class Layout_x,

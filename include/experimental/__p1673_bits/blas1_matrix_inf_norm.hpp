@@ -51,14 +51,43 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
+// begin anonymous namespace
+namespace {
+
+template <class Exec, class A_t, class Scalar, class = void>
+struct is_custom_matrix_inf_norm_avail : std::false_type {};
+
+template <class Exec, class A_t, class Scalar>
+struct is_custom_matrix_inf_norm_avail<
+  Exec, A_t, Scalar,
+  std::enable_if_t<
+    std::is_same<
+      decltype(matrix_inf_norm
+	       (std::declval<Exec>(),
+		std::declval<A_t>(),
+		std::declval<Scalar>()
+		)
+	       ),
+      Scalar
+      >::value
+    >
+  >
+{
+  static constexpr bool value =
+    !std::is_same<Exec, std::experimental::linalg::impl::inline_exec_t>::value;
+};
+
+} // end anonymous namespace
+
 template<
     class ElementType,
-    extents<>::size_type numRows, 
+    extents<>::size_type numRows,
     extents<>::size_type numCols,
     class Layout,
     class Accessor,
     class Scalar>
 Scalar matrix_inf_norm(
+  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
   std::experimental::mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A,
   Scalar init)
 {
@@ -89,28 +118,52 @@ Scalar matrix_inf_norm(
 template<
   class ExecutionPolicy,
   class ElementType,
-  extents<>::size_type numRows, 
+  extents<>::size_type numRows,
   extents<>::size_type numCols,
   class Layout,
   class Accessor,
   class Scalar>
 Scalar matrix_inf_norm(
-  ExecutionPolicy&& /* exec */,
+  ExecutionPolicy&& exec,
   std::experimental::mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A,
   Scalar init)
 {
-  return matrix_inf_norm(A, init);
+
+  constexpr bool use_custom = is_custom_matrix_inf_norm_avail<
+    decltype(execpolicy_mapper(exec)), decltype(A), Scalar
+    >::value;
+
+  if constexpr(use_custom){
+    return matrix_inf_norm(execpolicy_mapper(exec), A, init);
+  }
+  else{
+    return matrix_inf_norm(std::experimental::linalg::impl::inline_exec_t(), A, init);
+  }
+}
+
+template<
+    class ElementType,
+    extents<>::size_type numRows,
+    extents<>::size_type numCols,
+    class Layout,
+    class Accessor,
+    class Scalar>
+Scalar matrix_inf_norm(
+  std::experimental::mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A,
+  Scalar init)
+{
+  return matrix_inf_norm(std::experimental::linalg::impl::default_exec_t(), A, init);
 }
 
 namespace matrix_inf_norm_detail {
 
   using std::abs;
-  
+
   // The point of this is to do correct ADL for abs,
   // without exposing "using std::abs" in the outer namespace.
   template<
     class ElementType,
-    extents<>::size_type numRows, 
+    extents<>::size_type numRows,
     extents<>::size_type numCols,
     class Layout,
     class Accessor>
@@ -121,21 +174,21 @@ namespace matrix_inf_norm_detail {
 
 template<
   class ElementType,
-  extents<>::size_type numRows, 
+  extents<>::size_type numRows,
   extents<>::size_type numCols,
   class Layout,
   class Accessor>
 auto matrix_inf_norm(
   std::experimental::mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A)
 -> decltype(matrix_inf_norm_detail::matrix_inf_norm_return_type_deducer(A))
-{ 
+{
   using return_t = decltype(matrix_inf_norm_detail::matrix_inf_norm_return_type_deducer(A));
   return matrix_inf_norm(A, return_t{});
 }
 
 template<class ExecutionPolicy,
          class ElementType,
-         extents<>::size_type numRows, 
+         extents<>::size_type numRows,
          extents<>::size_type numCols,
          class Layout,
          class Accessor>

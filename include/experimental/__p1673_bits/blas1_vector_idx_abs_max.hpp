@@ -58,11 +58,9 @@ template <class Exec, class v_t>
 struct is_custom_idx_abs_max_avail<
   Exec, v_t,
   std::enable_if_t<
+    //FRizzi: maybe should use is_convertible?
     std::is_same<
-      decltype(idx_abs_max(std::declval<Exec>(),
-			   std::declval<v_t>()
-			   )
-	       ),
+      decltype(idx_abs_max(std::declval<Exec>(), std::declval<v_t>())),
       extents<>::size_type
       >::value
     >
@@ -94,10 +92,6 @@ extents<>::size_type idx_abs_max_default_impl(
 }
 
 } // end anonymous namespace
-
-// ------------
-// PUBLIC API:
-// ------------
 
 template<class ElementType,
          extents<>::size_type ext0,
