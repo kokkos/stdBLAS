@@ -122,9 +122,7 @@ struct is_custom_vector_swap_elements_avail<
   >
 {
   static constexpr bool value =
-    !std::is_same<Exec,
-		  std::experimental::linalg::impl::inline_exec_t
-		  >::value;
+    !std::is_same_v<Exec, std::experimental::linalg::impl::inline_exec_t>;
 };
 
 } // end anonymous namespace

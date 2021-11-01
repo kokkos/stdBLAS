@@ -20,9 +20,11 @@ int main(int argc, char* argv[])
     using mdspan_type  = std::experimental::mdspan<value_type, dyn_1d_ext_type>;
     mdspan_type a(a_ptr,N);
     mdspan_type b(b_ptr,N);
-    for(std::size_t i=0; i<a.extent(0); i++){
-      const value_type a_i(double(i) + 1.0, double(i) + 1.0);
-      const value_type b_i(double(i) - 2.0, double(i) - 2.0);
+    for(std::size_t i=0; i<a.extent(0); i++)
+    {
+      const auto i_double = static_cast<double>(i);
+      const value_type a_i(i_double + 1.0, i_double + 1.0);
+      const value_type b_i(i_double - 2.0, i_double - 2.0);
       a(i) = a_i;
       b(i) = b_i;
     }

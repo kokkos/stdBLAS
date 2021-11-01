@@ -66,23 +66,31 @@ struct is_custom_vector_sum_of_squares_avail : std::false_type {};
 template <class Exec, class x_t, class Scalar>
 struct is_custom_vector_sum_of_squares_avail<
   Exec, x_t, Scalar,
-  std::enable_if_t<
-    std::is_same<
-      decltype(vector_sum_of_squares(std::declval<Exec>(),
-				     std::declval<x_t>(),
-				     std::declval<sum_of_squares_result<Scalar>>()
-				     )
-	       ),
-      sum_of_squares_result<Scalar>
-      >::value
+  std::void_t<
+    decltype(vector_sum_of_squares(std::declval<Exec>(),
+				   std::declval<x_t>(),
+				   std::declval<sum_of_squares_result<Scalar>>()
+				   )
+	     )
     >
   >
 {
-  static constexpr bool value =
-    !std::is_same<Exec,
-		  std::experimental::linalg::impl::inline_exec_t
-		  >::value;
+
+  static constexpr bool has_matching_return_type = std::is_same_v<
+    sum_of_squares_result<Scalar>,
+    decltype(vector_sum_of_squares(std::declval<Exec>(),
+				   std::declval<x_t>(),
+				   std::declval<sum_of_squares_result<Scalar>>()
+				   )
+	     )
+    >;
+
+  static constexpr bool is_not_inline_exec_tag = !std::is_same_v<
+    Exec,std::experimental::linalg::impl::inline_exec_t>;
+
+  static constexpr bool value = has_matching_return_type && is_not_inline_exec_tag;
 };
+
 } // end anonymous namespace
 
 template<class ElementType,

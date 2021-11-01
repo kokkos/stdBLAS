@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
     using mdspan_type  = std::experimental::mdspan<value_type, dyn_1d_ext_type>;
     mdspan_type x(x_ptr,N);
     for(std::size_t i=0; i<x.extent(0); i++){
-      x(i) = (value_type) i;
+      x(i) = static_cast<value_type>(i);
     }
 
     namespace stdla = std::experimental::linalg;
