@@ -18,10 +18,10 @@ int main(int argc, char* argv[])
     mdspan_type x(x_ptr,N);
     for(std::size_t i=0; i<x.extent(0); i++){
       if (i % 2 == 0){
-	x(i) = i * (value_type) -1;
+	x(i) = i * static_cast<value_type>(-1);
       }
       else{
-	x(i) = (value_type) i;
+	x(i) = static_cast<value_type>(i);
       }
     }
 

@@ -60,21 +60,27 @@ struct is_custom_matrix_one_norm_avail : std::false_type {};
 template <class Exec, class A_t, class Scalar>
 struct is_custom_matrix_one_norm_avail<
   Exec, A_t, Scalar,
-  std::enable_if_t<
-    std::is_same<
-      decltype(matrix_one_norm
-	       (std::declval<Exec>(),
-		std::declval<A_t>(),
-		std::declval<Scalar>()
-		)
-	       ),
-      Scalar
-      >::value
+  std::void_t<
+    decltype(matrix_one_norm
+	     (std::declval<Exec>(),
+	      std::declval<A_t>(),
+	      std::declval<Scalar>()
+	      )
+	     )
     >
   >
 {
-  static constexpr bool value =
-    !std::is_same<Exec, std::experimental::linalg::impl::inline_exec_t>::value;
+
+  static constexpr bool has_matching_return_type = std::is_same_v<
+    Scalar,
+    decltype(matrix_one_norm(std::declval<Exec>(),
+			     std::declval<A_t>(),
+			     std::declval<Scalar>()))>;
+
+  static constexpr bool is_not_inline_exec_tag = !std::is_same_v<
+    Exec,std::experimental::linalg::impl::inline_exec_t>;
+
+  static constexpr bool value = has_matching_return_type && is_not_inline_exec_tag;
 };
 
 } // end anonymous namespace

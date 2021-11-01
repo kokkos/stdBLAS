@@ -57,16 +57,21 @@ struct is_custom_idx_abs_max_avail : std::false_type {};
 template <class Exec, class v_t>
 struct is_custom_idx_abs_max_avail<
   Exec, v_t,
-  std::enable_if_t<
-    //FRizzi: maybe should use is_convertible?
-    std::is_same<
-      decltype(idx_abs_max(std::declval<Exec>(), std::declval<v_t>())),
-      extents<>::size_type
-      >::value
+  std::void_t<
+    decltype(idx_abs_max(std::declval<Exec>(), std::declval<v_t>()))
     >
   >
 {
-  static constexpr bool value = !std::is_same<Exec,std::experimental::linalg::impl::inline_exec_t>::value;
+
+  static constexpr bool has_matching_return_type = std::is_same_v<
+    extents<>::size_type,
+    decltype(idx_abs_max(std::declval<Exec>(), std::declval<v_t>()))
+    >;
+
+  static constexpr bool is_not_inline_exec_tag = !std::is_same_v<
+    Exec,std::experimental::linalg::impl::inline_exec_t>;
+
+  static constexpr bool value = has_matching_return_type && is_not_inline_exec_tag;
 };
 
 template<class ElementType,
@@ -79,6 +84,11 @@ extents<>::size_type idx_abs_max_default_impl(
   using std::abs;
   using size_type = typename extents<>::size_type;
   using magnitude_type = decltype(abs(v(0)));
+
+  // if vector is empty, always return according to our proposal
+  if (v.extent(0) == 0) {
+    return std::numeric_limits<typename extents<>::size_type>::max();
+  }
 
   size_type maxInd = 0;
   magnitude_type maxVal = abs(v(0));
@@ -114,7 +124,7 @@ typename extents<>::size_type idx_abs_max(
   std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
 {
 
-  // if vector is empty, always retun according to our proposal
+  // if vector is empty, always return according to our proposal
   if (v.extent(0) == 0) {
     return std::numeric_limits<typename extents<>::size_type>::max();
   }
