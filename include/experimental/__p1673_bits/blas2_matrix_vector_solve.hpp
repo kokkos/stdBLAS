@@ -88,7 +88,7 @@ void trsv_upper_triangular_left_side(
     // in a type with the max precision of X and B).
     using sum_type = decltype (B(i) - A(0,0) * X(0));
     //using sum_type = typename out_object_t::element_type;
-    const sum_type t (B(i));
+    sum_type t (B(i));
     for (size_type j = i + 1; j < A_num_cols; ++j) {
       t = t - A(i,j) * X(j);
     }
@@ -134,7 +134,7 @@ void trsv_lower_triangular_left_side(
     // in a type with the max precision of X and B).
     using sum_type = decltype (B(i) - A(0,0) * X(0));
     //using sum_type = typename out_object_t::element_type;
-    const sum_type t (B(i));
+    sum_type t (B(i));
     for (size_type j = 0; j < i; ++j) {
       t = t - A(i,j) * X(j);
     }

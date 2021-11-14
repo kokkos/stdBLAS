@@ -93,7 +93,7 @@ template<class ElementType,
          class Accessor,
          class Scalar>
 Scalar vector_norm2(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
+  std::experimental::linalg::impl::inline_exec_t&& exec,
   std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x,
   Scalar init)
 {
@@ -106,7 +106,7 @@ Scalar vector_norm2(
 
   // Compute the sum of squares using an algorithm that avoids
   // underflow and overflow by scaling.
-  auto ssq_res = vector_sum_of_squares(x, ssq_init);
+  auto ssq_res = vector_sum_of_squares(exec, x, ssq_init);
   using std::sqrt;
   return init + ssq_res.scaling_factor * sqrt(ssq_res.scaled_sum_of_squares);
 }
