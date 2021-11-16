@@ -60,31 +60,19 @@ struct is_custom_vector_norm2_avail : std::false_type {};
 template <class Exec, class x_t, class Scalar>
 struct is_custom_vector_norm2_avail<
   Exec, x_t, Scalar,
-  std::void_t<
-    decltype(
-	     vector_norm2(std::declval<Exec>(),
-			  std::declval<x_t>(),
-			  std::declval<Scalar>())
-	     )
+  std::enable_if_t<
+    std::is_same<
+      decltype(
+	       vector_norm2(std::declval<Exec>(),
+			    std::declval<x_t>(),
+			    std::declval<Scalar>())
+	       ),
+      Scalar
+      >::value
+    && !linalg::impl::is_inline_exec_v<Exec>
     >
   >
-{
-
-  static constexpr bool has_matching_return_type = std::is_same_v<
-    Scalar,
-    decltype(
-	     vector_norm2(std::declval<Exec>(),
-			  std::declval<x_t>(),
-			  std::declval<Scalar>())
-	     )
-    >;
-
-  static constexpr bool is_not_inline_exec_tag = !std::is_same_v<
-    Exec,std::experimental::linalg::impl::inline_exec_t>;
-
-  static constexpr bool value = has_matching_return_type && is_not_inline_exec_tag;
-};
-
+  : std::true_type{};
 } // end anonymous namespace
 
 template<class ElementType,

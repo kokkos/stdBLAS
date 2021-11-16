@@ -56,21 +56,21 @@ struct is_custom_symmetric_matrix_rank_2_update_avail : std::false_type {};
 template <class Exec, class x_t, class y_t, class A_t, class Tr_t>
 struct is_custom_symmetric_matrix_rank_2_update_avail<
   Exec, x_t, y_t, A_t, Tr_t,
-  std::void_t<
-    decltype(symmetric_matrix_rank_2_update
-	     (std::declval<Exec>(),
-	      std::declval<x_t>(),
-	      std::declval<y_t>(),
-	      std::declval<A_t>(),
-	      std::declval<Tr_t>()
-	      )
-	     )
+  std::enable_if_t<
+    std::is_void_v<
+      decltype(symmetric_matrix_rank_2_update
+	       (std::declval<Exec>(),
+		std::declval<x_t>(),
+		std::declval<y_t>(),
+		std::declval<A_t>(),
+		std::declval<Tr_t>()
+		)
+	       )
+      >
+    && !linalg::impl::is_inline_exec_v<Exec>
     >
   >
-{
-  static constexpr bool value =
-    !std::is_same_v<Exec, std::experimental::linalg::impl::inline_exec_t>;
-};
+  : std::true_type{};
 
 template <class Exec, class x_t, class y_t, class A_t, class Tr_t, class = void>
 struct is_custom_hermitian_matrix_rank_2_update_avail : std::false_type {};
@@ -78,22 +78,21 @@ struct is_custom_hermitian_matrix_rank_2_update_avail : std::false_type {};
 template <class Exec, class x_t, class y_t, class A_t, class Tr_t>
 struct is_custom_hermitian_matrix_rank_2_update_avail<
   Exec, x_t, y_t, A_t, Tr_t,
-  std::void_t<
-    decltype(hermitian_matrix_rank_2_update
-	     (std::declval<Exec>(),
-	      std::declval<x_t>(),
-	      std::declval<y_t>(),
-	      std::declval<A_t>(),
-	      std::declval<Tr_t>()
-	      )
-	     )
+  std::enable_if_t<
+    std::is_void_v<
+      decltype(hermitian_matrix_rank_2_update
+	       (std::declval<Exec>(),
+		std::declval<x_t>(),
+		std::declval<y_t>(),
+		std::declval<A_t>(),
+		std::declval<Tr_t>()
+		)
+	       )
+      >
+    && !linalg::impl::is_inline_exec_v<Exec>
     >
   >
-{
-  static constexpr bool value =
-    !std::is_same_v<Exec, std::experimental::linalg::impl::inline_exec_t>;
-};
-
+  : std::true_type{};
 
 } // end anonymous namespace
 

@@ -59,30 +59,21 @@ struct is_custom_dot_avail : std::false_type {};
 template <class Exec, class v1_t, class v2_t, class Scalar>
 struct is_custom_dot_avail<
   Exec, v1_t, v2_t, Scalar,
-  std::void_t<
-    decltype(dot
-	     (std::declval<Exec>(),
-	      std::declval<v1_t>(),
-	      std::declval<v2_t>(),
-	      std::declval<Scalar>()
-	      )
-	     )
+  std::enable_if_t<
+    std::is_same<
+      decltype(dot
+	       (std::declval<Exec>(),
+		std::declval<v1_t>(),
+		std::declval<v2_t>(),
+		std::declval<Scalar>()
+		)
+	       ),
+      Scalar
+      >::value
+    && !linalg::impl::is_inline_exec_v<Exec>
     >
   >
-{
-  static constexpr bool has_matching_return_type = std::is_same_v<
-    Scalar,
-    decltype(
-	     dot(std::declval<Exec>(), std::declval<v1_t>(),
-		 std::declval<v2_t>(), std::declval<Scalar>())
-	     )
-    >;
-
-  static constexpr bool is_not_inline_exec_tag = !std::is_same_v<
-    Exec,std::experimental::linalg::impl::inline_exec_t>;
-
-  static constexpr bool value = has_matching_return_type && is_not_inline_exec_tag;
-};
+  : std::true_type {};
 
 } // end anonymous namespace
 
