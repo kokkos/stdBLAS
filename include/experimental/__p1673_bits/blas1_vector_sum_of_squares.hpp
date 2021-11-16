@@ -79,6 +79,7 @@ struct is_custom_vector_sum_of_squares_avail<
     >
   >
   : std::true_type{};
+
 } // end anonymous namespace
 
 template<class ElementType,

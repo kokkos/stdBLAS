@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
     std::vector<value_type> gold(N);
     for(std::size_t i=0; i<x.extent(0); i++){
       x(i) = i;
-      y(i) = i + (value_type)10;
+      y(i) = i + static_cast<value_type>(10);
       z(i) = 0;
       gold[i] = x(i) + y(i);
     }

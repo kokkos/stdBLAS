@@ -79,6 +79,11 @@ extents<>::size_type idx_abs_max_default_impl(
   using size_type = typename extents<>::size_type;
   using magnitude_type = decltype(abs(v(0)));
 
+  // if vector is empty, always return according to our proposal
+  if (v.extent(0) == 0) {
+    return std::numeric_limits<typename extents<>::size_type>::max();
+  }
+
   size_type maxInd = 0;
   magnitude_type maxVal = abs(v(0));
   for (size_type i = 1; i < v.extent(0); ++i) {
@@ -113,7 +118,7 @@ typename extents<>::size_type idx_abs_max(
   std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
 {
 
-  // if vector is empty, always retun according to our proposal
+  // if vector is empty, always return according to our proposal
   if (v.extent(0) == 0) {
     return std::numeric_limits<typename extents<>::size_type>::max();
   }
