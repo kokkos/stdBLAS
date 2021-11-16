@@ -63,11 +63,10 @@ struct is_custom_idx_abs_max_avail<
       decltype(idx_abs_max(std::declval<Exec>(), std::declval<v_t>())),
       extents<>::size_type
       >::value
+    && !linalg::impl::is_inline_exec_v<Exec>
     >
   >
-{
-  static constexpr bool value = !std::is_same<Exec,std::experimental::linalg::impl::inline_exec_t>::value;
-};
+  : std::true_type{};
 
 template<class ElementType,
          extents<>::size_type ext0,

@@ -154,22 +154,22 @@ struct is_custom_tri_mat_vec_solve_avail : std::false_type {};
 template <class Exec, class A_t, class Tri_t, class D_t, class B_t, class X_t>
 struct is_custom_tri_mat_vec_solve_avail<
   Exec, A_t, Tri_t, D_t, B_t, X_t,
-  std::void_t<
-    decltype(triangular_matrix_vector_solve
-	     (std::declval<Exec>(),
-	      std::declval<A_t>(),
-	      std::declval<Tri_t>(),
-	      std::declval<D_t>(),
-	      std::declval<B_t>(),
-	      std::declval<X_t>()
-	      )
-	     )
+  std::enable_if_t<
+    std::is_void_v<
+      decltype(triangular_matrix_vector_solve
+	       (std::declval<Exec>(),
+		std::declval<A_t>(),
+		std::declval<Tri_t>(),
+		std::declval<D_t>(),
+		std::declval<B_t>(),
+		std::declval<X_t>()
+		)
+	       )
+      >
+    && !linalg::impl::is_inline_exec_v<Exec>
     >
   >
-{
-  static constexpr bool value =
-    !std::is_same<Exec,std::experimental::linalg::impl::inline_exec_t>::value;
-};
+  : std::true_type{};
 
 } // end anonymous namespace
 

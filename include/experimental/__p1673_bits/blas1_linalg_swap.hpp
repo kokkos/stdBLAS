@@ -113,19 +113,17 @@ struct is_custom_vector_swap_elements_avail : std::false_type {};
 template <class Exec, class x_t, class y_t>
 struct is_custom_vector_swap_elements_avail<
   Exec, x_t, y_t,
-    std::void_t<
+  std::enable_if_t<
+    std::is_void_v<
       decltype(swap_elements(std::declval<Exec>(),
 			     std::declval<x_t>(),
 			     std::declval<y_t>())
 	       )
+      >
+    && !linalg::impl::is_inline_exec_v<Exec>
     >
   >
-{
-  static constexpr bool value =
-    !std::is_same<Exec,
-		  std::experimental::linalg::impl::inline_exec_t
-		  >::value;
-};
+  : std::true_type{};
 
 } // end anonymous namespace
 

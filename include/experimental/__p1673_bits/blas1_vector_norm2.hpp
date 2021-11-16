@@ -69,12 +69,10 @@ struct is_custom_vector_norm2_avail<
 	       ),
       Scalar
       >::value
+    && !linalg::impl::is_inline_exec_v<Exec>
     >
   >
-{
-  static constexpr bool value =
-    !std::is_same<Exec, std::experimental::linalg::impl::inline_exec_t>::value;
-};
+  : std::true_type{};
 } // end anonymous namespace
 
 template<class ElementType,

@@ -60,18 +60,19 @@ struct is_custom_mat_vec_product_avail : std::false_type {};
 template <class Exec, class A_t, class X_t, class Y_t>
 struct is_custom_mat_vec_product_avail<
   Exec, A_t, X_t, Y_t,
-  std::void_t<
-    decltype(
-	     matrix_vector_product
-	     (std::declval<Exec>(),
-	      std::declval<A_t>(),
-	      std::declval<X_t>(),
-	      std::declval<Y_t>()))
+  std::enable_if_t<
+    std::is_void_v<
+      decltype(
+	       matrix_vector_product
+	       (std::declval<Exec>(),
+		std::declval<A_t>(),
+		std::declval<X_t>(),
+		std::declval<Y_t>()))
+      >
+    && !linalg::impl::is_inline_exec_v<Exec>
     >
   >
-{
-  static constexpr bool value = !std::is_same<Exec,std::experimental::linalg::impl::inline_exec_t>::value;
-};
+  : std::true_type{};
 
 // Overwriting general matrix-vector product with update: z := y + A * x
 template <class Exec, class A_t, class X_t, class Y_t, class Z_t, class = void>
@@ -80,17 +81,18 @@ struct is_custom_mat_vec_product_with_update_avail : std::false_type {};
 template <class Exec, class A_t, class X_t, class Y_t, class Z_t>
 struct is_custom_mat_vec_product_with_update_avail<
   Exec, A_t, X_t, Y_t, Z_t,
-  std::void_t<
-    decltype(matrix_vector_product(std::declval<Exec>(),
-				   std::declval<A_t>(),
-				   std::declval<X_t>(),
-				   std::declval<Y_t>(),
-				   std::declval<Z_t>()))
+  std::enable_if_t<
+    std::is_void_v<
+      decltype(matrix_vector_product(std::declval<Exec>(),
+				     std::declval<A_t>(),
+				     std::declval<X_t>(),
+				     std::declval<Y_t>(),
+				     std::declval<Z_t>()))
+      >
+    && !linalg::impl::is_inline_exec_v<Exec>
     >
   >
-{
-  static constexpr bool value = !std::is_same<Exec,std::experimental::linalg::impl::inline_exec_t>::value;
-};
+  : std::true_type{};
 
 // Overwriting symmetric matrix-vector product
 template <class Exec, class A_t, class Triangle, class X_t, class Y_t, class = void>
@@ -99,17 +101,18 @@ struct is_custom_sym_mat_vec_product_avail : std::false_type {};
 template <class Exec, class A_t, class Triangle, class X_t, class Y_t>
 struct is_custom_sym_mat_vec_product_avail<
   Exec, A_t, Triangle, X_t, Y_t,
-  std::void_t<
-    decltype(symmetric_matrix_vector_product(std::declval<Exec>(),
-					     std::declval<A_t>(),
-					     std::declval<Triangle>(),
-					     std::declval<X_t>(),
-					     std::declval<Y_t>()))
+  std::enable_if_t<
+    std::is_void_v<
+      decltype(symmetric_matrix_vector_product(std::declval<Exec>(),
+					       std::declval<A_t>(),
+					       std::declval<Triangle>(),
+					       std::declval<X_t>(),
+					       std::declval<Y_t>()))
+      >
+    && !linalg::impl::is_inline_exec_v<Exec>
     >
   >
-{
-  static constexpr bool value = !std::is_same<Exec,std::experimental::linalg::impl::inline_exec_t>::value;
-};
+  : std::true_type{};
 
 // Overwriting symmetric matrix-vector product with update
 template <class Exec, class A_t, class Triangle, class X_t, class Y_t, class Z_t, class = void>
@@ -118,18 +121,19 @@ struct is_custom_sym_mat_vec_product_with_update_avail : std::false_type {};
 template <class Exec, class A_t, class Triangle, class X_t, class Y_t, class Z_t>
 struct is_custom_sym_mat_vec_product_with_update_avail<
   Exec, A_t, Triangle, X_t, Y_t, Z_t,
-  std::void_t<
-    decltype(symmetric_matrix_vector_product(std::declval<Exec>(),
-					     std::declval<A_t>(),
-					     std::declval<Triangle>(),
-					     std::declval<X_t>(),
-					     std::declval<Y_t>(),
-					     std::declval<Z_t>()))
+  std::enable_if_t<
+    std::is_void_v<
+      decltype(symmetric_matrix_vector_product(std::declval<Exec>(),
+					       std::declval<A_t>(),
+					       std::declval<Triangle>(),
+					       std::declval<X_t>(),
+					       std::declval<Y_t>(),
+					       std::declval<Z_t>()))
+      >
+    && !linalg::impl::is_inline_exec_v<Exec>
     >
   >
-{
-  static constexpr bool value = !std::is_same<Exec,std::experimental::linalg::impl::inline_exec_t>::value;
-};
+  : std::true_type{};
 
 // Overwriting hermitian matrix-vector product
 template <class Exec, class A_t, class Triangle, class X_t, class Y_t, class = void>
@@ -138,17 +142,18 @@ struct is_custom_hermitian_mat_vec_product_avail : std::false_type {};
 template <class Exec, class A_t, class Triangle, class X_t, class Y_t>
 struct is_custom_hermitian_mat_vec_product_avail<
   Exec, A_t, Triangle, X_t, Y_t,
-  std::void_t<
-    decltype(hermitian_matrix_vector_product(std::declval<Exec>(),
-					     std::declval<A_t>(),
-					     std::declval<Triangle>(),
-					     std::declval<X_t>(),
-					     std::declval<Y_t>()))
+  std::enable_if_t<
+    std::is_void_v<
+      decltype(hermitian_matrix_vector_product(std::declval<Exec>(),
+					       std::declval<A_t>(),
+					       std::declval<Triangle>(),
+					       std::declval<X_t>(),
+					       std::declval<Y_t>()))
+      >
+    && !linalg::impl::is_inline_exec_v<Exec>
     >
   >
-{
-  static constexpr bool value = !std::is_same<Exec,std::experimental::linalg::impl::inline_exec_t>::value;
-};
+  : std::true_type{};
 
 // Overwriting hermitian matrix-vector product with update
 template <class Exec, class A_t, class Triangle, class X_t, class Y_t, class Z_t, class = void>
@@ -157,18 +162,19 @@ struct is_custom_hermitian_mat_vec_product_with_update_avail : std::false_type {
 template <class Exec, class A_t, class Triangle, class X_t, class Y_t, class Z_t>
 struct is_custom_hermitian_mat_vec_product_with_update_avail<
   Exec, A_t, Triangle, X_t, Y_t, Z_t,
-  std::void_t<
-    decltype(hermitian_matrix_vector_product(std::declval<Exec>(),
-					     std::declval<A_t>(),
-					     std::declval<Triangle>(),
-					     std::declval<X_t>(),
-					     std::declval<Y_t>(),
-					     std::declval<Z_t>()))
+  std::enable_if_t<
+    std::is_void_v<
+      decltype(hermitian_matrix_vector_product(std::declval<Exec>(),
+					       std::declval<A_t>(),
+					       std::declval<Triangle>(),
+					       std::declval<X_t>(),
+					       std::declval<Y_t>(),
+					       std::declval<Z_t>()))
+      >
+    && !linalg::impl::is_inline_exec_v<Exec>
     >
   >
-{
-  static constexpr bool value = !std::is_same<Exec,std::experimental::linalg::impl::inline_exec_t>::value;
-};
+  : std::true_type{};
 
 // Overwriting triangular matrix-vector product: y := A * x
 template <class Exec, class A_t, class Tri_t, class D_t, class X_t, class Y_t, class = void>
@@ -177,22 +183,22 @@ struct is_custom_tri_mat_vec_product_avail : std::false_type {};
 template <class Exec, class A_t, class Tri_t, class D_t, class X_t, class Y_t>
 struct is_custom_tri_mat_vec_product_avail<
   Exec, A_t, Tri_t, D_t, X_t, Y_t,
-  std::void_t<
-    decltype(triangular_matrix_vector_product
-	     (std::declval<Exec>(),
-	      std::declval<A_t>(),
-	      std::declval<Tri_t>(),
-	      std::declval<D_t>(),
-	      std::declval<X_t>(),
-	      std::declval<Y_t>()
-	      )
-	     )
+  std::enable_if_t<
+    std::is_void_v<
+      decltype(triangular_matrix_vector_product
+	       (std::declval<Exec>(),
+		std::declval<A_t>(),
+		std::declval<Tri_t>(),
+		std::declval<D_t>(),
+		std::declval<X_t>(),
+		std::declval<Y_t>()
+		)
+	       )
+      >
+    && !linalg::impl::is_inline_exec_v<Exec>
     >
   >
-{
-  static constexpr bool value =
-    !std::is_same<Exec,std::experimental::linalg::impl::inline_exec_t>::value;
-};
+  : std::true_type{};
 
 // Overwriting triangular matrix-vector product with update
 template <class Exec, class A_t, class Tri_t, class D_t, class X_t, class Y_t, class Z_t, class = void>
@@ -201,23 +207,23 @@ struct is_custom_tri_mat_vec_product_with_update_avail : std::false_type {};
 template <class Exec, class A_t, class Tri_t, class D_t, class X_t, class Y_t, class Z_t>
 struct is_custom_tri_mat_vec_product_with_update_avail<
   Exec, A_t, Tri_t, D_t, X_t, Y_t, Z_t,
-  std::void_t<
-    decltype(triangular_matrix_vector_product
-	     (std::declval<Exec>(),
-	      std::declval<A_t>(),
-	      std::declval<Tri_t>(),
-	      std::declval<D_t>(),
-	      std::declval<X_t>(),
-	      std::declval<Y_t>(),
-	      std::declval<Z_t>()
-	      )
-	     )
+  std::enable_if_t<
+    std::is_void_v<
+      decltype(triangular_matrix_vector_product
+	       (std::declval<Exec>(),
+		std::declval<A_t>(),
+		std::declval<Tri_t>(),
+		std::declval<D_t>(),
+		std::declval<X_t>(),
+		std::declval<Y_t>(),
+		std::declval<Z_t>()
+		)
+	       )
+      >
+    && !linalg::impl::is_inline_exec_v<Exec>
     >
   >
-{
-  static constexpr bool value =
-    !std::is_same<Exec,std::experimental::linalg::impl::inline_exec_t>::value;
-};
+  : std::true_type{};
 
 } // end anonymous namespace
 

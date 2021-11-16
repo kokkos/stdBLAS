@@ -93,20 +93,21 @@ struct is_custom_givens_rotation_apply_avail : std::false_type {};
 template <class Exec, class x_t, class y_t, class c_t, class s_t>
 struct is_custom_givens_rotation_apply_avail<
   Exec, x_t, y_t, c_t, s_t,
-  std::void_t<
-    decltype(givens_rotation_apply
-	     (std::declval<Exec>(),
-	      std::declval<x_t>(),
-	      std::declval<y_t>(),
-	      std::declval<const c_t>(),
-	      std::declval<const s_t>()
-	      )
-	     )
+  std::enable_if_t<
+    std::is_void_v<
+      decltype(givens_rotation_apply
+	       (std::declval<Exec>(),
+		std::declval<x_t>(),
+		std::declval<y_t>(),
+		std::declval<const c_t>(),
+		std::declval<const s_t>()
+		)
+	       )
+      >
+    && !linalg::impl::is_inline_exec_v<Exec>
     >
   >
-{
-  static constexpr bool value = !std::is_same<Exec,std::experimental::linalg::impl::inline_exec_t>::value;
-};
+  : std::true_type{};
 } // end anonymous namespace
 
 
