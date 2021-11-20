@@ -50,8 +50,9 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
-#ifdef LINALG_ENABLE_BLAS
 namespace {
+
+#ifdef LINALG_ENABLE_BLAS
 
 // NOTE: I'm only exposing these extern declarations in a header file
 // so that we can keep this a header-only library, for ease of testing
@@ -362,6 +363,7 @@ constexpr bool extractConj ()
   return A_conj;
 }
 
+#endif // LINALG_ENABLE_BLAS
 
 template <class Exec, class A_t, class B_t, class C_t, class = void>
 struct is_custom_matrix_product_avail : std::false_type {};
@@ -666,10 +668,8 @@ struct is_custom_herm_matrix_right_product_with_update_avail<
   >
   : std::true_type{};
 
-
 } // end anonymous namespace
 
-#endif // LINALG_ENABLE_BLAS
 
 // Overwriting general matrix-matrix product
 
