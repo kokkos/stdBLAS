@@ -44,7 +44,7 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_LAYOUT_TAGS_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_LAYOUT_TAGS_HPP_
 
-#include <experimental/__p0009_bits/macros.hpp>
+#include <experimental/mdspan>
 
 namespace std {
 namespace experimental {
