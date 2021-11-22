@@ -72,7 +72,8 @@
 #include "__p1673_bits/blas2_matrix_rank_1_update.hpp"
 #include "__p1673_bits/blas2_matrix_rank_2_update.hpp"
 #include "__p1673_bits/blas3_matrix_product.hpp"
-#include "__p1673_bits/blas3_matrix_rank2k_update.hpp"
+#include "__p1673_bits/blas3_matrix_rank_k_update.hpp"
+#include "__p1673_bits/blas3_matrix_rank_2k_update.hpp"
 #include "__p1673_bits/blas3_triangular_matrix_matrix_solve.hpp"
 #ifdef LINALG_ENABLE_KOKKOS
 #include <experimental/linalg_kokkoskernels>
