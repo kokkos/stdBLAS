@@ -569,7 +569,7 @@ template<class ExecutionPolicy,
          class Layout_X,
          class Accessor_X>
 void triangular_matrix_matrix_solve(
-  ExecutionPolicy&& /* exec */,
+  ExecutionPolicy&& exec ,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
