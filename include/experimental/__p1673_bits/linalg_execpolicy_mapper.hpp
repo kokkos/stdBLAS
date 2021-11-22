@@ -10,6 +10,11 @@ struct inline_exec_t {};
 // The execution policy used when no execution policy is provided
 // It must be remapped to some other execution policy, which the default mapper does
 struct default_exec_t {};
+
+// helpers
+template<class T> struct is_inline_exec : std::false_type{};
+template<> struct is_inline_exec<inline_exec_t> : std::true_type{};
+template<class T> inline constexpr bool is_inline_exec_v = is_inline_exec<T>::value;
 }
 }
 }

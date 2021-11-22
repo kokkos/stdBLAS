@@ -137,19 +137,20 @@ struct is_custom_add_avail : std::false_type {};
 template <class Exec, class x_t, class y_t, class z_t>
 struct is_custom_add_avail<
   Exec, x_t, y_t, z_t,
-  std::void_t<
-    decltype(add
-	     (std::declval<Exec>(),
-	      std::declval<x_t>(),
-	      std::declval<y_t>(),
-	      std::declval<z_t>()
-	      )
-	     )
+  std::enable_if_t<
+    std::is_void_v<
+      decltype(add
+	       (std::declval<Exec>(),
+		std::declval<x_t>(),
+		std::declval<y_t>(),
+		std::declval<z_t>()
+		)
+	       )
+      >
+    && !linalg::impl::is_inline_exec_v<Exec>
     >
   >
-{
-  static constexpr bool value = !std::is_same_v<Exec,std::experimental::linalg::impl::inline_exec_t>;
-};
+  : std::true_type{};
 
 } // end anonymous namespace
 

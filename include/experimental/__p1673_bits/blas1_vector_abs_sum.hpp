@@ -59,27 +59,18 @@ struct is_custom_vector_abs_sum_avail : std::false_type {};
 template <class Exec, class v_t, class Scalar>
 struct is_custom_vector_abs_sum_avail<
   Exec, v_t, Scalar,
-  std::void_t<
-    decltype(vector_abs_sum(std::declval<Exec>(),
-			    std::declval<v_t>(),
-			    std::declval<Scalar>())
-	     )
+  std::enable_if_t<
+    std::is_same<
+      decltype(vector_abs_sum(std::declval<Exec>(),
+			      std::declval<v_t>(),
+			      std::declval<Scalar>())
+	       ),
+      Scalar
+      >::value
+    && !linalg::impl::is_inline_exec_v<Exec>
     >
   >
-{
-
-  static constexpr bool has_matching_return_type = std::is_same_v<
-    Scalar,
-    decltype(vector_abs_sum(std::declval<Exec>(),
-			    std::declval<v_t>(),
-			    std::declval<Scalar>())
-	     )>;
-
-  static constexpr bool is_not_inline_exec_tag = !std::is_same_v<
-    Exec,std::experimental::linalg::impl::inline_exec_t>;
-
-  static constexpr bool value = has_matching_return_type && is_not_inline_exec_tag;
-};
+  : std::true_type{};
 
 } // end anonymous namespace
 
