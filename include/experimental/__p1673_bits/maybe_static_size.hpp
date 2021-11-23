@@ -43,9 +43,7 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_MAYBE_STATIC_SIZE_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_MAYBE_STATIC_SIZE_HPP_
 
-#include <experimental/__p0009_bits/extents.hpp>
-#include <experimental/__p0009_bits/macros.hpp>
-#include <experimental/__p0009_bits/dynamic_extent.hpp>
+#include <experimental/mdspan>
 
 namespace std {
 namespace experimental {
