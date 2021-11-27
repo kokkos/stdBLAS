@@ -1,4 +1,4 @@
- /*
+/*
 //@HEADER
 // ************************************************************************
 //
@@ -6,8 +6,7 @@
 //              Copyright (2019) Sandia Corporation
 //
 // Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
-// the U.S. Government retains certain rights in this software.
-//
+// the U.S. Government retains certain rights in this software. //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
@@ -41,41 +40,36 @@
 //@HEADER
 */
 
-#pragma once
+#ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATE_IF_NEEDED_HPP_
+#define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATE_IF_NEEDED_HPP_
 
-#include "__p1673_bits/linalg_config.h"
-#include "__p1673_bits/linalg_execpolicy_mapper.hpp"
-#include "__p1673_bits/maybe_static_size.hpp"
-#include "__p1673_bits/layout_blas_general.hpp"
-#include "__p1673_bits/layout_tags.hpp"
-#include "__p1673_bits/layout_triangle.hpp"
-#include "__p1673_bits/packed_layout.hpp"
-#include "__p1673_bits/scaled.hpp"
-#include "__p1673_bits/conjugated.hpp"
-#include "__p1673_bits/transposed.hpp"
-#include "__p1673_bits/conjugate_transposed.hpp"
-#include "__p1673_bits/conjugate_if_needed.hpp"
-#include "__p1673_bits/blas1_givens.hpp"
-#include "__p1673_bits/blas1_linalg_swap.hpp"
-#include "__p1673_bits/blas1_matrix_frob_norm.hpp"
-#include "__p1673_bits/blas1_matrix_inf_norm.hpp"
-#include "__p1673_bits/blas1_matrix_one_norm.hpp"
-#include "__p1673_bits/blas1_scale.hpp"
-#include "__p1673_bits/blas1_linalg_copy.hpp"
-#include "__p1673_bits/blas1_linalg_add.hpp"
-#include "__p1673_bits/blas1_dot.hpp"
-#include "__p1673_bits/blas1_vector_norm2.hpp"
-#include "__p1673_bits/blas1_vector_abs_sum.hpp"
-#include "__p1673_bits/blas1_vector_idx_abs_max.hpp"
-#include "__p1673_bits/blas1_vector_sum_of_squares.hpp"
-#include "__p1673_bits/blas2_matrix_vector_product.hpp"
-#include "__p1673_bits/blas2_matrix_vector_solve.hpp"
-#include "__p1673_bits/blas2_matrix_rank_1_update.hpp"
-#include "__p1673_bits/blas2_matrix_rank_2_update.hpp"
-#include "__p1673_bits/blas3_matrix_product.hpp"
-#include "__p1673_bits/blas3_matrix_rank_k_update.hpp"
-#include "__p1673_bits/blas3_matrix_rank_2k_update.hpp"
-#include "__p1673_bits/blas3_triangular_matrix_matrix_solve.hpp"
-#ifdef LINALG_ENABLE_KOKKOS
-#include <experimental/linalg_kokkoskernels>
-#endif
+#include <complex>
+
+namespace std {
+namespace experimental {
+inline namespace __p1673_version_0 {
+namespace linalg {
+
+template<class T> struct is_complex : std::false_type{};
+template<> struct is_complex<std::complex<float>> : std::true_type{};
+template<> struct is_complex<std::complex<double>> : std::true_type{};
+template<> struct is_complex<std::complex<long double>> : std::true_type{};
+
+template<class T> inline constexpr bool is_complex_v = is_complex<T>::value;
+
+auto conj_if_needed = [](const auto value)
+{
+  using std::conj;
+  if constexpr (is_complex_v<decltype(value)>) {
+    return conj(value);
+  } else {
+    return value;
+  }
+};
+
+} // end namespace linalg
+} // end inline namespace __p1673_version_0
+} // end namespace experimental
+} // end namespace std
+
+#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATE_TRANSPOSED_HPP_

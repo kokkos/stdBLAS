@@ -138,7 +138,6 @@ void hermitian_matrix_rank_2k_update(
   std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle /* t */)
 {
-  using std::conj;
   constexpr bool lower_tri =
     std::is_same_v<Triangle, lower_triangle_t>;
   using size_type = typename extents<>::size_type;
@@ -148,7 +147,7 @@ void hermitian_matrix_rank_2k_update(
     const size_type i_upper = lower_tri ? C.extent(0) : j+1;
     for (size_type i = i_lower; i < i_upper; ++i) {
       for (size_type k = 0; k < A.extent(1); ++k) {
-        C(i,j) += A(i,k) * conj(B(j,k)) + B(i,k) * conj(A(j,k));
+        C(i,j) += A(i,k) * conj_if_needed(B(j,k)) + B(i,k) * conj_if_needed(A(j,k));
       }
     }
   }
