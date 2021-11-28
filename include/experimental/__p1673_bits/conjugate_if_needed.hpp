@@ -49,6 +49,7 @@ namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
+namespace impl{
 
 template<class T> struct is_complex : std::false_type{};
 template<> struct is_complex<std::complex<float>> : std::true_type{};
@@ -67,6 +68,7 @@ auto conj_if_needed = [](const auto value)
   }
 };
 
+} // end namespace impl
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
 } // end namespace experimental
