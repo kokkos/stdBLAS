@@ -52,16 +52,24 @@ namespace linalg {
 namespace impl{
 
 template<class T> struct is_complex : std::false_type{};
+
 template<> struct is_complex<std::complex<float>> : std::true_type{};
+template<> struct is_complex<std::complex<const float>> : std::true_type{};
+
 template<> struct is_complex<std::complex<double>> : std::true_type{};
+template<> struct is_complex<std::complex<const double>> : std::true_type{};
+
 template<> struct is_complex<std::complex<long double>> : std::true_type{};
+template<> struct is_complex<std::complex<const long double>> : std::true_type{};
 
 template<class T> inline constexpr bool is_complex_v = is_complex<T>::value;
 
 auto conj_if_needed = [](const auto value)
 {
   using std::conj;
-  if constexpr (is_complex_v<decltype(value)>) {
+  // we need to use remove_cv because in some cases, e.g. gcc10,
+  // decltype(value) carries a const qualification
+  if constexpr (is_complex_v<std::remove_cv_t<decltype(value)>>) {
     return conj(value);
   } else {
     return value;

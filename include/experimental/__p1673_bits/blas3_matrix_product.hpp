@@ -1829,14 +1829,13 @@ void hermitian_matrix_left_product(
   std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   using size_type = typename extents<>::size_type;
-  using std::conj;
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (size_type j = 0; j < C.extent(1); ++j) {
       for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
-        for (size_type k = 0; k < A.extent(1); ++k) {
-          ElementType_A aik = i <= k ? conj(A(k,i)) : A(i,k);
+        for (size_type k = 0; k < A.extent(1); ++k){
+          ElementType_A aik = i <= k ? impl::conj_if_needed(A(k,i)) : A(i,k);
           C(i,j) += aik * B(k,j);
         }
       }
@@ -1847,7 +1846,7 @@ void hermitian_matrix_left_product(
       for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
         for (size_type k = 0; k < A.extent(1); ++k) {
-          ElementType_A aik = i >= k ? conj(A(k,i)) : A(i,k);
+          ElementType_A aik = i >= k ? impl::conj_if_needed(A(k,i)) : A(i,k);
           C(i,j) += aik * B(k,j);
         }
       }
@@ -1940,14 +1939,13 @@ void hermitian_matrix_right_product(
   std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   using size_type = typename extents<>::size_type;
-  using std::conj;
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (size_type j = 0; j < C.extent(1); ++j) {
       for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
         for (size_type k = 0; k < A.extent(1); ++k) {
-          ElementType_A akj = j <= k ? A(k,j) : conj(A(j,k));
+          ElementType_A akj = j <= k ? A(k,j) : impl::conj_if_needed(A(j,k));
           C(i,j) += B(i,k) * akj;
         }
       }
@@ -1958,7 +1956,7 @@ void hermitian_matrix_right_product(
       for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
         for (size_type k = 0; k < A.extent(1); ++k) {
-          ElementType_A akj = j >= k ? A(k,j) : conj(A(j,k));
+          ElementType_A akj = j >= k ? A(k,j) : impl::conj_if_needed(A(j,k));
           C(i,j) += B(i,k) * akj;
         }
       }

@@ -350,20 +350,19 @@ void hermitian_matrix_rank_1_update(
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle /* t */)
 {
-  using std::conj;
   using size_type = typename extents<>::size_type;
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (size_type j = 0; j < A.extent(1); ++j) {
       for (size_type i = j; i < A.extent(0); ++i) {
-        A(i,j) += x(i) * conj(x(j));
+        A(i,j) += x(i) * impl::conj_if_needed(x(j));
       }
     }
   }
   else {
     for (size_type j = 0; j < A.extent(1); ++j) {
       for (size_type i = 0; i <= j; ++i) {
-        A(i,j) += x(i) * conj(x(j));
+        A(i,j) += x(i) * impl::conj_if_needed(x(j));
       }
     }
   }
