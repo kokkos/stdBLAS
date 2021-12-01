@@ -669,13 +669,12 @@ void hermitian_matrix_vector_product(
     y(i) = ElementType_y{};
   }
 
-  using std::conj;
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (size_type j = 0; j < A.extent(1); ++j) {
       for (size_type i = j; i < A.extent(0); ++i) {
         const auto A_ij = A(i,j);
         y(i) += A_ij * x(j);
-        y(j) += conj(A_ij) * x(i);
+        y(j) += impl::conj_if_needed(A_ij) * x(i);
       }
     }
   }
@@ -684,7 +683,7 @@ void hermitian_matrix_vector_product(
       for (size_type i = 0; i <= j; ++i) {
         const auto A_ij = A(i,j);
         y(i) += A_ij * x(j);
-        y(j) += conj(A_ij) * x(i);
+        y(j) += impl::conj_if_needed(A_ij) * x(i);
       }
     }
   }
@@ -783,13 +782,12 @@ void hermitian_matrix_vector_product(
     z(i) = y(i);
   }
 
-  using std::conj;
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (size_type j = 0; j < A.extent(1); ++j) {
       for (size_type i = j; i < A.extent(0); ++i) {
         const auto A_ij = A(i,j);
         z(i) += A_ij * x(j);
-        z(j) += conj(A_ij) * x(i);
+        z(j) += impl::conj_if_needed(A_ij) * x(i);
       }
     }
   }
@@ -798,7 +796,7 @@ void hermitian_matrix_vector_product(
       for (size_type i = 0; i <= j; ++i) {
         const auto A_ij = A(i,j);
         z(i) += A_ij * x(j);
-        z(j) += conj(A_ij) * x(i);
+        z(j) += impl::conj_if_needed(A_ij) * x(i);
       }
     }
   }
