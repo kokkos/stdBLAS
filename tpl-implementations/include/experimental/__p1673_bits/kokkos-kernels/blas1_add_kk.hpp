@@ -4,6 +4,18 @@
 
 namespace KokkosKernelsSTD {
 
+namespace addimpl{
+template<class T, class Accessor>
+T get_scaling_factor(Accessor /* a */) {
+  return static_cast<T>(1);
+}
+
+template<class T, class Accessor, class S>
+auto get_scaling_factor(std::experimental::linalg::accessor_scaled<Accessor, S> a) {
+  return a.scale_factor();
+}
+} // end namespace addimpl
+
 template<class ElementType_x,
          std::experimental::extents<>::size_type ... ext_x,
          class Layout_x,
@@ -34,7 +46,11 @@ void add(
   auto z_view = Impl::mdspan_to_view(z);
   using z_view_type = decltype(z_view);
 
-  KokkosBlas::update(1., x_view, 1., y_view, 1., z_view);
+  // we only need scaling factors for x,y because add overwrite z
+  const auto alpha = addimpl::get_scaling_factor<ElementType_x>(x.accessor());
+  const auto beta  = addimpl::get_scaling_factor<ElementType_y>(y.accessor());
+
+  KokkosBlas::update(alpha, x_view, beta, y_view, 0, z_view);
 }
 
 }
