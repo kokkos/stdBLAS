@@ -54,13 +54,8 @@ namespace impl{
 template<class T> struct is_complex : std::false_type{};
 
 template<> struct is_complex<std::complex<float>> : std::true_type{};
-template<> struct is_complex<std::complex<const float>> : std::true_type{};
-
 template<> struct is_complex<std::complex<double>> : std::true_type{};
-template<> struct is_complex<std::complex<const double>> : std::true_type{};
-
 template<> struct is_complex<std::complex<long double>> : std::true_type{};
-template<> struct is_complex<std::complex<const long double>> : std::true_type{};
 
 template<class T> inline constexpr bool is_complex_v = is_complex<T>::value;
 
