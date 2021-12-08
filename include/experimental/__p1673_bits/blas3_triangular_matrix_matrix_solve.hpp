@@ -89,7 +89,7 @@ void trsm_upper_triangular_left_side(
       // in a type with the max precision of X and B).
       using sum_type = decltype (B(i,k) - A(0,0) * X(0,0));
       //using sum_type = typename out_object_t::element_type;
-      const sum_type t (B(i,k));
+      sum_type t (B(i,k));
       for (size_type j = i + 1; j < A_num_rows; ++j) {
         t = t - A(i,j) * X(j,k);
       }
@@ -137,7 +137,7 @@ void trsm_lower_triangular_left_side(
       // TODO this would be a great opportunity for an implementer to
       // add value, by accumulating in extended precision (or at least
       // in a type with the max precision of X and B).
-      const ElementType_X t (B(i,k));
+      ElementType_X t (B(i,k));
       for (size_type j = 0; j < i; ++j) {
         t = t - A(i,j) * X(j,k);
       }
@@ -183,8 +183,8 @@ void trsm_upper_triangular_right_side(
   for (size_type i = 0; i < B_num_rows; ++i) {
     for (size_type j = 0; j < A_num_cols; ++j) {
       using sum_type = decltype (B(i,j) - A(0,0) * X(0,0));
-      const sum_type t (B(i,j));
-      for (size_type k = 0; k < j; ++j) {
+      sum_type t (B(i,j));
+      for (size_type k = 0; k < j; ++k) {
         t = t - X(i,k) * A(k,j);
       }
       if constexpr (explicit_diagonal) {
@@ -230,7 +230,7 @@ void trsm_lower_triangular_right_side(
   for (size_type i = 0; i < B_num_rows; ++i) {
     for (size_type j = 0; j < A_num_cols; ++j) {
       using sum_type = decltype (B(i,j) - A(0,0) * X(0,0));
-      const sum_type t (B(i,j));
+      sum_type t (B(i,j));
       for (size_type k = j + 1; k < A_num_rows; ++j) {
         t = t - X(i,k) * A(k,j);
       }
