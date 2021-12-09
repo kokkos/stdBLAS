@@ -5,118 +5,107 @@
 namespace
 {
 
-template<class T>
-void kokkos_blas1_dot_verify(const T r1, const T r2)
+template<class x_t, class y_t, class T>
+auto dot_gold_solution(x_t x, y_t y, T initValue, bool useInit)
 {
-  if constexpr(std::is_same_v<T, double>){
-    // I have to do this because I noticed in some cases DOUBLE_EQ
-    // gives troubles
-    EXPECT_NEAR(r1, r2, 1e-9);
+
+  T result = {};
+  for (std::size_t i=0; i<x.extent(0); ++i){
+    result += x(i) * y(i);
   }
+
+  if (useInit) result += initValue;
+  return result;
 }
 
 template<class x_t, class y_t, class T>
-void kokkos_blas1_dot_test_impl(x_t x, y_t y,
-				 T factorX, T factorY,
-				 bool scaleX, bool scaleY,
-				 T initValue,
-				 bool useInit)
+void kokkos_blas1_dot_test_impl(x_t x, y_t y, T initValue, bool useInit)
 {
   namespace stdla = std::experimental::linalg;
 
   const std::size_t extent = x.extent(0);
 
   // copy x and y to verify they are not changed after kernel
-  auto x_gold = kokkostesting::create_stdvector_and_copy(x);
-  auto y_gold = kokkostesting::create_stdvector_and_copy(y);
+  auto x_preKernel = kokkostesting::create_stdvector_and_copy(x);
+  auto y_preKernel = kokkostesting::create_stdvector_and_copy(y);
 
-  // use sequential as the gold
-  std::vector<T> gold(extent);
-  using mdspan_t = mdspan<T, extents<dynamic_extent>>;
-  mdspan_t z_gold(gold.data(), extent);
+  // compute gold
+  const T gold = dot_gold_solution(x, y, initValue, useInit);
 
-  if (!scaleX && !scaleY){
-    const auto r1 = stdla::dot(std::execution::seq,		  x, y);
-    const auto r2 = stdla::dot(KokkosKernelsSTD::kokkos_exec<>(), x, y);
-    kokkos_blas1_dot_verify(r1, r2);
+  T result = {};
+  if (useInit){
+    result = stdla::dot(KokkosKernelsSTD::kokkos_exec<>(),
+			x, y, initValue);
+  }else{
+    result = stdla::dot(KokkosKernelsSTD::kokkos_exec<>(),
+			x, y);
   }
 
-  if (scaleX && !scaleY){
-    const auto r1 = stdla::dot(std::execution::seq,
-			       stdla::scaled(factorX, x),
-			       y);
-    const auto r2 = stdla::dot(KokkosKernelsSTD::kokkos_exec<>(),
-			       stdla::scaled(factorX, x),
-			       y);
-    kokkos_blas1_dot_verify(r1, r2);
-  }
+  if constexpr(std::is_same_v<T, float>)
+  {
+    // cannot use EXPECT_FLOAT_EQ because
+    // in some cases that fails on third digit or similr
+    EXPECT_NEAR(result, gold, 1e-2);
 
-  if (!scaleX && scaleY){
-    const auto r1 = stdla::dot(std::execution::seq,
-			       x,
-			       stdla::scaled(factorY, y));
-    const auto r2 = stdla::dot(KokkosKernelsSTD::kokkos_exec<>(),
-			       x,
-			       stdla::scaled(factorY, y));
-    kokkos_blas1_dot_verify(r1, r2);
-  }
-
-  if (scaleX && scaleY){
-    const auto r1 = stdla::dot(std::execution::seq,
-			       stdla::scaled(factorX, x),
-			       stdla::scaled(factorY, y));
-    const auto r2 = stdla::dot(KokkosKernelsSTD::kokkos_exec<>(),
-			       stdla::scaled(factorX, x),
-			       stdla::scaled(factorY, y));
-    kokkos_blas1_dot_verify(r1, r2);
-  }
-
-  if constexpr(std::is_same_v<T, double>){
+    // x,y should not change after kernel
     for (std::size_t i=0; i<extent; ++i){
-      EXPECT_DOUBLE_EQ(x(i), x_gold[i]);
-      EXPECT_DOUBLE_EQ(y(i), y_gold[i]);
+      EXPECT_FLOAT_EQ(x(i), x_preKernel[i]);
+      EXPECT_FLOAT_EQ(y(i), y_preKernel[i]);
     }
   }
+
+  if constexpr(std::is_same_v<T, double>)
+  {
+    // similarly to float
+    EXPECT_NEAR(result, gold, 1e-9);
+    // x,y should not change after kernel
+    for (std::size_t i=0; i<extent; ++i){
+      EXPECT_DOUBLE_EQ(x(i), x_preKernel[i]);
+      EXPECT_DOUBLE_EQ(y(i), y_preKernel[i]);
+    }
+  }
+
+  if constexpr(std::is_same_v<T, std::complex<double>>){
+    EXPECT_NEAR(result.real(), gold.real(), 1e-9);
+    EXPECT_NEAR(result.imag(), gold.imag(), 1e-9);
+    // x,y should not change after kernel
+    for (std::size_t i=0; i<extent; ++i){
+      EXPECT_TRUE(x(i) == x_preKernel[i]);
+      EXPECT_TRUE(y(i) == y_preKernel[i]);
+    }
+  }
+
 }
 }//end anonym namespace
 
+TEST_F(blas1_signed_float_fixture, kokkos_dot_noinitvalue)
+{
+  kokkos_blas1_dot_test_impl(x, y, static_cast<float>(0), false);
+}
+
+TEST_F(blas1_signed_float_fixture, kokkos_dot_initvalue)
+{
+  kokkos_blas1_dot_test_impl(x, y, static_cast<float>(3), true);
+}
 
 TEST_F(blas1_signed_double_fixture, kokkos_dot_noinitvalue)
 {
-  kokkos_blas1_dot_test_impl(x, y, 0., 0., false, false, 0., false);
-}
-
-TEST_F(blas1_signed_double_fixture, kokkos_dot_noinitvalue_scaled_accessor_x)
-{
-  kokkos_blas1_dot_test_impl(x, y, 2., 0., true, false, 0., false);
-}
-
-TEST_F(blas1_signed_double_fixture, kokkos_dot_noinitvalue_scaled_accessor_y)
-{
-  kokkos_blas1_dot_test_impl(x, y, 0., 2., false, true, 0., false);
-}
-
-TEST_F(blas1_signed_double_fixture, kokkos_dot_noinitvalue_scaled_accessor_xy)
-{
-  kokkos_blas1_dot_test_impl(x, y, 2., 3., true, true, 0., false);
+  kokkos_blas1_dot_test_impl(x, y, static_cast<double>(0), false);
 }
 
 TEST_F(blas1_signed_double_fixture, kokkos_dot_initvalue)
 {
-  kokkos_blas1_dot_test_impl(x, y, 0., 0., false, false, 5., true);
+  kokkos_blas1_dot_test_impl(x, y, static_cast<double>(5), true);
 }
 
-TEST_F(blas1_signed_double_fixture, kokkos_dot_initvalue_scaled_accessor_x)
+TEST_F(blas1_signed_complex_double_fixture, kokkos_dot_noinitvalue)
 {
-  kokkos_blas1_dot_test_impl(x, y, 2., 0., true, false, 5., true);
+  const value_type init{0., 0.};
+  kokkos_blas1_dot_test_impl(x, y, init, false);
 }
 
-TEST_F(blas1_signed_double_fixture, kokkos_dot_initvalue_scaled_accessor_y)
+TEST_F(blas1_signed_complex_double_fixture, kokkos_dot_initvalue)
 {
-  kokkos_blas1_dot_test_impl(x, y, 0., 2., false, true, 5., true);
-}
-
-TEST_F(blas1_signed_double_fixture, kokkos_dot_initvalue_scaled_accessor_xy)
-{
-  kokkos_blas1_dot_test_impl(x, y, 3., 2., true, true, 5., true);
+  const value_type init{-2., 4.};
+  kokkos_blas1_dot_test_impl(x, y, init, true);
 }

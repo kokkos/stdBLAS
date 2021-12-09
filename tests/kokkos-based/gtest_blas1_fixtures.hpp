@@ -100,6 +100,8 @@ struct UnifDist<float> {
 template<class T>
 class _blas1_signed_fixture : public ::testing::Test
 {
+public:
+  // extent is chosen here arbitrarily but not trivially small
   const std::size_t myExtent = 137;
   using value_type = T;
 
@@ -117,21 +119,37 @@ protected:
     auto y_h = Kokkos::create_mirror_view(Kokkos::HostSpace(), y_view);
     auto z_h = Kokkos::create_mirror_view(Kokkos::HostSpace(), z_view);
 
-    // fill hosts with random numbers between (-101, 103)
-    // because this has to be signed values
     static_assert(std::is_same_v<value_type, int> ||
 		  std::is_same_v<value_type, double> ||
-		  std::is_same_v<value_type, float> ,
+		  std::is_same_v<value_type, float> ||
+		  std::is_same_v<value_type, std::complex<double>>,
 		  "Unsupported value_type");
 
-    const auto a = static_cast<value_type>(-101);
-    const auto b = static_cast<value_type>( 103);
-    UnifDist<value_type> randObj(a, b);
+    if constexpr(std::is_same_v<T, std::complex<double>>){
+      const auto a_r = static_cast<double>(-101);
+      const auto b_r = static_cast<double>( 103);
+      UnifDist<double> randObj_r(a_r, b_r);
 
-    for (std::size_t i=0; i < myExtent; ++i) {
-      x_h(i) = randObj();
-      y_h(i) = randObj();
-      z_h(i) = randObj();
+      const auto a_i = static_cast<double>(-21);
+      const auto b_i = static_cast<double>( 43);
+      UnifDist<double> randObj_i(a_i, b_i);
+
+      for (std::size_t i=0; i < myExtent; ++i) {
+	x_h(i) = {randObj_r(), randObj_i()};
+	y_h(i) = {randObj_r(), randObj_i()};
+	z_h(i) = {randObj_r(), randObj_i()};
+      }
+    }
+    else{
+      const auto a = static_cast<value_type>(-11);
+      const auto b = static_cast<value_type>( 23);
+      UnifDist<value_type> randObj(a, b);
+
+      for (std::size_t i=0; i < myExtent; ++i) {
+	x_h(i) = randObj();
+	y_h(i) = randObj();
+	z_h(i) = randObj();
+      }
     }
 
     Kokkos::deep_copy(x_view, x_h);
@@ -152,6 +170,8 @@ protected:
   mdspan_t z;
 };
 
+using blas1_signed_float_fixture  = _blas1_signed_fixture<float>;
 using blas1_signed_double_fixture = _blas1_signed_fixture<double>;
+using blas1_signed_complex_double_fixture = _blas1_signed_fixture<std::complex<double>>;
 
 #endif
