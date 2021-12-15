@@ -23,6 +23,7 @@ void kokkos_blas1_dot_test_impl(x_t x, y_t y, T initValue, bool useInit)
 {
   namespace stdla = std::experimental::linalg;
 
+  using value_type = typename x_t::value_type;
   const std::size_t extent = x.extent(0);
 
   // copy x and y to verify they are not changed after kernel
@@ -41,7 +42,7 @@ void kokkos_blas1_dot_test_impl(x_t x, y_t y, T initValue, bool useInit)
 			x, y);
   }
 
-  if constexpr(std::is_same_v<T, float>)
+  if constexpr(std::is_same_v<value_type, float>)
   {
     // cannot use EXPECT_FLOAT_EQ because
     // in some cases that fails on third digit or similr
@@ -54,7 +55,7 @@ void kokkos_blas1_dot_test_impl(x_t x, y_t y, T initValue, bool useInit)
     }
   }
 
-  if constexpr(std::is_same_v<T, double>)
+  if constexpr(std::is_same_v<value_type, double>)
   {
     // similarly to float
     EXPECT_NEAR(result, gold, 1e-9);
@@ -65,7 +66,7 @@ void kokkos_blas1_dot_test_impl(x_t x, y_t y, T initValue, bool useInit)
     }
   }
 
-  if constexpr(std::is_same_v<T, std::complex<double>>){
+  if constexpr(std::is_same_v<value_type, std::complex<double>>){
     EXPECT_NEAR(result.real(), gold.real(), 1e-9);
     EXPECT_NEAR(result.imag(), gold.imag(), 1e-9);
     // x,y should not change after kernel
