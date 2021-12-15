@@ -72,18 +72,6 @@ public:
     return conj(val) + upd;
   }
 
-  template<class T2>
-  bool operator== (const T2 upd) const {
-    using std::conj;
-    return conj(val) == upd;
-  }
-
-  template<class T2>
-  bool operator!= (const T2 upd) const {
-    using std::conj;
-    return conj(val) != upd;
-  }
-
 private:
   Reference val;
 };
