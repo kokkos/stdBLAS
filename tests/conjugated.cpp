@@ -35,7 +35,15 @@ namespace {
       accessor_t accessor0;
       accessor_t accessor1 (y.accessor ());
       using std::experimental::linalg::accessor_conjugate;
-      using accessor_conj_t = accessor_conjugate<accessor_t, scalar_t>;
+      using accessor_conj_t = accessor_conjugate<accessor_t>;
+      static_assert(! std::is_same_v<
+        typename accessor_conj_t::reference,
+        scalar_t&>);
+      using std::experimental::linalg::conjugated_scalar;
+      static_assert(std::is_same_v<
+        typename accessor_conj_t::reference,
+        conjugated_scalar<scalar_t&, scalar_t>>);
+
       accessor_conj_t accessor2;
       accessor_conj_t accessor3 (y.accessor ());
     }

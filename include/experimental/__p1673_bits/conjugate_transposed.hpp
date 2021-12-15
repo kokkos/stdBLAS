@@ -53,7 +53,7 @@ namespace linalg {
 
 template<class EltType, class Extents, class Layout, class Accessor>
 mdspan<EltType, Extents, layout_transpose<Layout>,
-             accessor_conjugate<Accessor, EltType>>
+  accessor_conjugate<Accessor>>
 conjugate_transposed(
   mdspan<EltType, Extents, Layout, Accessor> a)
 {

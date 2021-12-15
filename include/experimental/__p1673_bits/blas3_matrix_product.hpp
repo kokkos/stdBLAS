@@ -191,11 +191,13 @@ constexpr bool valid_input_blas_accessor ()
     default_accessor<elt_t>, elt_t>;
   // NOTE accessors don't necessarily commute.
   using valid_acc_t_2 = accessor_scaled<
-    accessor_conjugate<default_accessor<elt_t>, elt_t>,
+    accessor_conjugate<
+      default_accessor<elt_t>>,
     elt_t>;
   using valid_acc_t_3 = accessor_conjugate<
-    accessor_scaled<default_accessor<elt_t>, elt_t>,
-    elt_t>;
+    accessor_scaled<
+      default_accessor<elt_t>,
+      elt_t>>;
 
   // The two matrices' accessor types need not be the same.
   // Input matrices may be scaled or transposed.
@@ -309,11 +311,13 @@ extractScalingFactor (const in_matrix_t& A,
   using scaled_acc_t_1 = accessor_scaled<
     default_accessor<elt_t>, elt_t>;
   using scaled_acc_t_2 = accessor_scaled<
-    accessor_conjugate<default_accessor<elt_t>, elt_t>,
+    accessor_conjugate<
+      default_accessor<elt_t>>,
     elt_t>;
   using scaled_acc_t_3 = accessor_conjugate<
-    accessor_scaled<default_accessor<elt_t>, elt_t>,
-    elt_t>;
+    accessor_scaled<
+      default_accessor<elt_t>,
+      elt_t>>;
 
   if constexpr (std::is_same_v<acc_t, scaled_acc_t_1>) {
     return A.accessor().scale_factor();
@@ -349,13 +353,15 @@ constexpr bool extractConj ()
   using acc_t = typename in_matrix_t::accessor_type;
   using elt_t = typename in_matrix_t::element_type;
   using valid_acc_t_0 = accessor_conjugate<
-    default_accessor<elt_t>, elt_t>;
+    default_accessor<elt_t>>;
   using valid_acc_t_1 = accessor_scaled<
-    accessor_conjugate<default_accessor<elt_t>, elt_t>,
+    accessor_conjugate<
+      default_accessor<elt_t>>,
     elt_t>;
   using valid_acc_t_2 = accessor_conjugate<
-    accessor_scaled<default_accessor<elt_t>, elt_t>,
-    elt_t>;
+    accessor_scaled<
+      default_accessor<elt_t>,
+      elt_t>>;
 
   constexpr bool A_conj = std::is_same_v<acc_t, valid_acc_t_0> ||
     std::is_same_v<acc_t, valid_acc_t_1> ||

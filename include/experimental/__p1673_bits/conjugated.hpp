@@ -51,54 +51,70 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
-template<class T>
+template<class Reference, class ElementType>
 class conjugated_scalar {
 public:
-  using value_type = T;
+  using value_type = ElementType;
 
-  conjugated_scalar(const T& v) : val(v) {}
+  conjugated_scalar(Reference v) : val(v) {}
 
-  operator T() const { return conj(val); }
+  operator ElementType() const { return conj(val); }
 
   template<class T2>
-  T operator* (const T2 upd) const {
+  auto operator* (const T2 upd) const {
+    using std::conj;
     return conj(val) * upd;
   }
 
   template<class T2>
-  T operator+ (const T2 upd) const {
+  auto operator+ (const T2 upd) const {
+    using std::conj;
     return conj(val) + upd;
   }
 
   template<class T2>
   bool operator== (const T2 upd) const {
+    using std::conj;
     return conj(val) == upd;
   }
 
   template<class T2>
   bool operator!= (const T2 upd) const {
+    using std::conj;
     return conj(val) != upd;
   }
 
 private:
-  const T& val;
+  Reference val;
 };
 
-template<class T1, class T2>
-auto operator* (const T1 x, const conjugated_scalar<T2> y) {
-  using std::conj;
-  return x * T2(y);
+template<class T1, class Reference, class Element>
+auto operator* (const T1 x, const conjugated_scalar<Reference, Element> y) {
+  return x * Reference(y);
 }
 
-template<class Accessor, class T>
+template<class Accessor>
 class accessor_conjugate {
-private:
-  using size_type = typename extents<>::size_type;
 public:
   using element_type  = typename Accessor::element_type;
+
+private:
+  using size_type = typename extents<>::size_type;
+  static constexpr bool element_type_is_complex =
+    std::is_same_v<element_type, std::complex<float>> ||
+    std::is_same_v<element_type, std::complex<double>> ||
+    std::is_same_v<element_type, std::complex<long double>>;
+  
+public:
   using pointer       = typename Accessor::pointer;
-  using reference     = typename Accessor::reference;
-  using offset_policy = typename Accessor::offset_policy;
+  using reference     = typename std::conditional_t<
+    element_type_is_complex,
+    conjugated_scalar<typename Accessor::reference, element_type>,
+    typename Accessor::reference>;
+  using offset_policy = typename std::conditional_t<
+    element_type_is_complex,
+    accessor_conjugate<typename Accessor::offset_policy>,
+    typename Accessor::offset_policy>;
 
   accessor_conjugate() = default;
 
@@ -115,43 +131,6 @@ public:
   element_type* decay(pointer p) const noexcept {
     return acc.decay(p);
   }
-private:
-  Accessor acc;
-};
-
-template<class Accessor, class T>
-class accessor_conjugate<Accessor, std::complex<T>> {
-private:
-  using size_type = typename extents<>::size_type;
-public:
-  // FIXME If BLAS functions want to strip off accessor_conjugate for
-  // optimization, they will need a way to work with th underlying
-  // Accessor (which may not be the default one).
-
-  using element_type  = typename Accessor::element_type;
-  using pointer       = typename Accessor::pointer;
-  // FIXME Do we actually need to template conjugated_scalar
-  // on the Reference type as well as T ?
-  using reference     =
-    conjugated_scalar< /* typename Accessor::reference, */ std::complex<T>>;
-  using offset_policy =
-    accessor_conjugate<typename Accessor::offset_policy, std::complex<T>>;
-
-  accessor_conjugate() = default;
-
-  accessor_conjugate(Accessor a) : acc(a) {}
-
-  reference access(pointer p, size_type i) const noexcept {
-    return reference(acc.access(p, i));
-  }
-
-  typename offset_policy::pointer offset(pointer p, size_type i) const noexcept {
-    return acc.offset(p,i);
-  }
-
-  element_type* decay(pointer p) const noexcept {
-    return acc.decay(p);
-  }
 
   // NOT IN PROPOSAL
   //
@@ -160,19 +139,18 @@ public:
   Accessor nested_accessor() const {
     return acc;
   }
-
+  
 private:
   Accessor acc;
 };
 
 template<class EltType, class Extents, class Layout, class Accessor>
-mdspan<EltType, Extents, Layout,
-             accessor_conjugate<Accessor, EltType>>
+mdspan<EltType, Extents, Layout, accessor_conjugate<Accessor>>
 conjugated(mdspan<EltType, Extents, Layout, Accessor> a)
 {
-  using accessor_t = accessor_conjugate<Accessor, EltType>;
-  return mdspan<EltType, Extents, Layout, accessor_t> (
-    a.data (), a.mapping (), accessor_t (a.accessor ()));
+  using accessor_t = accessor_conjugate<Accessor>;
+  return mdspan<EltType, Extents, Layout, accessor_t>{
+    a.data(), a.mapping(), accessor_t(a.accessor())};
 }
 
 } // end namespace linalg
