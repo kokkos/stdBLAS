@@ -60,12 +60,24 @@ namespace {
       const scalar_t y_k (real_t(k) + 2.0, real_t(k) + 2.0);
       EXPECT_EQ( y(k), y_k );
 
+      // conjugated( y )
       const scalar_t y_k_conj (real_t(k) + 2.0, -real_t(k) - 2.0);
       EXPECT_EQ( y_conj(k), y_k_conj );
 
+      // x + conjugated( y )
       res_add(k) = x(k) + y_conj(k);
-      const scalar_t res_add_k(2 * real_t(k) + 3.0, -1.0);
-      EXPECT_EQ( res_add(k), res_add_k );
+      const scalar_t x_plus_conj_y_k(2 * real_t(k) + 3.0, -1.0);
+      EXPECT_EQ( res_add(k), x_plus_conj_y_k );
+
+      // conjugated( x ) + y
+      res_add(k) = x_conj(k) + y(k);
+      const scalar_t conj_x_plus_y_k(2 * real_t(k) + 3.0, 1.0);
+      EXPECT_EQ( res_add(k), conj_x_plus_y_k );
+
+      // conjugated( x ) + conjugated( y )
+      res_add(k) = x_conj(k) + y_conj(k);
+      const scalar_t conj_x_plus_conj_y_k(2 * real_t(k) + 3.0, -2 * real_t(k) - 3.0);
+      EXPECT_EQ( res_add(k), conj_x_plus_conj_y_k );
     }
   }
 }
