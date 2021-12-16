@@ -64,7 +64,7 @@ namespace {
       EXPECT_EQ( y_conj(k), y_k_conj );
 
       res_add(k) = x(k) + y_conj(k);
-      const scalar_t res_add_k(2 * real_t(k) + 3.0, -2 * real_t(k) - 3.0);
+      const scalar_t res_add_k(2 * real_t(k) + 3.0, -1.0);
       EXPECT_EQ( res_add(k), res_add_k );
     }
   }
