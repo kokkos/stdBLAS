@@ -16,11 +16,12 @@ namespace {
     using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
 
     constexpr std::size_t vectorSize (5);
-    constexpr std::size_t storageSize = std::size_t (2) * vectorSize;
+    constexpr std::size_t storageSize = std::size_t (3) * vectorSize;
     std::vector<scalar_t> storage (storageSize);
 
     vector_t x (storage.data (), vectorSize);
     vector_t y (storage.data () + vectorSize, vectorSize);
+    vector_t res_add (storage.data () + 2 * vectorSize, vectorSize);
 
     for (std::size_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k(real_t(k) + 1.0, real_t(k) + 1.0);
@@ -28,7 +29,6 @@ namespace {
       x(k) = x_k;
       y(k) = y_k;
     }
-
     // Make sure that accessor_conjugate compiles
     {
       using accessor_t = vector_t::accessor_type;
@@ -48,7 +48,9 @@ namespace {
       accessor_conj_t accessor3 (y.accessor ());
     }
 
+    auto x_conj = conjugated (x);
     auto y_conj = conjugated (y);
+
     for (std::size_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k(real_t(k) + 1.0, real_t(k) + 1.0);
       EXPECT_EQ( x(k), x_k );
@@ -58,8 +60,24 @@ namespace {
       const scalar_t y_k (real_t(k) + 2.0, real_t(k) + 2.0);
       EXPECT_EQ( y(k), y_k );
 
+      // conjugated( y )
       const scalar_t y_k_conj (real_t(k) + 2.0, -real_t(k) - 2.0);
       EXPECT_EQ( y_conj(k), y_k_conj );
+
+      // x + conjugated( y )
+      res_add(k) = x(k) + y_conj(k);
+      const scalar_t x_plus_conj_y_k(2 * real_t(k) + 3.0, -1.0);
+      EXPECT_EQ( res_add(k), x_plus_conj_y_k );
+
+      // conjugated( x ) + y
+      res_add(k) = x_conj(k) + y(k);
+      const scalar_t conj_x_plus_y_k(2 * real_t(k) + 3.0, 1.0);
+      EXPECT_EQ( res_add(k), conj_x_plus_y_k );
+
+      // conjugated( x ) + conjugated( y )
+      res_add(k) = x_conj(k) + y_conj(k);
+      const scalar_t conj_x_plus_conj_y_k(2 * real_t(k) + 3.0, -2 * real_t(k) - 3.0);
+      EXPECT_EQ( res_add(k), conj_x_plus_conj_y_k );
     }
   }
 }

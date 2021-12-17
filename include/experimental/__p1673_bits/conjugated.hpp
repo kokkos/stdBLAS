@@ -58,28 +58,24 @@ public:
 
   conjugated_scalar(Reference v) : val(v) {}
 
-  operator ElementType() const { return conj(val); }
+  operator value_type() const { return conj(value_type(val)); }
 
-  template<class T2>
-  auto operator* (const T2 upd) const {
+  auto operator* (const value_type upd) const {
     using std::conj;
     return conj(val) * upd;
   }
 
-  template<class T2>
-  auto operator+ (const T2 upd) const {
+  auto operator+ (const value_type upd) const {
     using std::conj;
     return conj(val) + upd;
   }
 
-  template<class T2>
-  bool operator== (const T2 upd) const {
+  bool operator== (const value_type upd) const {
     using std::conj;
     return conj(val) == upd;
   }
 
-  template<class T2>
-  bool operator!= (const T2 upd) const {
+  bool operator!= (const value_type upd) const {
     using std::conj;
     return conj(val) != upd;
   }
@@ -90,7 +86,12 @@ private:
 
 template<class T1, class Reference, class Element>
 auto operator* (const T1 x, const conjugated_scalar<Reference, Element> y) {
-  return x * Reference(y);
+  return x * Element(y);
+}
+
+template<class T1, class Reference, class Element>
+auto operator+ (const T1 x, const conjugated_scalar<Reference, Element> y) {
+  return x + Element(y);
 }
 
 template<class Accessor>
