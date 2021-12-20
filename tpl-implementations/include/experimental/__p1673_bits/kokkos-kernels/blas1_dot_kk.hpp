@@ -29,6 +29,10 @@ Scalar dot(kokkos_exec<ExeSpace>,
 	   > y,
 	   Scalar init)
 {
+#if defined LINALG_ENABLE_TESTS
+  std::cout << "dot: kokkos impl\n";
+#endif
+
   auto x_view = Impl::mdspan_to_view(x);
   auto y_view = Impl::mdspan_to_view(y);
 
@@ -70,6 +74,10 @@ Scalar dot(kokkos_exec<ExeSpace>,
 	   > y,
 	   Scalar init)
 {
+#if defined LINALG_ENABLE_TESTS
+  std::cout << "dot: kokkos impl\n";
+#endif
+
   auto x_view = Impl::mdspan_to_view(x);
   auto y_view = Impl::mdspan_to_view(y);
 

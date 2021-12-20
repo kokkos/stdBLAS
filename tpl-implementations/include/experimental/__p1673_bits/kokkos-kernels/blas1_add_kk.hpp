@@ -37,6 +37,10 @@ void add(kokkos_exec<ExeSpace>,
 	   std::experimental::default_accessor<ElementType_z>
 	 > z)
 {
+#if defined LINALG_ENABLE_TESTS
+  std::cout << "add: kokkos impl\n";
+#endif
+
   static_assert(z.rank() <= 2);
 
   auto x_view = Impl::mdspan_to_view(x);

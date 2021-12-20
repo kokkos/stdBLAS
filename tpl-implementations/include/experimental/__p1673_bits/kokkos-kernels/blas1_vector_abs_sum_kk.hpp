@@ -20,6 +20,9 @@ Scalar vector_abs_sum(kokkos_exec<ExeSpace>,
 		      > x,
 		      Scalar init)
 {
+#if defined LINALG_ENABLE_TESTS
+  std::cout << "vector_abs_sum: kokkos impl\n";
+#endif
 
   auto x_view = Impl::mdspan_to_view(x);
   using arithm_traits = Kokkos::Details::ArithTraits<ElementType>;

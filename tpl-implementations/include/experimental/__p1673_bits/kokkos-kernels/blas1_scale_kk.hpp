@@ -10,8 +10,7 @@ template<class ExecSpace,
          class Scalar,
          class ElementType,
          std::experimental::extents<>::size_type ... ext,
-         class Layout,
-         class Accessor>
+         class Layout>
 void scale(kokkos_exec<ExecSpace>,
 	   const Scalar alpha,
            std::experimental::mdspan<
@@ -21,8 +20,12 @@ void scale(kokkos_exec<ExecSpace>,
 	     std::experimental::default_accessor<ElementType>
 	   > x)
 {
+#if defined LINALG_ENABLE_TESTS
+  std::cout << "scale: kokkos impl\n";
+#endif
+
   auto x_view = Impl::mdspan_to_view(x);
-  KokkosBlas::scal(x, alpha, x);
+  KokkosBlas::scal(x_view, alpha, x_view);
 }
 
 }
