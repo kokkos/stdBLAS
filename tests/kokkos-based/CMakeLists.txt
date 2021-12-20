@@ -1,13 +1,44 @@
 
-macro(linalg_add_test_kokkos TESTNAME TESTSRCS)
-  set(testNameFinal ${TESTNAME})
-  add_executable(${testNameFinal} ${TESTSRCS} gtest_main_kokkos.cpp)
-  target_link_libraries(${testNameFinal} linalg GTest::GTest)
-  add_test(NAME ${testNameFinal} COMMAND ${testNameFinal})
+macro(linalg_add_test_kokkos TESTNAME FINDSTR)
+  set(testNameFinal utest_${TESTNAME})
+  set(testExe ${testNameFinal}_exe)
+  add_executable(${testExe} ${TESTNAME}.cpp gtest_main_kokkos.cpp)
+  target_link_libraries(${testExe} linalg GTest::GTest)
+
+  add_test(
+    NAME ${testNameFinal}
+    COMMAND ${CMAKE_COMMAND}
+    -DEXE_NAME=$<TARGET_FILE:${testExe}>
+    -DALGO_NAME=${TESTNAME}
+    -DLOG_FILE=${CMAKE_CURRENT_BINARY_DIR}/${TESTNAME}.log
+    -DTEST_STRING_FIND=${FINDSTR}
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/test.cmake)
+
+    # we have to set fail regex so that if it fails,
+    # test.cmake will detect it
+    set_tests_properties(
+      ${testNameFinal} PROPERTIES
+      FAIL_REGULAR_EXPRESSION "[^a-z]Error;ERROR;Failed;FAILED")
 endmacro()
 
-linalg_add_test_kokkos(utest_add_kokkos   add_kokkos.cpp)
-linalg_add_test_kokkos(utest_scale_kokkos scale_kokkos.cpp)
-linalg_add_test_kokkos(utest_dot_kokkos   dot_kokkos.cpp)
-linalg_add_test_kokkos(utest_dotc_kokkos  dotc_kokkos.cpp)
-linalg_add_test_kokkos(utest_vector_abs_sum_kokkos   vector_abs_sum_kokkos.cpp)
+linalg_add_test_kokkos(
+  add_kokkos
+  "add: kokkos impl")
+linalg_add_test_kokkos(
+  scale_kokkos
+  "scale: kokkos impl")
+linalg_add_test_kokkos(
+  dot_kokkos
+  "dot: kokkos impl")
+linalg_add_test_kokkos(
+  dotc_kokkos
+  "dot: kokkos impl")
+linalg_add_test_kokkos(
+  vector_abs_sum_kokkos
+  "vector_abs_sum: kokkos impl")
+linalg_add_test_kokkos(
+  idx_abs_max_kokkos
+  "idx_abs_max: kokkos impl")
+linalg_add_test_kokkos(
+  vector_norm2_kokkos
+  "vector_norm2: kokkos impl")

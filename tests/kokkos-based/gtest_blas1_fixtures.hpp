@@ -102,7 +102,7 @@ class _blas1_signed_fixture : public ::testing::Test
 {
 public:
   // extent is chosen here arbitrarily but not trivially small
-  const std::size_t myExtent = 137;
+  const std::size_t myExtent = 13;
   using value_type = T;
 
 protected:
