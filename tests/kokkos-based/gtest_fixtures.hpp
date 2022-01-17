@@ -94,9 +94,6 @@ struct UnifDist<float> {
 };
 
 
-//
-// fixture
-//
 template<class T>
 class _blas1_signed_fixture : public ::testing::Test
 {
@@ -115,10 +112,6 @@ protected:
       z(z_view.data(), myExtent)
   {
 
-    auto x_h = Kokkos::create_mirror_view(Kokkos::HostSpace(), x_view);
-    auto y_h = Kokkos::create_mirror_view(Kokkos::HostSpace(), y_view);
-    auto z_h = Kokkos::create_mirror_view(Kokkos::HostSpace(), z_view);
-
     static_assert(std::is_same_v<value_type, int> ||
 		  std::is_same_v<value_type, double> ||
 		  std::is_same_v<value_type, float> ||
@@ -135,9 +128,9 @@ protected:
       UnifDist<double> randObj_i(a_i, b_i);
 
       for (std::size_t i=0; i < myExtent; ++i) {
-	x_h(i) = {randObj_r(), randObj_i()};
-	y_h(i) = {randObj_r(), randObj_i()};
-	z_h(i) = {randObj_r(), randObj_i()};
+	x_view(i) = {randObj_r(), randObj_i()};
+	y_view(i) = {randObj_r(), randObj_i()};
+	z_view(i) = {randObj_r(), randObj_i()};
       }
     }
     else{
@@ -146,21 +139,17 @@ protected:
       UnifDist<value_type> randObj(a, b);
 
       for (std::size_t i=0; i < myExtent; ++i) {
-	x_h(i) = randObj();
-	y_h(i) = randObj();
-	z_h(i) = randObj();
+	x_view(i) = randObj();
+	y_view(i) = randObj();
+	z_view(i) = randObj();
       }
     }
-
-    Kokkos::deep_copy(x_view, x_h);
-    Kokkos::deep_copy(y_view, y_h);
-    Kokkos::deep_copy(z_view, z_h);
   }
 
   // these views will be on default memory space
-  Kokkos::View<value_type*> x_view;
-  Kokkos::View<value_type*> y_view;
-  Kokkos::View<value_type*> z_view;
+  Kokkos::View<value_type*, Kokkos::HostSpace> x_view;
+  Kokkos::View<value_type*, Kokkos::HostSpace> y_view;
+  Kokkos::View<value_type*, Kokkos::HostSpace> z_view;
 
   //using dyn_ext = std::experimental::dynamic_extent;
   // using std::experimental::extents;
@@ -175,8 +164,8 @@ class _blas2_signed_fixture : public ::testing::Test
 {
 public:
   // extent is chosen here arbitrarily but not trivially small
-  const std::size_t myExtent0 = 121;
-  const std::size_t myExtent1 = 177;
+  const std::size_t myExtent0 = 77;
+  const std::size_t myExtent1 = 41;
   using value_type = T;
 
 protected:
@@ -185,8 +174,6 @@ protected:
       A(A_view.data(), myExtent0, myExtent1)
   {
 
-    auto A_h = Kokkos::create_mirror_view(Kokkos::HostSpace(), A_view);
-
     static_assert(std::is_same_v<value_type, int> ||
 		  std::is_same_v<value_type, double> ||
 		  std::is_same_v<value_type, float> ||
@@ -194,39 +181,37 @@ protected:
 		  "Unsupported value_type");
 
     if constexpr(std::is_same_v<T, std::complex<double>>){
-      const auto a_r = static_cast<double>(-101);
-      const auto b_r = static_cast<double>( 103);
+      const auto a_r = static_cast<double>(-5);
+      const auto b_r = static_cast<double>( 3);
       UnifDist<double> randObj_r(a_r, b_r);
 
-      const auto a_i = static_cast<double>(-21);
-      const auto b_i = static_cast<double>( 43);
+      const auto a_i = static_cast<double>(-9);
+      const auto b_i = static_cast<double>( 7);
       UnifDist<double> randObj_i(a_i, b_i);
 
       for (std::size_t i=0; i < myExtent0; ++i) {
 	for (std::size_t j=0; j < myExtent1; ++j) {
-	  A_h(i,j) = {randObj_r(), randObj_i()};
+	  A_view(i,j) = {randObj_r(), randObj_i()};
 	}
       }
     }
     else{
-      const auto a = static_cast<value_type>(-11);
-      const auto b = static_cast<value_type>( 23);
+      const auto a = static_cast<value_type>(-5);
+      const auto b = static_cast<value_type>( 4);
       UnifDist<value_type> randObj(a, b);
 
       for (std::size_t i=0; i < myExtent0; ++i) {
 	for (std::size_t j=0; j < myExtent1; ++j) {
-	  A_h(i,j) = randObj();
+	  A_view(i,j) = randObj();
 	}
       }
     }
-
-    Kokkos::deep_copy(A_view, A_h);
   }
 
   // these views will be on default memory space
-  Kokkos::View<value_type*> A_view;
+  Kokkos::View<value_type**, Kokkos::HostSpace> A_view;
 
-  using mdspan_t = mdspan<value_type, extents<dynamic_extent>>;
+  using mdspan_t = mdspan<value_type, extents<dynamic_extent, dynamic_extent>>;
   mdspan_t A;
 };
 
