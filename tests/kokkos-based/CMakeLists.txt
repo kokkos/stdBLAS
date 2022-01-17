@@ -48,3 +48,6 @@ linalg_add_test_kokkos(
 linalg_add_test_kokkos(
   copy_kokkos
   "copy: kokkos impl")
+linalg_add_test_kokkos(
+  swap_elements_kokkos
+  "swap_elements: kokkos impl")
