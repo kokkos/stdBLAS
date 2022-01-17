@@ -1,5 +1,5 @@
 
-#include "gtest_blas1_fixtures.hpp"
+#include "gtest_fixtures.hpp"
 #include "helpers.hpp"
 
 namespace
