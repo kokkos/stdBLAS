@@ -42,40 +42,27 @@ void kokkos_blas1_dot_test_impl(x_t x, y_t y, T initValue, bool useInit)
 			x, y);
   }
 
-  if constexpr(std::is_same_v<value_type, float>)
-  {
+  if constexpr(std::is_same_v<value_type, float>){
     // cannot use EXPECT_FLOAT_EQ because
     // in some cases that fails on third digit or similr
     EXPECT_NEAR(result, gold, 1e-2);
-
-    // x,y should not change after kernel
-    for (std::size_t i=0; i<extent; ++i){
-      EXPECT_FLOAT_EQ(x(i), x_preKernel[i]);
-      EXPECT_FLOAT_EQ(y(i), y_preKernel[i]);
-    }
   }
 
-  if constexpr(std::is_same_v<value_type, double>)
-  {
+  if constexpr(std::is_same_v<value_type, double>){
     // similarly to float
     EXPECT_NEAR(result, gold, 1e-9);
-    // x,y should not change after kernel
-    for (std::size_t i=0; i<extent; ++i){
-      EXPECT_DOUBLE_EQ(x(i), x_preKernel[i]);
-      EXPECT_DOUBLE_EQ(y(i), y_preKernel[i]);
-    }
   }
 
   if constexpr(std::is_same_v<value_type, std::complex<double>>){
     EXPECT_NEAR(result.real(), gold.real(), 1e-9);
     EXPECT_NEAR(result.imag(), gold.imag(), 1e-9);
-    // x,y should not change after kernel
-    for (std::size_t i=0; i<extent; ++i){
-      EXPECT_TRUE(x(i) == x_preKernel[i]);
-      EXPECT_TRUE(y(i) == y_preKernel[i]);
-    }
   }
 
+  // x,y should not change after kernel
+  for (std::size_t i=0; i<extent; ++i){
+    EXPECT_TRUE(x(i) == x_preKernel[i]);
+    EXPECT_TRUE(y(i) == y_preKernel[i]);
+  }
 }
 }//end anonym namespace
 

@@ -53,32 +53,21 @@ void kokkos_blas1_vector_norm2_test_impl(x_t x, T initValue, bool useInit)
 				 x);
   }
 
-  if constexpr(std::is_same_v<value_type, float>)
-  {
+  if constexpr(std::is_same_v<value_type, float>){
     EXPECT_NEAR(result, gold, 1e-2);
-
-    // x should not change after kernel
-    for (std::size_t i=0; i<extent; ++i){
-      EXPECT_FLOAT_EQ(x(i), x_preKernel[i]);
-    }
   }
 
-  if constexpr(std::is_same_v<value_type, double>)
-  {
-    // similarly to float
+  if constexpr(std::is_same_v<value_type, double>){
     EXPECT_NEAR(result, gold, 1e-9);
-    // x should not change after kernel
-    for (std::size_t i=0; i<extent; ++i){
-      EXPECT_DOUBLE_EQ(x(i), x_preKernel[i]);
-    }
   }
 
   if constexpr(std::is_same_v<value_type, std::complex<double>>){
     EXPECT_NEAR(result, gold, 1e-9);
-    // x should not change after kernel
-    for (std::size_t i=0; i<extent; ++i){
-      EXPECT_TRUE(x(i) == x_preKernel[i]);
-    }
+  }
+
+  // x should not change after kernel
+  for (std::size_t i=0; i<extent; ++i){
+    EXPECT_TRUE(x(i) == x_preKernel[i]);
   }
 
 }
