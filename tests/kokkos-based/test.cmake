@@ -13,12 +13,11 @@ else()
 endif()
 
 # check that proper string was found
-# which signals that the correct Kokkos impl was found
+# which signals that the correct Kokkos impl was found/called
 set(CMD "grep -R '${TEST_STRING_FIND}' ${LOG_FILE} > /dev/null")
 execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES_B)
 if(RES_B)
-  message(
-    FATAL_ERROR
+  message(FATAL_ERROR
     "test failed: ${ALGO_NAME} did not call the correct Kokkos impl")
 else()
   message("${ALGO_NAME} called the correct Kokkos impl")
