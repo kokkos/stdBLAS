@@ -179,7 +179,7 @@ namespace matrix_frob_norm_detail
   auto matrix_frob_norm_return_type_deducer(
     std::experimental::mdspan<
       ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor
-    > A) -> decltype(abs(A(0,0)));
+    > A) -> decltype( abs(A(0,0)) * abs(A(0,0)) );
 
 } // namespace matrix_frob_norm_detail
 
