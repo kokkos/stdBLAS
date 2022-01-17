@@ -61,6 +61,26 @@ auto create_stdvector_and_copy(T source)
   for (std::size_t i=0; i<source.extent(0); ++i){
     result[i] = source(i);
   }
+
+  return result;
+}
+
+template<class T>
+auto create_stdvector_and_copy_rowwise(T source)
+{
+  static_assert (source.rank() == 2);
+
+  using value_type = typename T::value_type;
+  using res_t = std::vector<value_type>;
+
+  res_t result(source.extent(0)*source.extent(1));
+  std::size_t k=0;
+  for (std::size_t i=0; i<source.extent(0); ++i){
+    for (std::size_t j=0; j<source.extent(1); ++j){
+      result[k++] = source(i,j);
+    }
+  }
+
   return result;
 }
 
