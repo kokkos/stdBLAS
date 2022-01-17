@@ -42,3 +42,6 @@ linalg_add_test_kokkos(
 linalg_add_test_kokkos(
   vector_norm2_kokkos
   "vector_norm2: kokkos impl")
+linalg_add_test_kokkos(
+  vector_sum_of_squares_kokkos
+  "vector_sum_of_squares: kokkos impl")
