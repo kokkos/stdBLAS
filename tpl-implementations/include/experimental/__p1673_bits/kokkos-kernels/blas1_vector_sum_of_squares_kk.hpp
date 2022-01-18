@@ -48,7 +48,7 @@ vector_sum_of_squares(kokkos_exec<ExecSpace>,
   // no fence needed since reducing into scalar
   result.scaling_factor = std::max(scaling_factor, init.scaling_factor);
 
-  Scalar ssq;
+  Scalar ssq = {};
   Kokkos::parallel_reduce(Kokkos::RangePolicy(ExecSpace(), 0, x_view.extent(0)),
 			  KOKKOS_LAMBDA (const std::size_t i, Scalar & update)
 			  {
@@ -56,6 +56,7 @@ vector_sum_of_squares(kokkos_exec<ExecSpace>,
 			    update += tmp*tmp;
 			  }, ssq);
   // no fence needed since reducing into scalar
+
   result.scaled_sum_of_squares = ssq
     + (init.scaling_factor*init.scaling_factor*init.scaled_sum_of_squares)/(scaling_factor*scaling_factor);
 
