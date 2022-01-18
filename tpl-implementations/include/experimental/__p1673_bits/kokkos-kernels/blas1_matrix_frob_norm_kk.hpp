@@ -24,16 +24,14 @@ Scalar matrix_frob_norm(kokkos_exec<ExecSpace> kexe,
 #endif
 
   // corner cases
-  auto result = init;
   constexpr std::size_t zero = 0;
   constexpr std::size_t one  = 1;
   if (A.extent(0) == zero || A.extent(1) == zero) {
-    return result;
+    return init;
   }
   else if(A.extent(0) == one && A.extent(1) == one) {
     using std::abs;
-    result += abs(A(0, 0));
-    return result;
+    return init + abs(A(0, 0));
   }
 
   const std::size_t totNumElements = A.extent(0)*A.extent(1);
@@ -42,7 +40,9 @@ Scalar matrix_frob_norm(kokkos_exec<ExecSpace> kexe,
     Layout, std::experimental::default_accessor<ElementType>>;
 
   flatten_t Aflat(A.data(), totNumElements);
-  std::experimental::linalg::sum_of_squares_result<Scalar> initSsq{0, 0};
+  std::experimental::linalg::sum_of_squares_result<Scalar> initSsq;
+  initSsq.scaling_factor = Scalar{};
+  initSsq.scaled_sum_of_squares = Scalar{};
   const auto res = KokkosKernelsSTD::vector_sum_of_squares(kexe, Aflat, initSsq);
 
   return std::sqrt(init + res.scaling_factor * res.scaling_factor * res.scaled_sum_of_squares);

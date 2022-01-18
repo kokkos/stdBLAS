@@ -80,8 +80,9 @@ void kokkos_matrix_frob_norm_test_impl(A_t A, T initValue, bool useInit)
 }
 }//end anonym namespace
 
-
+//
 // float
+//
 TEST_F(blas2_signed_float_fixture, kokkos_matrix_frob_norm_trivial_empty)
 {
   std::vector<value_type> v;
@@ -90,34 +91,39 @@ TEST_F(blas2_signed_float_fixture, kokkos_matrix_frob_norm_trivial_empty)
   using s_t = std::experimental::mdspan<value_type, std::experimental::extents<de, de>>;
   s_t M(v.data(), 0, 0);
   namespace stdla = std::experimental::linalg;
-  const auto result = stdla::matrix_frob_norm(KokkosKernelsSTD::kokkos_exec<>(), M);
-  EXPECT_TRUE(result == static_cast<value_type>(0));
-}
 
-TEST_F(blas2_signed_float_fixture, kokkos_matrix_frob_norm_trivial_empty_init)
-{
-  std::vector<value_type> v;
-  constexpr value_type init = static_cast<value_type>(2.5);
-
-  constexpr auto de = std::experimental::dynamic_extent;
-  using s_t = std::experimental::mdspan<value_type, std::experimental::extents<de, de>>;
-  s_t M(v.data(), 0, 0);
-  namespace stdla = std::experimental::linalg;
-  const auto result = stdla::matrix_frob_norm(KokkosKernelsSTD::kokkos_exec<>(), M, init);
-  EXPECT_TRUE(result == init);
+  {
+    const auto result = stdla::matrix_frob_norm(KokkosKernelsSTD::kokkos_exec<>(), M);
+    using init_t = decltype( std::abs(M(0,0)) * std::abs(M(0,0)) );
+    EXPECT_TRUE(result == init_t{});
+  }
+  {
+    constexpr value_type init = static_cast<value_type>(2.5);
+    const auto result = stdla::matrix_frob_norm(KokkosKernelsSTD::kokkos_exec<>(), M, init);
+    EXPECT_TRUE(result == init);
+  }
 }
 
 TEST_F(blas2_signed_float_fixture, kokkos_matrix_frob_norm_trivial_one_element)
 {
-  constexpr value_type myvalue = static_cast<value_type>(1.5);
+  constexpr value_type myvalue = static_cast<value_type>(-1.5);
   std::vector<value_type> v = {myvalue};
 
   constexpr auto de = std::experimental::dynamic_extent;
   using s_t = std::experimental::mdspan<value_type, std::experimental::extents<de, de>>;
   s_t M(v.data(), 1, 1);
   namespace stdla = std::experimental::linalg;
-  const auto result = stdla::matrix_frob_norm(KokkosKernelsSTD::kokkos_exec<>(), M);
-  EXPECT_TRUE(result == myvalue);
+
+  {
+    const auto result = stdla::matrix_frob_norm(KokkosKernelsSTD::kokkos_exec<>(), M);
+    using init_t = decltype( std::abs(M(0,0)) * std::abs(M(0,0)) );
+    EXPECT_TRUE(result == init_t{} + std::abs(myvalue));
+  }
+  {
+    constexpr value_type init = static_cast<value_type>(2.8);
+    const auto result = stdla::matrix_frob_norm(KokkosKernelsSTD::kokkos_exec<>(), M, init);
+    EXPECT_TRUE(result == init + std::abs(myvalue));
+  }
 }
 
 TEST_F(blas2_signed_float_fixture, kokkos_matrix_frob_norm_noinitvalue)
@@ -130,7 +136,9 @@ TEST_F(blas2_signed_float_fixture, kokkos_matrix_frob_norm_initvalue)
   kokkos_matrix_frob_norm_test_impl(A, static_cast<value_type>(5.6), true);
 }
 
+//
 // double
+//
 TEST_F(blas2_signed_double_fixture, kokkos_matrix_frob_norm_trivial_empty)
 {
   std::vector<value_type> v;
@@ -139,34 +147,39 @@ TEST_F(blas2_signed_double_fixture, kokkos_matrix_frob_norm_trivial_empty)
   using s_t = std::experimental::mdspan<value_type, std::experimental::extents<de, de>>;
   s_t M(v.data(), 0, 0);
   namespace stdla = std::experimental::linalg;
-  const auto result = stdla::matrix_frob_norm(KokkosKernelsSTD::kokkos_exec<>(), M);
-  EXPECT_TRUE(result == static_cast<value_type>(0));
-}
 
-TEST_F(blas2_signed_double_fixture, kokkos_matrix_frob_norm_trivial_empty_init)
-{
-  std::vector<value_type> v;
-  constexpr value_type init = static_cast<value_type>(2.5);
-
-  constexpr auto de = std::experimental::dynamic_extent;
-  using s_t = std::experimental::mdspan<value_type, std::experimental::extents<de, de>>;
-  s_t M(v.data(), 0, 0);
-  namespace stdla = std::experimental::linalg;
-  const auto result = stdla::matrix_frob_norm(KokkosKernelsSTD::kokkos_exec<>(), M, init);
-  EXPECT_TRUE(result == init);
+  {
+    const auto result = stdla::matrix_frob_norm(KokkosKernelsSTD::kokkos_exec<>(), M);
+    using init_t = decltype( std::abs(M(0,0)) * std::abs(M(0,0)) );
+    EXPECT_TRUE(result == init_t{});
+  }
+  {
+    constexpr value_type init = static_cast<value_type>(2.5);
+    const auto result = stdla::matrix_frob_norm(KokkosKernelsSTD::kokkos_exec<>(), M, init);
+    EXPECT_TRUE(result == init);
+  }
 }
 
 TEST_F(blas2_signed_double_fixture, kokkos_matrix_frob_norm_trivial_one_element)
 {
-  constexpr value_type myvalue = static_cast<value_type>(1.5);
+  constexpr value_type myvalue = static_cast<value_type>(-1.5);
   std::vector<value_type> v = {myvalue};
 
   constexpr auto de = std::experimental::dynamic_extent;
   using s_t = std::experimental::mdspan<value_type, std::experimental::extents<de, de>>;
   s_t M(v.data(), 1, 1);
   namespace stdla = std::experimental::linalg;
-  const auto result = stdla::matrix_frob_norm(KokkosKernelsSTD::kokkos_exec<>(), M);
-  EXPECT_TRUE(result == myvalue);
+
+  {
+    const auto result = stdla::matrix_frob_norm(KokkosKernelsSTD::kokkos_exec<>(), M);
+    using init_t = decltype( std::abs(M(0,0)) * std::abs(M(0,0)) );
+    EXPECT_TRUE(result == init_t{} + std::abs(myvalue));
+  }
+  {
+    constexpr value_type init = static_cast<value_type>(2.8);
+    const auto result = stdla::matrix_frob_norm(KokkosKernelsSTD::kokkos_exec<>(), M, init);
+    EXPECT_TRUE(result == init + std::abs(myvalue));
+  }
 }
 
 TEST_F(blas2_signed_double_fixture, kokkos_matrix_frob_norm_noinitvalue)
@@ -179,7 +192,9 @@ TEST_F(blas2_signed_double_fixture, kokkos_matrix_frob_norm_initvalue)
   kokkos_matrix_frob_norm_test_impl(A, static_cast<value_type>(5), true);
 }
 
+//
 // complex double
+//
 TEST_F(blas2_signed_complex_double_fixture, kokkos_matrix_frob_norm_trivial_empty)
 {
   std::vector<value_type> v;
@@ -188,34 +203,39 @@ TEST_F(blas2_signed_complex_double_fixture, kokkos_matrix_frob_norm_trivial_empt
   using s_t = std::experimental::mdspan<value_type, std::experimental::extents<de, de>>;
   s_t M(v.data(), 0, 0);
   namespace stdla = std::experimental::linalg;
-  const auto result = stdla::matrix_frob_norm(KokkosKernelsSTD::kokkos_exec<>(), M);
-  EXPECT_TRUE(result == static_cast<value_type>(0));
-}
 
-TEST_F(blas2_signed_complex_double_fixture, kokkos_matrix_frob_norm_trivial_empty_init)
-{
-  std::vector<value_type> v;
-  constexpr double init{2.5};
-
-  constexpr auto de = std::experimental::dynamic_extent;
-  using s_t = std::experimental::mdspan<value_type, std::experimental::extents<de, de>>;
-  s_t M(v.data(), 0, 0);
-  namespace stdla = std::experimental::linalg;
-  const auto result = stdla::matrix_frob_norm(KokkosKernelsSTD::kokkos_exec<>(), M, init);
-  EXPECT_TRUE(result == init);
+  {
+    const auto result = stdla::matrix_frob_norm(KokkosKernelsSTD::kokkos_exec<>(), M);
+    using init_t = decltype( std::abs(M(0,0)) * std::abs(M(0,0)) );
+    EXPECT_TRUE(result == init_t{});
+  }
+  {
+    constexpr double init = static_cast<double>(2.5);
+    const auto result = stdla::matrix_frob_norm(KokkosKernelsSTD::kokkos_exec<>(), M, init);
+    EXPECT_TRUE(result == init);
+  }
 }
 
 TEST_F(blas2_signed_complex_double_fixture, kokkos_matrix_frob_norm_trivial_one_element)
 {
-  constexpr value_type myvalue {1.5, 2.4};
+  constexpr value_type myvalue{-1.5, 2.2};
   std::vector<value_type> v = {myvalue};
 
   constexpr auto de = std::experimental::dynamic_extent;
   using s_t = std::experimental::mdspan<value_type, std::experimental::extents<de, de>>;
   s_t M(v.data(), 1, 1);
   namespace stdla = std::experimental::linalg;
-  const auto result = stdla::matrix_frob_norm(KokkosKernelsSTD::kokkos_exec<>(), M);
-  EXPECT_DOUBLE_EQ(result, std::abs(myvalue));
+
+  {
+    const auto result = stdla::matrix_frob_norm(KokkosKernelsSTD::kokkos_exec<>(), M);
+    using init_t = decltype( std::abs(M(0,0)) * std::abs(M(0,0)) );
+    EXPECT_TRUE(result == init_t{} + std::abs(myvalue));
+  }
+  {
+    constexpr double init = static_cast<double>(2.5);
+    const auto result = stdla::matrix_frob_norm(KokkosKernelsSTD::kokkos_exec<>(), M, init);
+    EXPECT_TRUE(result == init + std::abs(myvalue));
+  }
 }
 
 TEST_F(blas2_signed_complex_double_fixture, kokkos_matrix_frob_norm_noinitvalue)
