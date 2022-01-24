@@ -57,3 +57,6 @@ linalg_add_test_kokkos(
 linalg_add_test_kokkos(
   matrix_one_norm_kokkos
   "matrix_one_norm: kokkos impl")
+linalg_add_test_kokkos(
+  matrix_inf_norm_kokkos
+  "matrix_inf_norm: kokkos impl")

@@ -5,18 +5,44 @@
 namespace KokkosKernelsSTD {
 
 template<
+    class ExeSpace,
     class ElementType,
     std::experimental::extents<>::size_type numRows,
     std::experimental::extents<>::size_type numCols,
     class Layout,
-    class Accessor,
     class Scalar>
-Scalar matrix_inf_norm(
-  kokkos_exec<>,
-  std::experimental::mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A,
-  Scalar init)
+Scalar matrix_inf_norm(kokkos_exec<ExeSpace> /*kexe*/,
+			std::experimental::mdspan<
+			ElementType,
+			std::experimental::extents<numRows, numCols>,
+			Layout,
+			std::experimental::default_accessor<ElementType>> A,
+			Scalar init)
 {
-  return {};
+#if defined LINALG_ENABLE_TESTS
+  std::cout << "matrix_inf_norm: kokkos impl\n";
+#endif
+
+  if (A.extent(0) == 0){
+    return init;
+  }
+
+  auto A_view = Impl::mdspan_to_view(A);
+
+  Scalar result = {};
+  Kokkos::Max<Scalar> reducer(result);
+  Kokkos::parallel_reduce(Kokkos::RangePolicy(ExeSpace(), 0, A_view.extent(0)),
+			  KOKKOS_LAMBDA (const std::size_t i, Scalar & update)
+			  {
+			    using ats = Kokkos::Details::ArithTraits<ElementType>;
+			    Scalar mysum = ats::abs(A_view(i,0));
+			    for (std::size_t j=1; j<A_view.extent(1); ++j){
+			      mysum += ats::abs(A_view(i,j));
+			    }
+			    reducer.join(update, mysum);
+			  }, reducer);
+
+  return init + result;
 }
 
 } // end namespace KokkosKernelsSTD
