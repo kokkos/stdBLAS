@@ -9,7 +9,7 @@ template<class ExeSpace,
 	 std::experimental::extents<>::size_type ext,
          class Layout,
          class Scalar>
-Scalar vector_norm2(kokkos_exec<ExeSpace>,
+Scalar vector_norm2(kokkos_exec<ExeSpace> /*kexe*/,
 		    std::experimental::mdspan<
 		    ElementType,
 		    std::experimental::extents<ext>,

@@ -10,7 +10,7 @@ template<class ExecSpace,
          class Layout,
          class Scalar>
 std::experimental::linalg::sum_of_squares_result<Scalar>
-vector_sum_of_squares(kokkos_exec<ExecSpace>,
+vector_sum_of_squares(kokkos_exec<ExecSpace> /*kexe*/,
 		      std::experimental::mdspan<
 		      ElementType,
 		      std::experimental::extents<ext0>,

@@ -13,7 +13,7 @@ template<class ExeSpace,
          std::experimental::extents<>::size_type ext0,
          class Layout>
 std::experimental::extents<>::size_type
-idx_abs_max(kokkos_exec<ExeSpace>,
+idx_abs_max(kokkos_exec<ExeSpace> /*kexe*/,
 	    std::experimental::mdspan<
 	    ElementType,
 	    std::experimental::extents<ext0>,

@@ -5,13 +5,13 @@
 namespace KokkosKernelsSTD {
 
 template<
-    class ExecSpace,
+    class ExeSpace,
     class ElementType,
     std::experimental::extents<>::size_type numRows,
     std::experimental::extents<>::size_type numCols,
     class Layout,
     class Scalar>
-Scalar matrix_frob_norm(kokkos_exec<ExecSpace> kexe,
+Scalar matrix_frob_norm(kokkos_exec<ExeSpace> kexe,
 			std::experimental::mdspan<
 			ElementType,
 			std::experimental::extents<numRows, numCols>,

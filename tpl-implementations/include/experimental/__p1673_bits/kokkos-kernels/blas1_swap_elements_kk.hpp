@@ -18,7 +18,7 @@ KOKKOS_INLINE_FUNCTION void _my_tmp_swap(T& a, T& b) noexcept {
   b     = std::move(tmp);
 }
 
-template<class ExecSpace,
+template<class ExeSpace,
 	 class ElementType_x,
          std::experimental::extents<>::size_type ... ext_x,
          class Layout_x,
@@ -26,7 +26,7 @@ template<class ExecSpace,
          std::experimental::extents<>::size_type ... ext_y,
          class Layout_y>
   requires (sizeof...(ext_x) == sizeof...(ext_y))
-void swap_elements(kokkos_exec<ExecSpace>,
+void swap_elements(kokkos_exec<ExeSpace> /*kexe*/,
 		   std::experimental::mdspan<
 		     ElementType_x,
 		     std::experimental::extents<ext_x ...>,
@@ -50,14 +50,14 @@ void swap_elements(kokkos_exec<ExecSpace>,
   auto y_view = Impl::mdspan_to_view(y);
 
   if constexpr(x.rank()==1){
-    Kokkos::parallel_for(Kokkos::RangePolicy(ExecSpace(), 0, x_view.extent(0)),
+    Kokkos::parallel_for(Kokkos::RangePolicy(ExeSpace(), 0, x_view.extent(0)),
 			 KOKKOS_LAMBDA (const std::size_t & i){
 			   _my_tmp_swap(x_view(i), y_view(i));
 			 });
   }
 
   else{
-    Kokkos::parallel_for(Kokkos::RangePolicy(ExecSpace(), 0, x_view.extent(0)),
+    Kokkos::parallel_for(Kokkos::RangePolicy(ExeSpace(), 0, x_view.extent(0)),
 			 KOKKOS_LAMBDA (const std::size_t & i)
 			 {
 			   for (std::size_t j=0; j<x_view.extent(1); ++j){

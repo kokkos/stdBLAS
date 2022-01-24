@@ -11,7 +11,7 @@ template<
     std::experimental::extents<>::size_type numCols,
     class Layout,
     class Scalar>
-Scalar matrix_one_norm(kokkos_exec<ExeSpace> kexe,
+Scalar matrix_one_norm(kokkos_exec<ExeSpace> /*kexe*/,
 			std::experimental::mdspan<
 			ElementType,
 			std::experimental::extents<numRows, numCols>,

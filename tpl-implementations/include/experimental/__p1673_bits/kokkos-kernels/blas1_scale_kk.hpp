@@ -6,12 +6,12 @@
 
 namespace KokkosKernelsSTD {
 
-template<class ExecSpace,
+template<class ExeSpace,
          class Scalar,
          class ElementType,
          std::experimental::extents<>::size_type ... ext,
          class Layout>
-void scale(kokkos_exec<ExecSpace>,
+void scale(kokkos_exec<ExeSpace> /*kexe*/,
 	   const Scalar alpha,
            std::experimental::mdspan<
 	     ElementType,

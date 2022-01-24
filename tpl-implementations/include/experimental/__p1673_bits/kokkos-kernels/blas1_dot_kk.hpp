@@ -14,7 +14,7 @@ template<class ExeSpace,
 	 std::experimental::extents<>::size_type ext_y,
          class Layout_y,
 	 class Scalar>
-Scalar dot(kokkos_exec<ExeSpace>,
+Scalar dot(kokkos_exec<ExeSpace> /*kexe*/,
 	   std::experimental::mdspan<
 	     ElementType_x,
 	     std::experimental::extents<ext_x>,

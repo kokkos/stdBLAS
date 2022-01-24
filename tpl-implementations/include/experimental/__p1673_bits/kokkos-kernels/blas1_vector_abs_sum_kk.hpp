@@ -11,7 +11,7 @@ template<class ExeSpace,
 	 std::experimental::extents<>::size_type ext0,
          class Layout,
          class Scalar>
-Scalar vector_abs_sum(kokkos_exec<ExeSpace>,
+Scalar vector_abs_sum(kokkos_exec<ExeSpace> /*kexe*/,
 		      std::experimental::mdspan<
 		      ElementType,
 		      std::experimental::extents<ext0>,
