@@ -18,14 +18,17 @@ void scale(kokkos_exec<ExeSpace> /*kexe*/,
 	     std::experimental::extents<ext ...>,
 	     Layout,
 	     std::experimental::default_accessor<ElementType>
-	   > x)
+	   > obj)
 {
+  // constraints
+  static_assert(obj.rank() <= 2);
+
 #if defined LINALG_ENABLE_TESTS
   std::cout << "scale: kokkos impl\n";
 #endif
 
-  auto x_view = Impl::mdspan_to_view(x);
-  KokkosBlas::scal(x_view, alpha, x_view);
+  auto obj_view = Impl::mdspan_to_view(obj);
+  KokkosBlas::scal(obj_view, alpha, obj_view);
 }
 
 }

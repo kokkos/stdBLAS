@@ -65,13 +65,13 @@ TEST_F(blas1_signed_double_fixture, kokkos_scale)
   kokkos_blas1_scale_test_impl(x, static_cast<value_type>(2));
 }
 
-TEST_F(blas1_signed_complex_double_fixture, kokkos_scale_a)
+TEST_F(blas1_signed_complex_double_fixture, kokkos_scale_complex_factor)
 {
   const value_type factor{2., 0.};
   kokkos_blas1_scale_test_impl(x, factor);
 }
 
-TEST_F(blas1_signed_complex_double_fixture, kokkos_scale_b)
+TEST_F(blas1_signed_complex_double_fixture, kokkos_scale_double_factor)
 {
   kokkos_blas1_scale_test_impl(x, 2.);
 }
