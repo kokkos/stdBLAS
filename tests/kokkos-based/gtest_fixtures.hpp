@@ -50,7 +50,7 @@
 #include <random>
 
 // it is fine to put these here even if this
-// a header since this is limited to tests
+// is a header since this is limited to tests
 using std::experimental::mdspan;
 using std::experimental::extents;
 using std::experimental::dynamic_extent;
@@ -95,14 +95,26 @@ struct UnifDist<float> {
 
 
 template<class T>
+constexpr void static_check_value_type(T /*unused*/)
+{
+  static_assert(std::is_same_v<T, int> ||
+		std::is_same_v<T, double> ||
+		std::is_same_v<T, float> ||
+		std::is_same_v<T, std::complex<double>>,
+		"gtest_fixtures: unsupported value_type");
+}
+
+
+template<class T>
 class _blas1_signed_fixture : public ::testing::Test
 {
-public:
-  // extent is chosen here arbitrarily but not trivially small
+  // extent is arbitrarily chosen but not trivially small
   const std::size_t myExtent = 137;
+
+public:
   using value_type = T;
 
-protected:
+public:
   _blas1_signed_fixture()
     : x_view("x_view", myExtent),
       y_view("y_view", myExtent),
@@ -111,12 +123,7 @@ protected:
       y(y_view.data(), myExtent),
       z(z_view.data(), myExtent)
   {
-
-    static_assert(std::is_same_v<value_type, int> ||
-		  std::is_same_v<value_type, double> ||
-		  std::is_same_v<value_type, float> ||
-		  std::is_same_v<value_type, std::complex<double>>,
-		  "Unsupported value_type");
+    static_check_value_type(value_type{});
 
     if constexpr(std::is_same_v<T, std::complex<double>>){
       const auto a_r = static_cast<double>(-101);
@@ -151,8 +158,6 @@ protected:
   Kokkos::View<value_type*, Kokkos::HostSpace> y_view;
   Kokkos::View<value_type*, Kokkos::HostSpace> z_view;
 
-  //using dyn_ext = std::experimental::dynamic_extent;
-  // using std::experimental::extents;
   using mdspan_t = mdspan<value_type, extents<dynamic_extent>>;
   mdspan_t x;
   mdspan_t y;
@@ -162,23 +167,22 @@ protected:
 template<class T>
 class _blas2_signed_fixture : public ::testing::Test
 {
-public:
-  // extent is chosen here arbitrarily but not trivially small
+  // extents are arbitrarily chosen but not trivially small
   const std::size_t myExtent0 = 77;
   const std::size_t myExtent1 = 41;
+
+public:
   using value_type = T;
 
-protected:
+public:
   _blas2_signed_fixture()
     : A_view("A_view", myExtent0, myExtent1),
-      A(A_view.data(), myExtent0, myExtent1)
+      A(A_view.data(), myExtent0, myExtent1),
+      B_view("B_view", myExtent0, myExtent1),
+      B(B_view.data(), myExtent0, myExtent1)
   {
 
-    static_assert(std::is_same_v<value_type, int> ||
-		  std::is_same_v<value_type, double> ||
-		  std::is_same_v<value_type, float> ||
-		  std::is_same_v<value_type, std::complex<double>>,
-		  "Unsupported value_type");
+    static_check_value_type(value_type{});
 
     if constexpr(std::is_same_v<T, std::complex<double>>){
       const auto a_r = static_cast<double>(-5);
@@ -192,6 +196,7 @@ protected:
       for (std::size_t i=0; i < myExtent0; ++i) {
 	for (std::size_t j=0; j < myExtent1; ++j) {
 	  A_view(i,j) = {randObj_r(), randObj_i()};
+	  B_view(i,j) = {randObj_r(), randObj_i()};
 	}
       }
     }
@@ -203,16 +208,18 @@ protected:
       for (std::size_t i=0; i < myExtent0; ++i) {
 	for (std::size_t j=0; j < myExtent1; ++j) {
 	  A_view(i,j) = randObj();
+	  B_view(i,j) = randObj();
 	}
       }
     }
   }
 
-  // these views will be on default memory space
   Kokkos::View<value_type**, Kokkos::HostSpace> A_view;
+  Kokkos::View<value_type**, Kokkos::HostSpace> B_view;
 
   using mdspan_t = mdspan<value_type, extents<dynamic_extent, dynamic_extent>>;
   mdspan_t A;
+  mdspan_t B;
 };
 
 
