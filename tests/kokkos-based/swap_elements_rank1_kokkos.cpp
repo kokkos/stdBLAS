@@ -5,7 +5,7 @@
 namespace{
 
 template<class x_t, class y_t>
-void kokkos_blas1_swap_test_impl(x_t x, y_t y)
+void kokkos_blas_swap_test_rank1_impl(x_t x, y_t y)
 {
   namespace stdla = std::experimental::linalg;
 
@@ -47,21 +47,20 @@ void kokkos_blas1_swap_test_impl(x_t x, y_t y)
       EXPECT_DOUBLE_EQ(y(i).imag(), x_preKernel[i].imag());
     }
   }
-
 }
 }//end anonym namespace
 
 TEST_F(blas1_signed_float_fixture, kokkos_swap)
 {
-  kokkos_blas1_swap_test_impl(x, y);
+  kokkos_blas_swap_test_rank1_impl(x, y);
 }
 
 TEST_F(blas1_signed_double_fixture, kokkos_swap)
 {
-  kokkos_blas1_swap_test_impl(x, y);
+  kokkos_blas_swap_test_rank1_impl(x, y);
 }
 
 TEST_F(blas1_signed_complex_double_fixture, kokkos_swap)
 {
-  kokkos_blas1_swap_test_impl(x, y);
+  kokkos_blas_swap_test_rank1_impl(x, y);
 }

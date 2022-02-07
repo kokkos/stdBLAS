@@ -6,11 +6,12 @@
 
 namespace KokkosKernelsSTD {
 
-// this is here but until we can use kokkos 3.6 which has swap avail
+// this is here until we can use kokkos 3.6 which has swap avail
 template <class T>
 KOKKOS_INLINE_FUNCTION void _my_tmp_swap(T& a, T& b) noexcept {
   static_assert(
-      std::is_move_assignable<T>::value && std::is_move_constructible<T>::value,
+      std::is_move_assignable<T>::value &&
+      std::is_move_constructible<T>::value,
       "KokkosKernelsSTD::swap arguments must be move assignable and move constructible");
 
   T tmp = std::move(a);
@@ -40,8 +41,22 @@ void swap_elements(kokkos_exec<ExeSpace> /*kexe*/,
 		     std::experimental::default_accessor<ElementType_y>
 		   > y)
 {
+  // constraints
+  // matching rank already checked via requires above
   static_assert(x.rank() <= 2);
 
+  // preconditions
+  if ( x.extent(0) != y.extent(0) ){
+    throw std::runtime_error("swap_elements: x.extent(0) != y.extent(0) ");
+  }
+
+  if constexpr(x.rank()==2){
+    if ( x.extent(1) != y.extent(1) ){
+      throw std::runtime_error("swap_elements: x.extent(1) != y.extent(1) ");
+    }
+  }
+
+  // this print is detected in the tests
 #if defined LINALG_ENABLE_TESTS
   std::cout << "swap_elements: kokkos impl\n";
 #endif
@@ -58,8 +73,7 @@ void swap_elements(kokkos_exec<ExeSpace> /*kexe*/,
 
   else{
     Kokkos::parallel_for(Kokkos::RangePolicy(ExeSpace(), 0, x_view.extent(0)),
-			 KOKKOS_LAMBDA (const std::size_t & i)
-			 {
+			 KOKKOS_LAMBDA (const std::size_t & i){
 			   for (std::size_t j=0; j<x_view.extent(1); ++j){
 			     _my_tmp_swap(x_view(i,j), y_view(i,j));
 			   }
