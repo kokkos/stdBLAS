@@ -22,11 +22,22 @@ macro(linalg_add_test_kokkos TESTNAME FINDSTR)
 endmacro()
 
 linalg_add_test_kokkos(
+  swap_elements_rank1_kokkos
+  "swap_elements: kokkos impl")
+linalg_add_test_kokkos(
+  swap_elements_rank2_kokkos
+  "swap_elements: kokkos impl")
+linalg_add_test_kokkos(
+  scale_rank1_kokkos
+  "scale: kokkos impl")
+linalg_add_test_kokkos(
+  scale_rank2_kokkos
+  "scale: kokkos impl")
+
+
+linalg_add_test_kokkos(
   add_kokkos
   "add: kokkos impl")
-linalg_add_test_kokkos(
-  scale_kokkos
-  "scale: kokkos impl")
 linalg_add_test_kokkos(
   dot_kokkos
   "dot: kokkos impl")
@@ -48,9 +59,6 @@ linalg_add_test_kokkos(
 linalg_add_test_kokkos(
   copy_kokkos
   "copy: kokkos impl")
-linalg_add_test_kokkos(
-  swap_elements_kokkos
-  "swap_elements: kokkos impl")
 linalg_add_test_kokkos(
   matrix_frob_norm_kokkos
   "matrix_frob_norm: kokkos impl")
