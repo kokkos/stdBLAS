@@ -114,7 +114,6 @@ class _blas1_signed_fixture : public ::testing::Test
 public:
   using value_type = T;
 
-public:
   _blas1_signed_fixture()
     : x_view("x_view", myExtent),
       y_view("y_view", myExtent),
@@ -174,12 +173,18 @@ class _blas2_signed_fixture : public ::testing::Test
 public:
   using value_type = T;
 
-public:
   _blas2_signed_fixture()
     : A_view("A_view", myExtent0, myExtent1),
-      A(A_view.data(), myExtent0, myExtent1),
       B_view("B_view", myExtent0, myExtent1),
-      B(B_view.data(), myExtent0, myExtent1)
+      v_Ae0_view ("v_Ae0_view", myExtent0),
+      v1_Ae0_view("v1_Ae0_view", myExtent0),
+      v_Ae1_view ("v_Ae1_view", myExtent1),
+      //
+      A(A_view.data(), myExtent0, myExtent1),
+      B(B_view.data(), myExtent0, myExtent1),
+      v_Ae0 (v_Ae0_view.data(), myExtent0),
+      v1_Ae0(v1_Ae0_view.data(), myExtent0),
+      v_Ae1 (v_Ae1_view.data(), myExtent1)
   {
 
     static_check_value_type(value_type{});
@@ -194,6 +199,14 @@ public:
       UnifDist<double> randObj_i(a_i, b_i);
 
       for (std::size_t i=0; i < myExtent0; ++i) {
+	v_Ae0_view(i)  = {randObj_r(), randObj_i()};
+	v1_Ae0_view(i) = {randObj_r(), randObj_i()};
+      }
+      for (std::size_t j=0; j < myExtent1; ++j) {
+	v_Ae1_view(j) = {randObj_r(), randObj_i()};
+      }
+
+      for (std::size_t i=0; i < myExtent0; ++i) {
 	for (std::size_t j=0; j < myExtent1; ++j) {
 	  A_view(i,j) = {randObj_r(), randObj_i()};
 	  B_view(i,j) = {randObj_r(), randObj_i()};
@@ -206,6 +219,14 @@ public:
       UnifDist<value_type> randObj(a, b);
 
       for (std::size_t i=0; i < myExtent0; ++i) {
+	v_Ae0_view(i)  = randObj();
+	v1_Ae0_view(i) = randObj();
+      }
+      for (std::size_t j=0; j < myExtent1; ++j) {
+	v_Ae1_view(j) = randObj();
+      }
+
+      for (std::size_t i=0; i < myExtent0; ++i) {
 	for (std::size_t j=0; j < myExtent1; ++j) {
 	  A_view(i,j) = randObj();
 	  B_view(i,j) = randObj();
@@ -216,10 +237,17 @@ public:
 
   Kokkos::View<value_type**, Kokkos::HostSpace> A_view;
   Kokkos::View<value_type**, Kokkos::HostSpace> B_view;
+  Kokkos::View<value_type*,  Kokkos::HostSpace> v_Ae0_view;
+  Kokkos::View<value_type*,  Kokkos::HostSpace> v_Ae1_view;
+  Kokkos::View<value_type*,  Kokkos::HostSpace> v1_Ae0_view;
 
-  using mdspan_t = mdspan<value_type, extents<dynamic_extent, dynamic_extent>>;
-  mdspan_t A;
-  mdspan_t B;
+  using mdspan_r1_t = mdspan<value_type, extents<dynamic_extent>>;
+  using mdspan_r2_t = mdspan<value_type, extents<dynamic_extent, dynamic_extent>>;
+  mdspan_r2_t A;
+  mdspan_r2_t B;
+  mdspan_r1_t v_Ae0;  // vector with extent == A.extent(0)
+  mdspan_r1_t v_Ae1;  // vector with extent == A.extent(1)
+  mdspan_r1_t v1_Ae0; // vector with extent == A.extent(0)
 };
 
 

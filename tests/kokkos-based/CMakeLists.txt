@@ -21,6 +21,11 @@ macro(linalg_add_test_kokkos TESTNAME FINDSTR)
       FAIL_REGULAR_EXPRESSION "[^a-z]Error;ERROR;Failed;FAILED")
 endmacro()
 
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# put here if finalized/cleanup/checked
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+### BLAS 1 ###
 linalg_add_test_kokkos(
   swap_elements_rank1_kokkos
   "swap_elements: kokkos impl")
@@ -34,7 +39,18 @@ linalg_add_test_kokkos(
   scale_rank2_kokkos
   "scale: kokkos impl")
 
+### BLAS 2 ###
+linalg_add_test_kokkos(
+  overwriting_matrix_vector_product
+  "overwriting_matrix_vector_product: kokkos impl")
+linalg_add_test_kokkos(
+  updating_matrix_vector_product
+  "updating_matrix_vector_product: kokkos impl")
 
+
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# following tests work but need cleanup
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 linalg_add_test_kokkos(
   add_kokkos
   "add: kokkos impl")
