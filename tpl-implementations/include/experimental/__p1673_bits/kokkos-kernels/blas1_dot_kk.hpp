@@ -5,6 +5,18 @@
 // keeping this in mind: https://github.com/kokkos/stdBLAS/issues/122
 
 namespace KokkosKernelsSTD {
+namespace DotImpl{
+
+template<class ScalarType, class = void>
+struct ResultTypeResolver{
+  using type = ScalarType;
+};
+
+template<class T>
+struct ResultTypeResolver< std::complex<T> >{
+  using type = Kokkos::complex<T>;
+};
+}
 
 template<class ExeSpace,
 	 class ElementType_x,
@@ -36,17 +48,22 @@ Scalar dot(kokkos_exec<ExeSpace> /*kexe*/,
   auto x_view = Impl::mdspan_to_view(x);
   auto y_view = Impl::mdspan_to_view(y);
 
-  // this overload is for the default_accessor (see the args above).
-  // Therefore, we cannot use KokkosBlas::dot here because
-  // it would automatically conjugate x for the complex case.
+  // This overload is for the default_accessor (see the args above).
+  // We cannot use KokkosBlas::dot here because it would automatically
+  // conjugate x for the complex case.
   // Since here we have the default accessors, we DO NOT want to conjugate x,
   // we just need to compute sum(x*y), even for the complex case.
-  Scalar result = {};
+
+  // In the complex case, Scalar is a std::complex type, so to use
+  // with Kokkos reduction we need to use Kokkos::complex as reduction type.
+  // If Scalar is not complex, then we do not need to do anything special.
+  using result_type = typename DotImpl::ResultTypeResolver<Scalar>::type;
+  result_type result = {};
   Kokkos::parallel_reduce(Kokkos::RangePolicy(ExeSpace(), 0, x_view.extent(0)),
-			  KOKKOS_LAMBDA (const std::size_t i, Scalar & update) {
+			  KOKKOS_LAMBDA (const std::size_t i, result_type & update){
 			    update += x_view(i)*y_view(i);
 			  }, result);
-  return result + init;
+  return Scalar(result) + init;
 }
 
 template<class ExeSpace,
@@ -84,7 +101,7 @@ Scalar dot(kokkos_exec<ExeSpace>,
   // this overload is for x with conjugated (with nested default) accessor
   // so can call KokkosBlas::dot because it automatically conjugates x
   // and it is what we want.
-  return KokkosBlas::dot(x_view, y_view) + init;
+  return Scalar(KokkosBlas::dot(x_view, y_view)) + init;
 }
 
 }

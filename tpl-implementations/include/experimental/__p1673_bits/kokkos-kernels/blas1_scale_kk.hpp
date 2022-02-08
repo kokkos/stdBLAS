@@ -2,10 +2,12 @@
 #ifndef LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_KOKKOSKERNELS_SCALE_HPP_
 #define LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_KOKKOSKERNELS_SCALE_HPP_
 
-// keeping this in mind: https://github.com/kokkos/stdBLAS/issues/122
-
 namespace KokkosKernelsSTD {
 
+//
+// for now, specialize for default_accessor
+// https://github.com/kokkos/stdBLAS/issues/122
+//
 template<class ExeSpace,
          class Scalar,
          class ElementType,

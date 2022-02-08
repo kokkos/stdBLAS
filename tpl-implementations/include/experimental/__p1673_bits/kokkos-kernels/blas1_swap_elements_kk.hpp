@@ -19,6 +19,10 @@ KOKKOS_INLINE_FUNCTION void _my_tmp_swap(T& a, T& b) noexcept {
   b     = std::move(tmp);
 }
 
+//
+// for now, specialize for default_accessor
+// https://github.com/kokkos/stdBLAS/issues/122
+//
 template<class ExeSpace,
 	 class ElementType_x,
          std::experimental::extents<>::size_type ... ext_x,
@@ -47,12 +51,12 @@ void swap_elements(kokkos_exec<ExeSpace> /*kexe*/,
 
   // preconditions
   if ( x.extent(0) != y.extent(0) ){
-    throw std::runtime_error("swap_elements: x.extent(0) != y.extent(0) ");
+    throw std::runtime_error("KokkosBlas: swap_elements: x.extent(0) != y.extent(0) ");
   }
 
   if constexpr(x.rank()==2){
     if ( x.extent(1) != y.extent(1) ){
-      throw std::runtime_error("swap_elements: x.extent(1) != y.extent(1) ");
+      throw std::runtime_error("KokkosBlas: swap_elements: x.extent(1) != y.extent(1) ");
     }
   }
 
