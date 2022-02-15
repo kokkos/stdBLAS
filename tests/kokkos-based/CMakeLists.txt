@@ -1,9 +1,28 @@
 
 macro(linalg_add_test_kokkos TESTNAME FINDSTR)
-  set(testNameFinal utest_${TESTNAME})
+
+  # the macro might have extra args
+  set(appendToTestName "")
+  set(compileDefs "")
+  set(extra_args "${ARGN}")
+  list(LENGTH extra_args extra_count)
+  if (${extra_count} EQUAL 2)
+    list(GET extra_args 0 compileDefs)
+    list(GET extra_args 1 appendToTestName)
+  endif()
+
+  if (appendToTestName STREQUAL "")
+    set(testNameFinal utest_${TESTNAME})
+  else()
+    set(testNameFinal utest_${TESTNAME}_${appendToTestName})
+  endif()
   set(testExe ${testNameFinal}_exe)
   add_executable(${testExe} ${TESTNAME}.cpp gtest_main_kokkos.cpp)
   target_link_libraries(${testExe} linalg GTest::GTest)
+
+  if (NOT compileDefs STREQUAL "")
+    target_compile_definitions(${testExe} PRIVATE -D${compileDefs})
+  endif()
 
   add_test(
     NAME ${testNameFinal}
@@ -46,7 +65,12 @@ linalg_add_test_kokkos(
 linalg_add_test_kokkos(
   updating_matrix_vector_product
   "updating_matrix_vector_product: kokkos impl")
-
+linalg_add_test_kokkos(
+  overwriting_symmetric_matrix_vector_product
+  "overwriting_symmetric_matrix_vector_product_lower: kokkos impl" USE_LOWER lower)
+linalg_add_test_kokkos(
+  overwriting_symmetric_matrix_vector_product
+  "overwriting_symmetric_matrix_vector_product_upper: kokkos impl" USE_UPPER upper)
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # following tests work but need cleanup

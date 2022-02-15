@@ -128,12 +128,12 @@ TEST_F(blas2_signed_float_fixture, kokkos_matrix_frob_norm_trivial_one_element)
 
 TEST_F(blas2_signed_float_fixture, kokkos_matrix_frob_norm_noinitvalue)
 {
-  kokkos_matrix_frob_norm_test_impl(A, static_cast<value_type>(0), false);
+  kokkos_matrix_frob_norm_test_impl(A_e0e1, static_cast<value_type>(0), false);
 }
 
 TEST_F(blas2_signed_float_fixture, kokkos_matrix_frob_norm_initvalue)
 {
-  kokkos_matrix_frob_norm_test_impl(A, static_cast<value_type>(5.6), true);
+  kokkos_matrix_frob_norm_test_impl(A_e0e1, static_cast<value_type>(5.6), true);
 }
 
 //
@@ -184,12 +184,12 @@ TEST_F(blas2_signed_double_fixture, kokkos_matrix_frob_norm_trivial_one_element)
 
 TEST_F(blas2_signed_double_fixture, kokkos_matrix_frob_norm_noinitvalue)
 {
-  kokkos_matrix_frob_norm_test_impl(A, static_cast<value_type>(0), false);
+  kokkos_matrix_frob_norm_test_impl(A_e0e1, static_cast<value_type>(0), false);
 }
 
 TEST_F(blas2_signed_double_fixture, kokkos_matrix_frob_norm_initvalue)
 {
-  kokkos_matrix_frob_norm_test_impl(A, static_cast<value_type>(5), true);
+  kokkos_matrix_frob_norm_test_impl(A_e0e1, static_cast<value_type>(5), true);
 }
 
 //
@@ -240,10 +240,10 @@ TEST_F(blas2_signed_complex_double_fixture, kokkos_matrix_frob_norm_trivial_one_
 
 TEST_F(blas2_signed_complex_double_fixture, kokkos_matrix_frob_norm_noinitvalue)
 {
-  kokkos_matrix_frob_norm_test_impl(A, static_cast<double>(0), false);
+  kokkos_matrix_frob_norm_test_impl(A_e0e1, static_cast<double>(0), false);
 }
 
 TEST_F(blas2_signed_complex_double_fixture, kokkos_matrix_frob_norm_initvalue)
 {
-  kokkos_matrix_frob_norm_test_impl(A, static_cast<double>(5), true);
+  kokkos_matrix_frob_norm_test_impl(A_e0e1, static_cast<double>(5), true);
 }

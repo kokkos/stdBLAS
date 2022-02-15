@@ -105,12 +105,12 @@ void kokkos_blas_updating_gemv_impl(A_t A, x_t x, y_t y, z_t z)
 
 TEST_F(blas2_signed_float_fixture, kokkos_updating_matrix_vector_product)
 {
-  kokkos_blas_updating_gemv_impl(A, v_Ae1, v_Ae0, v1_Ae0);
+  kokkos_blas_updating_gemv_impl(A_e0e1, x_e1, x_e0, y_e0);
 }
 
 TEST_F(blas2_signed_double_fixture, kokkos_updating_matrix_vector_product)
 {
-  kokkos_blas_updating_gemv_impl(A, v_Ae1, v_Ae0, v1_Ae0);
+  kokkos_blas_updating_gemv_impl(A_e0e1, x_e1, x_e0, y_e0);
 }
 
 TEST_F(blas2_signed_complex_double_fixture, kokkos_updating_matrix_vector_product)
@@ -118,6 +118,6 @@ TEST_F(blas2_signed_complex_double_fixture, kokkos_updating_matrix_vector_produc
   using kc_t = Kokkos::complex<double>;
   using stdc_t = value_type;
   if (alignof(value_type) == alignof(kc_t)){
-    kokkos_blas_updating_gemv_impl(A, v_Ae1, v_Ae0, v1_Ae0);
+    kokkos_blas_updating_gemv_impl(A_e0e1, x_e1, x_e0, y_e0);
   }
 }
