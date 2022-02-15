@@ -174,17 +174,23 @@ public:
   using value_type = T;
 
   _blas2_signed_fixture()
-    : A_view("A_view", myExtent0, myExtent1),
-      B_view("B_view", myExtent0, myExtent1),
-      v_Ae0_view ("v_Ae0_view", myExtent0),
-      v1_Ae0_view("v1_Ae0_view", myExtent0),
-      v_Ae1_view ("v_Ae1_view", myExtent1),
+    : A_e0e1_view("A_e0e1_view", myExtent0, myExtent1),
+      A_e0e1(A_e0e1_view.data(), myExtent0, myExtent1),
       //
-      A(A_view.data(), myExtent0, myExtent1),
-      B(B_view.data(), myExtent0, myExtent1),
-      v_Ae0 (v_Ae0_view.data(), myExtent0),
-      v1_Ae0(v1_Ae0_view.data(), myExtent0),
-      v_Ae1 (v_Ae1_view.data(), myExtent1)
+      B_e0e1_view("B_e0e1_view", myExtent0, myExtent1),
+      B_e0e1(B_e0e1_view.data(), myExtent0, myExtent1),
+      //
+      A_sym_e0_view("A_sym_e0_view", myExtent0, myExtent0),
+      A_sym_e0(A_sym_e0_view.data(), myExtent0, myExtent0),
+      //
+      x_e0_view("x_e0_view", myExtent0),
+      x_e0(x_e0_view.data(), myExtent0),
+      //
+      x_e1_view("x_e1_view", myExtent1),
+      x_e1(x_e1_view.data(), myExtent1),
+      //
+      y_e0_view("y_e0_view", myExtent0),
+      y_e0(y_e0_view.data(), myExtent0)
   {
 
     static_check_value_type(value_type{});
@@ -199,17 +205,24 @@ public:
       UnifDist<double> randObj_i(a_i, b_i);
 
       for (std::size_t i=0; i < myExtent0; ++i) {
-	v_Ae0_view(i)  = {randObj_r(), randObj_i()};
-	v1_Ae0_view(i) = {randObj_r(), randObj_i()};
+	x_e0_view(i) = {randObj_r(), randObj_i()};
+	y_e0_view(i) = {randObj_r(), randObj_i()};
       }
       for (std::size_t j=0; j < myExtent1; ++j) {
-	v_Ae1_view(j) = {randObj_r(), randObj_i()};
+	x_e1_view(j) = {randObj_r(), randObj_i()};
+      }
+
+      for (std::size_t i=0; i < myExtent0; ++i) {
+	for (std::size_t j=i; j < myExtent0; ++j) {
+	  A_sym_e0(i,j) = {randObj_r(), randObj_i()};
+	  A_sym_e0(j,i) = A_sym_e0(i,j);
+	}
       }
 
       for (std::size_t i=0; i < myExtent0; ++i) {
 	for (std::size_t j=0; j < myExtent1; ++j) {
-	  A_view(i,j) = {randObj_r(), randObj_i()};
-	  B_view(i,j) = {randObj_r(), randObj_i()};
+	  A_e0e1(i,j) = {randObj_r(), randObj_i()};
+	  B_e0e1(i,j) = {randObj_r(), randObj_i()};
 	}
       }
     }
@@ -219,35 +232,45 @@ public:
       UnifDist<value_type> randObj(a, b);
 
       for (std::size_t i=0; i < myExtent0; ++i) {
-	v_Ae0_view(i)  = randObj();
-	v1_Ae0_view(i) = randObj();
+	for (std::size_t j=i; j < myExtent0; ++j) {
+	  A_sym_e0(i,j) = randObj();
+	  A_sym_e0(j,i) = A_sym_e0(i,j);
+	}
+      }
+
+      for (std::size_t i=0; i < myExtent0; ++i) {
+	x_e0_view(i)  = randObj();
+	y_e0_view(i) = randObj();
       }
       for (std::size_t j=0; j < myExtent1; ++j) {
-	v_Ae1_view(j) = randObj();
+	x_e1_view(j) = randObj();
       }
 
       for (std::size_t i=0; i < myExtent0; ++i) {
 	for (std::size_t j=0; j < myExtent1; ++j) {
-	  A_view(i,j) = randObj();
-	  B_view(i,j) = randObj();
+	  A_e0e1_view(i,j) = randObj();
+	  B_e0e1_view(i,j) = randObj();
 	}
       }
     }
   }
 
-  Kokkos::View<value_type**, Kokkos::HostSpace> A_view;
-  Kokkos::View<value_type**, Kokkos::HostSpace> B_view;
-  Kokkos::View<value_type*,  Kokkos::HostSpace> v_Ae0_view;
-  Kokkos::View<value_type*,  Kokkos::HostSpace> v_Ae1_view;
-  Kokkos::View<value_type*,  Kokkos::HostSpace> v1_Ae0_view;
+  Kokkos::View<value_type**, Kokkos::HostSpace> A_e0e1_view;
+  Kokkos::View<value_type**, Kokkos::HostSpace> B_e0e1_view;
+  Kokkos::View<value_type**, Kokkos::HostSpace> A_sym_e0_view;
+  Kokkos::View<value_type*,  Kokkos::HostSpace> x_e0_view;
+  Kokkos::View<value_type*,  Kokkos::HostSpace> x_e1_view;
+  Kokkos::View<value_type*,  Kokkos::HostSpace> y_e0_view;
 
   using mdspan_r1_t = mdspan<value_type, extents<dynamic_extent>>;
   using mdspan_r2_t = mdspan<value_type, extents<dynamic_extent, dynamic_extent>>;
-  mdspan_r2_t A;
-  mdspan_r2_t B;
-  mdspan_r1_t v_Ae0;  // vector with extent == A.extent(0)
-  mdspan_r1_t v_Ae1;  // vector with extent == A.extent(1)
-  mdspan_r1_t v1_Ae0; // vector with extent == A.extent(0)
+  mdspan_r2_t A_e0e1; //e0 x e1
+  mdspan_r2_t B_e0e1; //e0 x e1
+  mdspan_r2_t A_sym_e0; //e0 x e0, sym
+
+  mdspan_r1_t x_e0;  // x vector with extent == e0
+  mdspan_r1_t x_e1;  // x vector with extent == e1
+  mdspan_r1_t y_e0;  // y vector with extent == e0
 };
 
 
