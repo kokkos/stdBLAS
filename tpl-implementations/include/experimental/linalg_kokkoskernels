@@ -19,4 +19,5 @@
 #include "__p1673_bits/kokkos-kernels/blas1_matrix_inf_norm_kk.hpp"
 #include "__p1673_bits/kokkos-kernels/blas1_matrix_one_norm_kk.hpp"
 
-#include "__p1673_bits/kokkos-kernels/blas2_matrix_vector_product_kk.hpp"
+#include "__p1673_bits/kokkos-kernels/blas2_gemv_kk.hpp"
+#include "__p1673_bits/kokkos-kernels/blas2_symv_kk.hpp"
