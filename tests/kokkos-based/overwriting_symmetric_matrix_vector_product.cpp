@@ -22,9 +22,8 @@ void kokkos_blas_overwriting_symv_impl(A_t A, Triangle t, x_t x, y_t y)
   namespace stdla = std::experimental::linalg;
 
   using value_type = typename A_t::value_type;
-  const std::size_t extent0 = A.extent(0);
-  const std::size_t extent1 = A.extent(1);
-  assert(extent0 == extent1);
+  assert(A.extent(0) == A.extent(1));
+  const std::size_t ext = A.extent(0);
 
   // copy operands before running the kernel
   auto A_preKernel = kokkostesting::create_stdvector_and_copy_rowwise(A);
@@ -45,53 +44,38 @@ void kokkos_blas_overwriting_symv_impl(A_t A, Triangle t, x_t x, y_t y)
   // since that is how we stored above the preKernel values
 
   if constexpr(std::is_same_v<value_type, float>){
-    // check x
-    for (std::size_t j=0; j<extent1; ++j){
-      EXPECT_FLOAT_EQ(x(j), x_preKernel[j]);
-    }
-
-    // check A and y
     std::size_t count=0;
-    for (std::size_t i=0; i<extent0; ++i){
+    for (std::size_t i=0; i<ext; ++i){
+      EXPECT_FLOAT_EQ(x(i), x_preKernel[i]);
       // for y, we need to use near or it won't work
       EXPECT_NEAR(y(i), y_gold(i), 1e-3);
-      for (std::size_t j=0; j<extent1; ++j){
+      for (std::size_t j=0; j<ext; ++j){
 	EXPECT_FLOAT_EQ(A(i,j), A_preKernel[count++]);
       }
     }
   }
 
   else if constexpr(std::is_same_v<value_type, double>){
-    // check x
-    for (std::size_t j=0; j<extent1; ++j){
-      EXPECT_DOUBLE_EQ(x(j), x_preKernel[j]);
-    }
-
-    // check A and y
     std::size_t count=0;
-    for (std::size_t i=0; i<extent0; ++i){
+    for (std::size_t i=0; i<ext; ++i){
+      EXPECT_DOUBLE_EQ(x(i), x_preKernel[i]);
       // for y, we need to use near or it won't work
       EXPECT_NEAR(y(i), y_gold(i), 1e-12);
-      for (std::size_t j=0; j<extent1; ++j){
+      for (std::size_t j=0; j<ext; ++j){
 	EXPECT_DOUBLE_EQ(A(i,j), A_preKernel[count++]);
       }
     }
   }
 
   else if constexpr(std::is_same_v<value_type, std::complex<double>>){
-    // check x
-    for (std::size_t j=0; j<extent1; ++j){
-      EXPECT_DOUBLE_EQ(x(j).real(), x_preKernel[j].real());
-      EXPECT_DOUBLE_EQ(x(j).imag(), x_preKernel[j].imag());
-    }
-
-    // check A and y
     std::size_t count=0;
-    for (std::size_t i=0; i<extent0; ++i){
-      EXPECT_NEAR(y(i).real(), y_gold(i).real(), 1e-12);
-      EXPECT_NEAR(y(i).imag(), y_gold(i).imag(), 1e-12);
+    for (std::size_t i=0; i<ext; ++i){
+      EXPECT_DOUBLE_EQ(x(i).real(), x_preKernel[i].real());
+      EXPECT_DOUBLE_EQ(x(i).imag(), x_preKernel[i].imag());
+      EXPECT_NEAR(y(i).real(),	    y_gold(i).real(), 1e-12);
+      EXPECT_NEAR(y(i).imag(),	    y_gold(i).imag(), 1e-12);
 
-      for (std::size_t j=0; j<extent1; ++j){
+      for (std::size_t j=0; j<ext; ++j){
 	EXPECT_DOUBLE_EQ(A(i,j).real(), A_preKernel[count].real());
 	EXPECT_DOUBLE_EQ(A(i,j).imag(), A_preKernel[count++].imag());
       }
@@ -131,7 +115,6 @@ TEST_F(blas2_signed_float_fixture, kokkos_overwriting_sym_matrix_vector_product_
   namespace stdla = std::experimental::linalg;
   kokkos_blas_overwriting_symv_impl(A_sym_e0, stdla::lower_triangle, x_e0, y_e0);
 }
-
 
 TEST_F(blas2_signed_double_fixture, kokkos_overwriting_sym_matrix_vector_product_lower)
 {

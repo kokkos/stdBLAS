@@ -190,7 +190,10 @@ public:
       x_e1(x_e1_view.data(), myExtent1),
       //
       y_e0_view("y_e0_view", myExtent0),
-      y_e0(y_e0_view.data(), myExtent0)
+      y_e0(y_e0_view.data(), myExtent0),
+      //
+      z_e0_view("z_e0_view", myExtent0),
+      z_e0(z_e0_view.data(), myExtent0)
   {
 
     static_check_value_type(value_type{});
@@ -204,14 +207,7 @@ public:
       const auto b_i = static_cast<double>( 7);
       UnifDist<double> randObj_i(a_i, b_i);
 
-      for (std::size_t i=0; i < myExtent0; ++i) {
-	x_e0_view(i) = {randObj_r(), randObj_i()};
-	y_e0_view(i) = {randObj_r(), randObj_i()};
-      }
-      for (std::size_t j=0; j < myExtent1; ++j) {
-	x_e1_view(j) = {randObj_r(), randObj_i()};
-      }
-
+      // fill symmetric matrices
       for (std::size_t i=0; i < myExtent0; ++i) {
 	for (std::size_t j=i; j < myExtent0; ++j) {
 	  A_sym_e0(i,j) = {randObj_r(), randObj_i()};
@@ -219,18 +215,33 @@ public:
 	}
       }
 
+      // fill nonsym matrices
       for (std::size_t i=0; i < myExtent0; ++i) {
 	for (std::size_t j=0; j < myExtent1; ++j) {
 	  A_e0e1(i,j) = {randObj_r(), randObj_i()};
 	  B_e0e1(i,j) = {randObj_r(), randObj_i()};
 	}
       }
+
+      // fill vectors with extent = extent0
+      for (std::size_t i=0; i < myExtent0; ++i) {
+	x_e0_view(i) = {randObj_r(), randObj_i()};
+	y_e0_view(i) = {randObj_r(), randObj_i()};
+	z_e0_view(i) = {randObj_r(), randObj_i()};
+      }
+
+      // fill vectors with extent = extent1
+      for (std::size_t j=0; j < myExtent1; ++j) {
+	x_e1_view(j) = {randObj_r(), randObj_i()};
+      }
+
     }
     else{
       const auto a = static_cast<value_type>(-5);
       const auto b = static_cast<value_type>( 4);
       UnifDist<value_type> randObj(a, b);
 
+      // fill symmetric matrices
       for (std::size_t i=0; i < myExtent0; ++i) {
 	for (std::size_t j=i; j < myExtent0; ++j) {
 	  A_sym_e0(i,j) = randObj();
@@ -238,20 +249,26 @@ public:
 	}
       }
 
-      for (std::size_t i=0; i < myExtent0; ++i) {
-	x_e0_view(i)  = randObj();
-	y_e0_view(i) = randObj();
-      }
-      for (std::size_t j=0; j < myExtent1; ++j) {
-	x_e1_view(j) = randObj();
-      }
-
+      // fill nonsym matrices
       for (std::size_t i=0; i < myExtent0; ++i) {
 	for (std::size_t j=0; j < myExtent1; ++j) {
 	  A_e0e1_view(i,j) = randObj();
 	  B_e0e1_view(i,j) = randObj();
 	}
       }
+
+      // fill vectors with extent = extent0
+      for (std::size_t i=0; i < myExtent0; ++i) {
+	x_e0_view(i) = randObj();
+	y_e0_view(i) = randObj();
+	z_e0_view(i) = randObj();
+      }
+
+      // fill vectors with extent = extent1
+      for (std::size_t j=0; j < myExtent1; ++j) {
+	x_e1_view(j) = randObj();
+      }
+
     }
   }
 
@@ -261,6 +278,7 @@ public:
   Kokkos::View<value_type*,  Kokkos::HostSpace> x_e0_view;
   Kokkos::View<value_type*,  Kokkos::HostSpace> x_e1_view;
   Kokkos::View<value_type*,  Kokkos::HostSpace> y_e0_view;
+  Kokkos::View<value_type*,  Kokkos::HostSpace> z_e0_view;
 
   using mdspan_r1_t = mdspan<value_type, extents<dynamic_extent>>;
   using mdspan_r2_t = mdspan<value_type, extents<dynamic_extent, dynamic_extent>>;
@@ -271,6 +289,7 @@ public:
   mdspan_r1_t x_e0;  // x vector with extent == e0
   mdspan_r1_t x_e1;  // x vector with extent == e1
   mdspan_r1_t y_e0;  // y vector with extent == e0
+  mdspan_r1_t z_e0;  // z vector with extent == e0
 };
 
 
