@@ -78,6 +78,22 @@ linalg_add_test_kokkos(
   updating_symmetric_matrix_vector_product
   "updating_symmetric_matrix_vector_product_upper: kokkos impl" USE_UPPER upper)
 
+linalg_add_test_kokkos(
+  overwriting_triangular_matrix_vector_product
+  "overwriting_triangular_matrix_vector_product_upper: kokkos impl" USE_UPPER upper)
+linalg_add_test_kokkos(
+  overwriting_triangular_matrix_vector_product
+  "overwriting_triangular_matrix_vector_product_lower: kokkos impl" USE_LOWER lower)
+linalg_add_test_kokkos(
+  updating_triangular_matrix_vector_product
+  "updating_triangular_matrix_vector_product_upper: kokkos impl" USE_UPPER upper)
+linalg_add_test_kokkos(
+  updating_triangular_matrix_vector_product
+  "updating_triangular_matrix_vector_product_lower: kokkos impl" USE_LOWER lower)
+
+
+
+
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # following tests work but need cleanup
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
