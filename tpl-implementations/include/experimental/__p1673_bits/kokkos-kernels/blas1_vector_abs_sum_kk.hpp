@@ -32,6 +32,8 @@ Scalar vector_abs_sum(kokkos_exec<ExeSpace> /*kexe*/,
 			  KOKKOS_LAMBDA (const std::size_t i, Scalar & update) {
 			    update += arithm_traits::abs(x_view(i));
 			  }, result);
+  // fence not needed because reducing into result
+
   return result + init;
 }
 

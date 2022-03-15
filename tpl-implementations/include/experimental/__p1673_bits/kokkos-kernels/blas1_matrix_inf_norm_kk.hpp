@@ -42,6 +42,8 @@ Scalar matrix_inf_norm(kokkos_exec<ExeSpace> /*kexe*/,
 			    reducer.join(update, mysum);
 			  }, reducer);
 
+  // fence not needed because reducing into result
+
   return init + result;
 }
 

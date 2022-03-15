@@ -42,8 +42,9 @@ Scalar matrix_one_norm(kokkos_exec<ExeSpace> /*kexe*/,
 			    reducer.join(update, mysum);
 			  }, reducer);
 
-  return init + result;
+  // fence not needed because reducing into result
 
+  return init + result;
 }
 
 } // end namespace KokkosKernelsSTD

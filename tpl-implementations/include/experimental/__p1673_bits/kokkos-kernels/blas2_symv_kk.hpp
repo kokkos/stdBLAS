@@ -92,7 +92,10 @@ void symmetric_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
 			   // note the +=
 			   y_view(i) += lsum;
 			 });
+
+    //fence message when using latest kokkos:
     ex.fence();
+    // ex.fence("KokkosStdBlas::overwriting_symv_upper: fence after operation");
   }
   else{
 
@@ -119,7 +122,10 @@ void symmetric_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
 			   // note the += here
 			   y_view(i) += lsum;
 			 });
+
+    //fence message when using latest kokkos:
     ex.fence();
+    // ex.fence("KokkosStdBlas::overwriting_symv_lower: fence after operation");
   }
 
 }
@@ -225,7 +231,10 @@ void symmetric_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
 			   }
 			   z_view(i) += y_view(i) + lsum;
 			 });
+
+    //fence message when using latest kokkos:
     ex.fence();
+    // ex.fence("KokkosStdBlas::updating_symv_upper: fence after operation");
   }
   else{
 
@@ -251,7 +260,10 @@ void symmetric_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
 			   }
 			   z_view(i) += y_view(i) + lsum;
 			 });
+
+    //fence message when using latest kokkos:
     ex.fence();
+    // ex.fence("KokkosStdBlas::updating_symv_lower: fence after operation");
   }
 
 }

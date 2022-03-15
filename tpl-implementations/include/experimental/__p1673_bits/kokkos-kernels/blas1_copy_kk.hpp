@@ -34,15 +34,16 @@ void copy(kokkos_exec<ExeSpace> /*kexe*/,
   auto x_view = Impl::mdspan_to_view(x);
   auto y_view = Impl::mdspan_to_view(y);
 
+  auto ex = ExeSpace();
   if constexpr(x.rank()==1){
-    Kokkos::parallel_for(Kokkos::RangePolicy(ExeSpace(), 0, x_view.extent(0)),
+    Kokkos::parallel_for(Kokkos::RangePolicy(ex, 0, x_view.extent(0)),
 			 KOKKOS_LAMBDA (const std::size_t & i){
 			   y_view(i) = x_view(i);
 			 });
   }
 
   else{
-    Kokkos::parallel_for(Kokkos::RangePolicy(ExeSpace(), 0, x_view.extent(0)),
+    Kokkos::parallel_for(Kokkos::RangePolicy(ex, 0, x_view.extent(0)),
 			 KOKKOS_LAMBDA (const std::size_t & i)
 			 {
 			   for (std::size_t j=0; j<x_view.extent(1); ++j){
@@ -50,6 +51,10 @@ void copy(kokkos_exec<ExeSpace> /*kexe*/,
 			   }
 			 });
   }
+
+  //fence message when using latest kokkos:
+  ex.fence();
+  // ex.fence("KokkosStdBlas::copy: fence after operation");
 }
 
 } // end namespace KokkosKernelsSTD

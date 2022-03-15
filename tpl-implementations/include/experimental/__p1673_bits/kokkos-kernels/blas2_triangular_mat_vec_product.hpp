@@ -93,6 +93,7 @@ void triangular_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
 
 			   y_view(i) = lsum;
 			 });
+    //fence message when using latest kokkos: "KokkosStdBlas::overwriting_triangular_mat_vec_upper: fence after operation"); 
     ex.fence();
   }
 
@@ -119,6 +120,7 @@ void triangular_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
 
 			   y_view(i) = lsum;
 			 });
+    //fence message when using latest kokkos: "KokkosStdBlas::overwriting_triangular_mat_vec_upper: fence after operation"
     ex.fence();
   }
 
@@ -228,7 +230,11 @@ void triangular_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
 
 			   z_view(i) = y_view(i) + lsum;
 			 });
+
+    //fence message when using latest kokkos:
+    // ex.fence("KokkosStdBlas::updating_triangular_mat_vec_upper: fence after operation");
     ex.fence();
+
   }
 
   else{
@@ -254,7 +260,10 @@ void triangular_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
 
 			   z_view(i) = y_view(i) + lsum;
 			 });
+
+    //fence message when using latest kokkos:
     ex.fence();
+    // ex.fence("KokkosStdBlas::updating_triangular_mat_vec_lower: fence after operation");
   }
 }
 

@@ -156,7 +156,8 @@ void matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
 
   // FRIZZI: we need to improve this or maybe we should
   // just do two ops: fist y->z, and then gemv directly
-  Kokkos::parallel_for(Kokkos::RangePolicy(ExeSpace(), 0, z_view.extent(0)),
+  auto ex = ExeSpace();
+  Kokkos::parallel_for(Kokkos::RangePolicy(ex, 0, z_view.extent(0)),
 		       KOKKOS_LAMBDA (const std::size_t & i)
 		       {
 			 typename decltype(z_view)::value_type z_i = {};
@@ -166,6 +167,9 @@ void matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
 			 z_view(i) = z_i;
 		       });
 
+  //fence message when using latest kokkos:
+  ex.fence();
+  // ex.fence("KokkosStdBlas::gemv: fence after operation");
 }
 
 //

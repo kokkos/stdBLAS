@@ -35,8 +35,10 @@ Scalar vector_norm2(kokkos_exec<ExeSpace> /*kexe*/,
 			    const typename IPT::mag_type tmp = IPT::norm(x_view(i));
 			    update += tmp*tmp;
 			  }, result);
-  return Kokkos::Details::ArithTraits<Scalar>::sqrt(result + init);
 
+  // fence not needed because reducing into result
+
+  return Kokkos::Details::ArithTraits<Scalar>::sqrt(result + init);
 }
 
 }

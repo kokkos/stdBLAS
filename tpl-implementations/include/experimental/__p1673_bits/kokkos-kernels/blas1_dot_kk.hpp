@@ -63,6 +63,9 @@ Scalar dot(kokkos_exec<ExeSpace> /*kexe*/,
 			  KOKKOS_LAMBDA (const std::size_t i, result_type & update){
 			    update += x_view(i)*y_view(i);
 			  }, result);
+
+  // fence not needed because reducing into result
+
   return Scalar(result) + init;
 }
 
