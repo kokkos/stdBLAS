@@ -22,3 +22,4 @@
 #include "__p1673_bits/kokkos-kernels/blas2_gemv_kk.hpp"
 #include "__p1673_bits/kokkos-kernels/blas2_symv_kk.hpp"
 #include "__p1673_bits/kokkos-kernels/blas2_triangular_mat_vec_product.hpp"
+#include "__p1673_bits/kokkos-kernels/blas2_matrix_rank_1_update.hpp"
