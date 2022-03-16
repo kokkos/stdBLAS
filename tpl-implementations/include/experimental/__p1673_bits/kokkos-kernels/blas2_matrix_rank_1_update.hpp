@@ -8,7 +8,7 @@ namespace detail {
 // manages parallel execution of independent action
 // called like action(i, j) for each matrix element A(i, j)
 template <typename ExecSpace, typename MatrixType, typename ActionType>
-void for_each_matrix_element(MatrixType &A, ActionType action) {
+void for_each_matrix_element(ExecSpace &&exec, MatrixType &A, ActionType action) {
   const auto num_rows = A.extent(0);
   const auto num_cols = A.extent(1);
 
@@ -37,6 +37,7 @@ void for_each_matrix_element(MatrixType &A, ActionType action) {
         action(i, j);
       });
   }
+  exec.fence();
 }
 
 } // namespace detail
@@ -86,7 +87,7 @@ void matrix_rank_1_update(kokkos_exec<ExecSpace> &&/* exec */,
   auto y_view = Impl::mdspan_to_view(y);
   auto A_view = Impl::mdspan_to_view(A);
 
-  detail::for_each_matrix_element<ExecSpace>(A,
+  detail::for_each_matrix_element(ExecSpace(), A,
     KOKKOS_LAMBDA(const auto i, const auto j) {
       A(i, j) += x(i) * y(j);
     });
