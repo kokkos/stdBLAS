@@ -13,29 +13,32 @@ void for_each_matrix_element(ExecSpace &&exec, MatrixType &A, ActionType action)
   const auto num_cols = A.extent(1);
 
   const auto max_val = std::numeric_limits<decltype(num_rows * num_cols)>::max();
-  if (num_rows >= max_val / num_cols) { // parallel rows
-    Kokkos::parallel_for(Kokkos::RangePolicy(ExecSpace(), 0, num_rows),
-      KOKKOS_LAMBDA(const auto i) {
-        using idx_type = std::remove_const_t<decltype(i)>;
-        for (idx_type j = 0; j < num_cols; ++j) {
-          action(i, j);
-        }
-      });
-  } else if (num_cols >= max_val / num_rows) { // parallel columns
-    Kokkos::parallel_for(Kokkos::RangePolicy(ExecSpace(), 0, num_cols),
-      KOKKOS_LAMBDA(const auto j) {
-        using idx_type = std::remove_const_t<decltype(j)>;
-        for (idx_type i = 0; i < num_rows; ++i) {
-          action(i, j);
-        }
-      });
-  } else { // parallel elements
-    Kokkos::parallel_for(Kokkos::RangePolicy(ExecSpace(), 0, num_rows * num_cols),
+  if (num_rows < max_val / num_cols) { // parallel elements
+    Kokkos::parallel_for(Kokkos::RangePolicy(exec, 0, num_rows * num_cols),
       KOKKOS_LAMBDA(const auto ij) {
         const auto i = ij / num_cols;
         const auto j = ij - (i * num_cols); // = ij % num_cols
         action(i, j);
       });
+  } else {
+    // parallelize over single dimension due to index int overflow
+    if (num_rows > num_cols) { // parallel rows
+      Kokkos::parallel_for(Kokkos::RangePolicy(exec, 0, num_rows),
+        KOKKOS_LAMBDA(const auto i) {
+          using idx_type = std::remove_const_t<decltype(i)>;
+          for (idx_type j = 0; j < num_cols; ++j) {
+            action(i, j);
+          }
+        });
+    } else { // parallel columns
+      Kokkos::parallel_for(Kokkos::RangePolicy(exec, 0, num_cols),
+        KOKKOS_LAMBDA(const auto j) {
+          using idx_type = std::remove_const_t<decltype(j)>;
+          for (idx_type i = 0; i < num_rows; ++i) {
+            action(i, j);
+          }
+        });
+      }
   }
   exec.fence();
 }
