@@ -5,18 +5,6 @@
 // keeping this in mind: https://github.com/kokkos/stdBLAS/issues/122
 
 namespace KokkosKernelsSTD {
-namespace DotImpl{
-
-template<class ScalarType, class = void>
-struct ResultTypeResolver{
-  using type = ScalarType;
-};
-
-template<class T>
-struct ResultTypeResolver< std::complex<T> >{
-  using type = Kokkos::complex<T>;
-};
-}
 
 template<class ExeSpace,
 	 class ElementType_x,
@@ -54,10 +42,10 @@ Scalar dot(kokkos_exec<ExeSpace> /*kexe*/,
   // Since here we have the default accessors, we DO NOT want to conjugate x,
   // we just need to compute sum(x*y), even for the complex case.
 
-  // In the complex case, Scalar is a std::complex type, so to use
-  // with Kokkos reduction we need to use Kokkos::complex as reduction type.
-  // If Scalar is not complex, then we do not need to do anything special.
-  using result_type = typename DotImpl::ResultTypeResolver<Scalar>::type;
+  // Note that here we cannot use Scalar as accumulation type
+  // because in the complex case, Scalar == std::complex type but the
+  // value_type of x_view, y_view is Kokkos::complex, so we need to be careful.
+  using result_type = decltype(x_view(0)*y_view(0));
   result_type result = {};
   Kokkos::parallel_reduce(Kokkos::RangePolicy(ExeSpace(), 0, x_view.extent(0)),
 			  KOKKOS_LAMBDA (const std::size_t i, result_type & update){
@@ -66,6 +54,7 @@ Scalar dot(kokkos_exec<ExeSpace> /*kexe*/,
 
   // fence not needed because reducing into result
 
+  // this is needed so that it works when Scalar is std::complex
   return Scalar(result) + init;
 }
 
