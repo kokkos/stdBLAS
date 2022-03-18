@@ -92,7 +92,7 @@ void matrix_rank_1_update(kokkos_exec<ExecSpace> &&/* exec */,
 
   detail::for_each_matrix_element(ExecSpace(), A,
     KOKKOS_LAMBDA(const auto i, const auto j) {
-      A(i, j) += x(i) * y(j);
+      A_view(i, j) += x_view(i) * y_view(j);
     });
 }
 
