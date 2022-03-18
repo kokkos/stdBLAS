@@ -191,8 +191,8 @@ void matrix_rank_1_update_gold_solution(const x_t &x, const y_t &y, A_t &A)
   }
 }
 
-template<class x_t, class y_t, class A_t>
-void kokkos_matrix_rank1_update_impl(const x_t &x, const y_t &y, A_t &A)
+template<class x_t, class y_t, class A_t, typename gold_t, typename action_t>
+void test_kokkos_matrix_update(const x_t &x, const y_t &y, A_t &A, gold_t get_gold, action_t action)
 {
   using value_type = typename x_t::value_type;
 
@@ -203,11 +203,10 @@ void kokkos_matrix_rank1_update_impl(const x_t &x, const y_t &y, A_t &A)
   // compute gold
   auto A_copy = kokkostesting::create_stdvector_and_copy_rowwise(A);
   auto A_gold = make_mdspan(A_copy.data(), A.extent(0), A.extent(1));
-  matrix_rank_1_update_gold_solution(x, y, A_gold);
+  get_gold(x, y, A_gold);
 
   // run tested routine
-  std::experimental::linalg::matrix_rank_1_update(
-      KokkosKernelsSTD::kokkos_exec<>(), x, y, A);
+  action();
 
   // compare results with gold
   EXPECT_TRUE(is_same_matrix(A_gold, A, tolerance<value_type>::value));
@@ -215,6 +214,31 @@ void kokkos_matrix_rank1_update_impl(const x_t &x, const y_t &y, A_t &A)
   // x,y should not change after kernel
   EXPECT_TRUE(is_same_vector(x, x_preKernel));
   EXPECT_TRUE(is_same_vector(y, y_preKernel));
+}
+
+template<class x_t, class y_t, class A_t>
+void test_kokkos_matrix_rank1_update_impl(const x_t &x, const y_t &y, A_t &A)
+{
+  test_kokkos_matrix_update(x, y, A,
+    matrix_rank_1_update_gold_solution<x_t, y_t, A_t>,
+    [&]() {
+      std::experimental::linalg::matrix_rank_1_update(
+          KokkosKernelsSTD::kokkos_exec<>(), x, y, A);
+    });
+}
+
+template<class x_t, class y_t, class A_t>
+void test_kokkos_matrix_rank1_update_conj_impl(const x_t &x, const y_t &y, A_t &A)
+{
+  test_kokkos_matrix_update(x, y, A,
+    [&](auto x, auto y, auto A) {
+      matrix_rank_1_update_gold_solution(x,
+        std::experimental::linalg::conjugated(y), A);
+    },
+    [&]() {
+      std::experimental::linalg::matrix_rank_1_update_c(
+          KokkosKernelsSTD::kokkos_exec<>(), x, y, A);
+    });
 }
 
 template <typename value_type, typename cb_type>
@@ -237,7 +261,8 @@ TEST_F(blas2_signed_##blas_val_type##_fixture, kokkos_matrix_rank1_update) { \
   using val_t = typename blas2_signed_##blas_val_type##_fixture::value_type; \
   run_checked_tests<val_t>(#blas_val_type, [&]() {                           \
                                                                              \
-    kokkos_matrix_rank1_update_impl(x_e0, x_e1, A_e0e1);                     \
+    test_kokkos_matrix_rank1_update_impl(x_e0, x_e1, A_e0e1);                \
+    test_kokkos_matrix_rank1_update_conj_impl(x_e0, x_e1, A_e0e1);           \
                                                                              \
   });                                                                        \
 }
