@@ -65,7 +65,6 @@ void symmetric_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
 
   auto ex = ExeSpace();
 
-  // FRIZZI: improve things and maybe fuse par_fors
   if constexpr (std::is_same_v<Triangle, std::experimental::linalg::upper_triangle_t>)
   {
 
@@ -75,22 +74,18 @@ void symmetric_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
 #endif
 
     Kokkos::parallel_for(Kokkos::RangePolicy(ex, 0, A_view.extent(0)),
-			 KOKKOS_LAMBDA (const std::size_t & i){
-			   typename decltype(y_view)::value_type lsum = {};
+			 KOKKOS_LAMBDA (const std::size_t & i)
+			 {
+
+			   typename decltype(y_view)::value_type lsum  = {};
 			   for (std::size_t j = i; j < A_view.extent(1); ++j) {
 			     lsum += A_view(i,j) * x_view(j);
 			   }
-			   y_view(i) = lsum;
-			 });
-
-    Kokkos::parallel_for(Kokkos::RangePolicy(ex, 0, A_view.extent(0)),
-			 KOKKOS_LAMBDA (const std::size_t & i){
-			   typename decltype(y_view)::value_type lsum = {};
 			   for (std::size_t j = 0; j < i; ++j) {
 			     lsum += A_view(j,i) * x_view(j);
 			   }
-			   // note the +=
-			   y_view(i) += lsum;
+
+			   y_view(i) = lsum;
 			 });
 
     //fence message when using latest kokkos:
@@ -105,22 +100,18 @@ void symmetric_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
 #endif
 
     Kokkos::parallel_for(Kokkos::RangePolicy(ex, 0, A_view.extent(0)),
-			 KOKKOS_LAMBDA (const std::size_t & i){
+			 KOKKOS_LAMBDA (const std::size_t & i)
+			 {
+
 			   typename decltype(y_view)::value_type lsum = {};
 			   for (std::size_t j = 0; j <= i; ++j) {
 			     lsum += A_view(i,j) * x_view(j);
 			   }
-			   y_view(i) = lsum;
-			 });
-
-    Kokkos::parallel_for(Kokkos::RangePolicy(ex, 0, A_view.extent(0)),
-			 KOKKOS_LAMBDA (const std::size_t & i){
-			   typename decltype(y_view)::value_type lsum = {};
 			   for (std::size_t j = i+1; j < A.extent(1); ++j) {
 			     lsum += A_view(j,i) * x_view(j);
 			   }
-			   // note the += here
-			   y_view(i) += lsum;
+
+			   y_view(i) = lsum;
 			 });
 
     //fence message when using latest kokkos:
@@ -205,7 +196,6 @@ void symmetric_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
 
   auto ex = ExeSpace();
 
-  // FRIZZI: improve things and maybe fuse par_fors
   if constexpr (std::is_same_v<Triangle, std::experimental::linalg::upper_triangle_t>)
   {
 
@@ -220,16 +210,11 @@ void symmetric_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
 			   for (std::size_t j = i; j < A_view.extent(1); ++j) {
 			     lsum += A_view(i,j) * x_view(j);
 			   }
-			   z_view(i) = lsum;
-			 });
-
-    Kokkos::parallel_for(Kokkos::RangePolicy(ex, 0, A_view.extent(0)),
-			 KOKKOS_LAMBDA (const std::size_t & i){
-			   typename decltype(y_view)::value_type lsum = {};
 			   for (std::size_t j = 0; j < i; ++j) {
 			     lsum += A_view(j,i) * x_view(j);
 			   }
-			   z_view(i) += y_view(i) + lsum;
+
+			   z_view(i) = y_view(i) + lsum;
 			 });
 
     //fence message when using latest kokkos:
@@ -249,16 +234,11 @@ void symmetric_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
 			   for (std::size_t j = 0; j <= i; ++j) {
 			     lsum += A_view(i,j) * x_view(j);
 			   }
-			   z_view(i) = lsum;
-			 });
-
-    Kokkos::parallel_for(Kokkos::RangePolicy(ex, 0, A_view.extent(0)),
-			 KOKKOS_LAMBDA (const std::size_t & i){
-			   typename decltype(y_view)::value_type lsum = {};
 			   for (std::size_t j = i+1; j < A.extent(1); ++j) {
 			     lsum += A_view(j,i) * x_view(j);
 			   }
-			   z_view(i) += y_view(i) + lsum;
+
+			   z_view(i) = y_view(i) + lsum;
 			 });
 
     //fence message when using latest kokkos:
