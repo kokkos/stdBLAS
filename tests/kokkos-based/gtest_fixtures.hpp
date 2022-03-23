@@ -255,6 +255,15 @@ public:
       const auto b = static_cast<value_type>( 4);
       UnifDist<value_type> randObj(a, b);
 
+      // fill herm matrices, which for float or double is
+      // just a symmetric matrix
+      for (std::size_t i=0; i < myExtent0; ++i) {
+	for (std::size_t j=i; j < myExtent0; ++j) {
+	  A_hem_e0(i,j) = randObj();
+	  A_hem_e0(j,i) = A_hem_e0(i,j);
+	}
+      }
+
       // fill symmetric matrices
       for (std::size_t i=0; i < myExtent0; ++i) {
 	for (std::size_t j=i; j < myExtent0; ++j) {

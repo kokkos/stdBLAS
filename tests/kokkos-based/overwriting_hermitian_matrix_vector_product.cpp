@@ -117,13 +117,13 @@ void kokkos_blas_overwriting_hemv_impl(A_t A, Triangle t, x_t x, y_t y)
 TEST_F(blas2_signed_float_fixture, kokkos_overwriting_hem_matrix_vector_product_upper)
 {
   namespace stdla = std::experimental::linalg;
-  kokkos_blas_overwriting_hemv_impl(A_sym_e0, stdla::upper_triangle, x_e0, y_e0);
+  kokkos_blas_overwriting_hemv_impl(A_hem_e0, stdla::upper_triangle, x_e0, y_e0);
 }
 
 TEST_F(blas2_signed_double_fixture, kokkos_overwriting_hem_matrix_vector_product_upper)
 {
   namespace stdla = std::experimental::linalg;
-  kokkos_blas_overwriting_hemv_impl(A_sym_e0, stdla::upper_triangle, x_e0, y_e0);
+  kokkos_blas_overwriting_hemv_impl(A_hem_e0, stdla::upper_triangle, x_e0, y_e0);
 }
 
 TEST_F(blas2_signed_complex_double_fixture, kokkos_overwriting_hem_matrix_vector_product_upper)
@@ -141,13 +141,13 @@ TEST_F(blas2_signed_complex_double_fixture, kokkos_overwriting_hem_matrix_vector
 TEST_F(blas2_signed_float_fixture, kokkos_overwriting_hem_matrix_vector_product_lower)
 {
   namespace stdla = std::experimental::linalg;
-  kokkos_blas_overwriting_hemv_impl(A_sym_e0, stdla::lower_triangle, x_e0, y_e0);
+  kokkos_blas_overwriting_hemv_impl(A_hem_e0, stdla::lower_triangle, x_e0, y_e0);
 }
 
 TEST_F(blas2_signed_double_fixture, kokkos_overwriting_hem_matrix_vector_product_lower)
 {
   namespace stdla = std::experimental::linalg;
-  kokkos_blas_overwriting_hemv_impl(A_sym_e0, stdla::lower_triangle, x_e0, y_e0);
+  kokkos_blas_overwriting_hemv_impl(A_hem_e0, stdla::lower_triangle, x_e0, y_e0);
 }
 
 TEST_F(blas2_signed_complex_double_fixture, kokkos_overwriting_hem_matrix_vector_product_lower)
