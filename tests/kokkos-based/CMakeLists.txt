@@ -91,6 +91,18 @@ linalg_add_test_kokkos(
   updating_triangular_matrix_vector_product
   "updating_triangular_matrix_vector_product_lower: kokkos impl" USE_LOWER lower)
 
+linalg_add_test_kokkos(
+  overwriting_hermitian_matrix_vector_product
+  "overwriting_hermitian_matrix_vector_product_upper: kokkos impl" USE_UPPER upper)
+linalg_add_test_kokkos(
+  overwriting_hermitian_matrix_vector_product
+  "overwriting_hermitian_matrix_vector_product_lower: kokkos impl" USE_LOWER lower)
+linalg_add_test_kokkos(
+  updating_hermitian_matrix_vector_product
+  "updating_hermitian_matrix_vector_product_upper: kokkos impl" USE_UPPER upper)
+linalg_add_test_kokkos(
+  updating_hermitian_matrix_vector_product
+  "updating_hermitian_matrix_vector_product_lower: kokkos impl" USE_LOWER lower)
 
 
 
@@ -130,6 +142,6 @@ linalg_add_test_kokkos(
 linalg_add_test_kokkos(
   matrix_inf_norm_kokkos
   "matrix_inf_norm: kokkos impl")
-linalg_add_test_kokkos(
-  matrix_rank1_update_kokkos
-  "matrix_rank1_update: kokkos impl")
+# linalg_add_test_kokkos(
+#   matrix_rank1_update_kokkos
+#   "matrix_rank1_update: kokkos impl")
