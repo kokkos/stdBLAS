@@ -51,9 +51,10 @@ inline bool is_same_vector(
   const auto size = v1.extent(0);
   if (size != v2.extent(0))
     return false;
-  bool diff = false;
-  Kokkos::parallel_reduce(size, KOKKOS_LAMBDA(const std::size_t i, bool &diff){
-        diff = diff || !(v1(i) == v2(i));
+  int diff = false;
+  Kokkos::parallel_reduce(size,
+    KOKKOS_LAMBDA(const std::size_t i, decltype(diff) &d){
+        d = d || !(v1(i) == v2(i));
 	    }, diff);
   return !diff;
 }
