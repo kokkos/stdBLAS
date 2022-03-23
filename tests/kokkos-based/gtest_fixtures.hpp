@@ -183,6 +183,9 @@ public:
       A_sym_e0_view("A_sym_e0_view", myExtent0, myExtent0),
       A_sym_e0(A_sym_e0_view.data(), myExtent0, myExtent0),
       //
+      A_hem_e0_view("A_hem_e0_view", myExtent0, myExtent0),
+      A_hem_e0(A_hem_e0_view.data(), myExtent0, myExtent0),
+      //
       x_e0_view("x_e0_view", myExtent0),
       x_e0(x_e0_view.data(), myExtent0),
       //
@@ -212,6 +215,17 @@ public:
 	for (std::size_t j=i; j < myExtent0; ++j) {
 	  A_sym_e0(i,j) = {randObj_r(), randObj_i()};
 	  A_sym_e0(j,i) = A_sym_e0(i,j);
+	}
+      }
+
+      // fill herm matrices
+      for (std::size_t i=0; i < myExtent0; ++i) {
+	// diagonal has real elements
+	A_hem_e0(i,i) = randObj_r();
+
+	for (std::size_t j=i+1; j < myExtent0; ++j) {
+	  A_hem_e0(i,j) = {randObj_r(), randObj_i()};
+	  A_hem_e0(j,i) = std::conj(A_hem_e0(i,j));
 	}
       }
 
@@ -275,6 +289,7 @@ public:
   Kokkos::View<value_type**, Kokkos::HostSpace> A_e0e1_view;
   Kokkos::View<value_type**, Kokkos::HostSpace> B_e0e1_view;
   Kokkos::View<value_type**, Kokkos::HostSpace> A_sym_e0_view;
+  Kokkos::View<value_type**, Kokkos::HostSpace> A_hem_e0_view;
   Kokkos::View<value_type*,  Kokkos::HostSpace> x_e0_view;
   Kokkos::View<value_type*,  Kokkos::HostSpace> x_e1_view;
   Kokkos::View<value_type*,  Kokkos::HostSpace> y_e0_view;
@@ -284,7 +299,8 @@ public:
   using mdspan_r2_t = mdspan<value_type, extents<dynamic_extent, dynamic_extent>>;
   mdspan_r2_t A_e0e1; //e0 x e1
   mdspan_r2_t B_e0e1; //e0 x e1
-  mdspan_r2_t A_sym_e0; //e0 x e0, sym
+  mdspan_r2_t A_sym_e0; //e0 x e0, symmetric
+  mdspan_r2_t A_hem_e0; //e0 x e0, hermitian
 
   mdspan_r1_t x_e0;  // x vector with extent == e0
   mdspan_r1_t x_e1;  // x vector with extent == e1
