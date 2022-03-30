@@ -163,23 +163,58 @@ Scalar matrix_frob_norm(
   return matrix_frob_norm(std::experimental::linalg::impl::default_exec_t(), A, init);
 }
 
-
-// TODO: Implement auto functions
-#if 0
-template<class in_matrix_t>
-auto matrix_frob_norm(in_matrix_t A)
+namespace matrix_frob_norm_detail
 {
 
-}
+  // The point of this is to do correct ADL for abs,
+  // without exposing "using std::abs" in the outer namespace.
+  using std::abs;
+  using size_type = typename extents<>::size_type;
+  template<
+    class ElementType,
+    size_type numRows, size_type numCols,
+    class Layout,
+    class Accessor>
+  auto matrix_frob_norm_return_type_deducer(
+    std::experimental::mdspan<
+      ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor
+    > A) -> decltype( abs(A(0,0)) * abs(A(0,0)) );
 
-template<class ExecutionPolicy,
-         class in_matrix_t>
-auto matrix_frob_norm(ExecutionPolicy&& exec,
-                      in_matrix_t A)
+} // namespace matrix_frob_norm_detail
+
+template<
+  class ElementType,
+  extents<>::size_type numRows,
+  extents<>::size_type numCols,
+  class Layout,
+  class Accessor>
+auto matrix_frob_norm(
+  std::experimental::mdspan<
+    ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor
+  > A)
+  -> decltype(matrix_frob_norm_detail::matrix_frob_norm_return_type_deducer(A))
 {
-
+  using return_t = decltype(matrix_frob_norm_detail::matrix_frob_norm_return_type_deducer(A));
+  return matrix_frob_norm(A, return_t{});
 }
-#endif
+
+template<
+  class ExecutionPolicy,
+  class ElementType,
+  extents<>::size_type numRows,
+  extents<>::size_type numCols,
+  class Layout,
+  class Accessor>
+auto matrix_frob_norm(
+  ExecutionPolicy&& exec,
+  std::experimental::mdspan<
+    ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor
+  > A)
+  -> decltype(matrix_frob_norm_detail::matrix_frob_norm_return_type_deducer(A))
+{
+  using return_t = decltype(matrix_frob_norm_detail::matrix_frob_norm_return_type_deducer(A));
+  return matrix_frob_norm(exec, A, return_t{});
+}
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
