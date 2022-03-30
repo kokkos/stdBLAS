@@ -1,0 +1,43 @@
+
+macro(linalg_add_test_kokkos TESTNAME FINDSTR)
+
+  # the macro might have extra args
+  set(appendToTestName "")
+  set(compileDefs "")
+  set(extra_args "${ARGN}")
+  list(LENGTH extra_args extra_count)
+  if (${extra_count} EQUAL 2)
+    list(GET extra_args 0 compileDefs)
+    list(GET extra_args 1 appendToTestName)
+  endif()
+
+  if (appendToTestName STREQUAL "")
+    set(testNameFinal utest_${TESTNAME})
+  else()
+    set(testNameFinal utest_${TESTNAME}_${appendToTestName})
+  endif()
+  set(testExe ${testNameFinal}_exe)
+  add_executable(${testExe} ${TESTNAME}.cpp gtest_main_kokkos.cpp)
+  target_link_libraries(${testExe} linalg GTest::GTest)
+
+  if (NOT compileDefs STREQUAL "")
+    target_compile_definitions(${testExe} PRIVATE -D${compileDefs})
+  endif()
+
+  add_test(
+    NAME ${testNameFinal}
+    COMMAND ${CMAKE_COMMAND}
+    -DEXE_NAME=$<TARGET_FILE:${testExe}>
+    -DALGO_NAME=${TESTNAME}
+    -DLOG_FILE=${CMAKE_CURRENT_BINARY_DIR}/${TESTNAME}.log
+    -DTEST_STRING_FIND=${FINDSTR}
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/test.cmake)
+
+    # we have to set fail regex so that if it fails,
+    # test.cmake will detect it
+    set_tests_properties(
+      ${testNameFinal} PROPERTIES
+      FAIL_REGULAR_EXPRESSION "[^a-z]Error;ERROR;Failed;FAILED")
+endmacro()
+
+# add tests below
