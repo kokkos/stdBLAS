@@ -55,3 +55,7 @@ set_tests_properties(utest_${testExe} PROPERTIES FAIL_REGULAR_EXPRESSION "[^a-z]
 linalg_add_test_kokkos(
   matrix_rank1_update_kokkos
   "matrix_rank1_update: kokkos impl")
+
+linalg_add_test_kokkos(
+  dot_kokkos
+  "dot: kokkos impl")
