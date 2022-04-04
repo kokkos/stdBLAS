@@ -4,4 +4,7 @@
 #cmakedefine LINALG_ENABLE_CONCEPTS
 #cmakedefine LINALG_ENABLE_KOKKOS
 #cmakedefine LINALG_ENABLE_KOKKOS_DEFAULT
+
+// this is here temporarily, but will be moved once
+// the kokkos impl is also moved
 #cmakedefine KOKKOS_STDBLAS_ENABLE_TESTS
