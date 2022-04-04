@@ -21,7 +21,9 @@ macro(linalg_add_test_kokkos TESTNAME FINDSTR)
   target_link_libraries(${testExe} linalg GTest::GTest)
 
   if (NOT compileDefs STREQUAL "")
-    target_compile_definitions(${testExe} PRIVATE -D${compileDefs})
+    target_compile_definitions(${testExe} PRIVATE -D${compileDefs} -DKOKKOS_STDBLAS_ENABLE_TESTS)
+  else()
+    target_compile_definitions(${testExe} PRIVATE -DKOKKOS_STDBLAS_ENABLE_TESTS)
   endif()
 
   add_test(
