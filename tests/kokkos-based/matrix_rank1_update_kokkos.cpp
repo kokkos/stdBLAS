@@ -128,13 +128,14 @@ inline bool is_same_matrix(
   const auto ext1 = A.extent(1);
   if (B.extent(0) != ext0 or B.extent(1) != ext1)
     return false;
-  bool diff = false;
+  int diff = false;
   const auto size = ext0 * ext1;
-  Kokkos::parallel_reduce(size, KOKKOS_LAMBDA(const std::size_t ij, bool &diff) {
+  Kokkos::parallel_reduce(size,
+    KOKKOS_LAMBDA(const std::size_t ij, decltype(diff) &d) {
         const auto i = ij / ext1;
         const auto j = ij - i * ext1;
         if (value_diff(A(i, j), B(i, j)) > tolerance)
-          diff = true;
+          d = true;
 	    }, diff);
   return !diff;
 }
