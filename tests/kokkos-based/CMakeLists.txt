@@ -51,3 +51,7 @@ add_executable(${testExe} mdspan_to_view.cpp gtest_main_kokkos.cpp)
 target_link_libraries(${testExe} linalg GTest::GTest)
 add_test(NAME utest_${testExe} COMMAND ${testExe})
 set_tests_properties(utest_${testExe} PROPERTIES FAIL_REGULAR_EXPRESSION "[^a-z]Error;ERROR;Failed;FAILED")
+
+linalg_add_test_kokkos(
+  matrix_rank1_update_kokkos
+  "matrix_rank1_update: kokkos impl")
