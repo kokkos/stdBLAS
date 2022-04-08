@@ -88,12 +88,20 @@ TEST_F(blas1_signed_double_fixture, kokkos_dot_initvalue)
 
 TEST_F(blas1_signed_complex_double_fixture, kokkos_dot_noinitvalue)
 {
-  const value_type init{0., 0.};
-  kokkos_blas1_dot_test_impl(x, y, init, false);
+  using kc_t   = Kokkos::complex<double>;
+  using stdc_t = value_type;
+  if (alignof(value_type) == alignof(kc_t)){
+    const value_type init{0., 0.};
+    kokkos_blas1_dot_test_impl(x, y, init, false);
+  }
 }
 
 TEST_F(blas1_signed_complex_double_fixture, kokkos_dot_initvalue)
 {
-  const value_type init{-2., 4.};
-  kokkos_blas1_dot_test_impl(x, y, init, true);
+  using kc_t   = Kokkos::complex<double>;
+  using stdc_t = value_type;
+  if (alignof(value_type) == alignof(kc_t)){
+    const value_type init{-2., 4.};
+    kokkos_blas1_dot_test_impl(x, y, init, true);
+  }
 }
