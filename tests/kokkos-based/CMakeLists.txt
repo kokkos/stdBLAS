@@ -59,3 +59,7 @@ linalg_add_test_kokkos(
 linalg_add_test_kokkos(
   dot_kokkos
   "dot: kokkos impl")
+  "dot: kokkos impl")
+linalg_add_test_kokkos(
+  dotc_kokkos
+  "dot: kokkos impl") # this his not a typo, dotc calls dot underneath
