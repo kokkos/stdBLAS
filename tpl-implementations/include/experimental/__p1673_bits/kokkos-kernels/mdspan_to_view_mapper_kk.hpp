@@ -26,7 +26,7 @@ constexpr void static_assert_complex_alignment(const T* /* p */)
 {
   using kc_t = Kokkos::complex<typename T::value_type>;
   static_assert(alignof(T) == alignof(kc_t),
-		"KokkosBlas: mdspan_to_view: mismatching alignment of std::complex<> and Kokkos::complex<> which prevents interoperability. By default, Kokkos::complex<T> is aligned as 2*sizeof(T) but std::complex<T> is aligned as sizeof(T). To match the alignment and allow correct conversion, you must rebuild Kokkos with KOKKOS_ENABLE_COMPLEX_ALIGN undefined.");
+    "KokkosBlas: mdspan_to_view: mismatching alignment of std::complex<> and Kokkos::complex<> which prevents interoperability. By default, Kokkos::complex<T> is aligned as 2*sizeof(T) but std::complex<T> is aligned as sizeof(T). To match the alignment and allow correct conversion, you must rebuild Kokkos with KOKKOS_ENABLE_COMPLEX_ALIGN undefined.");
 }
 
 //
@@ -58,11 +58,11 @@ template<
   class Layout,
   class Accessor>
 auto mdspan_to_view(std::experimental::mdspan<
-		      ElementType,
-		      std::experimental::extents<ext>,
-		      Layout,
-		      Accessor
-		    > a)
+          ElementType,
+          std::experimental::extents<ext>,
+          Layout,
+          Accessor
+        > a)
 {
   auto kokkos_p = to_kokkos_pointer(a.data());
   return Kokkos::View<decltype(kokkos_p)>(kokkos_p, a.extent(0));
@@ -75,11 +75,11 @@ template<
   class Layout,
   class Accessor>
 auto mdspan_to_view(std::experimental::mdspan<
-		      ElementType,
-		      std::experimental::extents<ext0, ext1>,
-		      Layout,
-		      Accessor
-		    > a)
+          ElementType,
+          std::experimental::extents<ext0, ext1>,
+          Layout,
+          Accessor
+        > a)
 {
   using mdspan_type = std::experimental::mdspan<
     ElementType, std::experimental::extents<ext0, ext1>, Layout, Accessor
