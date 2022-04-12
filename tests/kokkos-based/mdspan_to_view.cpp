@@ -2,6 +2,12 @@
 #include "gtest_fixtures.hpp"
 #include "helpers.hpp"
 
+template<class MDSpanType, class KViewType>
+void expect_shallow_copy(MDSpanType mdsp, KViewType kv)
+{
+  EXPECT_EQ( (void *) mdsp.data(), (void *) kv.data() );
+}
+
 template<class MDSpanValueType, class KViewValueType = MDSpanValueType>
 void mdspan_to_view_test_impl()
 {
@@ -20,6 +26,7 @@ void mdspan_to_view_test_impl()
     static_assert(kv_type::rank == 1);
     static_assert(std::is_same_v<typename kv_type::value_type, KViewValueType>);
     EXPECT_TRUE(kv.extent(0) == 5);
+    expect_shallow_copy(mdsp, kv);
   }
 
   // rank1, const
@@ -33,6 +40,7 @@ void mdspan_to_view_test_impl()
     static_assert(kv_type::rank == 1);
     static_assert(std::is_same_v<typename kv_type::value_type, const KViewValueType>);
     EXPECT_TRUE(kv.extent(0) == 5);
+    expect_shallow_copy(mdsp, kv);
   }
 
   // rank2, non-const
@@ -47,6 +55,7 @@ void mdspan_to_view_test_impl()
     static_assert(std::is_same_v<typename kv_type::value_type, KViewValueType>);
     EXPECT_TRUE(kv.extent(0) == 3);
     EXPECT_TRUE(kv.extent(1) == 4);
+    expect_shallow_copy(mdsp, kv);
   }
 
   // rank2, const
@@ -61,6 +70,7 @@ void mdspan_to_view_test_impl()
     static_assert(std::is_same_v<typename kv_type::value_type, const KViewValueType>);
     EXPECT_TRUE(kv.extent(0) == 3);
     EXPECT_TRUE(kv.extent(1) == 4);
+    expect_shallow_copy(mdsp, kv);
   }
 }
 
