@@ -84,8 +84,8 @@ public:
   }
 
 private:
-  const ExecSpace &exec;
-  MatrixType &A;
+  const ExecSpace exec;
+  MatrixType A;
   const size_t ext0;
   const size_t ext1;
 };
