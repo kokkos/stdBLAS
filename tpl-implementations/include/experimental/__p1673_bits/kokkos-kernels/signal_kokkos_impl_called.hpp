@@ -46,23 +46,14 @@
 
 #include <string_view>
 
-// Note: dependencies required only for compiling tests
-#if defined(KOKKOS_STDBLAS_ENABLE_TESTS)
-#include <iostream>
-#endif
-
 namespace KokkosKernelsSTD {
 namespace Impl {
 
-// For testing: signal that Kokkos implementation was called
-inline void signal_kokkos_impl_called(std::string_view functionName)
-{
 #if defined(KOKKOS_STDBLAS_ENABLE_TESTS)
-  std::cout << functionName << ": kokkos impl" << std::endl;
+extern void signal_kokkos_impl_called(std::string_view functionName);
 #else
-  (void)functionName;
+void signal_kokkos_impl_called(std::string_view /* functionName */) {}
 #endif
-}
 
 } // namespace Impl
 } // namespac KokkosKernelsSTD
