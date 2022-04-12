@@ -59,6 +59,8 @@ inline void signal_kokkos_impl_called(std::string_view functionName)
 {
 #if defined(KOKKOS_STDBLAS_ENABLE_TESTS)
   std::cout << functionName << ": kokkos impl" << std::endl;
+#else
+  (void)functionName;
 #endif
 }
 
