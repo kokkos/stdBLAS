@@ -56,5 +56,5 @@ void signal_kokkos_impl_called(std::string_view /* functionName */) {}
 #endif
 
 } // namespace Impl
-} // namespac KokkosKernelsSTD
+} // namespace KokkosKernelsSTD
 #endif
