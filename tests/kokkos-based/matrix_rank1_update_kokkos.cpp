@@ -211,17 +211,19 @@ template <typename value_type>
 inline constexpr auto check_types_v = check_types<value_type>::value;
 
 template <typename value_type, typename cb_type>
-void run_checked_tests(const char *test_name, const char *type_spec, const cb_type cb) {
-  if constexpr (!check_types_v<value_type>) {
+void run_checked_tests(const std::string_view test_prefix, const std::string_view method_name,
+                       const std::string_view test_postfix, const std::string_view type_spec,
+                       const cb_type cb) {
+  if constexpr (check_types_v<value_type>) {
+    cb();
+  } else {
     std::cout << "***\n"
-              << "***  Warning: " << test_name << " skipped for "
+              << "***  Warning: " << test_prefix << method_name << test_postfix << " skipped for "
               << type_spec << " (type check failed)\n"
-              << "***" << std::endl; \
+              << "***" << std::endl;
     /* avoid dispatcher check failure if all cases are skipped this way */
-    std::cout << "matrix_rank1_update: kokkos impl\n"; \
-    return;
+    KokkosKernelsSTD::Impl::signal_kokkos_impl_called(method_name);
   }
-  cb();
 }
 
 #define FOR_ALL_BLAS2_TYPES(TEST_DEF) \
@@ -310,7 +312,7 @@ void test_kokkos_matrix_rank1_update_conj_impl(const x_t &x, const y_t &y, A_t &
 #define DEFINE_TESTS(blas_val_type)                                          \
 TEST_F(blas2_signed_##blas_val_type##_fixture, kokkos_matrix_rank1_update) { \
   using val_t = typename blas2_signed_##blas_val_type##_fixture::value_type; \
-  run_checked_tests<val_t>("kokkos_matrix_rank1_update",                     \
+  run_checked_tests<val_t>("kokkos_", "matrix_rank1_update", "",             \
                            #blas_val_type, [&]() {                           \
                                                                              \
    test_kokkos_matrix_rank1_update_impl(x_e0, x_e1, A_e0e1);                 \
@@ -320,7 +322,7 @@ TEST_F(blas2_signed_##blas_val_type##_fixture, kokkos_matrix_rank1_update) { \
 TEST_F(blas2_signed_##blas_val_type##_fixture,                               \
        kokkos_matrix_rank1_update_conjugated) {                              \
   using val_t = typename blas2_signed_##blas_val_type##_fixture::value_type; \
-  run_checked_tests<val_t>("kokkos_matrix_rank1_update_conjugated",          \
+  run_checked_tests<val_t>("kokkos_", "matrix_rank1_update", "_conjugated",  \
                            #blas_val_type, [&]() {                           \
                                                                              \
    test_kokkos_matrix_rank1_update_conj_impl(x_e0, x_e1, A_e0e1);            \

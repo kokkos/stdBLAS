@@ -45,6 +45,7 @@
 #define LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_KOKKOSKERNELS_BLAS2_MATRIX_RANK_1_UPDATE_HPP_
 
 #include <complex>
+#include "signal_kokkos_impl_called.hpp"
 
 namespace KokkosKernelsSTD {
 
@@ -148,9 +149,7 @@ void matrix_rank_1_update(kokkos_exec<ExecSpace> &&/* exec */,
     throw std::runtime_error("KokkosBlas: matrix_rank_1_update: A.extent(1) != y.extent(0)");
   }
 
-#if defined KOKKOS_STDBLAS_ENABLE_TESTS
-  std::cout << "matrix_rank1_update: kokkos impl\n";
-#endif
+  Impl::signal_kokkos_impl_called("matrix_rank1_update");
 
   // convert mdspans to views and wrap input with original accessors
   const auto x_view = Impl::mdspan_to_view(x);
@@ -197,9 +196,7 @@ void matrix_rank_1_update(kokkos_exec<ExecSpace> &&/* exec */,
     throw std::runtime_error("KokkosBlas: matrix_rank_1_update: A.extent(1) != y.extent(0)");
   }
 
-#if defined KOKKOS_STDBLAS_ENABLE_TESTS
-  std::cout << "matrix_rank1_update: kokkos impl\n";
-#endif
+  Impl::signal_kokkos_impl_called("matrix_rank1_update");
 
   auto x_view = Impl::mdspan_to_view(x);
   auto y_view = Impl::mdspan_to_view(y);
