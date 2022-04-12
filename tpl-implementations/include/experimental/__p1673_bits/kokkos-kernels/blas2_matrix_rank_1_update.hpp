@@ -131,18 +131,18 @@ inline constexpr bool is_layout_blas_packed_v = is_layout_blas_packed<Layout>::v
 
 // Note: will only signal failure for layout_blas_packed with different triangle
 template <typename Layout, typename Triangle>
-struct triangle_layout_mismatch: public std::false_type {};
+struct triangle_layout_match: public std::true_type {};
 
 template <typename StorageOrder, typename Triangle1, typename Triangle2>
-struct triangle_layout_mismatch<
+struct triangle_layout_match<
   std::experimental::linalg::layout_blas_packed<Triangle1, StorageOrder>,
   Triangle2>
 {
-  static constexpr bool value = !std::is_same_v<Triangle1, Triangle2>;
+  static constexpr bool value = std::is_same_v<Triangle1, Triangle2>;
 };
 
 template <typename Layout, typename Triangle>
-inline constexpr bool triangle_layout_mismatch_v = triangle_layout_mismatch<Layout, Triangle>::value;
+inline constexpr bool triangle_layout_match_v = triangle_layout_match<Layout, Triangle>::value;
 
 // This version of conj_if_needed() also handles Kokkos::complex<T>
 template <class T>
@@ -305,7 +305,7 @@ void symmetric_matrix_rank_1_update(kokkos_exec<ExecSpace> &&exec,
   // P1673 constraints (redundant to mdspan extents in the header)
   static_assert(A.rank() == 2);
   static_assert(x.rank() == 1);
-  static_assert(!Impl::triangle_layout_mismatch_v<Layout_A, Triangle>);
+  static_assert(Impl::triangle_layout_match_v<Layout_A, Triangle>);
 
   // P1673 mandates
   static_assert(Impl::static_extent_match(A.static_extent(0), A.static_extent(1)));
