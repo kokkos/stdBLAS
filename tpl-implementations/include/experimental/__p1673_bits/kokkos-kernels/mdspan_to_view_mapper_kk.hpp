@@ -94,5 +94,5 @@ auto mdspan_to_view(std::experimental::mdspan<
 }
 
 } // namespace Impl
-} // namespac KokkosKernelsSTD
+} // namespace KokkosKernelsSTD
 #endif
