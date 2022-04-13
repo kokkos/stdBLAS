@@ -56,7 +56,7 @@ namespace Impl {
 template <typename ExecSpace, typename MatrixType>
 class ParallelMatrixVisitor {
 public:
-  KOKKOS_INLINE_FUNCTION ParallelMatrixVisitor(ExecSpace &&exec_in, MatrixType &A_in):
+  KOKKOS_INLINE_FUNCTION ParallelMatrixVisitor(ExecSpace &&exec_in, MatrixType A_in):
     exec(exec_in), A(A_in), ext0(A.extent(0)), ext1(A.extent(1))
   {}
 
@@ -84,10 +84,10 @@ public:
   }
 
 private:
-  const ExecSpace exec;
+  ExecSpace exec;
   MatrixType A;
-  const size_t ext0;
-  const size_t ext1;
+  size_t ext0;
+  size_t ext1;
 };
 
 // This version of conj_if_needed() also handles Kokkos::complex<T>
