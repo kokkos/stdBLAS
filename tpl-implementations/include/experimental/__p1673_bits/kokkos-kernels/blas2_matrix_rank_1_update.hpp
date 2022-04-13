@@ -145,7 +145,7 @@ void matrix_rank_1_update(kokkos_exec<ExecSpace> &&/* exec */,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A,
     std::experimental::default_accessor<ElementType_A>> A)
 {
-  // constraints
+  // P1673 constraints (redundant to mdspan extents in the header)
   static_assert(A.rank() == 2);
   static_assert(x.rank() == 1);
   static_assert(y.rank() == 1);
@@ -196,7 +196,7 @@ void matrix_rank_1_update(kokkos_exec<ExecSpace> &&/* exec */,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A,
     std::experimental::default_accessor<ElementType_A>> A)
 {
-  // constraints
+  // P1673 constraints (redundant to mdspan extents in the header)
   static_assert(A.rank() == 2);
   static_assert(x.rank() == 1);
   static_assert(y.rank() == 1);
@@ -205,7 +205,7 @@ void matrix_rank_1_update(kokkos_exec<ExecSpace> &&/* exec */,
   static_assert(Impl::static_extent_match(A.static_extent(0), x.static_extent(0)));
   static_assert(Impl::static_extent_match(A.static_extent(1), y.static_extent(0)));
 
-  // preconditions
+  // P1673 preconditions
   if ( A.extent(0) != x.extent(0) ){
     throw std::runtime_error("KokkosBlas: matrix_rank_1_update: A.extent(0) != x.extent(0)");
   }
