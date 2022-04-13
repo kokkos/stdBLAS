@@ -112,6 +112,15 @@ auto conj_if_needed(const std::complex<T> &value)
   return std::conj(value);
 };
 
+template <class size_type>
+KOKKOS_INLINE_FUNCTION
+constexpr bool static_extent_match(size_type extent1, size_type extent2)
+{
+  return extent1 == std::experimental::dynamic_extent ||
+         extent2 == std::experimental::dynamic_extent ||
+         extent1 == extent2;
+}
+
 } // namespace Impl
 
 // Nonsymmetric non-conjugated rank-1 update
@@ -141,7 +150,11 @@ void matrix_rank_1_update(kokkos_exec<ExecSpace> &&/* exec */,
   static_assert(x.rank() == 1);
   static_assert(y.rank() == 1);
 
-  // preconditions
+  // P1673 mandates
+  static_assert(Impl::static_extent_match(A.static_extent(0), x.static_extent(0)));
+  static_assert(Impl::static_extent_match(A.static_extent(1), y.static_extent(0)));
+
+  // P1673 preconditions
   if ( A.extent(0) != x.extent(0) ){
     throw std::runtime_error("KokkosBlas: matrix_rank_1_update: A.extent(0) != x.extent(0)");
   }
@@ -187,6 +200,10 @@ void matrix_rank_1_update(kokkos_exec<ExecSpace> &&/* exec */,
   static_assert(A.rank() == 2);
   static_assert(x.rank() == 1);
   static_assert(y.rank() == 1);
+
+  // P1673 mandates
+  static_assert(Impl::static_extent_match(A.static_extent(0), x.static_extent(0)));
+  static_assert(Impl::static_extent_match(A.static_extent(1), y.static_extent(0)));
 
   // preconditions
   if ( A.extent(0) != x.extent(0) ){
