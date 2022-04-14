@@ -58,7 +58,7 @@ TEST_F(blas1_signed_complex_double_fixture, kokkos_dotc_noinitvalue)
 {
   using kc_t   = Kokkos::complex<double>;
   using stdc_t = value_type;
-  if (alignof(value_type) == alignof(kc_t)){
+  if constexpr (alignof(value_type) == alignof(kc_t)){
     const value_type init{0., 0.};
     kokkos_blas1_dotc_test_impl(x, y, init, false);
   }
@@ -68,7 +68,7 @@ TEST_F(blas1_signed_complex_double_fixture, kokkos_dotc_initvalue)
 {
   using kc_t   = Kokkos::complex<double>;
   using stdc_t = value_type;
-  if (alignof(value_type) == alignof(kc_t)){
+  if constexpr (alignof(value_type) == alignof(kc_t)){
     const value_type init{-4., 5.};
     kokkos_blas1_dotc_test_impl(x, y, init, true);
   }
