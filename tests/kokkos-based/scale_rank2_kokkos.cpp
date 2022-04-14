@@ -80,7 +80,7 @@ TEST_F(blas2_signed_complex_double_fixture, kokkos_scale_complex_factor)
 {
   using kc_t   = Kokkos::complex<double>;
   using stdc_t = value_type;
-  if (alignof(value_type) == alignof(kc_t)){
+  if constexpr (alignof(value_type) == alignof(kc_t)){
     const value_type factor{2., 0.};
     kokkos_blas_scale_test_impl(A_e0e1, factor);
   }
@@ -90,7 +90,7 @@ TEST_F(blas2_signed_complex_double_fixture, kokkos_scale_double_factor)
 {
   using kc_t   = Kokkos::complex<double>;
   using stdc_t = value_type;
-  if (alignof(value_type) == alignof(kc_t)){
+  if constexpr (alignof(value_type) == alignof(kc_t)){
     kokkos_blas_scale_test_impl(A_e0e1, 2.);
   }
 }
