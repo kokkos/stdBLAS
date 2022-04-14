@@ -78,7 +78,7 @@ TEST_F(blas2_signed_complex_double_fixture, kokkos_swap)
 {
   using kc_t   = Kokkos::complex<double>;
   using stdc_t = value_type;
-  if (alignof(value_type) == alignof(kc_t)){
+  if constexpr(alignof(value_type) == alignof(kc_t)){
     kokkos_blas_swap_test_rank2_impl(A_e0e1, B_e0e1);
   }
 }
