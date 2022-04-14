@@ -4,34 +4,55 @@
 
 // keeping this in mind: https://github.com/kokkos/stdBLAS/issues/122
 
+#include "signal_kokkos_impl_called.hpp"
+
 namespace KokkosKernelsSTD {
 
+namespace dotimpl {
+
+template <class size_type>
+KOKKOS_INLINE_FUNCTION
+constexpr bool static_extent_match(size_type extent1, size_type extent2)
+{
+  return extent1 == std::experimental::dynamic_extent ||
+         extent2 == std::experimental::dynamic_extent ||
+         extent1 == extent2;
+}
+
+} // namespace Impl
+
 template<class ExeSpace,
-   class ElementType_x,
-   std::experimental::extents<>::size_type ext_x,
+	 class ElementType_x,
+	 std::experimental::extents<>::size_type ext_x,
          class Layout_x,
          class ElementType_y,
-   std::experimental::extents<>::size_type ext_y,
+	 std::experimental::extents<>::size_type ext_y,
          class Layout_y,
    class Scalar>
 Scalar dot(kokkos_exec<ExeSpace> /*kexe*/,
-     std::experimental::mdspan<
-       ElementType_x,
-       std::experimental::extents<ext_x>,
-       Layout_x,
-       std::experimental::default_accessor<ElementType_x>
-     > x,
-     std::experimental::mdspan<
-       ElementType_y,
-       std::experimental::extents<ext_y>,
-       Layout_y,
-       std::experimental::default_accessor<ElementType_y>
-     > y,
-     Scalar init)
+	   std::experimental::mdspan<
+	   ElementType_x,
+	   std::experimental::extents<ext_x>,
+	   Layout_x,
+	   std::experimental::default_accessor<ElementType_x>
+	   > x,
+	   std::experimental::mdspan<
+	   ElementType_y,
+	   std::experimental::extents<ext_y>,
+	   Layout_y,
+	   std::experimental::default_accessor<ElementType_y>
+	   > y,
+	   Scalar init)
 {
-#if defined KOKKOS_STDBLAS_ENABLE_TESTS
-  std::cout << "dot: kokkos impl\n";
-#endif
+  // P1673 preconditions
+  if ( x.extent(0) != y.extent(0) ){
+    throw std::runtime_error("KokkosBlas: dot: x.extent(0) != y.extent(0)");
+  }
+
+  // P1673 mandates
+  static_assert(dotimpl::static_extent_match(x.static_extent(0), y.static_extent(0)));
+
+  Impl::signal_kokkos_impl_called("dot");
 
   auto x_view = Impl::mdspan_to_view(x);
   auto y_view = Impl::mdspan_to_view(y);
@@ -59,33 +80,39 @@ Scalar dot(kokkos_exec<ExeSpace> /*kexe*/,
 }
 
 template<class ExeSpace,
-   class ElementType_x,
-   std::experimental::extents<>::size_type ext_x,
+	 class ElementType_x,
+	 std::experimental::extents<>::size_type ext_x,
          class Layout_x,
          class ElementType_y,
-   std::experimental::extents<>::size_type ext_y,
+	 std::experimental::extents<>::size_type ext_y,
          class Layout_y,
-   class Scalar>
+	 class Scalar>
 Scalar dot(kokkos_exec<ExeSpace>,
-     std::experimental::mdspan<
-      ElementType_x,
-      std::experimental::extents<ext_x>,
-      Layout_x,
-      std::experimental::linalg::accessor_conjugate<
-       std::experimental::default_accessor<ElementType_x>, ElementType_x
-      >
-     > x,
-     std::experimental::mdspan<
-       ElementType_y,
-       std::experimental::extents<ext_y>,
-       Layout_y,
-       std::experimental::default_accessor<ElementType_y>
-     > y,
-     Scalar init)
+	   std::experimental::mdspan<
+	   ElementType_x,
+	   std::experimental::extents<ext_x>,
+	   Layout_x,
+	   std::experimental::linalg::accessor_conjugate<
+	   std::experimental::default_accessor<ElementType_x>, ElementType_x
+	   >
+	   > x,
+	   std::experimental::mdspan<
+	   ElementType_y,
+	   std::experimental::extents<ext_y>,
+	   Layout_y,
+	   std::experimental::default_accessor<ElementType_y>
+	   > y,
+	   Scalar init)
 {
-#if defined KOKKOS_STDBLAS_ENABLE_TESTS
-  std::cout << "dot: kokkos impl\n";
-#endif
+  // P1673 preconditions
+  if ( x.extent(0) != y.extent(0) ){
+    throw std::runtime_error("KokkosBlas: dot: x.extent(0) != y.extent(0)");
+  }
+
+  // P1673 mandates
+  static_assert(dotimpl::static_extent_match(x.static_extent(0), y.static_extent(0)));
+
+  Impl::signal_kokkos_impl_called("dot");
 
   auto x_view = Impl::mdspan_to_view(x);
   auto y_view = Impl::mdspan_to_view(y);
