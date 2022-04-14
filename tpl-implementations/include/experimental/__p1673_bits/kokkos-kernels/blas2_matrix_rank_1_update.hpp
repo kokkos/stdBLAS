@@ -150,21 +150,21 @@ KOKKOS_INLINE_FUNCTION
 T conj_if_needed(const T &value)
 {
   return value;
-};
+}
 
 template <class T>
 KOKKOS_INLINE_FUNCTION
 auto conj_if_needed(const Kokkos::complex<T> &value)
 {
   return Kokkos::conj(value);
-};
+}
 
 template <class T>
 KOKKOS_INLINE_FUNCTION
 auto conj_if_needed(const std::complex<T> &value)
 {
   return std::conj(value);
-};
+}
 
 template <class size_type>
 KOKKOS_INLINE_FUNCTION
