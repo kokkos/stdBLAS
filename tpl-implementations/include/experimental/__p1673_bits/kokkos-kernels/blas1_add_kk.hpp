@@ -2,92 +2,100 @@
 #ifndef LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_KOKKOSKERNELS_ADD_HPP_
 #define LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_KOKKOSKERNELS_ADD_HPP_
 
+#include "signal_kokkos_impl_called.hpp"
+
 namespace KokkosKernelsSTD {
 
-template <class ViewXType, class ViewYType, class ViewZType>
-struct MyTmpAddFunctorRank1
+namespace add_impl{
+
+template <class size_type>
+KOKKOS_INLINE_FUNCTION
+constexpr bool static_extent_match(size_type extent1, size_type extent2)
 {
-  ViewXType m_x;
-  ViewYType m_y;
-  ViewZType m_z;
+  return extent1 == std::experimental::dynamic_extent ||
+         extent2 == std::experimental::dynamic_extent ||
+         extent1 == extent2;
+}
 
-  MyTmpAddFunctorRank1() = delete;
-  MyTmpAddFunctorRank1(const ViewXType x,
-		       const ViewYType y,
-		       const ViewZType z)
-    : m_x(x), m_y(y), m_z(z){}
+template <class F, class T, T... Is>
+void repeat_impl(F&& f, std::integer_sequence<T, Is...>){
+  ( f(std::integral_constant<T, Is>{}), ... );
+}
 
-  KOKKOS_INLINE_FUNCTION
-  void operator()(std::size_t i) const{
-    m_z(i) = m_x(i) + m_y(i);
-  }
-};
+template <int N, class F>
+void repeat(F&& f){
+  repeat_impl(f, std::make_integer_sequence<int, N>{});
+}
 
-template <class ViewXType, class ViewYType, class ViewZType>
-struct MyTmpAddFunctorRank2
-{
-  const std::size_t m_numCols;
-  ViewXType m_x;
-  ViewYType m_y;
-  ViewZType m_z;
+} // namespace add_impl
 
-  MyTmpAddFunctorRank2() = delete;
-  MyTmpAddFunctorRank2(const ViewXType x,
-		  const ViewYType y,
-		  const ViewZType z)
-    : m_numCols(x.extent(1)), m_x(x), m_y(y), m_z(z){}
+// keeping this in mind: https://github.com/kokkos/stdBLAS/issues/122
 
-  KOKKOS_INLINE_FUNCTION
-  void operator()(std::size_t i) const
-  {
-    for (std::size_t k = 0; k < m_numCols; ++k)
-    {
-      m_z(i,k) = m_x(i,k) + m_y(i,k);
-    }
-  }
-};
-
-template<class ElementType_x,
+template<class ExeSpace,
+   class ElementType_x,
          std::experimental::extents<>::size_type ... ext_x,
          class Layout_x,
-         class Accessor_x,
          class ElementType_y,
          std::experimental::extents<>::size_type ... ext_y,
          class Layout_y,
-         class Accessor_y,
          class ElementType_z,
          std::experimental::extents<>::size_type ... ext_z,
-         class Layout_z,
-         class Accessor_z>
+         class Layout_z>
   requires (sizeof...(ext_x) == sizeof...(ext_y) && sizeof...(ext_x) == sizeof...(ext_z))
-void add(
-  kokkos_exec<>,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_z, std::experimental::extents<ext_z ...>, Layout_z, Accessor_z> z)
+void add(kokkos_exec<ExeSpace>,
+	 std::experimental::mdspan<
+	   ElementType_x,
+	   std::experimental::extents<ext_x ...>,
+	   Layout_x,
+	   std::experimental::default_accessor<ElementType_x>
+	 > x,
+	 std::experimental::mdspan<
+	   ElementType_y,
+	   std::experimental::extents<ext_y ...>,
+	   Layout_y,
+	   std::experimental::default_accessor<ElementType_y>
+	 > y,
+	 std::experimental::mdspan<
+	   ElementType_z,
+	   std::experimental::extents<ext_z ...>,
+	   Layout_z,
+	   std::experimental::default_accessor<ElementType_z>
+	 > z)
 {
   static_assert(z.rank() <= 2);
 
+  // P1673 preconditions
+  add_impl::repeat<x.rank()>
+    ([=](int r){
+      if ( x.extent(r) != y.extent(r) ){
+	throw std::runtime_error("KokkosBlas: add: x.extent(r) != y.extent(r) for r="
+				 + std::to_string(r));
+      }
+      if ( y.extent(r) != z.extent(r) ){
+	throw std::runtime_error("KokkosBlas: add: y.extent(r) != z.extent(r) for r = "
+				 + std::to_string(r));
+      }
+    });
+
+  // P1673 mandates
+  add_impl::repeat<x.rank()>
+    ([=](int r){
+      add_impl::static_extent_match(x.static_extent(r), z.static_extent(r));
+      add_impl::static_extent_match(y.static_extent(r), z.static_extent(r));
+      add_impl::static_extent_match(x.static_extent(r), y.static_extent(r));
+    });
+
+  Impl::signal_kokkos_impl_called("add");
+
   auto x_view = Impl::mdspan_to_view(x);
-  using x_view_type = decltype(x_view);
-
   auto y_view = Impl::mdspan_to_view(y);
-  using y_view_type = decltype(y_view);
-
   auto z_view = Impl::mdspan_to_view(z);
-  using z_view_type = decltype(z_view);
 
-  // change this after adding the correct impl to KK
-  if constexpr (z.rank() == 1) {
-    using func_t = MyTmpAddFunctorRank1<x_view_type, y_view_type, z_view_type>;
-    func_t F(x_view, y_view, z_view);
-    Kokkos::parallel_for("stdBLAS::KokkosKernelsSTD_add_rank_1", x_view.extent(0), F);
-  }
-  else if constexpr (z.rank() == 2) {
-    using func_t = MyTmpAddFunctorRank2<x_view_type, y_view_type, z_view_type>;
-    func_t F(x_view, y_view, z_view);
-    Kokkos::parallel_for("stdBLAS::KokkosKernelsSTD_add_rank_2", x_view.extent(0), F);
-  }
+  const auto alpha = static_cast<typename decltype(x_view)::non_const_value_type>(1);
+  const auto beta  = static_cast<typename decltype(y_view)::non_const_value_type>(1);
+  const auto zero  = static_cast<typename decltype(z_view)::non_const_value_type>(0);
+
+  KokkosBlas::update(alpha, x_view, beta, y_view, zero, z_view);
 }
 
 }
