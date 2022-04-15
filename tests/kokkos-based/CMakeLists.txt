@@ -62,3 +62,19 @@ linalg_add_test_kokkos(
 linalg_add_test_kokkos(
   dotc_kokkos
   "dot: kokkos impl") # this his not a typo, dotc calls dot underneath
+
+linalg_add_test_kokkos(
+  swap_elements_rank1_kokkos
+  "swap_elements: kokkos impl")
+linalg_add_test_kokkos(
+  swap_elements_rank2_kokkos
+  "swap_elements: kokkos impl")
+linalg_add_test_kokkos(
+  add_kokkos
+  "add: kokkos impl")
+linalg_add_test_kokkos(
+  scale_rank1_kokkos
+  "scale: kokkos impl")
+linalg_add_test_kokkos(
+  scale_rank2_kokkos
+  "scale: kokkos impl")
