@@ -78,3 +78,6 @@ linalg_add_test_kokkos(
 linalg_add_test_kokkos(
   scale_rank2_kokkos
   "scale: kokkos impl")
+linalg_add_test_kokkos(
+  symmetric_matrix_rank1_update_kokkos
+  "symmetric_matrix_rank1_update: kokkos impl")

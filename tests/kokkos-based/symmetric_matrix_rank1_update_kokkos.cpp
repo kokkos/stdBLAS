@@ -250,13 +250,15 @@ void run_checked_tests(const std::string_view test_prefix, const std::string_vie
 // Tests
 ////////////////////////////////////////////////////////////
 
-template<class x_t, class y_t, class A_t>
-void matrix_rank_1_update_gold_solution(const x_t &x, const y_t &y, A_t &A)
+template<class x_t, class A_t, class Triangle>
+void symmetric_matrix_rank_1_update_gold_solution(const x_t &x, A_t &A, Triangle /* t */)
 {
   using size_type = std::experimental::extents<>::size_type;
-  for (size_type i = 0; i < A.extent(0); ++i) {
-    for (size_type j = 0; j < A.extent(1); ++j) {
-      A(i, j) += x(i) * y(j);
+  constexpr bool low = std::is_same_v<Triangle, std::experimental::linalg::lower_triangle_t>;
+  for (size_type j = 0; j < A.extent(1); ++j) {
+    const size_type i1 = low ? A.extent(0) : j + 1;
+    for (size_type i = low ? j : 0; i < i1; ++i) {
+      A(i,j) += x(i) * x(j);
     }
   }
 }
@@ -284,62 +286,32 @@ void test_kokkos_matrix_update(const x_t &x, A_t &A, gold_t get_gold, action_t a
   EXPECT_TRUE(is_same_vector(x, x_preKernel));
 }
 
-template<class x_t, class y_t, class A_t, typename gold_t, typename action_t>
-void test_kokkos_matrix_update(const x_t &x, const y_t &y, A_t &A,
-                               gold_t get_gold, action_t action)
-{
-  // backup y to verify it is not changed after kernel
-  auto y_preKernel = kokkostesting::create_stdvector_and_copy(y);
-  test_kokkos_matrix_update(x, A, get_gold, action);
-  EXPECT_TRUE(is_same_vector(y, y_preKernel));
-}
-
-template<class x_t, class y_t, class A_t>
-void test_kokkos_matrix_rank1_update_impl(const x_t &x, const y_t &y, A_t &A)
+template<class x_t, class A_t, class Triangle, class Scalar = typename x_t::element_type>
+void test_kokkos_symmetric_matrix_rank1_update_impl(const x_t &x, A_t &A, Triangle t)
 {
   const auto get_gold = [&](auto A_gold) {
-      matrix_rank_1_update_gold_solution(x, y, A_gold);
+      symmetric_matrix_rank_1_update_gold_solution(x, A_gold, t);
     };
   const auto compute = [&]() {
-      std::experimental::linalg::matrix_rank_1_update(
-          KokkosKernelsSTD::kokkos_exec<>(), x, y, A);
+      std::experimental::linalg::symmetric_matrix_rank_1_update(
+        KokkosKernelsSTD::kokkos_exec<>(), x, A, t);
     };
-  test_kokkos_matrix_update(x, y, A, get_gold, compute);
-}
-
-template<class x_t, class y_t, class A_t>
-void test_kokkos_matrix_rank1_update_conj_impl(const x_t &x, const y_t &y, A_t &A)
-{
-  const auto get_gold = [&](auto A_gold) {
-      matrix_rank_1_update_gold_solution(x,
-        std::experimental::linalg::conjugated(y), A_gold);
-    };
-  const auto compute = [&]() {
-      std::experimental::linalg::matrix_rank_1_update_c(
-          KokkosKernelsSTD::kokkos_exec<>(), x, y, A);
-    };
-  test_kokkos_matrix_update(x, y, A, get_gold, compute);
+  test_kokkos_matrix_update(x, A, get_gold, compute);
 }
 
 } // anonymous namespace
 
 #define DEFINE_TESTS(blas_val_type)                                          \
-TEST_F(blas2_signed_##blas_val_type##_fixture, kokkos_matrix_rank1_update) { \
-  using val_t = typename blas2_signed_##blas_val_type##_fixture::value_type; \
-  run_checked_tests<val_t>("kokkos_", "matrix_rank1_update", "",             \
-                           #blas_val_type, [&]() {                           \
-                                                                             \
-   test_kokkos_matrix_rank1_update_impl(x_e0, x_e1, A_e0e1);                 \
-                                                                             \
-  });                                                                        \
-}                                                                            \
 TEST_F(blas2_signed_##blas_val_type##_fixture,                               \
-       kokkos_matrix_rank1_update_conjugated) {                              \
+       kokkos_symmetric_matrix_rank1_update) {                               \
   using val_t = typename blas2_signed_##blas_val_type##_fixture::value_type; \
-  run_checked_tests<val_t>("kokkos_", "matrix_rank1_update", "_conjugated",  \
+  run_checked_tests<val_t>("kokkos_", "symmetric_matrix_rank1_update", "",   \
                            #blas_val_type, [&]() {                           \
                                                                              \
-   test_kokkos_matrix_rank1_update_conj_impl(x_e0, x_e1, A_e0e1);            \
+    test_kokkos_symmetric_matrix_rank1_update_impl(x_e0, A_sym_e0,           \
+                            std::experimental::linalg::lower_triangle);      \
+    test_kokkos_symmetric_matrix_rank1_update_impl(x_e0, A_sym_e0,           \
+                            std::experimental::linalg::upper_triangle);      \
                                                                              \
   });                                                                        \
 }
