@@ -117,7 +117,7 @@ TEST_F(blas2_signed_complex_double_fixture, kokkos_updating_matrix_vector_produc
 {
   using kc_t = Kokkos::complex<double>;
   using stdc_t = value_type;
-  if (alignof(value_type) == alignof(kc_t)){
+  if constexpr (alignof(value_type) == alignof(kc_t)){
     kokkos_blas_updating_gemv_impl(A_e0e1, x_e1, x_e0, y_e0);
   }
 }

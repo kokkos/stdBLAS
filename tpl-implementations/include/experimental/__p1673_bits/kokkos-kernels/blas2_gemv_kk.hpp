@@ -2,15 +2,25 @@
 #ifndef LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_KOKKOSKERNELS_GEMV_HPP_
 #define LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_KOKKOSKERNELS_GEMV_HPP_
 
+#include "signal_kokkos_impl_called.hpp"
+
 namespace KokkosKernelsSTD {
 
-namespace gemvimpl{
+namespace gemv_impl{
 template<class Accessor>
 double get_scaling_factor(Accessor) { return 1.0; }
 
 template<class Accessor, class S>
 auto get_scaling_factor(std::experimental::linalg::accessor_scaled<Accessor,S> a) {
   return a.scale_factor();
+}
+
+template <class size_type>
+constexpr bool static_extent_match(size_type extent1, size_type extent2)
+{
+  return extent1 == std::experimental::dynamic_extent ||
+         extent2 == std::experimental::dynamic_extent ||
+         extent1 == extent2;
 }
 } //end anon namespace
 
@@ -52,11 +62,6 @@ void matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
 			   > y)
 {
 
-  // constraints
-  static_assert(A.rank() == 2);
-  static_assert(x.rank() == 1);
-  static_assert(y.rank() == 1);
-
   // preconditions
   if ( A.extent(1) != x.extent(0) ){
     throw std::runtime_error("KokkosBlas: matrix_vector_product: A.extent(1) != x.extent(0) ");
@@ -65,16 +70,17 @@ void matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
     throw std::runtime_error("KokkosBlas: matrix_vector_product: A.extent(0) != y.extent(0) ");
   }
 
-  // this print is detected in the tests
-#if defined KOKKOS_STDBLAS_ENABLE_TESTS
-  std::cout << "overwriting_matrix_vector_product: kokkos impl\n";
-#endif
+  // mandates
+  gemv_impl::static_extent_match(A.static_extent(1), x.static_extent(0));
+  gemv_impl::static_extent_match(A.static_extent(0), y.static_extent(0));
+
+  Impl::signal_kokkos_impl_called("overwriting_matrix_vector_product");
 
   auto A_view = Impl::mdspan_to_view(A);
   auto x_view = Impl::mdspan_to_view(x);
   auto y_view = Impl::mdspan_to_view(y);
 
-  // make alpha and beta consistent with types in KokkosBals::gemv
+  // make alpha and beta consistent with types in KokkosBlas::gemv
   const auto alpha = static_cast<typename decltype(A_view)::value_type>(1);
   const auto beta  = static_cast<typename decltype(y_view)::value_type>(0);
   KokkosBlas::gemv("N", alpha, A_view, x_view, beta, y_view);
@@ -127,12 +133,6 @@ void matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
 			   > z)
 {
 
-  // constraints
-  static_assert(A.rank() == 2);
-  static_assert(x.rank() == 1);
-  static_assert(y.rank() == 1);
-  static_assert(z.rank() == 1);
-
   // preconditions
   if ( A.extent(1) != x.extent(0) ){
     throw std::runtime_error("KokkosBlas: matrix_vector_product: A.extent(1) != x.extent(0) ");
@@ -144,21 +144,21 @@ void matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
     throw std::runtime_error("KokkosBlas: matrix_vector_product: A.extent(0) != z.extent(0) ");
   }
 
-  // this print is detected in the tests
-#if defined KOKKOS_STDBLAS_ENABLE_TESTS
-  std::cout << "updating_matrix_vector_product: kokkos impl\n";
-#endif
+  // mandates
+  gemv_impl::static_extent_match(A.static_extent(1), x.static_extent(0));
+  gemv_impl::static_extent_match(A.static_extent(0), y.static_extent(0));
+  gemv_impl::static_extent_match(y.static_extent(0), z.static_extent(0));
+
+  Impl::signal_kokkos_impl_called("updating_matrix_vector_product");
 
   auto A_view = Impl::mdspan_to_view(A);
   auto x_view = Impl::mdspan_to_view(x);
   auto y_view = Impl::mdspan_to_view(y);
   auto z_view = Impl::mdspan_to_view(z);
 
-  // FRIZZI: we need to improve this or maybe we should
-  // just do two ops: fist y->z, and then gemv directly
   auto ex = ExeSpace();
   Kokkos::parallel_for(Kokkos::RangePolicy(ex, 0, z_view.extent(0)),
-		       KOKKOS_LAMBDA (const std::size_t & i)
+		       KOKKOS_LAMBDA (const std::size_t i)
 		       {
 			 typename decltype(z_view)::value_type z_i = {};
 			 for (std::size_t j=0; j<A_view.extent(1); ++j){
@@ -216,11 +216,14 @@ matrix_vector_product(kokkos_exec<>,
 		        Accessor_y
 		      > y)
 {
-  auto alpha = gemvimpl::get_scaling_factor(A.accessor())  *
-               gemvimpl::get_scaling_factor(x.accessor());
-  KokkosBlas::gemv("N", alpha, Impl::mdspan_to_view(A),
-		   Impl::mdspan_to_view(x), 0.0,
-		   Impl::mdspan_to_view(y));
+  auto A_view = Impl::mdspan_to_view(A);
+  auto x_view = Impl::mdspan_to_view(x);
+  auto y_view = Impl::mdspan_to_view(y);
+
+  auto alpha = gemv_impl::get_scaling_factor(A.accessor())  *
+               gemv_impl::get_scaling_factor(x.accessor());
+  const auto beta  = static_cast<typename decltype(y_view)::value_type>(0);
+  KokkosBlas::gemv("N", alpha, A_view, x_view, beta, y_view);
 }
 
 

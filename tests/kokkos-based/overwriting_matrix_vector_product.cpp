@@ -111,7 +111,7 @@ TEST_F(blas2_signed_complex_double_fixture, kokkos_overwriting_matrix_vector_pro
 {
   using kc_t = Kokkos::complex<double>;
   using stdc_t = value_type;
-  if (alignof(value_type) == alignof(kc_t)){
+  if constexpr (alignof(value_type) == alignof(kc_t)){
     kokkos_blas_overwriting_gemv_impl(A_e0e1, x_e1, x_e0);
   }
 }
