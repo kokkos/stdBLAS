@@ -5,14 +5,6 @@
 namespace KokkosKernelsSTD {
 namespace Impl {
 
-template<class T> struct is_complex : std::false_type{};
-template<> struct is_complex<std::complex<float>> : std::true_type{};
-template<> struct is_complex<std::complex<double>> : std::true_type{};
-template<> struct is_complex<std::complex<long double>> : std::true_type{};
-
-template<class T> inline constexpr bool is_complex_v = is_complex<T>::value;
-
-
 // These are only minimal mappers from mdspan to View without safety checks.
 // Kokkos is working on using mdspan as the underlying implementation for View
 // When that is done the mapping becomes trivial and full featured.
