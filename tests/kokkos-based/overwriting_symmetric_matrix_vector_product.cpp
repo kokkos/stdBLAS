@@ -103,7 +103,7 @@ TEST_F(blas2_signed_complex_double_fixture, kokkos_overwriting_sym_matrix_vector
   namespace stdla = std::experimental::linalg;
   using kc_t = Kokkos::complex<double>;
   using stdc_t = value_type;
-  if (alignof(value_type) == alignof(kc_t)){
+  if constexpr (alignof(value_type) == alignof(kc_t)){
     kokkos_blas_overwriting_symv_impl(A_sym_e0, stdla::upper_triangle, x_e0, y_e0);
   }
 }
@@ -127,7 +127,7 @@ TEST_F(blas2_signed_complex_double_fixture, kokkos_overwriting_sym_matrix_vector
   namespace stdla = std::experimental::linalg;
   using kc_t = Kokkos::complex<double>;
   using stdc_t = value_type;
-  if (alignof(value_type) == alignof(kc_t)){
+  if constexpr (alignof(value_type) == alignof(kc_t)){
     kokkos_blas_overwriting_symv_impl(A_sym_e0, stdla::lower_triangle, x_e0, y_e0);
   }
 }
