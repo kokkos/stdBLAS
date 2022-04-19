@@ -7,12 +7,16 @@
 namespace KokkosKernelsSTD {
 
 namespace gemv_impl{
-template<class Accessor>
-double get_scaling_factor(Accessor) { return 1.0; }
+template<class Accessor, class T>
+T get_scaling_factor(Accessor /*a*/, T /*v*/) {
+  return T(1);
+}
 
-template<class Accessor, class S>
-auto get_scaling_factor(std::experimental::linalg::accessor_scaled<Accessor,S> a) {
-  return a.scale_factor();
+template<class Accessor, class S, class T>
+auto get_scaling_factor(std::experimental::linalg::accessor_scaled<Accessor,S> a,
+			T /*v*/)
+{
+  return T(a.scale_factor());
 }
 
 template <class size_type>
@@ -191,39 +195,64 @@ template<//class ExecSpace,
          class ElementType_y,
          std::experimental::extents<>::size_type ext_y,
          class Layout_y,
-         class Accessor_y>
-std::enable_if_t<
-  !std::is_same<Accessor_A, std::experimental::default_accessor<ElementType_A>>::value
-  and !std::is_same<Accessor_x, std::experimental::default_accessor<ElementType_x>>::value
-  and !std::is_same<Accessor_y, std::experimental::default_accessor<ElementType_y>>::value
-  >
-matrix_vector_product(kokkos_exec<>,
-		      std::experimental::mdspan<
-		        ElementType_A,
-		        std::experimental::extents<numRows_A, numCols_A>,
-		        Layout_A, Accessor_A
-		      > A,
-		      std::experimental::mdspan<
-		        ElementType_x,
-		        std::experimental::extents<ext_x>,
-		        Layout_x,
-		        Accessor_x
-		      > x,
-		      std::experimental::mdspan<
-		        ElementType_y,
-		        std::experimental::extents<ext_y>,
-		        Layout_y,
-		        Accessor_y
-		      > y)
+	 class Accessor_y,
+         class ElementType_z,
+         std::experimental::extents<>::size_type ext_z,
+         class Layout_z>
+void matrix_vector_product(kokkos_exec<>,
+			   std::experimental::mdspan<
+			    ElementType_A,
+			    std::experimental::extents<numRows_A, numCols_A>,
+			    Layout_A, Accessor_A
+			   > A,
+			   std::experimental::mdspan<
+			    ElementType_x,
+			    std::experimental::extents<ext_x>,
+			    Layout_x,
+			    Accessor_x
+			   > x,
+			   std::experimental::mdspan<
+			    ElementType_y,
+			    std::experimental::extents<ext_y>,
+			    Layout_y,
+			    Accessor_y
+			   > y,
+			   std::experimental::mdspan<
+			    ElementType_z,
+			    std::experimental::extents<ext_z>,
+			    Layout_z,
+			    std::experimental::default_accessor<ElementType_z>
+			   > z)
 {
   auto A_view = Impl::mdspan_to_view(A);
   auto x_view = Impl::mdspan_to_view(x);
   auto y_view = Impl::mdspan_to_view(y);
+  auto z_view = Impl::mdspan_to_view(z);
 
-  auto alpha = gemv_impl::get_scaling_factor(A.accessor())  *
-               gemv_impl::get_scaling_factor(x.accessor());
-  const auto beta  = static_cast<typename decltype(y_view)::value_type>(0);
-  KokkosBlas::gemv("N", alpha, A_view, x_view, beta, y_view);
+  // here we need to compute: z = y + Ax
+  // where A,x,y can have non-trivial accessors.
+  // Since kokkos-kernels gemv only supports
+  //     v=beta*v + alpha*A*v1
+  // we cannot use it directly, so for now we
+  // break the impl into two calls
+
+  using Av_t = typename decltype(A)::value_type;
+  using xv_t = typename decltype(x)::value_type;
+  using yv_t = typename decltype(y)::value_type;
+  using zv_t = typename decltype(z)::value_type;
+
+  // z = alpha1*y
+  auto alpha1 = gemv_impl::get_scaling_factor(y.accessor(), yv_t{});
+  constexpr zv_t zero(0);
+  KokkosBlas::axpby(alpha1, y_view, zero, z_view);
+
+  // z = z + alpha2*A*x
+  using alpha_t = decltype(std::declval<Av_t>() * std::declval<xv_t>());
+  auto alpha2 = gemv_impl::get_scaling_factor(A.accessor(), alpha_t{}) *
+    gemv_impl::get_scaling_factor(x.accessor(), alpha_t{});
+
+  constexpr zv_t one(1);
+  KokkosBlas::gemv("N", alpha2, A_view, x_view, one, z_view);
 }
 
 
