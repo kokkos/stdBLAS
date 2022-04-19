@@ -11,4 +11,5 @@
 #include "__p1673_bits/kokkos-kernels/blas1_vector_sum_of_squares_kk.hpp"
 #include "__p1673_bits/kokkos-kernels/blas2_matrix_rank_1_update.hpp"
 #include "__p1673_bits/kokkos-kernels/blas1_swap_elements_kk.hpp"
+#include "__p1673_bits/kokkos-kernels/blas2_gemv_kk.hpp"
 #include "__p1673_bits/kokkos-kernels/blas2_symv_kk.hpp"
