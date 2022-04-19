@@ -2,7 +2,19 @@
 #ifndef LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_KOKKOSKERNELS_TRIANG_MATVEC_HPP_
 #define LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_KOKKOSKERNELS_TRIANG_MATVEC_HPP_
 
+#include "signal_kokkos_impl_called.hpp"
+
 namespace KokkosKernelsSTD {
+
+namespace trmv_impl{
+template <class size_type>
+constexpr bool static_extent_match(size_type extent1, size_type extent2)
+{
+  return extent1 == std::experimental::dynamic_extent ||
+         extent2 == std::experimental::dynamic_extent ||
+         extent1 == extent2;
+}
+} //end trmv_impl namespace
 
 //
 // Overwriting triangular matrix-vector product: y = Ax
@@ -44,11 +56,6 @@ void triangular_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
 					std::experimental::default_accessor<ElementType_y>
 				      > y)
 {
-  // constraints
-  static_assert(A.rank() == 2);
-  static_assert(x.rank() == 1);
-  static_assert(y.rank() == 1);
-
   // preconditions
   if ( A.extent(0) != A.extent(1) ){
     throw std::runtime_error("KokkosBlas: triangular_matrix_vector_product: A.extent(0) != A.extent(1) ");
@@ -59,6 +66,10 @@ void triangular_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
   if ( A.extent(0) != y.extent(0) ){
     throw std::runtime_error("KokkosBlas: triangular_matrix_vector_product: A.extent(0) != y.extent(0) ");
   }
+
+  trmv_impl::static_extent_match(A.static_extent(1), A.static_extent(0));
+  trmv_impl::static_extent_match(A.static_extent(0), y.static_extent(0));
+  trmv_impl::static_extent_match(A.static_extent(1), x.static_extent(0));
 
   auto A_view = Impl::mdspan_to_view(A);
   auto x_view = Impl::mdspan_to_view(x);
@@ -72,13 +83,10 @@ void triangular_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
   if constexpr (std::is_same_v<Triangle, std::experimental::linalg::upper_triangle_t>)
   {
 
-  // this print is detected in the tests
-#if defined KOKKOS_STDBLAS_ENABLE_TESTS
-  std::cout << "overwriting_triangular_matrix_vector_product_upper: kokkos impl\n";
-#endif
+    Impl::signal_kokkos_impl_called("overwriting_triangular_matrix_vector_product_upper");
 
     Kokkos::parallel_for(Kokkos::RangePolicy(ex, 0, A_view.extent(0)),
-			 KOKKOS_LAMBDA (const std::size_t & i)
+			 KOKKOS_LAMBDA (const std::size_t i)
 			 {
 			   const std::size_t jStart = implicitUnitDiag ? i + std::size_t(1) : i;
 			   typename decltype(y_view)::value_type lsum = {};
@@ -93,19 +101,16 @@ void triangular_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
 
 			   y_view(i) = lsum;
 			 });
-    //fence message when using latest kokkos: "KokkosStdBlas::overwriting_triangular_mat_vec_upper: fence after operation"); 
+    //fence message when using latest kokkos: "KokkosStdBlas::overwriting_triangular_mat_vec_upper: fence after operation");
     ex.fence();
   }
 
   else{
 
-  // this print is detected in the tests
-#if defined KOKKOS_STDBLAS_ENABLE_TESTS
-  std::cout << "overwriting_triangular_matrix_vector_product_lower: kokkos impl\n";
-#endif
+    Impl::signal_kokkos_impl_called("overwriting_triangular_matrix_vector_product_lower");
 
     Kokkos::parallel_for(Kokkos::RangePolicy(ex, 0, A_view.extent(0)),
-			 KOKKOS_LAMBDA (const std::size_t & i)
+			 KOKKOS_LAMBDA (const std::size_t i)
 			 {
 			   typename decltype(y_view)::value_type lsum = {};
 
@@ -175,11 +180,6 @@ void triangular_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
 					std::experimental::default_accessor<ElementType_z>
 				      > z)
 {
-  // constraints
-  static_assert(A.rank() == 2);
-  static_assert(x.rank() == 1);
-  static_assert(y.rank() == 1);
-  static_assert(z.rank() == 1);
 
   // preconditions
   if ( A.extent(0) != A.extent(1) ){
@@ -195,6 +195,11 @@ void triangular_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
     throw std::runtime_error("KokkosBlas: triangular_matrix_vector_product: A.extent(0) != z.extent(0) ");
   }
 
+  trmv_impl::static_extent_match(A.static_extent(1), A.static_extent(0));
+  trmv_impl::static_extent_match(A.static_extent(0), y.static_extent(0));
+  trmv_impl::static_extent_match(A.static_extent(1), x.static_extent(0));
+  trmv_impl::static_extent_match(y.static_extent(0), z.static_extent(0));
+
   auto A_view = Impl::mdspan_to_view(A);
   auto x_view = Impl::mdspan_to_view(x);
   auto y_view = Impl::mdspan_to_view(y);
@@ -208,13 +213,10 @@ void triangular_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
   if constexpr (std::is_same_v<Triangle, std::experimental::linalg::upper_triangle_t>)
   {
 
-  // this print is detected in the tests
-#if defined KOKKOS_STDBLAS_ENABLE_TESTS
-  std::cout << "updating_triangular_matrix_vector_product_upper: kokkos impl\n";
-#endif
+    Impl::signal_kokkos_impl_called("updating_triangular_matrix_vector_product_upper");
 
     Kokkos::parallel_for(Kokkos::RangePolicy(ex, 0, A_view.extent(0)),
-			 KOKKOS_LAMBDA (const std::size_t & i)
+			 KOKKOS_LAMBDA (const std::size_t i)
 			 {
 			   const std::size_t jStart = implicitUnitDiag ? i + std::size_t(1) : i;
 			   typename decltype(y_view)::value_type lsum = {};
@@ -239,13 +241,10 @@ void triangular_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
 
   else{
 
-  // this print is detected in the tests
-#if defined KOKKOS_STDBLAS_ENABLE_TESTS
-  std::cout << "updating_triangular_matrix_vector_product_lower: kokkos impl\n";
-#endif
+    Impl::signal_kokkos_impl_called("updating_triangular_matrix_vector_product_lower");
 
     Kokkos::parallel_for(Kokkos::RangePolicy(ex, 0, A_view.extent(0)),
-			 KOKKOS_LAMBDA (const std::size_t & i)
+			 KOKKOS_LAMBDA (const std::size_t i)
 			 {
 			   typename decltype(y_view)::value_type lsum = {};
 
