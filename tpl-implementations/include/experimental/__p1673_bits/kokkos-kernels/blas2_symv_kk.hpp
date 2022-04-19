@@ -66,9 +66,9 @@ void symmetric_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
     throw std::runtime_error("KokkosBlas: matrix_vector_product: A.extent(0) != y.extent(0) ");
   }
 
-  swap_impl::static_extent_match(A.static_extent(0), A.static_extent(1));
-  swap_impl::static_extent_match(A.static_extent(1), x.static_extent(0));
-  swap_impl::static_extent_match(A.static_extent(0), x.static_extent(0));
+  symv_impl::static_extent_match(A.static_extent(0), A.static_extent(1));
+  symv_impl::static_extent_match(A.static_extent(1), x.static_extent(0));
+  symv_impl::static_extent_match(A.static_extent(0), x.static_extent(0));
 
   auto A_view = Impl::mdspan_to_view(A);
   auto x_view = Impl::mdspan_to_view(x);
@@ -188,10 +188,10 @@ void symmetric_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
     throw std::runtime_error("KokkosBlas: matrix_vector_product: A.extent(0) != z.extent(0) ");
   }
 
-  swap_impl::static_extent_match(A.static_extent(0), A.static_extent(1));
-  swap_impl::static_extent_match(A.static_extent(1), x.static_extent(0));
-  swap_impl::static_extent_match(A.static_extent(0), x.static_extent(0));
-  swap_impl::static_extent_match(y.static_extent(0), z.static_extent(0));
+  symv_impl::static_extent_match(A.static_extent(0), A.static_extent(1));
+  symv_impl::static_extent_match(A.static_extent(1), x.static_extent(0));
+  symv_impl::static_extent_match(A.static_extent(0), x.static_extent(0));
+  symv_impl::static_extent_match(y.static_extent(0), z.static_extent(0));
 
   auto A_view = Impl::mdspan_to_view(A);
   auto x_view = Impl::mdspan_to_view(x);
