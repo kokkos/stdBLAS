@@ -82,12 +82,15 @@ linalg_add_test_kokkos(
   symmetric_matrix_rank1_update_kokkos
   "symmetric_matrix_rank1_update: kokkos impl")
 
+# gemv
 linalg_add_test_kokkos(
   overwriting_matrix_vector_product
   "overwriting_matrix_vector_product: kokkos impl")
 linalg_add_test_kokkos(
   updating_matrix_vector_product
   "updating_matrix_vector_product: kokkos impl")
+
+# symv
 linalg_add_test_kokkos(
   overwriting_symmetric_matrix_vector_product
   "overwriting_symmetric_matrix_vector_product_lower: kokkos impl" USE_LOWER lower)
@@ -100,3 +103,31 @@ linalg_add_test_kokkos(
 linalg_add_test_kokkos(
   updating_symmetric_matrix_vector_product
   "updating_symmetric_matrix_vector_product_upper: kokkos impl" USE_UPPER upper)
+
+# trmv
+linalg_add_test_kokkos(
+  overwriting_triangular_matrix_vector_product
+  "overwriting_triangular_matrix_vector_product_upper: kokkos impl" USE_UPPER upper)
+linalg_add_test_kokkos(
+  overwriting_triangular_matrix_vector_product
+  "overwriting_triangular_matrix_vector_product_lower: kokkos impl" USE_LOWER lower)
+linalg_add_test_kokkos(
+  updating_triangular_matrix_vector_product
+  "updating_triangular_matrix_vector_product_upper: kokkos impl" USE_UPPER upper)
+linalg_add_test_kokkos(
+  updating_triangular_matrix_vector_product
+  "updating_triangular_matrix_vector_product_lower: kokkos impl" USE_LOWER lower)
+
+# hemv
+linalg_add_test_kokkos(
+  overwriting_hermitian_matrix_vector_product
+  "overwriting_hermitian_matrix_vector_product_upper: kokkos impl" USE_UPPER upper)
+linalg_add_test_kokkos(
+  overwriting_hermitian_matrix_vector_product
+  "overwriting_hermitian_matrix_vector_product_lower: kokkos impl" USE_LOWER lower)
+linalg_add_test_kokkos(
+  updating_hermitian_matrix_vector_product
+  "updating_hermitian_matrix_vector_product_upper: kokkos impl" USE_UPPER upper)
+linalg_add_test_kokkos(
+  updating_hermitian_matrix_vector_product
+  "updating_hermitian_matrix_vector_product_lower: kokkos impl" USE_LOWER lower)
