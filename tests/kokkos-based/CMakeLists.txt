@@ -100,3 +100,6 @@ linalg_add_test_kokkos(
 linalg_add_test_kokkos(
   updating_symmetric_matrix_vector_product
   "updating_symmetric_matrix_vector_product_upper: kokkos impl" USE_UPPER upper)
+linalg_add_test_kokkos(
+  hermitian_matrix_rank1_update_kokkos
+  "hermitian_matrix_rank1_update: kokkos impl")

@@ -331,5 +331,54 @@ void symmetric_matrix_rank_1_update(kokkos_exec<ExecSpace> &&exec,
 }
 
 
+// Rank-1 update of a Hermitian matrix
+// performs BLAS xHER/xHPR: A[i,j] += x[i] * conj(x[j])
+
+template<class ExecSpace,
+         class ElementType_x,
+         std::experimental::extents<>::size_type ext_x,
+         class Layout_x,
+         class ElementType_A,
+         std::experimental::extents<>::size_type numRows_A,
+         std::experimental::extents<>::size_type numCols_A,
+         class Layout_A,
+         class Triangle>
+  requires (Impl::is_unique_layout_v<Layout_A, numRows_A, numCols_A>
+            or Impl::is_layout_blas_packed_v<Layout_A>)
+void hermitian_matrix_rank_1_update(kokkos_exec<ExecSpace> &&exec,
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x,
+    std::experimental::default_accessor<ElementType_x>> x,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A,
+    std::experimental::default_accessor<ElementType_A>> A,
+  Triangle t)
+{
+  // P1673 constraints (redundant to mdspan extents in the header)
+  static_assert(A.rank() == 2);
+  static_assert(x.rank() == 1);
+  static_assert(Impl::triangle_layout_match_v<Layout_A, Triangle>);
+
+  // P1673 mandates
+  static_assert(Impl::static_extent_match(A.static_extent(0), A.static_extent(1)));
+  static_assert(Impl::static_extent_match(A.static_extent(0), x.static_extent(0)));
+
+  // P1673 preconditions
+  if ( A.extent(0) != A.extent(1) ){
+    throw std::runtime_error("KokkosBlas: hermitian_matrix_rank_1_update: A.extent(0) != A.extent(1)");
+  }
+  if ( A.extent(0) != x.extent(0) ){
+    throw std::runtime_error("KokkosBlas: hermitian_matrix_rank_1_update: A.extent(0) != x.extent(0)");
+  }
+
+  Impl::signal_kokkos_impl_called("hermitian_matrix_rank1_update");
+
+  auto x_view = Impl::mdspan_to_view(x);
+  auto A_view = Impl::mdspan_to_view(A);
+  Impl::ParallelMatrixVisitor v(ExecSpace(), A_view);
+  v.for_each_triangle_matrix_element(t,
+    KOKKOS_LAMBDA(const auto i, const auto j) {
+      A_view(i, j) += x_view(i) * Impl::conj_if_needed(x_view(j));
+    });
+}
+
 } // namespace KokkosKernelsSTD
 #endif
