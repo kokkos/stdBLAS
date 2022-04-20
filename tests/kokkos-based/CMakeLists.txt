@@ -85,6 +85,12 @@ linalg_add_test_kokkos(
   hermitian_matrix_rank1_update_kokkos
   "hermitian_matrix_rank1_update: kokkos impl")
 linalg_add_test_kokkos(
+  symmetric_matrix_rank2_update_kokkos
+  "symmetric_matrix_rank2_update: kokkos impl")
+linalg_add_test_kokkos(
+  hermitian_matrix_rank2_update_kokkos
+  "hermitian_matrix_rank2_update: kokkos impl")
+linalg_add_test_kokkos(
   overwriting_matrix_vector_product
   "overwriting_matrix_vector_product: kokkos impl")
 linalg_add_test_kokkos(
