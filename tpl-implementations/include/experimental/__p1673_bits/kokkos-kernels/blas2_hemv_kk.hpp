@@ -2,18 +2,20 @@
 #ifndef LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_KOKKOSKERNELS_HERMITIAN_MATVEC_HPP_
 #define LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_KOKKOSKERNELS_HERMITIAN_MATVEC_HPP_
 
+#include "signal_kokkos_impl_called.hpp"
+
 namespace KokkosKernelsSTD {
 
-namespace hermitianmatvecimpl{
+namespace hemv_impl{
 
-template<class T> struct is_complex : std::false_type{};
-template<> struct is_complex<std::complex<float>> : std::true_type{};
-template<> struct is_complex<std::complex<double>> : std::true_type{};
-template<> struct is_complex<std::complex<long double>> : std::true_type{};
+template<class T> struct is_std_complex : std::false_type{};
+template<> struct is_std_complex<std::complex<float>> : std::true_type{};
+template<> struct is_std_complex<std::complex<double>> : std::true_type{};
+template<> struct is_std_complex<std::complex<long double>> : std::true_type{};
 
-template<class T> inline constexpr bool is_complex_v = is_complex<T>::value;
+template<class T> inline constexpr bool is_std_complex_v = is_std_complex<T>::value;
 
-} // end namespace hermitianmatvecimpl
+} // end namespace hemv_impl
 
 //
 // Overwriting hermitian matrix-vector product: y = Ax
@@ -53,12 +55,6 @@ void hermitian_matrix_vector_product(kokkos_exec<ExeSpace> kexe,
 					std::experimental::default_accessor<ElementType_y>
 				      > y)
 {
-
-  // constraints
-  static_assert(A.rank() == 2);
-  static_assert(x.rank() == 1);
-  static_assert(y.rank() == 1);
-
   // preconditions
   if ( A.extent(0) != A.extent(1) ){
     throw std::runtime_error("KokkosBlas: hermitian_matrix_vector_product: A.extent(0) != A.extent(1) ");
@@ -76,7 +72,7 @@ void hermitian_matrix_vector_product(kokkos_exec<ExeSpace> kexe,
   // If inout_matrix_t::element_type is complex<RA> for some RA, then ....
   // Otherwise, the functions will assume that A[j,i] equals A[i,j].
   //
-  if constexpr (hermitianmatvecimpl::is_complex_v<ElementType_A> == false){
+  if constexpr (hemv_impl::is_std_complex_v<typename decltype(A)::value_type> == false){
     std::experimental::linalg::symmetric_matrix_vector_product(kexe, A, tr, x, y);
   }
   else
@@ -91,13 +87,10 @@ void hermitian_matrix_vector_product(kokkos_exec<ExeSpace> kexe,
       if constexpr (std::is_same_v<Triangle, std::experimental::linalg::upper_triangle_t>)
       {
 
-	// this print is detected in the tests
-#if defined KOKKOS_STDBLAS_ENABLE_TESTS
-	std::cout << "overwriting_hermitian_matrix_vector_product_upper: kokkos impl\n";
-#endif
+	Impl::signal_kokkos_impl_called("overwriting_hermitian_matrix_vector_product_upper");
 
 	Kokkos::parallel_for(Kokkos::RangePolicy(ex, 0, A_view.extent(0)),
-			     KOKKOS_LAMBDA (const std::size_t & i)
+			     KOKKOS_LAMBDA (const std::size_t i)
 			     {
 
 			       using lsum_type = decltype( A_view(0,0) * x_view(0) );
@@ -117,13 +110,10 @@ void hermitian_matrix_vector_product(kokkos_exec<ExeSpace> kexe,
       }
       else{
 
-	// this print is detected in the tests
-#if defined KOKKOS_STDBLAS_ENABLE_TESTS
-	std::cout << "overwriting_hermitian_matrix_vector_product_lower: kokkos impl\n";
-#endif
+	Impl::signal_kokkos_impl_called("overwriting_hermitian_matrix_vector_product_lower");
 
         Kokkos::parallel_for(Kokkos::RangePolicy(ex, 0, A_view.extent(0)),
-			     KOKKOS_LAMBDA (const std::size_t & i)
+			     KOKKOS_LAMBDA (const std::size_t i)
 			     {
 
 			       using lsum_type = decltype( A_view(0,0) * x_view(0) );
@@ -191,12 +181,6 @@ void hermitian_matrix_vector_product(kokkos_exec<ExeSpace> kexe,
 				      > z)
 {
 
-  // constraints
-  static_assert(A.rank() == 2);
-  static_assert(x.rank() == 1);
-  static_assert(y.rank() == 1);
-  static_assert(z.rank() == 1);
-
   // preconditions
   if ( A.extent(0) != A.extent(1) ){
     throw std::runtime_error("KokkosBlas: hermitian_matrix_vector_product: A.extent(0) != A.extent(1) ");
@@ -217,7 +201,7 @@ void hermitian_matrix_vector_product(kokkos_exec<ExeSpace> kexe,
   // If inout_matrix_t::element_type is complex<RA> for some RA, then ....
   // Otherwise, the functions will assume that A[j,i] equals A[i,j].
   //
-  if constexpr (hermitianmatvecimpl::is_complex_v<ElementType_A> == false){
+  if constexpr (hemv_impl::is_std_complex_v<typename decltype(A)::value_type> == false){
     std::experimental::linalg::symmetric_matrix_vector_product(kexe, A, tr, x, y, z);
   }
   else
@@ -233,13 +217,10 @@ void hermitian_matrix_vector_product(kokkos_exec<ExeSpace> kexe,
       if constexpr (std::is_same_v<Triangle, std::experimental::linalg::upper_triangle_t>)
       {
 
-	// this print is detected in the tests
-#if defined KOKKOS_STDBLAS_ENABLE_TESTS
-	std::cout << "updating_hermitian_matrix_vector_product_upper: kokkos impl\n";
-#endif
+	Impl::signal_kokkos_impl_called("updating_hermitian_matrix_vector_product_upper");
 
 	Kokkos::parallel_for(Kokkos::RangePolicy(ex, 0, A_view.extent(0)),
-			     KOKKOS_LAMBDA (const std::size_t & i)
+			     KOKKOS_LAMBDA (const std::size_t i)
 			     {
 
 			       using lsum_type = decltype( A_view(0,0) * x_view(0) );
@@ -259,13 +240,10 @@ void hermitian_matrix_vector_product(kokkos_exec<ExeSpace> kexe,
       }
       else{
 
-	// this print is detected in the tests
-#if defined KOKKOS_STDBLAS_ENABLE_TESTS
-	std::cout << "updating_hermitian_matrix_vector_product_lower: kokkos impl\n";
-#endif
+	Impl::signal_kokkos_impl_called("updating_hermitian_matrix_vector_product_lower");
 
         Kokkos::parallel_for(Kokkos::RangePolicy(ex, 0, A_view.extent(0)),
-			     KOKKOS_LAMBDA (const std::size_t & i)
+			     KOKKOS_LAMBDA (const std::size_t i)
 			     {
 
 			       using lsum_type = decltype( A_view(0,0) * x_view(0) );

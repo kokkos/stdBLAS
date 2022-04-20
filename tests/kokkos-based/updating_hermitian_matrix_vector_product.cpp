@@ -141,7 +141,7 @@ TEST_F(blas2_signed_complex_double_fixture, kokkos_updating_hem_matrix_vector_pr
   namespace stdla = std::experimental::linalg;
   using kc_t = Kokkos::complex<double>;
   using stdc_t = value_type;
-  if (alignof(value_type) == alignof(kc_t)){
+  if constexpr (alignof(value_type) == alignof(kc_t)){
     kokkos_blas_updating_hemv_impl(A_hem_e0, stdla::upper_triangle, x_e0, y_e0, z_e0);
   }
 }
@@ -165,7 +165,7 @@ TEST_F(blas2_signed_complex_double_fixture, kokkos_updating_hem_matrix_vector_pr
   namespace stdla = std::experimental::linalg;
   using kc_t = Kokkos::complex<double>;
   using stdc_t = value_type;
-  if (alignof(value_type) == alignof(kc_t)){
+  if constexpr (alignof(value_type) == alignof(kc_t)){
     kokkos_blas_updating_hemv_impl(A_hem_e0, stdla::lower_triangle, x_e0, y_e0, z_e0);
   }
 }
