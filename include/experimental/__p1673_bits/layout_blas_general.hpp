@@ -151,22 +151,22 @@ public:
   MDSPAN_INLINE_FUNCTION constexpr __extents_type extents() const noexcept { return _base_layout.extents(); }
 
   MDSPAN_INLINE_FUNCTION
-  constexpr __extents_type::size_type required_span_size() const noexcept {
+  constexpr typename __extents_type::size_type required_span_size() const noexcept {
     return _base_layout.required_span_size() * __lda.value;
   }
 
   MDSPAN_INLINE_FUNCTION
-  constexpr __extents_type::size_type stride(size_t r) const noexcept {
+  constexpr typename __extents_type::size_type stride(size_t r) const noexcept {
     return _base_layout.stride(r) * __lda.value;
   }
 
-  template<class OtherExtents, __extents_type::size_type OtherLDA>
+  template<class OtherExtents, typename __extents_type::size_type OtherLDA>
   MDSPAN_INLINE_FUNCTION
   friend constexpr bool operator==(__layout_blas_impl const& a, __layout_blas_impl<OtherExtents, OtherLDA> const& b) noexcept {
     return a.extents() == b.extents() && a.__lda == b.__lda;
   }
 
-  template<class OtherExtents, __extents_type::size_type OtherLDA>
+  template<class OtherExtents, typename __extents_type::size_type OtherLDA>
   MDSPAN_INLINE_FUNCTION
   friend constexpr bool operator!=(__layout_blas_impl const& a, __layout_blas_impl<OtherExtents, OtherLDA> const& b) noexcept {
     return a.extents() != b.extents() || a.__lda != b.__lda;
@@ -175,7 +175,7 @@ public:
   // Needed to work with subspan()
   template <size_t N>
   struct __static_stride_workaround {
-    static constexpr __extents_type::size_type value = __lda_t::is_static ?
+    static constexpr typename __extents_type::size_type value = __lda_t::is_static ?
       (BaseLayout::template __static_stride_workaround<N>::value == dynamic_extent ? dynamic_extent :
         (__lda_t::value_static * BaseLayout::template __static_stride_workaround<N>::value)
       ) : dynamic_extent;
