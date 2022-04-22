@@ -326,4 +326,10 @@ using blas2_signed_float_fixture  = _blas2_signed_fixture<float>;
 using blas2_signed_double_fixture = _blas2_signed_fixture<double>;
 using blas2_signed_complex_double_fixture = _blas2_signed_fixture<std::complex<double>>;
 
+// Run all tests for types defined above
+#define FOR_ALL_BLAS2_TYPES(TEST_DEF) \
+  TEST_DEF(double) \
+  TEST_DEF(float) \
+  TEST_DEF(complex_double)
+
 #endif
