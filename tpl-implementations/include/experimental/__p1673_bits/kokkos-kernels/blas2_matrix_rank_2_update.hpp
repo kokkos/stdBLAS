@@ -272,11 +272,12 @@ void hermitian_matrix_rank_2_update(kokkos_exec<ExecSpace> &&exec,
   const auto y_view = Impl::mdspan_to_view(y);
   auto A_view = Impl::mdspan_to_view(A);
 
-  constexpr auto conj = std::experimental::linalg::impl::conj_if_needed;
+  using std::experimental::linalg::impl::conj_if_needed;
   mtxr2update_impl::ParallelMatrixVisitor v(ExecSpace(), A_view);
   v.for_each_triangle_matrix_element(t,
     KOKKOS_LAMBDA(const auto i, const auto j) {
-      A_view(i, j) += x_view(i) * conj(y_view(j)) + y_view(i) * conj(x_view(j));
+      A_view(i, j) += x_view(i) * conj_if_needed(y_view(j))
+                    + y_view(i) * conj_if_needed(x_view(j));
     });
 }
 

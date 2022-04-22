@@ -51,13 +51,13 @@ using namespace kokkostesting;
 template<class x_t, class y_t, class A_t, class Triangle>
 void hermitian_matrix_rank_2_update_gold_solution(const x_t &x, const y_t &y, A_t &A, Triangle /* t */)
 {
+  using std::experimental::linalg::impl::conj_if_needed;
   using size_type = std::experimental::extents<>::size_type;
-  constexpr auto conj = std::experimental::linalg::impl::conj_if_needed;
   constexpr bool low = std::is_same_v<Triangle, std::experimental::linalg::lower_triangle_t>;
   for (size_type j = 0; j < A.extent(1); ++j) {
     const size_type i1 = low ? A.extent(0) : j + 1;
     for (size_type i = low ? j : 0; i < i1; ++i) {
-      A(i,j) += x(i) * conj(y(j)) + y(i) * conj(x(j));
+      A(i,j) += x(i) * conj_if_needed(y(j)) + y(i) * conj_if_needed(x(j));
     }
   }
 }
