@@ -52,9 +52,9 @@ target_link_libraries(${testExe} linalg GTest::GTest)
 add_test(NAME utest_${testExe} COMMAND ${testExe})
 set_tests_properties(utest_${testExe} PROPERTIES FAIL_REGULAR_EXPRESSION "[^a-z]Error;ERROR;Failed;FAILED")
 
-linalg_add_test_kokkos(
-  matrix_rank1_update_kokkos
-  "matrix_rank1_update: kokkos impl")
+#
+# blas1 (according to P1673)
+#
 
 linalg_add_test_kokkos(
   dot_kokkos
@@ -64,12 +64,6 @@ linalg_add_test_kokkos(
   "dot: kokkos impl") # this his not a typo, dotc calls dot underneath
 
 linalg_add_test_kokkos(
-  swap_elements_rank1_kokkos
-  "swap_elements: kokkos impl")
-linalg_add_test_kokkos(
-  swap_elements_rank2_kokkos
-  "swap_elements: kokkos impl")
-linalg_add_test_kokkos(
   add_kokkos
   "add: kokkos impl")
 linalg_add_test_kokkos(
@@ -78,28 +72,37 @@ linalg_add_test_kokkos(
 linalg_add_test_kokkos(
   scale_rank2_kokkos
   "scale: kokkos impl")
-linalg_add_test_kokkos(
-  symmetric_matrix_rank1_update_kokkos
-  "symmetric_matrix_rank1_update: kokkos impl")
 
 linalg_add_test_kokkos(
-  overwriting_matrix_vector_product
-  "overwriting_matrix_vector_product: kokkos impl")
+  idx_abs_max_kokkos
+  "idx_abs_max: kokkos impl")
+
 linalg_add_test_kokkos(
-  updating_matrix_vector_product
-  "updating_matrix_vector_product: kokkos impl")
+  vector_norm2_kokkos
+  "vector_norm2: kokkos impl")
 linalg_add_test_kokkos(
-  overwriting_symmetric_matrix_vector_product
-  "overwriting_symmetric_matrix_vector_product_lower: kokkos impl" USE_LOWER lower)
+  vector_sum_of_squares_kokkos
+  "vector_sum_of_squares: kokkos impl")
 linalg_add_test_kokkos(
-  overwriting_symmetric_matrix_vector_product
-  "overwriting_symmetric_matrix_vector_product_upper: kokkos impl" USE_UPPER upper)
+  vector_abs_sum_kokkos
+  "vector_abs_sum: kokkos impl")
+
 linalg_add_test_kokkos(
-  updating_symmetric_matrix_vector_product
-  "updating_symmetric_matrix_vector_product_lower: kokkos impl" USE_LOWER lower)
+  matrix_frob_norm_kokkos
+  "matrix_frob_norm: kokkos impl")
 linalg_add_test_kokkos(
-  updating_symmetric_matrix_vector_product
-  "updating_symmetric_matrix_vector_product_upper: kokkos impl" USE_UPPER upper)
+  matrix_one_norm_kokkos
+  "matrix_one_norm: kokkos impl")
 linalg_add_test_kokkos(
-  hermitian_matrix_rank1_update_kokkos
-  "hermitian_matrix_rank1_update: kokkos impl")
+  matrix_inf_norm_kokkos
+  "matrix_inf_norm: kokkos impl")
+
+linalg_add_test_kokkos(
+  swap_elements_rank1_kokkos
+  "swap_elements: kokkos impl")
+linalg_add_test_kokkos(
+  swap_elements_rank2_kokkos
+  "swap_elements: kokkos impl")
+linalg_add_test_kokkos(
+  copy_kokkos
+  "copy: kokkos impl")
