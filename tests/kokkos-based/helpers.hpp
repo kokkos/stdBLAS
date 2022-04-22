@@ -87,30 +87,30 @@ auto create_stdvector_and_copy_rowwise(T sourceView)
 // create rank-1 mdspan (vector)
 template <typename ValueType,
           typename mdspan_t = typename _blas2_signed_fixture<ValueType>::mdspan_r1_t>
-inline mdspan_t make_mdspan(ValueType *data, std::size_t ext) {
+mdspan_t make_mdspan(ValueType *data, std::size_t ext) {
   return mdspan_t(data, ext);
 }
 
 template <typename ValueType,
           typename mdspan_t = typename _blas2_signed_fixture<const ValueType>::mdspan_r1_t>
-inline mdspan_t make_mdspan(const ValueType *data, std::size_t ext) {
+mdspan_t make_mdspan(const ValueType *data, std::size_t ext) {
   return mdspan_t(data, ext);
 }
 
 template <typename ValueType>
-inline auto make_mdspan(std::vector<ValueType> &v) {
+auto make_mdspan(std::vector<ValueType> &v) {
   return make_mdspan(v.data(), v.size());
 }
 
 template <typename ValueType>
-inline auto make_mdspan(const std::vector<ValueType> &v) {
+auto make_mdspan(const std::vector<ValueType> &v) {
   return make_mdspan(v.data(), v.size());
 }
 
 // create rank-2 mdspan (matrix)
 template <typename ValueType,
           typename mdspan_t = typename _blas2_signed_fixture<ValueType>::mdspan_r2_t>
-inline mdspan_t make_mdspan(ValueType *data, std::size_t ext0, std::size_t ext1) {
+mdspan_t make_mdspan(ValueType *data, std::size_t ext0, std::size_t ext1) {
   return mdspan_t(data, ext0, ext1);
 }
 
@@ -122,7 +122,7 @@ template <typename ElementType1,
           typename ElementType2,
           typename LayoutPolicy2,
           typename AccessorPolicy2>
-inline bool is_same_vector(
+bool is_same_vector(
     const mdspan<ElementType1, extents<dynamic_extent>, LayoutPolicy1, AccessorPolicy1> &v1,
     const mdspan<ElementType2, extents<dynamic_extent>, LayoutPolicy2, AccessorPolicy2> &v2)
 {
@@ -143,7 +143,7 @@ template <typename ElementType1,
           typename LayoutPolicy,
           typename AccessorPolicy,
           typename ElementType2>
-inline bool is_same_vector(
+bool is_same_vector(
     const mdspan<ElementType1, extents<dynamic_extent>, LayoutPolicy, AccessorPolicy> &v1,
     const std::vector<ElementType2> &v2)
 {
@@ -154,7 +154,7 @@ template <typename ElementType1,
           typename LayoutPolicy,
           typename AccessorPolicy,
           typename ElementType2>
-inline bool is_same_vector(
+bool is_same_vector(
     const std::vector<ElementType1> &v1,
     const mdspan<ElementType2, extents<dynamic_extent>, LayoutPolicy, AccessorPolicy> &v2)
 {
@@ -162,7 +162,7 @@ inline bool is_same_vector(
 }
 
 template <typename ElementType>
-inline bool is_same_vector(
+bool is_same_vector(
     const std::vector<ElementType> &v1,
     const std::vector<ElementType> &v2)
 {
@@ -213,7 +213,7 @@ template <typename ElementType,
           typename LayoutPolicy2,
           typename AccessorPolicy2,
           typename ToleranceType>
-inline bool is_same_matrix(
+bool is_same_matrix(
     const mdspan<ElementType, extents<dynamic_extent, dynamic_extent>, LayoutPolicy1, AccessorPolicy1> &A,
     const mdspan<ElementType, extents<dynamic_extent, dynamic_extent>, LayoutPolicy2, AccessorPolicy2> &B,
     ToleranceType tolerance)
@@ -261,7 +261,7 @@ struct check_types<std::complex<T>> {
 };
 
 template <typename ValueType>
-inline constexpr auto check_types_v = check_types<ValueType>::value;
+constexpr auto check_types_v = check_types<ValueType>::value;
 
 // skips test execution (giving a warning instead) if type checks fail
 template <typename ValueType, typename cb_type>
