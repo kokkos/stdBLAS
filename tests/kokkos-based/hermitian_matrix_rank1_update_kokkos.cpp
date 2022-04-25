@@ -93,4 +93,6 @@ TEST_F(blas2_signed_##blas_val_type##_fixture,                               \
   });                                                                        \
 }
 
-FOR_ALL_BLAS2_TYPES(DEFINE_TESTS);
+DEFINE_TESTS(double)
+DEFINE_TESTS(float)
+DEFINE_TESTS(complex_double)
