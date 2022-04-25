@@ -91,12 +91,6 @@ mdspan_t make_mdspan(ValueType *data, std::size_t ext) {
   return mdspan_t(data, ext);
 }
 
-template <typename ValueType,
-          typename mdspan_t = typename _blas2_signed_fixture<const ValueType>::mdspan_r1_t>
-mdspan_t make_mdspan(const ValueType *data, std::size_t ext) {
-  return mdspan_t(data, ext);
-}
-
 template <typename ValueType>
 auto make_mdspan(std::vector<ValueType> &v) {
   return make_mdspan(v.data(), v.size());
