@@ -167,7 +167,7 @@ bool is_same_vector(
 template <typename T, typename Enabled=void>
 class value_diff {
 public:
-  value_diff(const T &val1, const T &val2): _v(fabs(val1 - val2)) {}
+  value_diff(const T &val1, const T &val2): _v(std::abs(val1 - val2)) {}
   operator T() const { return _v; }
 protected:
   value_diff() = default;
