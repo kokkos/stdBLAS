@@ -13,6 +13,7 @@ template<class ExeSpace,
          class ElementType_y,
          std::experimental::extents<>::size_type ... ext_y,
          class Layout_y>
+requires ( (sizeof...(ext_x) == sizeof...(ext_y)) && (sizeof...(ext_x) <=2) )
 void copy(kokkos_exec<ExeSpace> /*kexe*/,
 	  std::experimental::mdspan<
 	    ElementType_x,
@@ -26,7 +27,6 @@ void copy(kokkos_exec<ExeSpace> /*kexe*/,
 	    Layout_y,
 	    std::experimental::default_accessor<ElementType_y>
 	  > y)
-requires ((sizeof...(ext_x) == sizeof...(ext_y)) && (x.rank() <=2))
 {
   Impl::signal_kokkos_impl_called("copy");
 
@@ -35,7 +35,7 @@ requires ((sizeof...(ext_x) == sizeof...(ext_y)) && (x.rank() <=2))
   auto ex = ExeSpace();
 
   if constexpr(std::is_same_v<typename decltype(x_view)::array_layout, typename decltype(y_view)::array_layout>) {
-    Kokkos::deep_copy(ex, y, x);
+    Kokkos::deep_copy(ex, y_view, x_view);
   } else {
 
     if constexpr(x.rank()==1){
