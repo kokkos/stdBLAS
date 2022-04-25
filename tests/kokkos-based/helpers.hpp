@@ -254,22 +254,22 @@ template <> float  tolerance<std::complex<float>>( double double_tol, float floa
 // checks if std::complex<T> and Kokkos::complex<T> are aligned
 // (they can get misalligned when Kokkos is build with Kokkos_ENABLE_COMPLEX_ALIGN=ON)
 template <typename ValueType, typename Enabled = void>
-struct check_types: public std::true_type {};
+struct check_complex_alignment: public std::true_type {};
 
 template <typename T>
-struct check_types<std::complex<T>> {
+struct check_complex_alignment<std::complex<T>> {
   static constexpr bool value = alignof(std::complex<T>) == alignof(Kokkos::complex<T>);
 };
 
 template <typename ValueType>
-constexpr auto check_types_v = check_types<ValueType>::value;
+constexpr auto check_complex_alignment_v = check_complex_alignment<ValueType>::value;
 
 // skips test execution (giving a warning instead) if type checks fail
 template <typename ValueType, typename cb_type>
 void run_checked_tests(const std::string_view test_prefix, const std::string_view method_name,
                        const std::string_view test_postfix, const std::string_view type_spec,
                        const cb_type cb) {
-  if constexpr (check_types_v<ValueType>) {
+  if constexpr (check_complex_alignment_v<ValueType>) { // add more checks if needed
     cb();
   } else {
     std::cout << "***\n"
