@@ -117,8 +117,8 @@ template <typename ElementType1,
           typename LayoutPolicy2,
           typename AccessorPolicy2>
 bool is_same_vector(
-    const mdspan<ElementType1, extents<dynamic_extent>, LayoutPolicy1, AccessorPolicy1> &v1,
-    const mdspan<ElementType2, extents<dynamic_extent>, LayoutPolicy2, AccessorPolicy2> &v2)
+    mdspan<ElementType1, extents<dynamic_extent>, LayoutPolicy1, AccessorPolicy1> v1,
+    mdspan<ElementType2, extents<dynamic_extent>, LayoutPolicy2, AccessorPolicy2> v2)
 {
   const auto size = v1.extent(0);
   if (size != v2.extent(0))
@@ -138,7 +138,7 @@ template <typename ElementType1,
           typename AccessorPolicy,
           typename ElementType2>
 bool is_same_vector(
-    const mdspan<ElementType1, extents<dynamic_extent>, LayoutPolicy, AccessorPolicy> &v1,
+    mdspan<ElementType1, extents<dynamic_extent>, LayoutPolicy, AccessorPolicy> v1,
     const std::vector<ElementType2> &v2)
 {
   return is_same_vector(v1, make_mdspan(v2));
@@ -150,7 +150,7 @@ template <typename ElementType1,
           typename ElementType2>
 bool is_same_vector(
     const std::vector<ElementType1> &v1,
-    const mdspan<ElementType2, extents<dynamic_extent>, LayoutPolicy, AccessorPolicy> &v2)
+    mdspan<ElementType2, extents<dynamic_extent>, LayoutPolicy, AccessorPolicy> v2)
 {
   return is_same_vector(v2, v1);
 }
@@ -208,8 +208,8 @@ template <typename ElementType,
           typename AccessorPolicy2,
           typename ToleranceType>
 bool is_same_matrix(
-    const mdspan<ElementType, extents<dynamic_extent, dynamic_extent>, LayoutPolicy1, AccessorPolicy1> &A,
-    const mdspan<ElementType, extents<dynamic_extent, dynamic_extent>, LayoutPolicy2, AccessorPolicy2> &B,
+    mdspan<ElementType, extents<dynamic_extent, dynamic_extent>, LayoutPolicy1, AccessorPolicy1> A,
+    mdspan<ElementType, extents<dynamic_extent, dynamic_extent>, LayoutPolicy2, AccessorPolicy2> B,
     ToleranceType tolerance)
 {
   const auto ext0 = A.extent(0);
@@ -276,7 +276,7 @@ void run_checked_tests(const std::string_view test_prefix, const std::string_vie
 
 // drives A = F(A, x, ...) operation test
 template<class x_t, class A_t, typename gold_t, typename action_t>
-void test_op_Ax(const x_t &x, A_t &A, gold_t get_gold, action_t action)
+void test_op_Ax(x_t x, A_t A, gold_t get_gold, action_t action)
 {
   using value_type = typename x_t::value_type;
 
@@ -300,8 +300,7 @@ void test_op_Ax(const x_t &x, A_t &A, gold_t get_gold, action_t action)
 
 // drives A = F(A, x, y, ...) operation test
 template<class x_t, class y_t, class A_t, typename gold_t, typename action_t>
-void test_op_Axy(const x_t &x, const y_t &y, A_t &A,
-                               gold_t get_gold, action_t action)
+void test_op_Axy(x_t x, y_t y, A_t A, gold_t get_gold, action_t action)
 {
   auto y_preKernel = create_stdvector_and_copy(y);
   test_op_Ax(x, A, get_gold, action);
