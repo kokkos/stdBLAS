@@ -166,44 +166,29 @@ bool is_same_vector(
   return is_same_vector(make_mdspan(v1), make_mdspan(v2));
 }
 
-// real diff: d = |v1 - v2|
-template <typename T, typename Enabled=void>
-class value_diff {
-public:
-  value_diff(const T &val1, const T &val2): _v(std::abs(val1 - val2)) {}
-  operator T() const { return _v; }
-protected:
-  value_diff() = default;
-  T _v;
-};
-
-// real diff: d = max(|R(v1) - R(v2)|, |I(v1) - I(v2)|)
-// Note: returned value is of underlying real type
-template <typename T>
-class value_diff<std::complex<T>>: public value_diff<T> {
-  using base = value_diff<T>;
-public:
-  value_diff(const std::complex<T> &val1, const std::complex<T> &val2) {
-    const T dreal = base(val1.real(), val2.real());
-    const T dimag = base(val1.imag(), val2.imag());
-    base::_v = std::max(dreal, dimag);
-  }
-};
+template <typename RealValue>
+KOKKOS_INLINE_FUNCTION
+RealValue scalar_diff(RealValue v1, RealValue v2) {
+  return std::abs(v2 - v1);
+}
 
 template <typename T>
-class value_diff<Kokkos::complex<T>>: public value_diff<T> {
-  using base = value_diff<T>;
-public:
-  KOKKOS_INLINE_FUNCTION
-  value_diff(const Kokkos::complex<T> &val1, const Kokkos::complex<T> &val2) {
-    const T dreal = base(val1.real(), val2.real());
-    const T dimag = base(val1.imag(), val2.imag());
-    base::_v = dreal > dimag ? dreal : dimag; // can't use std::max on GPU
-  }
-};
+T scalar_diff(const std::complex<T> &v1, const std::complex<T> &v2) {
+  const auto dr = scalar_diff(v1.real(), v2.real());
+  const auto di = scalar_diff(v1.imag(), v2.imag());
+  return std::max(dr, di);
+}
+
+template <typename T>
+KOKKOS_INLINE_FUNCTION
+T scalar_diff(const Kokkos::complex<T> &v1, const Kokkos::complex<T> &v2) {
+  const auto dr = scalar_diff(v1.real(), v2.real());
+  const auto di = scalar_diff(v1.imag(), v2.imag());
+  return dr > di ? dr : di; // can't use std::max on GPU
+}
 
 // tolerance based comparison
-// TODO: replace fixed `value_diff` with flexible norm, if needed in future
+// TODO: replace fixed `scalar_diff` with templated flexible norm, if needed in future
 template <typename ElementType,
           typename LayoutPolicy1,
           typename AccessorPolicy1,
@@ -228,7 +213,7 @@ bool is_same_matrix(
   Kokkos::parallel_reduce(ext0,
     KOKKOS_LAMBDA(std::size_t i, diff_type &diff) {
         for (decltype(i) j = 0; j < ext1; ++j) {
-          const auto d = value_diff(A_view(i, j), B_view(i, j));
+          const auto d = scalar_diff(A_view(i, j), B_view(i, j));
           diff = diff || (d > tolerance);
         }
 	    }, Kokkos::LOr<diff_type>(is_different));
