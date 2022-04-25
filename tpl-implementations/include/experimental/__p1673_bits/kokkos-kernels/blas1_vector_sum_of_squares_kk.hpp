@@ -26,22 +26,12 @@ vector_sum_of_squares(kokkos_exec<ExecSpace> /*kexe*/,
   auto x_view = Impl::mdspan_to_view(x);
   std::experimental::linalg::sum_of_squares_result<Scalar> result;
 
-  // FRIZZI:
-  // (1) this works only for types that have a reduction identity.
-  //     for arbitrary types, we need to do something else,
-  //     see what we did for std::algorithms in kokkos where we check
-  //     if reduction if initial or not.
-  // (2) for now this is split into two reductions but we need to check
-  //     if we can combine into a single one while maintaining
-  //     the scaling appropriately
-
   using arithm_traits = Kokkos::Details::ArithTraits<ElementType>;
 
-  Scalar scaling_factor;
+  Scalar scaling_factor = {};
   Kokkos::Max<Scalar> max_reducer(scaling_factor);
   Kokkos::parallel_reduce( Kokkos::RangePolicy(ExecSpace(), 0, x_view.extent(0)),
-			   KOKKOS_LAMBDA (const std::size_t i, Scalar & lmax)
-			   {
+			   KOKKOS_LAMBDA (const std::size_t i, Scalar & lmax){
 			     const auto val = arithm_traits::abs(x_view(i));
 			     max_reducer.join(lmax, val);
 			   },
@@ -51,8 +41,7 @@ vector_sum_of_squares(kokkos_exec<ExecSpace> /*kexe*/,
 
   Scalar ssq = {};
   Kokkos::parallel_reduce(Kokkos::RangePolicy(ExecSpace(), 0, x_view.extent(0)),
-			  KOKKOS_LAMBDA (const std::size_t i, Scalar & update)
-			  {
+			  KOKKOS_LAMBDA (const std::size_t i, Scalar & update){
 			    const auto tmp = arithm_traits::abs(x_view(i))/result.scaling_factor;
 			    update += tmp*tmp;
 			  }, ssq);
