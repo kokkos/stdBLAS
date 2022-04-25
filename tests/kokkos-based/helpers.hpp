@@ -282,11 +282,9 @@ void run_checked_tests(const std::string_view test_prefix, const std::string_vie
 }
 
 // drives A = F(A, x, ...) operation test
-template<class x_t, class A_t, typename gold_t, typename action_t>
-void test_op_Ax(x_t x, A_t A, gold_t get_gold, action_t action)
+template<class x_t, class A_t, class AToleranceType, class GoldType, class ActionType>
+void test_op_Ax(x_t x, A_t A, AToleranceType A_tol, GoldType get_gold, ActionType action)
 {
-  using value_type = typename x_t::value_type;
-
   // backup x to verify it is not changed after kernel
   auto x_preKernel = create_stdvector_and_copy(x);
 
@@ -299,18 +297,18 @@ void test_op_Ax(x_t x, A_t A, gold_t get_gold, action_t action)
   action();
 
   // compare results with gold
-  EXPECT_TRUE(is_same_matrix(A_gold, A, tolerance<value_type>(1e-9, 1e-2f)));
+  EXPECT_TRUE(is_same_matrix(A_gold, A, A_tol));
 
   // x should not change after kernel
   EXPECT_TRUE(is_same_vector(x, x_preKernel));
 }
 
 // drives A = F(A, x, y, ...) operation test
-template<class x_t, class y_t, class A_t, typename gold_t, typename action_t>
-void test_op_Axy(x_t x, y_t y, A_t A, gold_t get_gold, action_t action)
+template<class x_t, class y_t, class A_t, class AToleranceType, class GoldType, class ActionType>
+void test_op_Axy(x_t x, y_t y, A_t A, AToleranceType A_tol, GoldType get_gold, ActionType action)
 {
   auto y_preKernel = create_stdvector_and_copy(y);
-  test_op_Ax(x, A, get_gold, action);
+  test_op_Ax(x, A, A_tol, get_gold, action);
   EXPECT_TRUE(is_same_vector(y, y_preKernel));
 }
 

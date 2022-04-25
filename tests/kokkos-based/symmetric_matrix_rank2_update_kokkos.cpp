@@ -71,7 +71,8 @@ void test_kokkos_symmetric_matrix_rank2_update_impl(const x_t &x, const y_t &y, 
       std::experimental::linalg::symmetric_matrix_rank_2_update(
         KokkosKernelsSTD::kokkos_exec<>(), x, y, A, t);
     };
-  test_op_Axy(x, y, A, get_gold, compute);
+  const auto tol = tolerance<typename x_t::value_type>(1e-9, 1e-2f);
+  test_op_Axy(x, y, A, tol, get_gold, compute);
 }
 
 } // anonymous namespace

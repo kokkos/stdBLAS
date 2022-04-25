@@ -69,7 +69,8 @@ void test_kokkos_matrix_rank1_update_impl(const x_t &x, const y_t &y, A_t &A)
       std::experimental::linalg::matrix_rank_1_update(
           KokkosKernelsSTD::kokkos_exec<>(), x, y, A);
     };
-  test_op_Axy(x, y, A, get_gold, compute);
+  const auto tol = tolerance<typename x_t::value_type>(1e-9, 1e-2f);
+  test_op_Axy(x, y, A, tol, get_gold, compute);
 }
 
 template<class x_t, class y_t, class A_t>
@@ -83,7 +84,8 @@ void test_kokkos_matrix_rank1_update_conj_impl(const x_t &x, const y_t &y, A_t &
       std::experimental::linalg::matrix_rank_1_update_c(
           KokkosKernelsSTD::kokkos_exec<>(), x, y, A);
     };
-  test_op_Axy(x, y, A, get_gold, compute);
+  const auto tol = tolerance<typename x_t::value_type>(1e-9, 1e-2f);
+  test_op_Axy(x, y, A, tol, get_gold, compute);
 }
 
 } // anonymous namespace
