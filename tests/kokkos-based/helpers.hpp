@@ -125,12 +125,15 @@ bool is_same_vector(
     return false;
   const auto v1_view = KokkosKernelsSTD::Impl::mdspan_to_view(v1);
   const auto v2_view = KokkosKernelsSTD::Impl::mdspan_to_view(v2);
-  int diff = false;
+  // Note: reducint to `int` because Kokkos can complain on `bool` not being 
+  //       aligned with int32 and deny it for parallel_reduce()
+  using diff_type = int;
+  diff_type is_different = false;
   Kokkos::parallel_reduce(size,
-    KOKKOS_LAMBDA(const std::size_t i, decltype(diff) &d){
-        d = d || !(v1_view(i) == v2_view(i));
-	    }, diff);
-  return !diff;
+    KOKKOS_LAMBDA(const std::size_t i, diff_type &diff){
+        diff = v1_view[i] != v2_view[i];
+	    }, Kokkos::LOr<diff_type>(is_different));
+  return !is_different;
 }
 
 template <typename ElementType1,
@@ -218,14 +221,18 @@ bool is_same_matrix(
     return false;
   const auto A_view = KokkosKernelsSTD::Impl::mdspan_to_view(A);
   const auto B_view = KokkosKernelsSTD::Impl::mdspan_to_view(B);
-  int diff = false;
+  // Note: reducint to `int` because Kokkos can complain on `bool` not being 
+  //       aligned with int32 and deny it for parallel_reduce()
+  using diff_type = int;
+  diff_type is_different = false;
   Kokkos::parallel_reduce(ext0,
-    KOKKOS_LAMBDA(std::size_t i, decltype(diff) &d) {
+    KOKKOS_LAMBDA(std::size_t i, diff_type &diff) {
         for (decltype(i) j = 0; j < ext1; ++j) {
-          d = d || (value_diff(A_view(i, j), B_view(i, j)) > tolerance);
+          const auto d = value_diff(A_view(i, j), B_view(i, j));
+          diff = diff || (d > tolerance);
         }
-	    }, diff);
-  return !diff;
+	    }, Kokkos::LOr<diff_type>(is_different));
+  return !is_different;
 }
 
 namespace Impl { // internal to test helpers
