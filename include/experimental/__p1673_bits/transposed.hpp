@@ -75,7 +75,7 @@ public:
     // TODO insert other standard mapping things
 
     // for non-batched layouts
-    Extents::size_type operator() (Extents::size_type i, Extents::size_type j) const {
+    typename Extents::size_type operator() (typename Extents::size_type i, typename Extents::size_type j) const {
       return nested_mapping(j, i);
     }
 
@@ -93,7 +93,7 @@ public:
       return nested_mapping.is_strided();
     }
 
-    constexpr Extents::size_type stride(size_t r) const noexcept {
+    constexpr typename Extents::size_type stride(size_t r) const noexcept {
       // FIXME this only works for rank 2
       return nested_mapping.stride(size_t(1) - r);
     }
