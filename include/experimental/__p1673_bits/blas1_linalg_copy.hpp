@@ -124,15 +124,17 @@ struct is_custom_copy_avail<
 } // end anonymous namespace
 
 
-template<class ElementType_x,
-         extents<>::size_type ... ext_x,
+MDSPAN_TEMPLATE_REQUIRES(
+         class ElementType_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         extents<>::size_type ... ext_y,
          class Layout_y,
-         class Accessor_y>
-  requires (sizeof...(ext_x) == sizeof...(ext_y))
+         class Accessor_y,
+         extents<>::size_type ... ext_x,
+         extents<>::size_type ... ext_y,
+         /* requires */ (sizeof...(ext_x) == sizeof...(ext_y))
+)
 void copy(
   std::experimental::linalg::impl::inline_exec_t&& /* exec */,
   std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
@@ -148,16 +150,18 @@ void copy(
   }
 }
 
-template<class ExecutionPolicy,
+MDSPAN_TEMPLATE_REQUIRES(
+         class ExecutionPolicy,
          class ElementType_x,
-         extents<>::size_type ... ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         extents<>::size_type ... ext_y,
          class Layout_y,
-         class Accessor_y>
-  requires (sizeof...(ext_x) == sizeof...(ext_y))
+         class Accessor_y,
+         extents<>::size_type ... ext_x,
+         extents<>::size_type ... ext_y,
+         /* requires */ (sizeof...(ext_x) == sizeof...(ext_y))
+)
 void copy(
   ExecutionPolicy&& exec,
   std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
@@ -177,15 +181,17 @@ void copy(
   }
 }
 
-template<class ElementType_x,
-         extents<>::size_type ... ext_x,
+MDSPAN_TEMPLATE_REQUIRES(
+         class ElementType_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         extents<>::size_type ... ext_y,
          class Layout_y,
-         class Accessor_y>
-  requires (sizeof...(ext_x) == sizeof...(ext_y))
+         class Accessor_y,
+         extents<>::size_type ... ext_x,
+         extents<>::size_type ... ext_y,
+         /* requires */ (sizeof...(ext_x) == sizeof...(ext_y))
+)
 void copy(
   std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
   std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y)

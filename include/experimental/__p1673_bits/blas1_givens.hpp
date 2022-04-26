@@ -45,7 +45,6 @@
 
 #include <cmath>
 #include <complex>
-#include <concepts>
 
 namespace std {
 namespace experimental {
@@ -112,7 +111,7 @@ struct is_custom_givens_rotation_apply_avail<
 
 
 
-template<std::floating_point Real>
+MDSPAN_TEMPLATE_REQUIRES( class Real, /* requires */ ( _MDSPAN_TRAIT(is_floating_point, Real) ) )
 void givens_rotation_setup(const Real f,
                            const Real g,
                            Real& cs,
@@ -218,7 +217,7 @@ void givens_rotation_setup(const Real f,
 }
 
 namespace impl {
-template<std::floating_point Real>
+MDSPAN_TEMPLATE_REQUIRES( class Real, /* requires */ ( _MDSPAN_TRAIT(is_floating_point, Real) ) )
 Real abs1(const complex<Real>& ff) {
   using std::abs;
   using std::imag;
@@ -228,7 +227,7 @@ Real abs1(const complex<Real>& ff) {
   return max(abs(real(ff)), abs(imag(ff)));
 }
 
-template<std::floating_point Real>
+MDSPAN_TEMPLATE_REQUIRES( class Real, /* requires */ ( _MDSPAN_TRAIT(is_floating_point, Real) ) )
 Real abssq(const complex<Real>& ff) {
   using std::imag;
   using std::real;
@@ -237,7 +236,7 @@ Real abssq(const complex<Real>& ff) {
 }
 }
 
-template<std::floating_point Real>
+MDSPAN_TEMPLATE_REQUIRES( class Real, /* requires */ ( _MDSPAN_TRAIT(is_floating_point, Real) ) )
 void givens_rotation_setup(const complex<Real>& f,
                            const complex<Real>& g,
                            Real& cs,
@@ -372,8 +371,8 @@ label20:
   }
 }
 
-// c and s are std::floating_point
-template<class ElementType1,
+MDSPAN_TEMPLATE_REQUIRES(
+         class ElementType1,
          extents<>::size_type ext1,
          class Layout1,
          class Accessor1,
@@ -381,7 +380,9 @@ template<class ElementType1,
          extents<>::size_type ext2,
          class Layout2,
          class Accessor2,
-         std::floating_point Real>
+         class Real,
+         /* requires */ (_MDSPAN_TRAIT(is_floating_point, Real))
+)
 void givens_rotation_apply(
   std::experimental::linalg::impl::inline_exec_t&& /* exec */,
   std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
@@ -400,7 +401,8 @@ void givens_rotation_apply(
   }
 }
 
-template<class ExecutionPolicy,
+MDSPAN_TEMPLATE_REQUIRES(
+         class ExecutionPolicy,
          class ElementType1,
          extents<>::size_type ext1,
          class Layout1,
@@ -409,7 +411,9 @@ template<class ExecutionPolicy,
          extents<>::size_type ext2,
          class Layout2,
          class Accessor2,
-         std::floating_point Real>
+         class Real,
+         /* requires */ (_MDSPAN_TRAIT(is_floating_point, Real))
+)
 void givens_rotation_apply(
   ExecutionPolicy&& exec,
   std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
@@ -431,7 +435,8 @@ void givens_rotation_apply(
   }
 }
 
-template<class ElementType1,
+MDSPAN_TEMPLATE_REQUIRES(
+         class ElementType1,
          extents<>::size_type ext1,
          class Layout1,
          class Accessor1,
@@ -439,7 +444,9 @@ template<class ElementType1,
          extents<>::size_type ext2,
          class Layout2,
          class Accessor2,
-         std::floating_point Real>
+         class Real,
+         /* requires */ (_MDSPAN_TRAIT(is_floating_point, Real))
+)
 void givens_rotation_apply(
   std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
   std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
@@ -452,7 +459,8 @@ void givens_rotation_apply(
 
 // c is std::floating_point
 // s is complex<std::floating_point>
-template<class ElementType1,
+MDSPAN_TEMPLATE_REQUIRES(
+         class ElementType1,
          extents<>::size_type ext1,
          class Layout1,
          class Accessor1,
@@ -460,7 +468,9 @@ template<class ElementType1,
          extents<>::size_type ext2,
          class Layout2,
          class Accessor2,
-         std::floating_point Real>
+         class Real,
+         /* requires */ (_MDSPAN_TRAIT(is_floating_point, Real))
+)
 void givens_rotation_apply(
   std::experimental::linalg::impl::inline_exec_t&& /* exec */,
   std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
@@ -480,7 +490,8 @@ void givens_rotation_apply(
   }
 }
 
-template<class ExecutionPolicy,
+MDSPAN_TEMPLATE_REQUIRES(
+         class ExecutionPolicy,
          class ElementType1,
          extents<>::size_type ext1,
          class Layout1,
@@ -489,7 +500,9 @@ template<class ExecutionPolicy,
          extents<>::size_type ext2,
          class Layout2,
          class Accessor2,
-         std::floating_point Real>
+         class Real,
+         /* requires */ (_MDSPAN_TRAIT(is_floating_point, Real))
+)
 void givens_rotation_apply(
   ExecutionPolicy&& exec,
   std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
@@ -511,7 +524,8 @@ void givens_rotation_apply(
   }
 }
 
-template<class ElementType1,
+MDSPAN_TEMPLATE_REQUIRES(
+         class ElementType1,
          extents<>::size_type ext1,
          class Layout1,
          class Accessor1,
@@ -519,7 +533,9 @@ template<class ElementType1,
          extents<>::size_type ext2,
          class Layout2,
          class Accessor2,
-         std::floating_point Real>
+         class Real,
+         /* requires */ (_MDSPAN_TRAIT(is_floating_point, Real))
+)
 void givens_rotation_apply(
   std::experimental::mdspan<ElementType1, std::experimental::extents<ext1>, Layout1, Accessor1> x,
   std::experimental::mdspan<ElementType2, std::experimental::extents<ext2>, Layout2, Accessor2> y,
