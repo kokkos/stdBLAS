@@ -157,17 +157,17 @@ struct is_custom_add_avail<
 
 MDSPAN_TEMPLATE_REQUIRES(
          class ElementType_x,
+         extents<>::size_type ... ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
+         extents<>::size_type ... ext_y,
          class Layout_y,
          class Accessor_y,
          class ElementType_z,
+         extents<>::size_type ... ext_z,
          class Layout_z,
          class Accessor_z,
-         extents<>::size_type ... ext_x,
-         extents<>::size_type ... ext_y,
-         extents<>::size_type ... ext_z,
          /* requires */ (sizeof...(ext_x) == sizeof...(ext_y) && sizeof...(ext_x) == sizeof...(ext_z))
 )
 void add(
@@ -191,17 +191,17 @@ void add(
 MDSPAN_TEMPLATE_REQUIRES(
          class ExecutionPolicy,
          class ElementType_x,
+         extents<>::size_type ... ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
+         extents<>::size_type ... ext_y,
          class Layout_y,
          class Accessor_y,
          class ElementType_z,
+         extents<>::size_type ... ext_z,
          class Layout_z,
          class Accessor_z,
-         extents<>::size_type ... ext_x,
-         extents<>::size_type ... ext_y,
-         extents<>::size_type ... ext_z,
          /* requires */ (sizeof...(ext_x) == sizeof...(ext_y) && sizeof...(ext_x) == sizeof...(ext_z))
 )
 void add(
@@ -227,17 +227,17 @@ void add(
 
 MDSPAN_TEMPLATE_REQUIRES(
          class ElementType_x,
+         extents<>::size_type ... ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
+         extents<>::size_type ... ext_y,
          class Layout_y,
          class Accessor_y,
          class ElementType_z,
+         extents<>::size_type ... ext_z,
          class Layout_z,
          class Accessor_z,
-         extents<>::size_type ... ext_x,
-         extents<>::size_type ... ext_y,
-         extents<>::size_type ... ext_z,
          /* requires */ (sizeof...(ext_x) == sizeof...(ext_y) && sizeof...(ext_x) == sizeof...(ext_z))
 )
 void add(

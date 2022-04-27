@@ -129,13 +129,13 @@ struct is_custom_vector_swap_elements_avail<
 
 MDSPAN_TEMPLATE_REQUIRES(
          class ElementType_x,
+         extents<>::size_type ... ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
+         extents<>::size_type ... ext_y,
          class Layout_y,
          class Accessor_y,
-         extents<>::size_type ... ext_x,
-         extents<>::size_type ... ext_y,
          /* requires */ (sizeof...(ext_x) == sizeof...(ext_y))
 )
 void swap_elements(
@@ -155,14 +155,14 @@ void swap_elements(
 
 MDSPAN_TEMPLATE_REQUIRES(
          class ExecutionPolicy,
+         extents<>::size_type ... ext_x,
          class ElementType_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
+         extents<>::size_type ... ext_y,
          class Layout_y,
          class Accessor_y,
-         extents<>::size_type ... ext_x,
-         extents<>::size_type ... ext_y,
          /* requires */ (sizeof...(ext_x) == sizeof...(ext_y))
 )
 void swap_elements(
@@ -185,13 +185,13 @@ void swap_elements(
 
 MDSPAN_TEMPLATE_REQUIRES(
          class ElementType_x,
+         extents<>::size_type ... ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
+         extents<>::size_type ... ext_y,
          class Layout_y,
          class Accessor_y,
-         extents<>::size_type ... ext_x,
-         extents<>::size_type ... ext_y,
          /* requires */ (sizeof...(ext_x) == sizeof...(ext_y))
 )
 void swap_elements(
