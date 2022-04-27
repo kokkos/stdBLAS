@@ -155,8 +155,8 @@ void swap_elements(
 
 MDSPAN_TEMPLATE_REQUIRES(
          class ExecutionPolicy,
-         extents<>::size_type ... ext_x,
          class ElementType_x,
+         extents<>::size_type ... ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
