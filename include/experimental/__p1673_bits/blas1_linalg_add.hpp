@@ -155,7 +155,8 @@ struct is_custom_add_avail<
 } // end anonymous namespace
 
 
-template<class ElementType_x,
+MDSPAN_TEMPLATE_REQUIRES(
+         class ElementType_x,
          extents<>::size_type ... ext_x,
          class Layout_x,
          class Accessor_x,
@@ -166,8 +167,9 @@ template<class ElementType_x,
          class ElementType_z,
          extents<>::size_type ... ext_z,
          class Layout_z,
-         class Accessor_z>
-  requires (sizeof...(ext_x) == sizeof...(ext_y) && sizeof...(ext_x) == sizeof...(ext_z))
+         class Accessor_z,
+         /* requires */ (sizeof...(ext_x) == sizeof...(ext_y) && sizeof...(ext_x) == sizeof...(ext_z))
+)
 void add(
   std::experimental::linalg::impl::inline_exec_t&& /* exec */,
   std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
@@ -186,7 +188,8 @@ void add(
   }
 }
 
-template<class ExecutionPolicy,
+MDSPAN_TEMPLATE_REQUIRES(
+         class ExecutionPolicy,
          class ElementType_x,
          extents<>::size_type ... ext_x,
          class Layout_x,
@@ -198,8 +201,9 @@ template<class ExecutionPolicy,
          class ElementType_z,
          extents<>::size_type ... ext_z,
          class Layout_z,
-         class Accessor_z>
-  requires (sizeof...(ext_x) == sizeof...(ext_y) && sizeof...(ext_x) == sizeof...(ext_z))
+         class Accessor_z,
+         /* requires */ (sizeof...(ext_x) == sizeof...(ext_y) && sizeof...(ext_x) == sizeof...(ext_z))
+)
 void add(
   ExecutionPolicy&& exec,
   std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
@@ -221,7 +225,8 @@ void add(
   }
 }
 
-template<class ElementType_x,
+MDSPAN_TEMPLATE_REQUIRES(
+         class ElementType_x,
          extents<>::size_type ... ext_x,
          class Layout_x,
          class Accessor_x,
@@ -232,8 +237,9 @@ template<class ElementType_x,
          class ElementType_z,
          extents<>::size_type ... ext_z,
          class Layout_z,
-         class Accessor_z>
-  requires (sizeof...(ext_x) == sizeof...(ext_y) && sizeof...(ext_x) == sizeof...(ext_z))
+         class Accessor_z,
+         /* requires */ (sizeof...(ext_x) == sizeof...(ext_y) && sizeof...(ext_x) == sizeof...(ext_z))
+)
 void add(
   std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
   std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y,
