@@ -4,6 +4,7 @@
 
 #include <utility>
 #include "signal_kokkos_impl_called.hpp"
+#include "static_extent_match.hpp"
 
 namespace KokkosKernelsSTD {
 
@@ -27,14 +28,6 @@ void repeat_impl(F&& f, std::integer_sequence<T, Is...>){
 template <int N, class F>
 void repeat(F&& f){
   repeat_impl(f, std::make_integer_sequence<int, N>{});
-}
-
-template <class size_type>
-constexpr bool static_extent_match(size_type extent1, size_type extent2)
-{
-  return extent1 == std::experimental::dynamic_extent ||
-         extent2 == std::experimental::dynamic_extent ||
-         extent1 == extent2;
 }
 
 } // end namespace swap_impl
@@ -80,7 +73,7 @@ void swap_elements(kokkos_exec<ExeSpace> /*kexe*/,
   // P1673 mandates
   swap_impl::repeat<x.rank()>
     ([=](int r){
-      swap_impl::static_extent_match(x.static_extent(r), y.static_extent(r));
+      Impl::static_extent_match(x.static_extent(r), y.static_extent(r));
     });
 
   Impl::signal_kokkos_impl_called("swap_elements");

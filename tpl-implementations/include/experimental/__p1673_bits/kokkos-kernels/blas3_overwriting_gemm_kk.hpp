@@ -3,18 +3,9 @@
 #define LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_KOKKOSKERNELS_OVERWRITING_GEMM_HPP_
 
 #include "signal_kokkos_impl_called.hpp"
+#include "static_extent_match.hpp"
 
 namespace KokkosKernelsSTD {
-
-namespace ov_gemm_impl{
-template <class size_type>
-constexpr bool static_extent_match(size_type extent1, size_type extent2)
-{
-  return extent1 == std::experimental::dynamic_extent ||
-         extent2 == std::experimental::dynamic_extent ||
-         extent1 == extent2;
-}
-} //end ov_gemm_impl namespace
 
 //
 // overwriting gemm: C = alpha*A*B
@@ -66,9 +57,9 @@ void matrix_product(
   }
 
   // mandates
-  ov_gemm_impl::static_extent_match(A.static_extent(1), B.static_extent(0));
-  ov_gemm_impl::static_extent_match(A.static_extent(0), C.static_extent(0));
-  ov_gemm_impl::static_extent_match(B.static_extent(1), C.static_extent(1));
+  Impl::static_extent_match(A.static_extent(1), B.static_extent(0));
+  Impl::static_extent_match(A.static_extent(0), C.static_extent(0));
+  Impl::static_extent_match(B.static_extent(1), C.static_extent(1));
 
   auto A_view = Impl::mdspan_to_view(A);
   auto B_view = Impl::mdspan_to_view(B);
@@ -149,9 +140,9 @@ void matrix_product(
   }
 
   // mandates
-  ov_gemm_impl::static_extent_match(AT.static_extent(1), B.static_extent(0));
-  ov_gemm_impl::static_extent_match(AT.static_extent(0), C.static_extent(0));
-  ov_gemm_impl::static_extent_match(B.static_extent(1), C.static_extent(1));
+  Impl::static_extent_match(AT.static_extent(1), B.static_extent(0));
+  Impl::static_extent_match(AT.static_extent(0), C.static_extent(0));
+  Impl::static_extent_match(B.static_extent(1), C.static_extent(1));
 
   // note that the conversion to view does NOT carry the transpose
   auto A_view = Impl::mdspan_to_view(AT);
@@ -235,9 +226,9 @@ void matrix_product(
   }
 
   // mandates
-  ov_gemm_impl::static_extent_match(A.static_extent(1),  BT.static_extent(0));
-  ov_gemm_impl::static_extent_match(A.static_extent(0),  C.static_extent(0));
-  ov_gemm_impl::static_extent_match(BT.static_extent(1), C.static_extent(1));
+  Impl::static_extent_match(A.static_extent(1),  BT.static_extent(0));
+  Impl::static_extent_match(A.static_extent(0),  C.static_extent(0));
+  Impl::static_extent_match(BT.static_extent(1), C.static_extent(1));
 
   // note that the conversion to view does NOT carry the transpose
   auto A_view = Impl::mdspan_to_view(A);

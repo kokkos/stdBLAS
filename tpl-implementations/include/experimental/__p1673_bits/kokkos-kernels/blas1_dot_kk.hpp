@@ -5,21 +5,9 @@
 // keeping this in mind: https://github.com/kokkos/stdBLAS/issues/122
 
 #include "signal_kokkos_impl_called.hpp"
+#include "static_extent_match.hpp"
 
 namespace KokkosKernelsSTD {
-
-namespace dot_impl {
-
-template <class size_type>
-KOKKOS_INLINE_FUNCTION
-constexpr bool static_extent_match(size_type extent1, size_type extent2)
-{
-  return extent1 == std::experimental::dynamic_extent ||
-         extent2 == std::experimental::dynamic_extent ||
-         extent1 == extent2;
-}
-
-} // namespace dot_impl
 
 template<class ExeSpace,
 	 class ElementType_x,
@@ -50,7 +38,7 @@ Scalar dot(kokkos_exec<ExeSpace> /*kexe*/,
   }
 
   // P1673 mandates
-  static_assert(dot_impl::static_extent_match(x.static_extent(0), y.static_extent(0)));
+  static_assert(Impl::static_extent_match(x.static_extent(0), y.static_extent(0)));
 
   Impl::signal_kokkos_impl_called("dot");
 
@@ -110,7 +98,7 @@ Scalar dot(kokkos_exec<ExeSpace>,
   }
 
   // P1673 mandates
-  static_assert(dot_impl::static_extent_match(x.static_extent(0), y.static_extent(0)));
+  static_assert(Impl::static_extent_match(x.static_extent(0), y.static_extent(0)));
 
   Impl::signal_kokkos_impl_called("dot");
 

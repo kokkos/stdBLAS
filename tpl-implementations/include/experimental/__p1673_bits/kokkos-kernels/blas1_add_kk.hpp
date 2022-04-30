@@ -3,19 +3,11 @@
 #define LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_KOKKOSKERNELS_ADD_HPP_
 
 #include "signal_kokkos_impl_called.hpp"
+#include "static_extent_match.hpp"
 
 namespace KokkosKernelsSTD {
 
 namespace add_impl{
-
-template <class size_type>
-KOKKOS_INLINE_FUNCTION
-constexpr bool static_extent_match(size_type extent1, size_type extent2)
-{
-  return extent1 == std::experimental::dynamic_extent ||
-         extent2 == std::experimental::dynamic_extent ||
-         extent1 == extent2;
-}
 
 template <class F, class T, T... Is>
 void repeat_impl(F&& f, std::integer_sequence<T, Is...>){
@@ -80,9 +72,9 @@ void add(kokkos_exec<ExeSpace>,
   // P1673 mandates
   add_impl::repeat<x.rank()>
     ([=](int r){
-      add_impl::static_extent_match(x.static_extent(r), z.static_extent(r));
-      add_impl::static_extent_match(y.static_extent(r), z.static_extent(r));
-      add_impl::static_extent_match(x.static_extent(r), y.static_extent(r));
+      Impl::static_extent_match(x.static_extent(r), z.static_extent(r));
+      Impl::static_extent_match(y.static_extent(r), z.static_extent(r));
+      Impl::static_extent_match(x.static_extent(r), y.static_extent(r));
     });
 
   Impl::signal_kokkos_impl_called("add");

@@ -46,6 +46,7 @@
 
 #include <complex>
 #include "signal_kokkos_impl_called.hpp"
+#include "static_extent_match.hpp"
 
 namespace KokkosKernelsSTD {
 
@@ -143,15 +144,6 @@ struct triangle_layout_match<
 
 template <typename Layout, typename Triangle>
 inline constexpr bool triangle_layout_match_v = triangle_layout_match<Layout, Triangle>::value;
-
-template <class size_type>
-KOKKOS_INLINE_FUNCTION
-constexpr bool static_extent_match(size_type extent1, size_type extent2)
-{
-  return extent1 == std::experimental::dynamic_extent ||
-         extent2 == std::experimental::dynamic_extent ||
-         extent1 == extent2;
-}
 
 } // namespace Impl
 
