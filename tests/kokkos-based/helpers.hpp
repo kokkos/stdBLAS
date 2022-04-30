@@ -108,8 +108,37 @@ mdspan_t make_mdspan(ValueType *data, std::size_t ext0, std::size_t ext1) {
   return mdspan_t(data, ext0, ext1);
 }
 
+template <typename RealValue>
+KOKKOS_INLINE_FUNCTION
+RealValue scalar_abs_diff(RealValue v1, RealValue v2) {
+  return std::abs(v2 - v1);
+}
+
+template <typename T>
+T scalar_abs_diff(const std::complex<T> &v1, const std::complex<T> &v2) {
+  const auto dr = scalar_abs_diff(v1.real(), v2.real());
+  const auto di = scalar_abs_diff(v1.imag(), v2.imag());
+  return std::max(dr, di);
+}
+
+template <typename T>
+KOKKOS_INLINE_FUNCTION
+T scalar_abs_diff(const Kokkos::complex<T> &v1, const Kokkos::complex<T> &v2) {
+  const auto dr = scalar_abs_diff(v1.real(), v2.real());
+  const auto di = scalar_abs_diff(v1.imag(), v2.imag());
+  return dr > di ? dr : di; // can't use std::max on GPU
+}
+
+#if 0
+template <typename T>
+KOKKOS_INLINE_FUNCTION
+auto scalar_ref_diff(const T &v1, const T &v2) {
+  const auto v1_abs = scalar_abs_diff(v1, static_cast<T>(0));
+  return scalar_abs_diff(v1, v2) / v1_abs;
+}
+#endif
+
 // no-tolerance (exact) comparison
-// TODO: add tolerance based comparison if needed (see is_same_matrix below)
 template <typename ElementType1,
           typename LayoutPolicy1,
           typename AccessorPolicy1,
@@ -166,39 +195,136 @@ bool is_same_vector(
   return is_same_vector(make_mdspan(v1), make_mdspan(v2));
 }
 
-template <typename RealValue>
-KOKKOS_INLINE_FUNCTION
-RealValue scalar_diff(RealValue v1, RealValue v2) {
-  return std::abs(v2 - v1);
-}
-
-template <typename T>
-T scalar_diff(const std::complex<T> &v1, const std::complex<T> &v2) {
-  const auto dr = scalar_diff(v1.real(), v2.real());
-  const auto di = scalar_diff(v1.imag(), v2.imag());
-  return std::max(dr, di);
-}
-
-template <typename T>
-KOKKOS_INLINE_FUNCTION
-T scalar_diff(const Kokkos::complex<T> &v1, const Kokkos::complex<T> &v2) {
-  const auto dr = scalar_diff(v1.real(), v2.real());
-  const auto di = scalar_diff(v1.imag(), v2.imag());
-  return dr > di ? dr : di; // can't use std::max on GPU
-}
-
-// tolerance based comparison
-// TODO: replace fixed `scalar_diff` with templated flexible norm, if needed in future
-template <typename ElementType,
+template <typename ElementType1,
           typename LayoutPolicy1,
           typename AccessorPolicy1,
+          typename ElementType2,
           typename LayoutPolicy2,
-          typename AccessorPolicy2,
-          typename ToleranceType>
+          typename AccessorPolicy2>
+auto vector_abs_diff(
+    mdspan<ElementType1, extents<dynamic_extent>, LayoutPolicy1, AccessorPolicy1> v1,
+    mdspan<ElementType2, extents<dynamic_extent>, LayoutPolicy2, AccessorPolicy2> v2)
+{
+  using RetType = decltype(scalar_abs_diff(v1[0], v2[0])); // will be same for views
+  const auto size = v1.extent(0);
+  if (size != v2.extent(0))
+    return std::numeric_limits<RetType>::max(); // very, very different
+  const auto v1_view = KokkosKernelsSTD::Impl::mdspan_to_view(v1);
+  const auto v2_view = KokkosKernelsSTD::Impl::mdspan_to_view(v2);
+  RetType diff = static_cast<RetType>(0);
+  Kokkos::parallel_reduce(size,
+    KOKKOS_LAMBDA(const std::size_t i, RetType &diff){
+        const RetType d = scalar_abs_diff(v1_view[i], v2_view[i]);
+        if (d > diff) {
+          diff = d;
+        }
+	    }, Kokkos::Max<RetType>(diff));
+  return diff;
+}
+
+template <typename ElementType1,
+          typename LayoutPolicy,
+          typename AccessorPolicy,
+          typename ElementType2>
+auto vector_abs_diff(
+    mdspan<ElementType1, extents<dynamic_extent>, LayoutPolicy, AccessorPolicy> v1,
+    const std::vector<ElementType2> &v2)
+{
+  return vector_abs_diff(v1, make_mdspan(v2));
+}
+
+template <typename ElementType1,
+          typename LayoutPolicy,
+          typename AccessorPolicy,
+          typename ElementType2>
+auto vector_abs_diff(
+    const std::vector<ElementType1> &v1,
+    mdspan<ElementType2, extents<dynamic_extent>, LayoutPolicy, AccessorPolicy> v2)
+{
+  return vector_abs_diff(v2, v1);
+}
+
+template <typename ElementType1, typename ElementType2>
+auto vector_abs_diff(
+    const std::vector<ElementType1> &v1,
+    const std::vector<ElementType2> &v2)
+{
+  return vector_abs_diff(make_mdspan(v1), make_mdspan(v2));
+}
+
+template <typename ElementType1,
+          typename LayoutPolicy1,
+          typename AccessorPolicy1,
+          typename ElementType2,
+          typename LayoutPolicy2,
+          typename AccessorPolicy2>
+auto vector_rel_diff(
+    mdspan<ElementType1, extents<dynamic_extent>, LayoutPolicy1, AccessorPolicy1> v1,
+    mdspan<ElementType2, extents<dynamic_extent>, LayoutPolicy2, AccessorPolicy2> v2)
+{
+  using RetType = decltype(scalar_abs_diff(v1[0], v2[0]));
+  const auto size = v1.extent(0);
+  if (size != v2.extent(0))
+    return std::numeric_limits<RetType>::max(); // very, very different
+
+  constexpr auto zero1 = static_cast<ElementType1>(0);
+  constexpr auto zero2 = static_cast<ElementType2>(0);
+  RetType abs_diff = vector_abs_diff(v1, v2);
+  auto v1_norm = scalar_abs_diff(zero1, v1[std::experimental::linalg::idx_abs_max(v1)]);
+  auto v2_norm = scalar_abs_diff(zero2, v2[std::experimental::linalg::idx_abs_max(v2)]);
+  if (v1_norm == zero1) {
+    if (v2_norm == zero2) {
+      return static_cast<RetType>(0); // no difference
+    } else {
+      return abs_diff;
+    }
+  } else if (v2_norm == static_cast<ElementType2>(0)) {
+    return abs_diff;
+  } else {
+    return abs_diff / std::min(v1_norm, v2_norm); // pick larger relative error
+  }
+}
+
+template <typename ElementType1,
+          typename LayoutPolicy,
+          typename AccessorPolicy,
+          typename ElementType2>
+auto vector_rel_diff(
+    mdspan<ElementType1, extents<dynamic_extent>, LayoutPolicy, AccessorPolicy> v1,
+    const std::vector<ElementType2> &v2)
+{
+  return vector_rel_diff(v1, make_mdspan(v2));
+}
+
+template <typename ElementType1,
+          typename LayoutPolicy,
+          typename AccessorPolicy,
+          typename ElementType2>
+auto vector_rel_diff(
+    const std::vector<ElementType1> &v1,
+    mdspan<ElementType2, extents<dynamic_extent>, LayoutPolicy, AccessorPolicy> v2)
+{
+  return vector_rel_diff(v2, v1);
+}
+
+template <typename ElementType1, typename ElementType2>
+auto vector_rel_diff(
+    const std::vector<ElementType1> &v1,
+    const std::vector<ElementType2> &v2)
+{
+  return vector_rel_diff(make_mdspan(v1), make_mdspan(v2));
+}
+
+// no-tolerance (exact) comparison
+template <typename ElementType1,
+          typename LayoutPolicy1,
+          typename AccessorPolicy1,
+          typename ElementType2,
+          typename LayoutPolicy2,
+          typename AccessorPolicy2>
 bool is_same_matrix(
-    mdspan<ElementType, extents<dynamic_extent, dynamic_extent>, LayoutPolicy1, AccessorPolicy1> A,
-    mdspan<ElementType, extents<dynamic_extent, dynamic_extent>, LayoutPolicy2, AccessorPolicy2> B,
-    ToleranceType tolerance)
+    mdspan<ElementType1, extents<dynamic_extent, dynamic_extent>, LayoutPolicy1, AccessorPolicy1> A,
+    mdspan<ElementType2, extents<dynamic_extent, dynamic_extent>, LayoutPolicy2, AccessorPolicy2> B)
 {
   const auto ext0 = A.extent(0);
   const auto ext1 = A.extent(1);
@@ -213,11 +339,70 @@ bool is_same_matrix(
   Kokkos::parallel_reduce(ext0,
     KOKKOS_LAMBDA(std::size_t i, diff_type &diff) {
         for (decltype(i) j = 0; j < ext1; ++j) {
-          const auto d = scalar_diff(A_view(i, j), B_view(i, j));
-          diff = diff || (d > tolerance);
+          const bool d = A_view(i, j) != B_view(i, j);
+          diff = diff || d;
         }
 	    }, Kokkos::LOr<diff_type>(is_different));
   return !is_different;
+}
+
+template <typename ElementType,
+          typename LayoutPolicy1,
+          typename AccessorPolicy1>
+bool is_same_matrix(
+    mdspan<ElementType, extents<dynamic_extent, dynamic_extent>, LayoutPolicy1, AccessorPolicy1> A,
+    const std::vector<ElementType> &B)
+{
+  return is_same_matrix(A, make_mdspan(B.data(), A.extent(0), A.extent(1)));
+}
+
+template <typename ElementType,
+          typename LayoutPolicy1,
+          typename AccessorPolicy1>
+bool is_same_matrix(const std::vector<ElementType> &A,
+    mdspan<ElementType, extents<dynamic_extent, dynamic_extent>, LayoutPolicy1, AccessorPolicy1> B)
+{
+  return is_same_matrix(make_mdspan(A.data(), B.extent(0), B.extent(1)), B);
+}
+
+template <typename ElementType,
+          typename LayoutPolicy1,
+          typename AccessorPolicy1,
+          typename LayoutPolicy2,
+          typename AccessorPolicy2>
+auto matrix_abs_diff(
+    mdspan<ElementType, extents<dynamic_extent, dynamic_extent>, LayoutPolicy1, AccessorPolicy1> A,
+    mdspan<ElementType, extents<dynamic_extent, dynamic_extent>, LayoutPolicy2, AccessorPolicy2> B)
+{
+  const auto ext0 = A.extent(0);
+  const auto ext1 = A.extent(1);
+  using RetType = decltype(scalar_abs_diff(A(0, 0), B(0, 0)));
+  if (B.extent(0) != ext0 or B.extent(1) != ext1) {
+    return std::numeric_limits<RetType>::max(); // very, very different
+  }
+  return vector_abs_diff(
+      make_mdspan(A.data(), ext0 * ext1),
+      make_mdspan(B.data(), ext0 * ext1));
+}
+
+template <typename ElementType,
+          typename LayoutPolicy1,
+          typename AccessorPolicy1,
+          typename LayoutPolicy2,
+          typename AccessorPolicy2>
+auto matrix_rel_diff(
+    mdspan<ElementType, extents<dynamic_extent, dynamic_extent>, LayoutPolicy1, AccessorPolicy1> A,
+    mdspan<ElementType, extents<dynamic_extent, dynamic_extent>, LayoutPolicy2, AccessorPolicy2> B)
+{
+  const auto ext0 = A.extent(0);
+  const auto ext1 = A.extent(1);
+  using RetType = decltype(scalar_abs_diff(A(0, 0), B(0, 0)));
+  if (B.extent(0) != ext0 or B.extent(1) != ext1) {
+    return std::numeric_limits<RetType>::max(); // very, very different
+  }
+  return vector_rel_diff(
+      make_mdspan(A.data(), ext0 * ext1),
+      make_mdspan(B.data(), ext0 * ext1));
 }
 
 namespace Impl { // internal to test helpers
@@ -282,7 +467,7 @@ void test_op_Ax(x_t x, A_t A, AToleranceType A_tol, GoldType get_gold, ActionTyp
   action();
 
   // compare results with gold
-  EXPECT_TRUE(is_same_matrix(A_gold, A, A_tol));
+  EXPECT_LE(matrix_rel_diff(A_gold, A), A_tol);
 
   // x should not change after kernel
   EXPECT_TRUE(is_same_vector(x, x_preKernel));
