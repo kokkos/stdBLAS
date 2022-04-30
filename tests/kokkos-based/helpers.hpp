@@ -154,7 +154,7 @@ bool is_same_vector(
     return false;
   const auto v1_view = KokkosKernelsSTD::Impl::mdspan_to_view(v1);
   const auto v2_view = KokkosKernelsSTD::Impl::mdspan_to_view(v2);
-  // Note: reducint to `int` because Kokkos can complain on `bool` not being 
+  // Note: reducint to `int` because Kokkos can complain on `bool` not being
   //       aligned with int32 and deny it for parallel_reduce()
   using diff_type = int;
   diff_type is_different = false;
@@ -332,7 +332,7 @@ bool is_same_matrix(
     return false;
   const auto A_view = KokkosKernelsSTD::Impl::mdspan_to_view(A);
   const auto B_view = KokkosKernelsSTD::Impl::mdspan_to_view(B);
-  // Note: reducint to `int` because Kokkos can complain on `bool` not being 
+  // Note: reducint to `int` because Kokkos can complain on `bool` not being
   //       aligned with int32 and deny it for parallel_reduce()
   using diff_type = int;
   diff_type is_different = false;
