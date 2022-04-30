@@ -48,71 +48,9 @@
 #include "signal_kokkos_impl_called.hpp"
 #include "static_extent_match.hpp"
 #include "triangle.hpp"
+#include "parallel_matrix.hpp"
 
 namespace KokkosKernelsSTD {
-
-namespace mtxr2update_impl {
-
-// manages parallel execution of independent action
-// called like action(i, j) for each matrix element A(i, j)
-template <typename ExecSpace, typename MatrixType>
-class ParallelMatrixVisitor {
-public:
-  KOKKOS_INLINE_FUNCTION ParallelMatrixVisitor(ExecSpace &&exec_in, MatrixType A_in):
-    exec(exec_in), A(A_in), ext0(A.extent(0)), ext1(A.extent(1))
-  {}
-
-  template <typename ActionType>
-  KOKKOS_INLINE_FUNCTION
-  void for_each_matrix_element(ActionType action) {
-    if (ext0 > ext1) { // parallel rows
-      Kokkos::parallel_for(Kokkos::RangePolicy(exec, 0, ext0),
-        KOKKOS_LAMBDA(const auto i) {
-          using idx_type = std::remove_const_t<decltype(i)>;
-          for (idx_type j = 0; j < ext1; ++j) {
-            action(i, j);
-          }
-        });
-    } else { // parallel columns
-      Kokkos::parallel_for(Kokkos::RangePolicy(exec, 0, ext1),
-        KOKKOS_LAMBDA(const auto j) {
-          using idx_type = std::remove_const_t<decltype(j)>;
-          for (idx_type i = 0; i < ext0; ++i) {
-            action(i, j);
-          }
-        });
-    }
-    exec.fence();
-  }
-
-  template <typename ActionType>
-  void for_each_triangle_matrix_element(std::experimental::linalg::upper_triangle_t t, ActionType action) {
-    Kokkos::parallel_for(Kokkos::RangePolicy(exec, 0, ext1),
-      KOKKOS_LAMBDA(const auto j) {
-        using idx_type = std::remove_const_t<decltype(j)>;
-        for (idx_type i = 0; i <= j; ++i) {
-          action(i, j);
-        }
-      });
-    exec.fence();
-  }
-
-  template <typename ActionType>
-  void for_each_triangle_matrix_element(std::experimental::linalg::lower_triangle_t t, ActionType action) {
-    for_each_triangle_matrix_element(std::experimental::linalg::upper_triangle,
-        [action](const auto i, const auto j) {
-          action(j, i);
-      });
-  }
-
-private:
-  ExecSpace exec;
-  MatrixType A;
-  size_t ext0;
-  size_t ext1;
-};
-
-} // namespace mtxr2update_impl
 
 // Rank-2 update of a symmetric matrix
 // performs BLAS xSYR2/xSPR2: A[i,j] += x[i] * y[j] + y[i] * x[j]
@@ -168,7 +106,7 @@ void symmetric_matrix_rank_2_update(kokkos_exec<ExecSpace> &&exec,
   const auto x_view = Impl::mdspan_to_view(x);
   const auto y_view = Impl::mdspan_to_view(y);
   auto A_view = Impl::mdspan_to_view(A);
-  mtxr2update_impl::ParallelMatrixVisitor v(ExecSpace(), A_view);
+  Impl::ParallelMatrixVisitor v(ExecSpace(), A_view);
   v.for_each_triangle_matrix_element(t,
     KOKKOS_LAMBDA(const auto i, const auto j) {
       A_view(i, j) += x_view(i) * y_view(j) + y_view(i) * x_view(j);
@@ -231,7 +169,7 @@ void hermitian_matrix_rank_2_update(kokkos_exec<ExecSpace> &&exec,
   auto A_view = Impl::mdspan_to_view(A);
 
   using std::experimental::linalg::impl::conj_if_needed;
-  mtxr2update_impl::ParallelMatrixVisitor v(ExecSpace(), A_view);
+  Impl::ParallelMatrixVisitor v(ExecSpace(), A_view);
   v.for_each_triangle_matrix_element(t,
     KOKKOS_LAMBDA(const auto i, const auto j) {
       A_view(i, j) += x_view(i) * conj_if_needed(y_view(j))
