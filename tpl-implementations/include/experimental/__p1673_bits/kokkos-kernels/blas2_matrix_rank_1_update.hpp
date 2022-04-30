@@ -47,6 +47,7 @@
 #include <complex>
 #include "signal_kokkos_impl_called.hpp"
 #include "static_extent_match.hpp"
+#include "triangle.hpp"
 
 namespace KokkosKernelsSTD {
 
@@ -110,40 +111,6 @@ private:
   size_t ext0;
   size_t ext1;
 };
-
-// Note: phrase it simply and the same as in specification ("has unique layout")
-template <typename Layout,
-          std::experimental::extents<>::size_type numRows,
-          std::experimental::extents<>::size_type numCols>
-
-inline constexpr bool is_unique_layout_v = Layout::template mapping<
-    std::experimental::extents<numRows, numCols> >::is_always_unique();
-
-template <typename Layout>
-struct is_layout_blas_packed: public std::false_type {};
-
-template <typename Triangle, typename StorageOrder>
-struct is_layout_blas_packed<
-  std::experimental::linalg::layout_blas_packed<Triangle, StorageOrder>>:
-    public std::true_type {};
-
-template <typename Layout>
-inline constexpr bool is_layout_blas_packed_v = is_layout_blas_packed<Layout>::value;
-
-// Note: will only signal failure for layout_blas_packed with different triangle
-template <typename Layout, typename Triangle>
-struct triangle_layout_match: public std::true_type {};
-
-template <typename StorageOrder, typename Triangle1, typename Triangle2>
-struct triangle_layout_match<
-  std::experimental::linalg::layout_blas_packed<Triangle1, StorageOrder>,
-  Triangle2>
-{
-  static constexpr bool value = std::is_same_v<Triangle1, Triangle2>;
-};
-
-template <typename Layout, typename Triangle>
-inline constexpr bool triangle_layout_match_v = triangle_layout_match<Layout, Triangle>::value;
 
 } // namespace Impl
 
