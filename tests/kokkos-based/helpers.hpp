@@ -140,14 +140,16 @@ auto scalar_ref_diff(const T &v1, const T &v2) {
 
 // no-tolerance (exact) comparison
 template <typename ElementType1,
+          std::size_t Extent1,
           typename LayoutPolicy1,
           typename AccessorPolicy1,
           typename ElementType2,
+          std::size_t Extent2,
           typename LayoutPolicy2,
           typename AccessorPolicy2>
 bool is_same_vector(
-    mdspan<ElementType1, extents<dynamic_extent>, LayoutPolicy1, AccessorPolicy1> v1,
-    mdspan<ElementType2, extents<dynamic_extent>, LayoutPolicy2, AccessorPolicy2> v2)
+    mdspan<ElementType1, extents<Extent1>, LayoutPolicy1, AccessorPolicy1> v1,
+    mdspan<ElementType2, extents<Extent2>, LayoutPolicy2, AccessorPolicy2> v2)
 {
   const auto size = v1.extent(0);
   if (size != v2.extent(0))
@@ -166,23 +168,25 @@ bool is_same_vector(
 }
 
 template <typename ElementType1,
+          std::size_t Extent,
           typename LayoutPolicy,
           typename AccessorPolicy,
           typename ElementType2>
 bool is_same_vector(
-    mdspan<ElementType1, extents<dynamic_extent>, LayoutPolicy, AccessorPolicy> v1,
+    mdspan<ElementType1, extents<Extent>, LayoutPolicy, AccessorPolicy> v1,
     const std::vector<ElementType2> &v2)
 {
   return is_same_vector(v1, make_mdspan(v2));
 }
 
 template <typename ElementType1,
+          std::size_t Extent,
           typename LayoutPolicy,
           typename AccessorPolicy,
           typename ElementType2>
 bool is_same_vector(
     const std::vector<ElementType1> &v1,
-    mdspan<ElementType2, extents<dynamic_extent>, LayoutPolicy, AccessorPolicy> v2)
+    mdspan<ElementType2, extents<Extent>, LayoutPolicy, AccessorPolicy> v2)
 {
   return is_same_vector(v2, v1);
 }
@@ -196,14 +200,16 @@ bool is_same_vector(
 }
 
 template <typename ElementType1,
+          std::size_t Extent1,
           typename LayoutPolicy1,
           typename AccessorPolicy1,
           typename ElementType2,
+          std::size_t Extent2,
           typename LayoutPolicy2,
           typename AccessorPolicy2>
 auto vector_abs_diff(
-    mdspan<ElementType1, extents<dynamic_extent>, LayoutPolicy1, AccessorPolicy1> v1,
-    mdspan<ElementType2, extents<dynamic_extent>, LayoutPolicy2, AccessorPolicy2> v2)
+    mdspan<ElementType1, extents<Extent1>, LayoutPolicy1, AccessorPolicy1> v1,
+    mdspan<ElementType2, extents<Extent2>, LayoutPolicy2, AccessorPolicy2> v2)
 {
   using RetType = decltype(scalar_abs_diff(v1[0], v2[0])); // will be same for views
   const auto size = v1.extent(0);
@@ -223,23 +229,25 @@ auto vector_abs_diff(
 }
 
 template <typename ElementType1,
+          std::size_t Extent,
           typename LayoutPolicy,
           typename AccessorPolicy,
           typename ElementType2>
 auto vector_abs_diff(
-    mdspan<ElementType1, extents<dynamic_extent>, LayoutPolicy, AccessorPolicy> v1,
+    mdspan<ElementType1, extents<Extent>, LayoutPolicy, AccessorPolicy> v1,
     const std::vector<ElementType2> &v2)
 {
   return vector_abs_diff(v1, make_mdspan(v2));
 }
 
 template <typename ElementType1,
+          std::size_t Extent,
           typename LayoutPolicy,
           typename AccessorPolicy,
           typename ElementType2>
 auto vector_abs_diff(
     const std::vector<ElementType1> &v1,
-    mdspan<ElementType2, extents<dynamic_extent>, LayoutPolicy, AccessorPolicy> v2)
+    mdspan<ElementType2, extents<Extent>, LayoutPolicy, AccessorPolicy> v2)
 {
   return vector_abs_diff(v2, v1);
 }
@@ -253,14 +261,16 @@ auto vector_abs_diff(
 }
 
 template <typename ElementType1,
+          std::size_t Extent1,
           typename LayoutPolicy1,
           typename AccessorPolicy1,
           typename ElementType2,
+          std::size_t Extent2,
           typename LayoutPolicy2,
           typename AccessorPolicy2>
 auto vector_rel_diff(
-    mdspan<ElementType1, extents<dynamic_extent>, LayoutPolicy1, AccessorPolicy1> v1,
-    mdspan<ElementType2, extents<dynamic_extent>, LayoutPolicy2, AccessorPolicy2> v2)
+    mdspan<ElementType1, extents<Extent1>, LayoutPolicy1, AccessorPolicy1> v1,
+    mdspan<ElementType2, extents<Extent2>, LayoutPolicy2, AccessorPolicy2> v2)
 {
   using RetType = decltype(scalar_abs_diff(v1[0], v2[0]));
   const auto size = v1.extent(0);
@@ -286,23 +296,25 @@ auto vector_rel_diff(
 }
 
 template <typename ElementType1,
+          std::size_t Extent1,
           typename LayoutPolicy,
           typename AccessorPolicy,
           typename ElementType2>
 auto vector_rel_diff(
-    mdspan<ElementType1, extents<dynamic_extent>, LayoutPolicy, AccessorPolicy> v1,
+    mdspan<ElementType1, extents<Extent1>, LayoutPolicy, AccessorPolicy> v1,
     const std::vector<ElementType2> &v2)
 {
   return vector_rel_diff(v1, make_mdspan(v2));
 }
 
 template <typename ElementType1,
+          std::size_t Extent,
           typename LayoutPolicy,
           typename AccessorPolicy,
           typename ElementType2>
 auto vector_rel_diff(
     const std::vector<ElementType1> &v1,
-    mdspan<ElementType2, extents<dynamic_extent>, LayoutPolicy, AccessorPolicy> v2)
+    mdspan<ElementType2, extents<Extent>, LayoutPolicy, AccessorPolicy> v2)
 {
   return vector_rel_diff(v2, v1);
 }
@@ -317,14 +329,18 @@ auto vector_rel_diff(
 
 // no-tolerance (exact) comparison
 template <typename ElementType1,
+          std::size_t Extent10,
+          std::size_t Extent11,
           typename LayoutPolicy1,
           typename AccessorPolicy1,
           typename ElementType2,
+          std::size_t Extent20,
+          std::size_t Extent21,
           typename LayoutPolicy2,
           typename AccessorPolicy2>
 bool is_same_matrix(
-    mdspan<ElementType1, extents<dynamic_extent, dynamic_extent>, LayoutPolicy1, AccessorPolicy1> A,
-    mdspan<ElementType2, extents<dynamic_extent, dynamic_extent>, LayoutPolicy2, AccessorPolicy2> B)
+    mdspan<ElementType1, extents<Extent10, Extent11>, LayoutPolicy1, AccessorPolicy1> A,
+    mdspan<ElementType2, extents<Extent20, Extent21>, LayoutPolicy2, AccessorPolicy2> B)
 {
   const auto ext0 = A.extent(0);
   const auto ext1 = A.extent(1);
@@ -347,32 +363,41 @@ bool is_same_matrix(
 }
 
 template <typename ElementType,
+          std::size_t Extent0,
+          std::size_t Extent1,
           typename LayoutPolicy1,
           typename AccessorPolicy1>
 bool is_same_matrix(
-    mdspan<ElementType, extents<dynamic_extent, dynamic_extent>, LayoutPolicy1, AccessorPolicy1> A,
+    mdspan<ElementType, extents<Extent0, Extent1>, LayoutPolicy1, AccessorPolicy1> A,
     const std::vector<ElementType> &B)
 {
   return is_same_matrix(A, make_mdspan(B.data(), A.extent(0), A.extent(1)));
 }
 
 template <typename ElementType,
+          std::size_t Extent0,
+          std::size_t Extent1,
           typename LayoutPolicy1,
           typename AccessorPolicy1>
 bool is_same_matrix(const std::vector<ElementType> &A,
-    mdspan<ElementType, extents<dynamic_extent, dynamic_extent>, LayoutPolicy1, AccessorPolicy1> B)
+    mdspan<ElementType, extents<Extent0, Extent1>, LayoutPolicy1, AccessorPolicy1> B)
 {
   return is_same_matrix(make_mdspan(A.data(), B.extent(0), B.extent(1)), B);
 }
 
-template <typename ElementType,
+template <typename ElementType1,
+          std::size_t Extent10,
+          std::size_t Extent11,
           typename LayoutPolicy1,
           typename AccessorPolicy1,
+          typename ElementType2,
+          std::size_t Extent20,
+          std::size_t Extent21,
           typename LayoutPolicy2,
           typename AccessorPolicy2>
 auto matrix_abs_diff(
-    mdspan<ElementType, extents<dynamic_extent, dynamic_extent>, LayoutPolicy1, AccessorPolicy1> A,
-    mdspan<ElementType, extents<dynamic_extent, dynamic_extent>, LayoutPolicy2, AccessorPolicy2> B)
+    mdspan<ElementType1, extents<Extent10, Extent11>, LayoutPolicy1, AccessorPolicy1> A,
+    mdspan<ElementType2, extents<Extent20, Extent21>, LayoutPolicy2, AccessorPolicy2> B)
 {
   const auto ext0 = A.extent(0);
   const auto ext1 = A.extent(1);
@@ -386,13 +411,17 @@ auto matrix_abs_diff(
 }
 
 template <typename ElementType,
+          std::size_t Extent10,
+          std::size_t Extent11,
           typename LayoutPolicy1,
           typename AccessorPolicy1,
+          std::size_t Extent20,
+          std::size_t Extent21,
           typename LayoutPolicy2,
           typename AccessorPolicy2>
 auto matrix_rel_diff(
-    mdspan<ElementType, extents<dynamic_extent, dynamic_extent>, LayoutPolicy1, AccessorPolicy1> A,
-    mdspan<ElementType, extents<dynamic_extent, dynamic_extent>, LayoutPolicy2, AccessorPolicy2> B)
+    mdspan<ElementType, extents<Extent10, Extent11>, LayoutPolicy1, AccessorPolicy1> A,
+    mdspan<ElementType, extents<Extent20, Extent21>, LayoutPolicy2, AccessorPolicy2> B)
 {
   const auto ext0 = A.extent(0);
   const auto ext1 = A.extent(1);
