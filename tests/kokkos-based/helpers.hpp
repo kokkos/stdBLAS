@@ -206,18 +206,20 @@ auto vector_abs_diff(
   const auto size = v1.extent(0);
   if (size != v2.extent(0)) {
     throw std::runtime_error("Compared vectors have different sizes");
+  } else if (size == 0) {
+    return static_cast<RetType>(0); // no difference
   }
   const auto v1_view = KokkosKernelsSTD::Impl::mdspan_to_view(v1);
   const auto v2_view = KokkosKernelsSTD::Impl::mdspan_to_view(v2);
-  RetType diff = static_cast<RetType>(0);
+  RetType difference;
+  const auto red = Kokkos::Max<RetType>(difference);
   Kokkos::parallel_reduce(size,
     KOKKOS_LAMBDA(const std::size_t i, RetType &diff){
-        const RetType d = scalar_abs_diff(v1_view[i], v2_view[i]);
-        if (d > diff) {
-          diff = d;
-        }
-	    }, Kokkos::Max<RetType>(diff));
-  return diff;
+        const auto val1 = v1_view[i];
+        const auto val2 = v2_view[i];
+        red.join(diff, scalar_abs_diff(val1, val2));
+	    }, red);
+  return difference;
 }
 
 template <typename ElementType1,
