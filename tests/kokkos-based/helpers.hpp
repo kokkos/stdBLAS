@@ -108,6 +108,66 @@ mdspan_t make_mdspan(ValueType *data, std::size_t ext0, std::size_t ext1) {
   return mdspan_t(data, ext0, ext1);
 }
 
+namespace Impl {
+
+template <typename ElementType,
+          std::size_t Extent,
+          typename LayoutPolicy,
+          typename AccessorPolicy>
+auto abs_max(mdspan<ElementType, extents<Extent>, LayoutPolicy, AccessorPolicy> v)
+{
+  const auto size = v.extent(0);
+  if (size == 0) {
+    throw std::runtime_error("abs_max() requires non-empty input");
+  }
+  const auto i = std::experimental::linalg::idx_abs_max(v);
+  if (i >= size) { // shouldn't happen: empty case is handled above
+    throw std::runtime_error("Fatal: idx_abs_max() failed");
+  }
+  return std::abs(v[i]);
+}
+
+template <typename ElementType,
+          std::size_t Extent0,
+          std::size_t Extent1,
+          typename LayoutPolicy,
+          typename AccessorPolicy>
+auto abs_max(mdspan<ElementType, extents<Extent0, Extent1>, LayoutPolicy, AccessorPolicy> A)
+{
+  const auto ext0 = A.extent(0);
+  const auto ext1 = A.extent(1);
+  if (ext0 == 0 or ext1 == 0) {
+    throw std::runtime_error("abs_max() requires non-empty input");
+  }
+  const auto A_view = KokkosKernelsSTD::Impl::mdspan_to_view(A);
+  using RetType = decltype(Kokkos::abs(A_view(0, 0)));
+  RetType result;
+  const auto red = Kokkos::Max<RetType>(result);
+  Kokkos::parallel_reduce(ext0,
+    KOKKOS_LAMBDA(std::size_t i, RetType &max_val) {
+        for (decltype(i) j = 0; j < ext1; ++j) {
+          red.join(max_val, Kokkos::abs(A_view(i, j)));
+        }
+	    }, red);
+  return result;
+}
+
+template <typename RealType>
+RealType abs2rel_diff(RealType abs_diff, RealType norm1, RealType norm2)
+{
+  constexpr auto zero = static_cast<RealType>(0);
+  if (norm1 != zero and norm2 != zero) {
+    return abs_diff / std::min(norm1, norm2); // pick larger relative error
+  } else if (norm1 == zero and norm2 == zero) {
+    return zero; // no difference
+  }
+  // Can't get good relative diff with zero -
+  // so return absolute diff out of better ideas...
+  return abs_diff;
+}
+
+}
+
 template <typename RealValue>
 KOKKOS_INLINE_FUNCTION
 RealValue scalar_abs_diff(RealValue v1, RealValue v2) {
@@ -151,10 +211,11 @@ bool is_same_vector(
   //       aligned with int32 and deny it for parallel_reduce()
   using diff_type = int;
   diff_type is_different = false;
+  const auto red = Kokkos::LOr<diff_type>(is_different);
   Kokkos::parallel_reduce(size,
     KOKKOS_LAMBDA(const std::size_t i, diff_type &diff){
-        diff = v1_view[i] != v2_view[i];
-	    }, Kokkos::LOr<diff_type>(is_different));
+        red.join(diff, v1_view[i] != v2_view[i]);
+	    }, red);
   return !is_different;
 }
 
@@ -270,23 +331,13 @@ auto vector_rel_diff(
   const auto size = v1.extent(0);
   if (size != v2.extent(0)) {
     throw std::runtime_error("Compared vectors have different sizes");
+  } else if (size == 0) {
+    return static_cast<RetType>(0); // both empty -> no difference
   }
-  constexpr auto zero1 = static_cast<ElementType1>(0);
-  constexpr auto zero2 = static_cast<ElementType2>(0);
-  RetType abs_diff = vector_abs_diff(v1, v2);
-  auto v1_norm = scalar_abs_diff(zero1, v1[std::experimental::linalg::idx_abs_max(v1)]);
-  auto v2_norm = scalar_abs_diff(zero2, v2[std::experimental::linalg::idx_abs_max(v2)]);
-  if (v1_norm == zero1) {
-    if (v2_norm == zero2) {
-      return static_cast<RetType>(0); // no difference
-    } else {
-      return abs_diff;
-    }
-  } else if (v2_norm == static_cast<ElementType2>(0)) {
-    return abs_diff;
-  } else {
-    return abs_diff / std::min(v1_norm, v2_norm); // pick larger relative error
-  }
+  const auto abs_diff = vector_abs_diff(v1, v2);
+  const auto max1 = Impl::abs_max(v1);
+  const auto max2 = Impl::abs_max(v2);
+  return Impl::abs2rel_diff(abs_diff, max1, max2);
 }
 
 template <typename ElementType1,
@@ -393,15 +444,27 @@ auto matrix_abs_diff(
     mdspan<ElementType1, extents<Extent10, Extent11>, LayoutPolicy1, AccessorPolicy1> A,
     mdspan<ElementType2, extents<Extent20, Extent21>, LayoutPolicy2, AccessorPolicy2> B)
 {
+  using RetType = decltype(scalar_abs_diff(A(0, 0), B(0, 0))); // will be same for views
   const auto ext0 = A.extent(0);
   const auto ext1 = A.extent(1);
-  using RetType = decltype(scalar_abs_diff(A(0, 0), B(0, 0)));
   if (B.extent(0) != ext0 or B.extent(1) != ext1) {
     throw std::runtime_error("Compared matrices have different sizes");
+  } else if (ext0 == 0 or ext1 == 0) {
+    return static_cast<RetType>(0); // both empty -> no difference
   }
-  return vector_abs_diff(
-      make_mdspan(A.data(), ext0 * ext1),
-      make_mdspan(B.data(), ext0 * ext1));
+  const auto A_view = KokkosKernelsSTD::Impl::mdspan_to_view(A);
+  const auto B_view = KokkosKernelsSTD::Impl::mdspan_to_view(B);
+  RetType difference;
+  const auto red = Kokkos::Max<RetType>(difference);
+  Kokkos::parallel_reduce(ext0,
+    KOKKOS_LAMBDA(const std::size_t i, RetType &diff){
+        for (size_t j = 0; j < ext1; ++j) {
+          const auto a = A_view(i, j);
+          const auto b = B_view(i, j);
+          red.join(diff, scalar_abs_diff(a, b));
+        }
+	    }, red);
+  return difference;
 }
 
 template <typename ElementType,
@@ -417,15 +480,18 @@ auto matrix_rel_diff(
     mdspan<ElementType, extents<Extent10, Extent11>, LayoutPolicy1, AccessorPolicy1> A,
     mdspan<ElementType, extents<Extent20, Extent21>, LayoutPolicy2, AccessorPolicy2> B)
 {
+  using RetType = decltype(scalar_abs_diff(A(0, 0), B(0, 0)));
   const auto ext0 = A.extent(0);
   const auto ext1 = A.extent(1);
-  using RetType = decltype(scalar_abs_diff(A(0, 0), B(0, 0)));
   if (B.extent(0) != ext0 or B.extent(1) != ext1) {
     throw std::runtime_error("Compared matrices have different sizes");
+  } else if (ext0 == 0 or ext1 == 0) {
+    return static_cast<RetType>(0); // both empty -> no difference
   }
-  return vector_rel_diff(
-      make_mdspan(A.data(), ext0 * ext1),
-      make_mdspan(B.data(), ext0 * ext1));
+  const auto abs_diff = matrix_abs_diff(A, B);
+  const auto max1 = Impl::abs_max(A);
+  const auto max2 = Impl::abs_max(B);
+  return Impl::abs2rel_diff(abs_diff, max1, max2);
 }
 
 namespace Impl { // internal to test helpers
