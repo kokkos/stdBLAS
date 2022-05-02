@@ -171,14 +171,14 @@ RealType abs2rel_diff(RealType abs_diff, RealType norm1, RealType norm2)
 template <typename RealValue>
 KOKKOS_INLINE_FUNCTION
 RealValue scalar_abs_diff(RealValue v1, RealValue v2) {
-  return std::abs(v2 - v1);
+  return Kokkos::abs(v2 - v1);
 }
 
 template <typename T>
 T scalar_abs_diff(const std::complex<T> &v1, const std::complex<T> &v2) {
   const auto dr = scalar_abs_diff(v1.real(), v2.real());
   const auto di = scalar_abs_diff(v1.imag(), v2.imag());
-  return std::max(dr, di);
+  return di > dr ? di : dr;
 }
 
 template <typename T>
@@ -186,7 +186,7 @@ KOKKOS_INLINE_FUNCTION
 T scalar_abs_diff(const Kokkos::complex<T> &v1, const Kokkos::complex<T> &v2) {
   const auto dr = scalar_abs_diff(v1.real(), v2.real());
   const auto di = scalar_abs_diff(v1.imag(), v2.imag());
-  return dr > di ? dr : di; // can't use std::max on GPU
+  return di > dr ? di : dr;
 }
 
 // no-tolerance (exact) comparison
