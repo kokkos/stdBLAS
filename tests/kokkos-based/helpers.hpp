@@ -204,8 +204,9 @@ auto vector_abs_diff(
 {
   using RetType = decltype(scalar_abs_diff(v1[0], v2[0])); // will be same for views
   const auto size = v1.extent(0);
-  if (size != v2.extent(0))
-    return std::numeric_limits<RetType>::max(); // very, very different
+  if (size != v2.extent(0)) {
+    throw std::runtime_error("Compared vectors have different sizes");
+  }
   const auto v1_view = KokkosKernelsSTD::Impl::mdspan_to_view(v1);
   const auto v2_view = KokkosKernelsSTD::Impl::mdspan_to_view(v2);
   RetType diff = static_cast<RetType>(0);
@@ -265,9 +266,9 @@ auto vector_rel_diff(
 {
   using RetType = decltype(scalar_abs_diff(v1[0], v2[0]));
   const auto size = v1.extent(0);
-  if (size != v2.extent(0))
-    return std::numeric_limits<RetType>::max(); // very, very different
-
+  if (size != v2.extent(0)) {
+    throw std::runtime_error("Compared vectors have different sizes");
+  }
   constexpr auto zero1 = static_cast<ElementType1>(0);
   constexpr auto zero2 = static_cast<ElementType2>(0);
   RetType abs_diff = vector_abs_diff(v1, v2);
@@ -394,7 +395,7 @@ auto matrix_abs_diff(
   const auto ext1 = A.extent(1);
   using RetType = decltype(scalar_abs_diff(A(0, 0), B(0, 0)));
   if (B.extent(0) != ext0 or B.extent(1) != ext1) {
-    return std::numeric_limits<RetType>::max(); // very, very different
+    throw std::runtime_error("Compared matrices have different sizes");
   }
   return vector_abs_diff(
       make_mdspan(A.data(), ext0 * ext1),
@@ -418,7 +419,7 @@ auto matrix_rel_diff(
   const auto ext1 = A.extent(1);
   using RetType = decltype(scalar_abs_diff(A(0, 0), B(0, 0)));
   if (B.extent(0) != ext0 or B.extent(1) != ext1) {
-    return std::numeric_limits<RetType>::max(); // very, very different
+    throw std::runtime_error("Compared matrices have different sizes");
   }
   return vector_rel_diff(
       make_mdspan(A.data(), ext0 * ext1),
