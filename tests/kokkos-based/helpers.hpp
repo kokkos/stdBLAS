@@ -129,15 +129,6 @@ T scalar_abs_diff(const Kokkos::complex<T> &v1, const Kokkos::complex<T> &v2) {
   return dr > di ? dr : di; // can't use std::max on GPU
 }
 
-#if 0
-template <typename T>
-KOKKOS_INLINE_FUNCTION
-auto scalar_ref_diff(const T &v1, const T &v2) {
-  const auto v1_abs = scalar_abs_diff(v1, static_cast<T>(0));
-  return scalar_abs_diff(v1, v2) / v1_abs;
-}
-#endif
-
 // no-tolerance (exact) comparison
 template <typename ElementType1,
           std::size_t Extent1,
