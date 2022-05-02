@@ -169,6 +169,7 @@ class _blas2_signed_fixture : public ::testing::Test
   // extents are arbitrarily chosen but not trivially small
   const std::size_t myExtent0 = 77;
   const std::size_t myExtent1 = 41;
+  const std::size_t myExtent2 = 53;
 
 public:
   using value_type = T;
@@ -179,6 +180,15 @@ public:
       //
       B_e0e1_view("B_e0e1_view", myExtent0, myExtent1),
       B_e0e1(B_e0e1_view.data(), myExtent0, myExtent1),
+      //
+      B_e1e2_view("B_e1e2_view", myExtent1, myExtent2),
+      B_e1e2(B_e1e2_view.data(), myExtent1, myExtent2),
+      //
+      C_e0e2_view("C_e0e2_view", myExtent0, myExtent2),
+      C_e0e2(C_e0e2_view.data(), myExtent0, myExtent2),
+      //
+      E_e0e2_view("E_e0e2_view", myExtent0, myExtent2),
+      E_e0e2(E_e0e2_view.data(), myExtent0, myExtent2),
       //
       A_sym_e0_view("A_sym_e0_view", myExtent0, myExtent0),
       A_sym_e0(A_sym_e0_view.data(), myExtent0, myExtent0),
@@ -235,6 +245,17 @@ public:
 	  A_e0e1(i,j) = {randObj_r(), randObj_i()};
 	  B_e0e1(i,j) = {randObj_r(), randObj_i()};
 	}
+
+	for (std::size_t j=0; j < myExtent2; ++j) {
+	  C_e0e2(i,j) = {randObj_r(), randObj_i()};
+	  E_e0e2(i,j) = {randObj_r(), randObj_i()};
+	}
+      }
+
+      for (std::size_t i=0; i < myExtent1; ++i) {
+	for (std::size_t j=0; j < myExtent2; ++j) {
+	  B_e1e2(i,j) = {randObj_r(), randObj_i()};
+	}
       }
 
       // fill vectors with extent = extent0
@@ -278,6 +299,17 @@ public:
 	  A_e0e1_view(i,j) = randObj();
 	  B_e0e1_view(i,j) = randObj();
 	}
+
+	for (std::size_t j=0; j < myExtent2; ++j) {
+	  C_e0e2(i,j) = randObj();
+	  E_e0e2(i,j) = randObj();
+	}
+      }
+
+      for (std::size_t i=0; i < myExtent1; ++i) {
+	for (std::size_t j=0; j < myExtent2; ++j) {
+	  B_e1e2(i,j) = randObj();
+	}
       }
 
       // fill vectors with extent = extent0
@@ -297,6 +329,9 @@ public:
 
   Kokkos::View<value_type**, Kokkos::HostSpace> A_e0e1_view;
   Kokkos::View<value_type**, Kokkos::HostSpace> B_e0e1_view;
+  Kokkos::View<value_type**, Kokkos::HostSpace> B_e1e2_view;
+  Kokkos::View<value_type**, Kokkos::HostSpace> C_e0e2_view;
+  Kokkos::View<value_type**, Kokkos::HostSpace> E_e0e2_view;
   Kokkos::View<value_type**, Kokkos::HostSpace> A_sym_e0_view;
   Kokkos::View<value_type**, Kokkos::HostSpace> A_hem_e0_view;
   Kokkos::View<value_type*,  Kokkos::HostSpace> x_e0_view;
@@ -308,9 +343,11 @@ public:
   using mdspan_r2_t = mdspan<value_type, extents<dynamic_extent, dynamic_extent>>;
   mdspan_r2_t A_e0e1; //e0 x e1
   mdspan_r2_t B_e0e1; //e0 x e1
+  mdspan_r2_t B_e1e2; //e1 x e2
+  mdspan_r2_t C_e0e2; //e0 x e2
+  mdspan_r2_t E_e0e2; //e0 x e2
   mdspan_r2_t A_sym_e0; //e0 x e0, symmetric
   mdspan_r2_t A_hem_e0; //e0 x e0, hermitian
-
   mdspan_r1_t x_e0;  // x vector with extent == e0
   mdspan_r1_t x_e1;  // x vector with extent == e1
   mdspan_r1_t y_e0;  // y vector with extent == e0
