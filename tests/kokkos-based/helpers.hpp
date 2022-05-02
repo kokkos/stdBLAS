@@ -168,27 +168,6 @@ RealType abs2rel_diff(RealType abs_diff, RealType norm1, RealType norm2)
 
 }
 
-template <typename RealValue>
-KOKKOS_INLINE_FUNCTION
-RealValue scalar_abs_diff(RealValue v1, RealValue v2) {
-  return Kokkos::abs(v2 - v1);
-}
-
-template <typename T>
-T scalar_abs_diff(const std::complex<T> &v1, const std::complex<T> &v2) {
-  const auto dr = scalar_abs_diff(v1.real(), v2.real());
-  const auto di = scalar_abs_diff(v1.imag(), v2.imag());
-  return di > dr ? di : dr;
-}
-
-template <typename T>
-KOKKOS_INLINE_FUNCTION
-T scalar_abs_diff(const Kokkos::complex<T> &v1, const Kokkos::complex<T> &v2) {
-  const auto dr = scalar_abs_diff(v1.real(), v2.real());
-  const auto di = scalar_abs_diff(v1.imag(), v2.imag());
-  return di > dr ? di : dr;
-}
-
 // no-tolerance (exact) comparison
 template <typename ElementType1,
           std::size_t Extent1,
@@ -263,7 +242,7 @@ auto vector_abs_diff(
     mdspan<ElementType1, extents<Extent1>, LayoutPolicy1, AccessorPolicy1> v1,
     mdspan<ElementType2, extents<Extent2>, LayoutPolicy2, AccessorPolicy2> v2)
 {
-  using RetType = decltype(scalar_abs_diff(v1[0], v2[0])); // will be same for views
+  using RetType = decltype(std::abs(v1[0] - v2[0])); // will be same for views
   const auto size = v1.extent(0);
   if (size != v2.extent(0)) {
     throw std::runtime_error("Compared vectors have different sizes");
@@ -278,7 +257,7 @@ auto vector_abs_diff(
     KOKKOS_LAMBDA(const std::size_t i, RetType &diff){
         const auto val1 = v1_view[i];
         const auto val2 = v2_view[i];
-        red.join(diff, scalar_abs_diff(val1, val2));
+        red.join(diff, Kokkos::abs(val1 - val2));
 	    }, red);
   return difference;
 }
@@ -327,7 +306,7 @@ auto vector_rel_diff(
     mdspan<ElementType1, extents<Extent1>, LayoutPolicy1, AccessorPolicy1> v1,
     mdspan<ElementType2, extents<Extent2>, LayoutPolicy2, AccessorPolicy2> v2)
 {
-  using RetType = decltype(scalar_abs_diff(v1[0], v2[0]));
+  using RetType = decltype(std::abs(v1[0] - v2[0]));
   const auto size = v1.extent(0);
   if (size != v2.extent(0)) {
     throw std::runtime_error("Compared vectors have different sizes");
@@ -444,7 +423,7 @@ auto matrix_abs_diff(
     mdspan<ElementType1, extents<Extent10, Extent11>, LayoutPolicy1, AccessorPolicy1> A,
     mdspan<ElementType2, extents<Extent20, Extent21>, LayoutPolicy2, AccessorPolicy2> B)
 {
-  using RetType = decltype(scalar_abs_diff(A(0, 0), B(0, 0))); // will be same for views
+  using RetType = decltype(std::abs(A(0, 0) - B(0, 0))); // will be same for views
   const auto ext0 = A.extent(0);
   const auto ext1 = A.extent(1);
   if (B.extent(0) != ext0 or B.extent(1) != ext1) {
@@ -461,7 +440,7 @@ auto matrix_abs_diff(
         for (size_t j = 0; j < ext1; ++j) {
           const auto a = A_view(i, j);
           const auto b = B_view(i, j);
-          red.join(diff, scalar_abs_diff(a, b));
+          red.join(diff, Kokkos::abs(a - b));
         }
 	    }, red);
   return difference;
@@ -480,7 +459,7 @@ auto matrix_rel_diff(
     mdspan<ElementType, extents<Extent10, Extent11>, LayoutPolicy1, AccessorPolicy1> A,
     mdspan<ElementType, extents<Extent20, Extent21>, LayoutPolicy2, AccessorPolicy2> B)
 {
-  using RetType = decltype(scalar_abs_diff(A(0, 0), B(0, 0)));
+  using RetType = decltype(std::abs(A(0, 0) - B(0, 0)));
   const auto ext0 = A.extent(0);
   const auto ext1 = A.extent(1);
   if (B.extent(0) != ext0 or B.extent(1) != ext1) {
