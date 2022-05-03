@@ -22,7 +22,8 @@ constexpr bool static_extent_match(size_type extent1, size_type extent2)
 // for now, specialize for default_accessor
 // https://github.com/kokkos/stdBLAS/issues/122
 //
-template<class ExeSpace,
+MDSPAN_TEMPLATE_REQUIRES(
+         class ExeSpace,
 	 class ElementType_A,
          std::experimental::extents<>::size_type numRows_A,
          std::experimental::extents<>::size_type numCols_A,
@@ -34,10 +35,12 @@ template<class ExeSpace,
          class ElementType_C,
          std::experimental::extents<>::size_type numRows_C,
          std::experimental::extents<>::size_type numCols_C,
-         class Layout_C>
-requires (Layout_A::template mapping<std::experimental::extents<numRows_A, numCols_A>>::is_always_unique() &&
+         class Layout_C,
+	 /* requires */
+	 (Layout_A::template mapping<std::experimental::extents<numRows_A, numCols_A>>::is_always_unique() &&
 	  Layout_B::template mapping<std::experimental::extents<numRows_B, numCols_B>>::is_always_unique() &&
-	  Layout_C::template mapping<std::experimental::extents<numRows_C, numCols_C>>::is_always_unique())
+	  Layout_C::template mapping<std::experimental::extents<numRows_C, numCols_C>>::is_always_unique()
+	  ))
 void matrix_product(
   kokkos_exec<ExeSpace> /*kexe*/,
   std::experimental::mdspan<
@@ -87,7 +90,8 @@ void matrix_product(
 // for now, specialize for default_accessor
 // https://github.com/kokkos/stdBLAS/issues/122
 //
-template<class ExeSpace,
+MDSPAN_TEMPLATE_REQUIRES(
+         class ExeSpace,
 	 class ElementType_A,
          std::experimental::extents<>::size_type numRows_A,
          std::experimental::extents<>::size_type numCols_A,
@@ -103,11 +107,13 @@ template<class ExeSpace,
          class ElementType_C,
          std::experimental::extents<>::size_type numRows_C,
          std::experimental::extents<>::size_type numCols_C,
-         class Layout_C>
-requires (Layout_A::template mapping<std::experimental::extents<numRows_A, numCols_A>>::is_always_unique() &&
+         class Layout_C,
+	 /* requires */
+         (Layout_A::template mapping<std::experimental::extents<numRows_A, numCols_A>>::is_always_unique() &&
 	  Layout_B::template mapping<std::experimental::extents<numRows_B, numCols_B>>::is_always_unique() &&
 	  Layout_E::template mapping<std::experimental::extents<numRows_E, numCols_E>>::is_always_unique() &&
-	  Layout_C::template mapping<std::experimental::extents<numRows_C, numCols_C>>::is_always_unique())
+	  Layout_C::template mapping<std::experimental::extents<numRows_C, numCols_C>>::is_always_unique()
+	  ))
 void matrix_product(
   kokkos_exec<ExeSpace> kexe,
   std::experimental::mdspan<
