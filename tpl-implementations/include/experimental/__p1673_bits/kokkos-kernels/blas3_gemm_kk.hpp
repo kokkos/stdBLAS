@@ -167,7 +167,6 @@ void matrix_product(
 
   // C = E
   std::experimental::linalg::copy(kexe, E, C);
-  ExeSpace().fence();
 
   // C = C + A*B
   const auto alpha = static_cast<typename decltype(A_view)::value_type>(1);
