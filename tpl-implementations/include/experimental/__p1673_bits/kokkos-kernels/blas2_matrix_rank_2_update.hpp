@@ -144,27 +144,6 @@ struct triangle_layout_match<
 template <typename Layout, typename Triangle>
 inline constexpr bool triangle_layout_match_v = triangle_layout_match<Layout, Triangle>::value;
 
-// This version of conj_if_needed() also handles Kokkos::complex<T>
-template <class T>
-KOKKOS_INLINE_FUNCTION
-T conj_if_needed(const T &value)
-{
-  return value;
-}
-
-template <class T>
-KOKKOS_INLINE_FUNCTION
-auto conj_if_needed(const Kokkos::complex<T> &value)
-{
-  return Kokkos::conj(value);
-}
-
-template <class T>
-KOKKOS_INLINE_FUNCTION
-auto conj_if_needed(const std::complex<T> &value)
-{
-  return std::conj(value);
-}
 
 template <class size_type>
 KOKKOS_INLINE_FUNCTION
@@ -292,12 +271,13 @@ void hermitian_matrix_rank_2_update(kokkos_exec<ExecSpace> &&exec,
   const auto x_view = Impl::mdspan_to_view(x);
   const auto y_view = Impl::mdspan_to_view(y);
   auto A_view = Impl::mdspan_to_view(A);
+
+  using std::experimental::linalg::impl::conj_if_needed;
   mtxr2update_impl::ParallelMatrixVisitor v(ExecSpace(), A_view);
   v.for_each_triangle_matrix_element(t,
     KOKKOS_LAMBDA(const auto i, const auto j) {
-      const auto yjc = mtxr2update_impl::conj_if_needed(y_view(j));
-      const auto xjc = mtxr2update_impl::conj_if_needed(x_view(j));
-      A_view(i, j) += x_view(i) * yjc + y_view(i) * xjc;
+      A_view(i, j) += x_view(i) * conj_if_needed(y_view(j))
+                    + y_view(i) * conj_if_needed(x_view(j));
     });
 }
 
