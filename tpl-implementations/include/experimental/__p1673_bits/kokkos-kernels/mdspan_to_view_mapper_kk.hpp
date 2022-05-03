@@ -81,16 +81,67 @@ auto mdspan_to_view(std::experimental::mdspan<
 		      Accessor
 		    > a)
 {
-  using mdspan_type = std::experimental::mdspan<
-    ElementType, std::experimental::extents<ext0, ext1>, Layout, Accessor
-    >;
-
   auto kokkos_p = to_kokkos_pointer(a.data());
   using view_type = Kokkos::View<
-    decltype(kokkos_p)*,
-    typename LayoutMapper<typename mdspan_type::layout_type>::type
+    decltype(kokkos_p)*, typename LayoutMapper<Layout>::type
     >;
   return view_type(kokkos_p, a.extent(0), a.extent(1));
+}
+
+/*
+  partially specialize for when the mdspan has transposed layout.
+
+  Note that here we basically neglect the transposition
+  and convert the "nested/original" mdspan.
+  This way, the task of accounting the transposition is
+  handed over to the algorithm impl. The reason for this is the following.
+  Suppose that one has: A, B, C : mdspans
+  and wants to do:  C = A^T B
+  One would do this by calling:
+    AT = std::experimental::linalg::transposed(A)
+    matrix_product(kokkos_exec<>, AT, B, C)
+
+  Our Kokkos impl would then see:
+   matrix_product(kokkos_exec<>, Ain, Bin, Cin)
+
+  so that Ain would reference AT, Bin would reference B, etc.
+  Inside our impl we convert the mdspan arguments o kokkos views.
+  Suppose two scenarios:
+  (1) when converting Ain to a view (Ain_view) we account for the transposition.
+      In this case, Ain_view would already carry the effect of the transpose.
+      To call the KK impl, we would then need do:
+          KokkosBlas::gemm("N", "N", alpha, Ain_view, Bin_view, beta, Cin_view);
+      Note that here we do NOT pass "T" as first arg because Ain_view
+      already carries the tranposition.
+
+  (2) when converting Ain to a view (Ain_view) we do NOT account for the transposition.
+      To call the KK impl, we need to explicitly express the tranpose:
+          KokkosBlas::gemm("T", "N", alpha, Ain_view, Bin_view, beta, Cin_view);
+      In this case, we need "T" because Ain_view would NOT already
+      carry the effect of the transpose.
+
+  Here we take option 2 to avoid allways calling the fallback impl.
+*/
+template<
+  class ElementType,
+  std::experimental::extents<>::size_type ext0,
+  std::experimental::extents<>::size_type ext1,
+  class NestedLayout,
+  class Accessor>
+auto mdspan_to_view(std::experimental::mdspan<
+		    ElementType,
+		    std::experimental::extents<ext0, ext1>,
+		    std::experimental::linalg::layout_transpose<NestedLayout>,
+		    Accessor
+		    > a)
+{
+  auto kokkos_p = to_kokkos_pointer(a.data());
+  using view_type = Kokkos::View<
+    decltype(kokkos_p)*, typename LayoutMapper<NestedLayout>::type
+    >;
+  // note that here a is the transposed mdspan so to get the
+  // correct extents of the original mdpsan we need to invert indices
+  return view_type(kokkos_p, a.extent(1), a.extent(0));
 }
 
 } // namespace Impl
