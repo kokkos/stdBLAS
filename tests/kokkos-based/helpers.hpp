@@ -108,52 +108,116 @@ mdspan_t make_mdspan(ValueType *data, std::size_t ext0, std::size_t ext1) {
   return mdspan_t(data, ext0, ext1);
 }
 
+namespace Impl {
+
+template <typename ElementType,
+          std::size_t Extent,
+          typename LayoutPolicy,
+          typename AccessorPolicy>
+auto abs_max(mdspan<ElementType, extents<Extent>, LayoutPolicy, AccessorPolicy> v)
+{
+  const auto size = v.extent(0);
+  if (size == 0) {
+    throw std::runtime_error("abs_max() requires non-empty input");
+  }
+  const auto i = std::experimental::linalg::idx_abs_max(v);
+  if (i >= size) { // shouldn't happen: empty case is handled above
+    throw std::runtime_error("Fatal: idx_abs_max() failed");
+  }
+  return std::abs(v[i]);
+}
+
+template <typename ElementType,
+          std::size_t Extent0,
+          std::size_t Extent1,
+          typename LayoutPolicy,
+          typename AccessorPolicy>
+auto abs_max(mdspan<ElementType, extents<Extent0, Extent1>, LayoutPolicy, AccessorPolicy> A)
+{
+  const auto ext0 = A.extent(0);
+  const auto ext1 = A.extent(1);
+  if (ext0 == 0 or ext1 == 0) {
+    throw std::runtime_error("abs_max() requires non-empty input");
+  }
+  const auto A_view = KokkosKernelsSTD::Impl::mdspan_to_view(A);
+  using RetType = decltype(Kokkos::abs(A_view(0, 0)));
+  RetType result;
+  const auto red = Kokkos::Max<RetType>(result);
+  Kokkos::parallel_reduce(ext0,
+    KOKKOS_LAMBDA(std::size_t i, RetType &max_val) {
+        for (decltype(i) j = 0; j < ext1; ++j) {
+          red.join(max_val, Kokkos::abs(A_view(i, j)));
+        }
+	    }, red);
+  return result;
+}
+
+template <typename RealType>
+RealType abs2rel_diff(RealType abs_diff, RealType norm1, RealType norm2)
+{
+  constexpr auto zero = static_cast<RealType>(0);
+  if (norm1 != zero and norm2 != zero) {
+    return abs_diff / std::min(norm1, norm2); // pick larger relative error
+  } else if (norm1 == zero and norm2 == zero) {
+    return zero; // no difference
+  }
+  // Can't get good relative diff with zero -
+  // so return absolute diff out of better ideas...
+  return abs_diff;
+}
+
+}
+
 // no-tolerance (exact) comparison
-// TODO: add tolerance based comparison if needed (see is_same_matrix below)
 template <typename ElementType1,
+          std::size_t Extent1,
           typename LayoutPolicy1,
           typename AccessorPolicy1,
           typename ElementType2,
+          std::size_t Extent2,
           typename LayoutPolicy2,
           typename AccessorPolicy2>
 bool is_same_vector(
-    mdspan<ElementType1, extents<dynamic_extent>, LayoutPolicy1, AccessorPolicy1> v1,
-    mdspan<ElementType2, extents<dynamic_extent>, LayoutPolicy2, AccessorPolicy2> v2)
+    mdspan<ElementType1, extents<Extent1>, LayoutPolicy1, AccessorPolicy1> v1,
+    mdspan<ElementType2, extents<Extent2>, LayoutPolicy2, AccessorPolicy2> v2)
 {
   const auto size = v1.extent(0);
   if (size != v2.extent(0))
     return false;
   const auto v1_view = KokkosKernelsSTD::Impl::mdspan_to_view(v1);
   const auto v2_view = KokkosKernelsSTD::Impl::mdspan_to_view(v2);
-  // Note: reducint to `int` because Kokkos can complain on `bool` not being 
+  // Note: reducing to `int` because Kokkos can complain on `bool` not being
   //       aligned with int32 and deny it for parallel_reduce()
   using diff_type = int;
   diff_type is_different = false;
+  const auto red = Kokkos::LOr<diff_type>(is_different);
   Kokkos::parallel_reduce(size,
     KOKKOS_LAMBDA(const std::size_t i, diff_type &diff){
-        diff = v1_view[i] != v2_view[i];
-	    }, Kokkos::LOr<diff_type>(is_different));
+        red.join(diff, v1_view[i] != v2_view[i]);
+	    }, red);
   return !is_different;
 }
 
 template <typename ElementType1,
+          std::size_t Extent,
           typename LayoutPolicy,
           typename AccessorPolicy,
           typename ElementType2>
 bool is_same_vector(
-    mdspan<ElementType1, extents<dynamic_extent>, LayoutPolicy, AccessorPolicy> v1,
+    mdspan<ElementType1, extents<Extent>, LayoutPolicy, AccessorPolicy> v1,
     const std::vector<ElementType2> &v2)
 {
   return is_same_vector(v1, make_mdspan(v2));
 }
 
 template <typename ElementType1,
+          std::size_t Extent,
           typename LayoutPolicy,
           typename AccessorPolicy,
           typename ElementType2>
 bool is_same_vector(
     const std::vector<ElementType1> &v1,
-    mdspan<ElementType2, extents<dynamic_extent>, LayoutPolicy, AccessorPolicy> v2)
+    mdspan<ElementType2, extents<Extent>, LayoutPolicy, AccessorPolicy> v2)
 {
   return is_same_vector(v2, v1);
 }
@@ -166,39 +230,141 @@ bool is_same_vector(
   return is_same_vector(make_mdspan(v1), make_mdspan(v2));
 }
 
-template <typename RealValue>
-KOKKOS_INLINE_FUNCTION
-RealValue scalar_diff(RealValue v1, RealValue v2) {
-  return std::abs(v2 - v1);
-}
-
-template <typename T>
-T scalar_diff(const std::complex<T> &v1, const std::complex<T> &v2) {
-  const auto dr = scalar_diff(v1.real(), v2.real());
-  const auto di = scalar_diff(v1.imag(), v2.imag());
-  return std::max(dr, di);
-}
-
-template <typename T>
-KOKKOS_INLINE_FUNCTION
-T scalar_diff(const Kokkos::complex<T> &v1, const Kokkos::complex<T> &v2) {
-  const auto dr = scalar_diff(v1.real(), v2.real());
-  const auto di = scalar_diff(v1.imag(), v2.imag());
-  return dr > di ? dr : di; // can't use std::max on GPU
-}
-
-// tolerance based comparison
-// TODO: replace fixed `scalar_diff` with templated flexible norm, if needed in future
-template <typename ElementType,
+template <typename ElementType1,
+          std::size_t Extent1,
           typename LayoutPolicy1,
           typename AccessorPolicy1,
+          typename ElementType2,
+          std::size_t Extent2,
           typename LayoutPolicy2,
-          typename AccessorPolicy2,
-          typename ToleranceType>
+          typename AccessorPolicy2>
+auto vector_abs_diff(
+    mdspan<ElementType1, extents<Extent1>, LayoutPolicy1, AccessorPolicy1> v1,
+    mdspan<ElementType2, extents<Extent2>, LayoutPolicy2, AccessorPolicy2> v2)
+{
+  const auto v1_view = KokkosKernelsSTD::Impl::mdspan_to_view(v1);
+  const auto v2_view = KokkosKernelsSTD::Impl::mdspan_to_view(v2);
+  using RetType = decltype(Kokkos::abs(v1_view[0] - v2_view[0]));
+  const auto size = v1.extent(0);
+  if (size != v2.extent(0)) {
+    throw std::runtime_error("Compared vectors have different sizes");
+  } else if (size == 0) {
+    return static_cast<RetType>(0); // no difference
+  }
+  RetType difference;
+  const auto red = Kokkos::Max<RetType>(difference);
+  Kokkos::parallel_reduce(size,
+    KOKKOS_LAMBDA(const std::size_t i, RetType &diff){
+        const auto val1 = v1_view[i];
+        const auto val2 = v2_view[i];
+        red.join(diff, Kokkos::abs(val1 - val2));
+	    }, red);
+  return difference;
+}
+
+template <typename ElementType1,
+          std::size_t Extent,
+          typename LayoutPolicy,
+          typename AccessorPolicy,
+          typename ElementType2>
+auto vector_abs_diff(
+    mdspan<ElementType1, extents<Extent>, LayoutPolicy, AccessorPolicy> v1,
+    const std::vector<ElementType2> &v2)
+{
+  return vector_abs_diff(v1, make_mdspan(v2));
+}
+
+template <typename ElementType1,
+          std::size_t Extent,
+          typename LayoutPolicy,
+          typename AccessorPolicy,
+          typename ElementType2>
+auto vector_abs_diff(
+    const std::vector<ElementType1> &v1,
+    mdspan<ElementType2, extents<Extent>, LayoutPolicy, AccessorPolicy> v2)
+{
+  return vector_abs_diff(v2, v1);
+}
+
+template <typename ElementType1, typename ElementType2>
+auto vector_abs_diff(
+    const std::vector<ElementType1> &v1,
+    const std::vector<ElementType2> &v2)
+{
+  return vector_abs_diff(make_mdspan(v1), make_mdspan(v2));
+}
+
+template <typename ElementType1,
+          std::size_t Extent1,
+          typename LayoutPolicy1,
+          typename AccessorPolicy1,
+          typename ElementType2,
+          std::size_t Extent2,
+          typename LayoutPolicy2,
+          typename AccessorPolicy2>
+auto vector_rel_diff(
+    mdspan<ElementType1, extents<Extent1>, LayoutPolicy1, AccessorPolicy1> v1,
+    mdspan<ElementType2, extents<Extent2>, LayoutPolicy2, AccessorPolicy2> v2)
+{
+  using RetType = decltype(std::abs(v1[0] - v2[0]));
+  const auto size = v1.extent(0);
+  if (size != v2.extent(0)) {
+    throw std::runtime_error("Compared vectors have different sizes");
+  } else if (size == 0) {
+    return static_cast<RetType>(0); // both empty -> no difference
+  }
+  const auto abs_diff = vector_abs_diff(v1, v2);
+  const auto max1 = Impl::abs_max(v1);
+  const auto max2 = Impl::abs_max(v2);
+  return Impl::abs2rel_diff(abs_diff, max1, max2);
+}
+
+template <typename ElementType1,
+          std::size_t Extent1,
+          typename LayoutPolicy,
+          typename AccessorPolicy,
+          typename ElementType2>
+auto vector_rel_diff(
+    mdspan<ElementType1, extents<Extent1>, LayoutPolicy, AccessorPolicy> v1,
+    const std::vector<ElementType2> &v2)
+{
+  return vector_rel_diff(v1, make_mdspan(v2));
+}
+
+template <typename ElementType1,
+          std::size_t Extent,
+          typename LayoutPolicy,
+          typename AccessorPolicy,
+          typename ElementType2>
+auto vector_rel_diff(
+    const std::vector<ElementType1> &v1,
+    mdspan<ElementType2, extents<Extent>, LayoutPolicy, AccessorPolicy> v2)
+{
+  return vector_rel_diff(v2, v1);
+}
+
+template <typename ElementType1, typename ElementType2>
+auto vector_rel_diff(
+    const std::vector<ElementType1> &v1,
+    const std::vector<ElementType2> &v2)
+{
+  return vector_rel_diff(make_mdspan(v1), make_mdspan(v2));
+}
+
+// no-tolerance (exact) comparison
+template <typename ElementType1,
+          std::size_t Extent10,
+          std::size_t Extent11,
+          typename LayoutPolicy1,
+          typename AccessorPolicy1,
+          typename ElementType2,
+          std::size_t Extent20,
+          std::size_t Extent21,
+          typename LayoutPolicy2,
+          typename AccessorPolicy2>
 bool is_same_matrix(
-    mdspan<ElementType, extents<dynamic_extent, dynamic_extent>, LayoutPolicy1, AccessorPolicy1> A,
-    mdspan<ElementType, extents<dynamic_extent, dynamic_extent>, LayoutPolicy2, AccessorPolicy2> B,
-    ToleranceType tolerance)
+    mdspan<ElementType1, extents<Extent10, Extent11>, LayoutPolicy1, AccessorPolicy1> A,
+    mdspan<ElementType2, extents<Extent20, Extent21>, LayoutPolicy2, AccessorPolicy2> B)
 {
   const auto ext0 = A.extent(0);
   const auto ext1 = A.extent(1);
@@ -206,18 +372,105 @@ bool is_same_matrix(
     return false;
   const auto A_view = KokkosKernelsSTD::Impl::mdspan_to_view(A);
   const auto B_view = KokkosKernelsSTD::Impl::mdspan_to_view(B);
-  // Note: reducint to `int` because Kokkos can complain on `bool` not being 
+  // Note: reducing to `int` because Kokkos can complain on `bool` not being
   //       aligned with int32 and deny it for parallel_reduce()
   using diff_type = int;
   diff_type is_different = false;
   Kokkos::parallel_reduce(ext0,
     KOKKOS_LAMBDA(std::size_t i, diff_type &diff) {
         for (decltype(i) j = 0; j < ext1; ++j) {
-          const auto d = scalar_diff(A_view(i, j), B_view(i, j));
-          diff = diff || (d > tolerance);
+          const bool d = A_view(i, j) != B_view(i, j);
+          diff = diff || d;
         }
 	    }, Kokkos::LOr<diff_type>(is_different));
   return !is_different;
+}
+
+template <typename ElementType,
+          std::size_t Extent0,
+          std::size_t Extent1,
+          typename LayoutPolicy1,
+          typename AccessorPolicy1>
+bool is_same_matrix(
+    mdspan<ElementType, extents<Extent0, Extent1>, LayoutPolicy1, AccessorPolicy1> A,
+    const std::vector<ElementType> &B)
+{
+  return is_same_matrix(A, make_mdspan(B.data(), A.extent(0), A.extent(1)));
+}
+
+template <typename ElementType,
+          std::size_t Extent0,
+          std::size_t Extent1,
+          typename LayoutPolicy1,
+          typename AccessorPolicy1>
+bool is_same_matrix(const std::vector<ElementType> &A,
+    mdspan<ElementType, extents<Extent0, Extent1>, LayoutPolicy1, AccessorPolicy1> B)
+{
+  return is_same_matrix(make_mdspan(A.data(), B.extent(0), B.extent(1)), B);
+}
+
+template <typename ElementType1,
+          std::size_t Extent10,
+          std::size_t Extent11,
+          typename LayoutPolicy1,
+          typename AccessorPolicy1,
+          typename ElementType2,
+          std::size_t Extent20,
+          std::size_t Extent21,
+          typename LayoutPolicy2,
+          typename AccessorPolicy2>
+auto matrix_abs_diff(
+    mdspan<ElementType1, extents<Extent10, Extent11>, LayoutPolicy1, AccessorPolicy1> A,
+    mdspan<ElementType2, extents<Extent20, Extent21>, LayoutPolicy2, AccessorPolicy2> B)
+{
+  const auto A_view = KokkosKernelsSTD::Impl::mdspan_to_view(A);
+  const auto B_view = KokkosKernelsSTD::Impl::mdspan_to_view(B);
+  using RetType = decltype(Kokkos::abs(A_view(0, 0) - B_view(0, 0)));
+  const auto ext0 = A.extent(0);
+  const auto ext1 = A.extent(1);
+  if (B.extent(0) != ext0 or B.extent(1) != ext1) {
+    throw std::runtime_error("Compared matrices have different sizes");
+  } else if (ext0 == 0 or ext1 == 0) {
+    return static_cast<RetType>(0); // both empty -> no difference
+  }
+  RetType difference;
+  const auto red = Kokkos::Max<RetType>(difference);
+  Kokkos::parallel_reduce(ext0,
+    KOKKOS_LAMBDA(const std::size_t i, RetType &diff){
+        for (size_t j = 0; j < ext1; ++j) {
+          const auto a = A_view(i, j);
+          const auto b = B_view(i, j);
+          red.join(diff, Kokkos::abs(a - b));
+        }
+	    }, red);
+  return difference;
+}
+
+template <typename ElementType,
+          std::size_t Extent10,
+          std::size_t Extent11,
+          typename LayoutPolicy1,
+          typename AccessorPolicy1,
+          std::size_t Extent20,
+          std::size_t Extent21,
+          typename LayoutPolicy2,
+          typename AccessorPolicy2>
+auto matrix_rel_diff(
+    mdspan<ElementType, extents<Extent10, Extent11>, LayoutPolicy1, AccessorPolicy1> A,
+    mdspan<ElementType, extents<Extent20, Extent21>, LayoutPolicy2, AccessorPolicy2> B)
+{
+  using RetType = decltype(std::abs(A(0, 0) - B(0, 0)));
+  const auto ext0 = A.extent(0);
+  const auto ext1 = A.extent(1);
+  if (B.extent(0) != ext0 or B.extent(1) != ext1) {
+    throw std::runtime_error("Compared matrices have different sizes");
+  } else if (ext0 == 0 or ext1 == 0) {
+    return static_cast<RetType>(0); // both empty -> no difference
+  }
+  const auto abs_diff = matrix_abs_diff(A, B);
+  const auto max1 = Impl::abs_max(A);
+  const auto max2 = Impl::abs_max(B);
+  return Impl::abs2rel_diff(abs_diff, max1, max2);
 }
 
 namespace Impl { // internal to test helpers
@@ -282,7 +535,7 @@ void test_op_Ax(x_t x, A_t A, AToleranceType A_tol, GoldType get_gold, ActionTyp
   action();
 
   // compare results with gold
-  EXPECT_TRUE(is_same_matrix(A_gold, A, A_tol));
+  EXPECT_LE(matrix_rel_diff(A_gold, A), A_tol);
 
   // x should not change after kernel
   EXPECT_TRUE(is_same_vector(x, x_preKernel));
