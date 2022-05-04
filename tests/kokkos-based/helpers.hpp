@@ -242,15 +242,15 @@ auto vector_abs_diff(
     mdspan<ElementType1, extents<Extent1>, LayoutPolicy1, AccessorPolicy1> v1,
     mdspan<ElementType2, extents<Extent2>, LayoutPolicy2, AccessorPolicy2> v2)
 {
-  using RetType = decltype(std::abs(v1[0] - v2[0])); // will be same for views
+  const auto v1_view = KokkosKernelsSTD::Impl::mdspan_to_view(v1);
+  const auto v2_view = KokkosKernelsSTD::Impl::mdspan_to_view(v2);
+  using RetType = decltype(Kokkos::abs(v1_view[0] - v2_view[0]));
   const auto size = v1.extent(0);
   if (size != v2.extent(0)) {
     throw std::runtime_error("Compared vectors have different sizes");
   } else if (size == 0) {
     return static_cast<RetType>(0); // no difference
   }
-  const auto v1_view = KokkosKernelsSTD::Impl::mdspan_to_view(v1);
-  const auto v2_view = KokkosKernelsSTD::Impl::mdspan_to_view(v2);
   RetType difference;
   const auto red = Kokkos::Max<RetType>(difference);
   Kokkos::parallel_reduce(size,
@@ -423,7 +423,9 @@ auto matrix_abs_diff(
     mdspan<ElementType1, extents<Extent10, Extent11>, LayoutPolicy1, AccessorPolicy1> A,
     mdspan<ElementType2, extents<Extent20, Extent21>, LayoutPolicy2, AccessorPolicy2> B)
 {
-  using RetType = decltype(std::abs(A(0, 0) - B(0, 0))); // will be same for views
+  const auto A_view = KokkosKernelsSTD::Impl::mdspan_to_view(A);
+  const auto B_view = KokkosKernelsSTD::Impl::mdspan_to_view(B);
+  using RetType = decltype(Kokkos::abs(A_view(0, 0) - B_view(0, 0)));
   const auto ext0 = A.extent(0);
   const auto ext1 = A.extent(1);
   if (B.extent(0) != ext0 or B.extent(1) != ext1) {
@@ -431,8 +433,6 @@ auto matrix_abs_diff(
   } else if (ext0 == 0 or ext1 == 0) {
     return static_cast<RetType>(0); // both empty -> no difference
   }
-  const auto A_view = KokkosKernelsSTD::Impl::mdspan_to_view(A);
-  const auto B_view = KokkosKernelsSTD::Impl::mdspan_to_view(B);
   RetType difference;
   const auto red = Kokkos::Max<RetType>(difference);
   Kokkos::parallel_reduce(ext0,
