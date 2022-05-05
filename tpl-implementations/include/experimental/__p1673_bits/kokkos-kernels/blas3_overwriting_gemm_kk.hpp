@@ -135,7 +135,7 @@ void matrix_product(
   > C)
 {
 
-  // note that AT = A^T so AT carries the tranpose effect
+  // note that AT = A^T so AT carries the transpose effect
 
   // preconditions
   if ( AT.extent(1) != B.extent(0) ){
@@ -221,7 +221,7 @@ void matrix_product(
   > C)
 {
 
-  // note that BT = B^T so BT carries the tranpose effect
+  // note that BT = B^T so BT carries the transpose effect
 
   // preconditions
   if ( A.extent(1) != BT.extent(0) ){

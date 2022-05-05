@@ -115,7 +115,7 @@ auto mdspan_to_view(std::experimental::mdspan<
       already carries the tranposition.
 
   (2) when converting Ain to a view (Ain_view) we do NOT account for the transposition.
-      To call the KK impl, we need to explicitly express the tranpose:
+      To call the KK impl, we need to explicitly express the transpose:
           KokkosBlas::gemm("T", "N", alpha, Ain_view, Bin_view, beta, Cin_view);
       In this case, we need "T" because Ain_view would NOT already
       carry the effect of the transpose.
