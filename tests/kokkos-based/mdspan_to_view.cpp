@@ -89,3 +89,90 @@ TEST(mdspan_to_view, for_complex_double){
     mdspan_to_view_test_impl<value_type, kc_t>();
   }
 }
+
+
+template<class MDSpanValueType, class KViewValueType = MDSpanValueType>
+void transposed_mdspan_to_view_test_impl()
+{
+  using std::experimental::mdspan;
+  using std::experimental::extents;
+  using std::experimental::dynamic_extent;
+
+  using lr_t = std::experimental::layout_right;
+  using ll_t = std::experimental::layout_left;
+
+  std::vector<MDSpanValueType> a(12);
+  std::iota(a.begin(), a.end(), 0);
+
+  {
+    // mdspan is layout right
+    using mdspan_t = mdspan<MDSpanValueType, extents<dynamic_extent, dynamic_extent>, lr_t>;
+    mdspan_t mdsp(a.data(), 3, 4);
+    auto mdsp_T = std::experimental::linalg::transposed(mdsp);
+
+    auto kv = KokkosKernelsSTD::Impl::mdspan_to_view(mdsp_T);
+    using kv_type = decltype(kv);
+    static_assert(kv_type::rank == 2);
+    static_assert(std::is_same_v<typename kv_type::value_type, KViewValueType>);
+
+    // the conversion from transposed() to view basically discards the transposition
+    // so behaves as if we were tranposing the nested mspan directly
+    static_assert(std::is_same_v<typename kv_type::array_layout, Kokkos::LayoutRight>);
+    EXPECT_TRUE(kv.extent(0) == 3);
+    EXPECT_TRUE(kv.extent(1) == 4);
+    expect_shallow_copy(mdsp, kv);
+
+    int count=0;
+    // for layoutright we need to loop over each row
+    for (std::size_t i=0; i<kv.extent(0); ++i){
+      for (std::size_t j=0; j<kv.extent(1); ++j){
+	EXPECT_TRUE( mdsp(i,j) == a[count++] );
+	EXPECT_TRUE( mdsp(i,j) == kv(i,j) );
+      }
+    }
+  }
+
+  {
+    // mdspan is layout left
+    using mdspan_t = mdspan<MDSpanValueType, extents<dynamic_extent, dynamic_extent>, ll_t>;
+    mdspan_t mdsp(a.data(), 3, 4);
+    auto mdsp_T = std::experimental::linalg::transposed(mdsp);
+
+    auto kv = KokkosKernelsSTD::Impl::mdspan_to_view(mdsp_T);
+    using kv_type = decltype(kv);
+    static_assert(kv_type::rank == 2);
+    static_assert(std::is_same_v<typename kv_type::value_type, KViewValueType>);
+
+    // the conversion from transposed() to view basically discards the transposition
+    // so behaves as if we were tranposing the nested mspan directly
+    static_assert(std::is_same_v<typename kv_type::array_layout, Kokkos::LayoutLeft>);
+    EXPECT_TRUE(kv.extent(0) == 3);
+    EXPECT_TRUE(kv.extent(1) == 4);
+    expect_shallow_copy(mdsp, kv);
+
+    int count=0;
+    // for layoutleft we need to loop over each columns
+    for (std::size_t j=0; j<kv.extent(1); ++j){
+      for (std::size_t i=0; i<kv.extent(0); ++i){
+	EXPECT_TRUE( mdsp(i,j) == a[count++] );
+	EXPECT_TRUE( mdsp(i,j) == kv(i,j) );
+      }
+    }
+  }
+}
+
+TEST(mdspan_to_view, float_transposed){
+  transposed_mdspan_to_view_test_impl<float>();
+}
+
+TEST(mdspan_to_view, double_transposed){
+  transposed_mdspan_to_view_test_impl<double>();
+}
+
+TEST(mdspan_to_view, complex_double_transposed){
+  using value_type = std::complex<double>;
+  using kc_t       = Kokkos::complex<double>;
+  if constexpr (alignof(value_type) == alignof(kc_t)){
+    transposed_mdspan_to_view_test_impl<value_type, kc_t>();
+  }
+}
