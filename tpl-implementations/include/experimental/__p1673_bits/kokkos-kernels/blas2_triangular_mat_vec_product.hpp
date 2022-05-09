@@ -3,17 +3,10 @@
 #define LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_KOKKOSKERNELS_TRIANG_MATVEC_HPP_
 
 #include "signal_kokkos_impl_called.hpp"
+#include "static_extent_match.hpp"
 
 namespace KokkosKernelsSTD {
 
-namespace trmv_impl{
-template <class size_type>
-constexpr bool static_extent_match(size_type extent1, size_type extent2)
-{
-  return extent1 == std::experimental::dynamic_extent ||
-         extent2 == std::experimental::dynamic_extent ||
-         extent1 == extent2;
-}
 } //end trmv_impl namespace
 
 //
@@ -67,9 +60,9 @@ void triangular_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
     throw std::runtime_error("KokkosBlas: triangular_matrix_vector_product: A.extent(0) != y.extent(0) ");
   }
 
-  trmv_impl::static_extent_match(A.static_extent(1), A.static_extent(0));
-  trmv_impl::static_extent_match(A.static_extent(0), y.static_extent(0));
-  trmv_impl::static_extent_match(A.static_extent(1), x.static_extent(0));
+  Impl::static_extent_match(A.static_extent(1), A.static_extent(0));
+  Impl::static_extent_match(A.static_extent(0), y.static_extent(0));
+  Impl::static_extent_match(A.static_extent(1), x.static_extent(0));
 
   auto A_view = Impl::mdspan_to_view(A);
   auto x_view = Impl::mdspan_to_view(x);
@@ -195,10 +188,10 @@ void triangular_matrix_vector_product(kokkos_exec<ExeSpace> /*kexe*/,
     throw std::runtime_error("KokkosBlas: triangular_matrix_vector_product: A.extent(0) != z.extent(0) ");
   }
 
-  trmv_impl::static_extent_match(A.static_extent(1), A.static_extent(0));
-  trmv_impl::static_extent_match(A.static_extent(0), y.static_extent(0));
-  trmv_impl::static_extent_match(A.static_extent(1), x.static_extent(0));
-  trmv_impl::static_extent_match(y.static_extent(0), z.static_extent(0));
+  Impl::static_extent_match(A.static_extent(1), A.static_extent(0));
+  Impl::static_extent_match(A.static_extent(0), y.static_extent(0));
+  Impl::static_extent_match(A.static_extent(1), x.static_extent(0));
+  Impl::static_extent_match(y.static_extent(0), z.static_extent(0));
 
   auto A_view = Impl::mdspan_to_view(A);
   auto x_view = Impl::mdspan_to_view(x);

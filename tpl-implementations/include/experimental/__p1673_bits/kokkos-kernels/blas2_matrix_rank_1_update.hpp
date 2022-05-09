@@ -46,114 +46,11 @@
 
 #include <complex>
 #include "signal_kokkos_impl_called.hpp"
+#include "static_extent_match.hpp"
+#include "triangle.hpp"
+#include "parallel_matrix.hpp"
 
 namespace KokkosKernelsSTD {
-
-namespace Impl {
-
-// manages parallel execution of independent action
-// called like action(i, j) for each matrix element A(i, j)
-template <typename ExecSpace, typename MatrixType>
-class ParallelMatrixVisitor {
-public:
-  KOKKOS_INLINE_FUNCTION ParallelMatrixVisitor(ExecSpace &&exec_in, MatrixType A_in):
-    exec(exec_in), A(A_in), ext0(A.extent(0)), ext1(A.extent(1))
-  {}
-
-  template <typename ActionType>
-  KOKKOS_INLINE_FUNCTION
-  void for_each_matrix_element(ActionType action) {
-    if (ext0 > ext1) { // parallel rows
-      Kokkos::parallel_for(Kokkos::RangePolicy(exec, 0, ext0),
-        KOKKOS_LAMBDA(const auto i) {
-          using idx_type = std::remove_const_t<decltype(i)>;
-          for (idx_type j = 0; j < ext1; ++j) {
-            action(i, j);
-          }
-        });
-    } else { // parallel columns
-      Kokkos::parallel_for(Kokkos::RangePolicy(exec, 0, ext1),
-        KOKKOS_LAMBDA(const auto j) {
-          using idx_type = std::remove_const_t<decltype(j)>;
-          for (idx_type i = 0; i < ext0; ++i) {
-            action(i, j);
-          }
-        });
-    }
-    exec.fence();
-  }
-
-  template <typename ActionType>
-  void for_each_triangle_matrix_element(std::experimental::linalg::upper_triangle_t t, ActionType action) {
-    Kokkos::parallel_for(Kokkos::RangePolicy(exec, 0, ext1),
-      KOKKOS_LAMBDA(const auto j) {
-        using idx_type = std::remove_const_t<decltype(j)>;
-        for (idx_type i = 0; i <= j; ++i) {
-          action(i, j);
-        }
-      });
-    exec.fence();
-  }
-
-  template <typename ActionType>
-  void for_each_triangle_matrix_element(std::experimental::linalg::lower_triangle_t t, ActionType action) {
-    for_each_triangle_matrix_element(std::experimental::linalg::upper_triangle,
-        [action](const auto i, const auto j) {
-          action(j, i);
-      });
-  }
-
-private:
-  ExecSpace exec;
-  MatrixType A;
-  size_t ext0;
-  size_t ext1;
-};
-
-// Note: phrase it simply and the same as in specification ("has unique layout")
-template <typename Layout,
-          std::experimental::extents<>::size_type numRows,
-          std::experimental::extents<>::size_type numCols>
-
-inline constexpr bool is_unique_layout_v = Layout::template mapping<
-    std::experimental::extents<numRows, numCols> >::is_always_unique();
-
-template <typename Layout>
-struct is_layout_blas_packed: public std::false_type {};
-
-template <typename Triangle, typename StorageOrder>
-struct is_layout_blas_packed<
-  std::experimental::linalg::layout_blas_packed<Triangle, StorageOrder>>:
-    public std::true_type {};
-
-template <typename Layout>
-inline constexpr bool is_layout_blas_packed_v = is_layout_blas_packed<Layout>::value;
-
-// Note: will only signal failure for layout_blas_packed with different triangle
-template <typename Layout, typename Triangle>
-struct triangle_layout_match: public std::true_type {};
-
-template <typename StorageOrder, typename Triangle1, typename Triangle2>
-struct triangle_layout_match<
-  std::experimental::linalg::layout_blas_packed<Triangle1, StorageOrder>,
-  Triangle2>
-{
-  static constexpr bool value = std::is_same_v<Triangle1, Triangle2>;
-};
-
-template <typename Layout, typename Triangle>
-inline constexpr bool triangle_layout_match_v = triangle_layout_match<Layout, Triangle>::value;
-
-template <class size_type>
-KOKKOS_INLINE_FUNCTION
-constexpr bool static_extent_match(size_type extent1, size_type extent2)
-{
-  return extent1 == std::experimental::dynamic_extent ||
-         extent2 == std::experimental::dynamic_extent ||
-         extent1 == extent2;
-}
-
-} // namespace Impl
 
 // Nonsymmetric non-conjugated rank-1 update
 // Performs BLAS xGER/xGERU (for real/complex types) A[i,j] += x[i] * y[j]
