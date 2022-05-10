@@ -85,7 +85,8 @@ template<class A_t,
          class X_t,
          class Triangle,
          class DiagonalStorage>
-void test_triangular_matrix_matrix_right_solve_impl(A_t A, B_t B, X_t X0, Triangle t, DiagonalStorage d)
+void test_triangular_matrix_matrix_right_solve_impl(
+        A_t A, B_t B, X_t X0, Triangle t, DiagonalStorage d)
 {
   // copy x to leave original fixture intact
   auto x_data = create_stdvector_and_copy_rowwise(X0);
@@ -106,16 +107,16 @@ void test_triangular_matrix_matrix_right_solve_impl(A_t A, B_t B, X_t X0, Triang
 } // anonymous namespace
 
 #define DEFINE_TESTS(blas_val_type)                                               \
-TEST_F(blas2_signed_##blas_val_type##_fixture,                                    \
+TEST_F(blas3_signed_##blas_val_type##_fixture,                                    \
        kokkos_triangular_matrix_matrix_right_solve) {                             \
-  using val_t = typename blas2_signed_##blas_val_type##_fixture::value_type;      \
+  using val_t = typename blas3_signed_##blas_val_type##_fixture::value_type;      \
   run_checked_tests<val_t>("kokkos_", "triangular_matrix_matrix_right_solve", "", \
                            #blas_val_type, [&]() {                                \
                                                                                   \
-    test_triangular_matrix_matrix_right_solve_impl(A_sym_e0, A_sym_e0, A_hem_e0,  \
+    test_triangular_matrix_matrix_right_solve_impl(A_sym_e0, C_e2e0, C_e2e0,      \
                          std::experimental::linalg::lower_triangle,               \
                          std::experimental::linalg::implicit_unit_diagonal);      \
-    test_triangular_matrix_matrix_right_solve_impl(A_sym_e0, A_sym_e0, A_hem_e0,  \
+    test_triangular_matrix_matrix_right_solve_impl(A_sym_e0, C_e2e0, C_e2e0,      \
                          std::experimental::linalg::upper_triangle,               \
                          std::experimental::linalg::explicit_diagonal);           \
                                                                                   \

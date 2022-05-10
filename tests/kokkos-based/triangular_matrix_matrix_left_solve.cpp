@@ -85,7 +85,8 @@ template<class A_t,
          class X_t,
          class Triangle,
          class DiagonalStorage>
-void test_triangular_matrix_matrix_left_solve_impl(A_t A, B_t B, X_t X0, Triangle t, DiagonalStorage d)
+void test_triangular_matrix_matrix_left_solve_impl(
+        A_t A, B_t B, X_t X0, Triangle t, DiagonalStorage d)
 {
   // copy x to leave original fixture intact
   auto x_data = create_stdvector_and_copy_rowwise(X0);
@@ -99,7 +100,7 @@ void test_triangular_matrix_matrix_left_solve_impl(A_t A, B_t B, X_t X0, Triangl
       std::experimental::linalg::triangular_matrix_matrix_left_solve(
         KokkosKernelsSTD::kokkos_exec<>(), A, t, d, B, X);
     };
-  const auto tol = tolerance<typename X_t::value_type>(1e-13, 1e-4f);
+  const auto tol = tolerance<typename X_t::value_type>(1e-12, 1e-4f);
   test_op_CAB(A, B, X, tol, get_gold, compute);
 }
 
@@ -112,10 +113,10 @@ TEST_F(blas2_signed_##blas_val_type##_fixture,                                  
   run_checked_tests<val_t>("kokkos_", "triangular_matrix_matrix_left_solve", "", \
                            #blas_val_type, [&]() {                               \
                                                                                  \
-    test_triangular_matrix_matrix_left_solve_impl(A_sym_e0, A_sym_e0, A_hem_e0,  \
+    test_triangular_matrix_matrix_left_solve_impl(A_sym_e0, A_e0e1, B_e0e1,      \
                          std::experimental::linalg::lower_triangle,              \
                          std::experimental::linalg::implicit_unit_diagonal);     \
-    test_triangular_matrix_matrix_left_solve_impl(A_sym_e0, A_sym_e0, A_hem_e0,  \
+    test_triangular_matrix_matrix_left_solve_impl(A_sym_e0, A_e0e1, B_e0e1,      \
                          std::experimental::linalg::upper_triangle,              \
                          std::experimental::linalg::explicit_diagonal);          \
                                                                                  \
