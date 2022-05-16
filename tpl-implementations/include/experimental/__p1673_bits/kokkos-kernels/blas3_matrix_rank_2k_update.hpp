@@ -76,7 +76,7 @@ void symmetric_matrix_rank_2k_update(kokkos_exec<ExecSpace> &&exec,
   Impl::ParallelMatrixVisitor v(ExecSpace(), C_view);
   v.for_each_triangle_matrix_element(t,
     KOKKOS_LAMBDA(const auto i, const auto j) {
-      auto &c = C_view(i, j);
+      decltype(auto) c = C_view(i, j);
       for (size_type k = 0; k < A_ext1; ++k) {
         c += A_view(i, k) * B_view(j, k) + B_view(i, k) * A_view(j, k);
       }
@@ -150,7 +150,7 @@ void hermitian_matrix_rank_2k_update(kokkos_exec<ExecSpace> &&exec,
   Impl::ParallelMatrixVisitor v(ExecSpace(), C_view);
   v.for_each_triangle_matrix_element(t,
     KOKKOS_LAMBDA(const auto i, const auto j) {
-      auto &c = C_view(i, j);
+      decltype(auto) c = C_view(i, j);
       for (size_type k = 0; k < A_ext1; ++k) {
         c += A_view(i, k) * conj_if_needed(B_view(j, k))
            + B_view(i, k) * conj_if_needed(A_view(j, k));
