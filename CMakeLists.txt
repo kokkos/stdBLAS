@@ -99,8 +99,8 @@ add_library(std::linalg ALIAS linalg)
 
 target_link_libraries(linalg INTERFACE std::mdspan)
 if(LINALG_ENABLE_KOKKOS)
-  find_package(Kokkos)
-  find_package(KokkosKernels)
+  find_package(Kokkos REQUIRED)
+  find_package(KokkosKernels REQUIRED)
   target_link_libraries(linalg INTERFACE Kokkos::kokkos)
   target_link_libraries(linalg INTERFACE Kokkos::kokkoskernels)
   target_include_directories(linalg INTERFACE
