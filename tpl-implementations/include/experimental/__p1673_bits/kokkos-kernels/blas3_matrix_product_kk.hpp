@@ -423,5 +423,207 @@ void symmetric_matrix_right_product(
     });
 }
 
+// Overwriting hermitian matrix-matrix left product
+// performs BLAS xHEMM: C = A x B
+
+MDSPAN_TEMPLATE_REQUIRES(class ExecSpace,
+    class ElementType_A,
+    std::experimental::extents<>::size_type numRows_A,
+    std::experimental::extents<>::size_type numCols_A,
+    class Layout_A,
+    class Triangle,
+    class ElementType_B,
+    std::experimental::extents<>::size_type numRows_B,
+    std::experimental::extents<>::size_type numCols_B,
+    class Layout_B,
+    class ElementType_C,
+    std::experimental::extents<>::size_type numRows_C,
+    std::experimental::extents<>::size_type numCols_C,
+    class Layout_C,
+    /* requires */ (Impl::is_unique_layout_v<Layout_B, numRows_B, numCols_B>
+        and Impl::is_unique_layout_v<Layout_C, numRows_C, numCols_C>
+        and (Impl::is_unique_layout_v<Layout_A, numRows_A, numCols_A>
+        or Impl::is_layout_blas_packed_v<Layout_A>)))
+void hermitian_matrix_left_product(
+  kokkos_exec<ExecSpace>&& /* exec */,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A,
+    std::experimental::default_accessor<ElementType_A>> A,
+  Triangle t,
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B,
+    std::experimental::default_accessor<ElementType_B>> B,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C,
+    std::experimental::default_accessor<ElementType_C>> C)
+{
+  matproduct_impl::check_left_product(A, t, B, C, "hermitian_matrix_left_product");
+
+  Impl::signal_kokkos_impl_called("overwriting_hermitian_matrix_left_product");
+
+  constexpr bool lower = std::is_same_v<Triangle, std::experimental::linalg::lower_triangle_t>;
+  using std::experimental::linalg::impl::conj_if_needed;
+
+  matproduct_impl::product(ExecSpace(), A, B, C,
+    KOKKOS_LAMBDA(const auto i, const auto j, const auto k,
+                  auto &&cij, auto A_view, auto B_view) {
+      const bool flip = lower ? i <= k : i >= k;
+      const auto aik = flip ? conj_if_needed(A_view(k, i)) : A_view(i, k);
+      cij += aik * B_view(k, j);
+    });
+}
+
+// Updating hermitian matrix-matrix left product
+// performs BLAS xHEMM: C = E + A x B
+
+MDSPAN_TEMPLATE_REQUIRES(class ExecSpace,
+    class ElementType_A,
+    std::experimental::extents<>::size_type numRows_A,
+    std::experimental::extents<>::size_type numCols_A,
+    class Layout_A,
+    class Triangle,
+    class ElementType_B,
+    std::experimental::extents<>::size_type numRows_B,
+    std::experimental::extents<>::size_type numCols_B,
+    class Layout_B,
+    class ElementType_E,
+    std::experimental::extents<>::size_type numRows_E,
+    std::experimental::extents<>::size_type numCols_E,
+    class Layout_E,
+    class ElementType_C,
+    std::experimental::extents<>::size_type numRows_C,
+    std::experimental::extents<>::size_type numCols_C,
+    class Layout_C,
+    /* requires */ (Impl::is_unique_layout_v<Layout_B, numRows_B, numCols_B>
+        and Impl::is_unique_layout_v<Layout_C, numRows_C, numCols_C>
+        and Impl::is_unique_layout_v<Layout_E, numRows_E, numCols_E>
+        and (Impl::is_unique_layout_v<Layout_A, numRows_A, numCols_A>
+        or Impl::is_layout_blas_packed_v<Layout_A>)))
+void hermitian_matrix_left_product(
+  kokkos_exec<ExecSpace>&& /* exec */,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A,
+    std::experimental::default_accessor<ElementType_A>> A,
+  Triangle t,
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B,
+    std::experimental::default_accessor<ElementType_B>> B,
+  std::experimental::mdspan<ElementType_E, std::experimental::extents<numRows_E, numCols_E>, Layout_E,
+    std::experimental::default_accessor<ElementType_E>> E,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C,
+    std::experimental::default_accessor<ElementType_C>> C)
+{
+  matproduct_impl::check_left_product(A, t, B, E, C, "hermitian_matrix_left_product");
+
+  Impl::signal_kokkos_impl_called("updating_hermitian_matrix_left_product");
+
+  constexpr bool lower = std::is_same_v<Triangle, std::experimental::linalg::lower_triangle_t>;
+  using std::experimental::linalg::impl::conj_if_needed;
+
+  matproduct_impl::product(ExecSpace(), A, B, E, C,
+    KOKKOS_LAMBDA(const auto i, const auto j, const auto k,
+                  auto &&cij, auto A_view, auto B_view) {
+      const bool flip = lower ? i <= k : i >= k;
+      const auto aik = flip ? conj_if_needed(A_view(k, i)) : A_view(i, k);
+      cij += aik * B_view(k, j);
+    });
+}
+
+// Overwriting hermitian matrix-matrix right product
+// performs BLAS xHEMM: C = B x A
+
+MDSPAN_TEMPLATE_REQUIRES(class ExecSpace,
+    class ElementType_A,
+    std::experimental::extents<>::size_type numRows_A,
+    std::experimental::extents<>::size_type numCols_A,
+    class Layout_A,
+    class Triangle,
+    class ElementType_B,
+    std::experimental::extents<>::size_type numRows_B,
+    std::experimental::extents<>::size_type numCols_B,
+    class Layout_B,
+    class ElementType_C,
+    std::experimental::extents<>::size_type numRows_C,
+    std::experimental::extents<>::size_type numCols_C,
+    class Layout_C,
+    /* requires */ (Impl::is_unique_layout_v<Layout_B, numRows_B, numCols_B>
+        and Impl::is_unique_layout_v<Layout_C, numRows_C, numCols_C>
+        and (Impl::is_unique_layout_v<Layout_A, numRows_A, numCols_A>
+        or Impl::is_layout_blas_packed_v<Layout_A>)))
+void hermitian_matrix_right_product(
+  kokkos_exec<ExecSpace>&& /* exec */,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A,
+    std::experimental::default_accessor<ElementType_A>> A,
+  Triangle t,
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B,
+    std::experimental::default_accessor<ElementType_B>> B,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C,
+    std::experimental::default_accessor<ElementType_C>> C)
+{
+  matproduct_impl::check_right_product(A, t, B, C, "hermitian_matrix_right_product");
+
+  Impl::signal_kokkos_impl_called("overwriting_hermitian_matrix_right_product");
+
+  constexpr bool lower = std::is_same_v<Triangle, std::experimental::linalg::lower_triangle_t>;
+  using std::experimental::linalg::impl::conj_if_needed;
+
+  matproduct_impl::product(ExecSpace(), A, B, C,
+    KOKKOS_LAMBDA(const auto i, const auto j, const auto k,
+                  auto &&cij, auto A_view, auto B_view) {
+      const bool flip = lower ? j >= k : j <= k;
+      const auto akj = flip ? conj_if_needed(A_view(j, k)) : A_view(k, j);
+      cij += B(i, k) * akj;
+    });
+}
+
+// Updating hermitian matrix-matrix right product
+// performs BLAS xHEMM: C = E + B x A
+
+MDSPAN_TEMPLATE_REQUIRES(class ExecSpace,
+    class ElementType_A,
+    std::experimental::extents<>::size_type numRows_A,
+    std::experimental::extents<>::size_type numCols_A,
+    class Layout_A,
+    class Triangle,
+    class ElementType_B,
+    std::experimental::extents<>::size_type numRows_B,
+    std::experimental::extents<>::size_type numCols_B,
+    class Layout_B,
+    class ElementType_E,
+    std::experimental::extents<>::size_type numRows_E,
+    std::experimental::extents<>::size_type numCols_E,
+    class Layout_E,
+    class ElementType_C,
+    std::experimental::extents<>::size_type numRows_C,
+    std::experimental::extents<>::size_type numCols_C,
+    class Layout_C,
+    /* requires */ (Impl::is_unique_layout_v<Layout_B, numRows_B, numCols_B>
+        and Impl::is_unique_layout_v<Layout_C, numRows_C, numCols_C>
+        and Impl::is_unique_layout_v<Layout_E, numRows_E, numCols_E>
+        and (Impl::is_unique_layout_v<Layout_A, numRows_A, numCols_A>
+        or Impl::is_layout_blas_packed_v<Layout_A>)))
+void hermitian_matrix_right_product(
+  kokkos_exec<ExecSpace>&& /* exec */,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A,
+    std::experimental::default_accessor<ElementType_A>> A,
+  Triangle t,
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B,
+    std::experimental::default_accessor<ElementType_B>> B,
+  std::experimental::mdspan<ElementType_E, std::experimental::extents<numRows_E, numCols_E>, Layout_E,
+    std::experimental::default_accessor<ElementType_E>> E,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C,
+    std::experimental::default_accessor<ElementType_C>> C)
+{
+  matproduct_impl::check_right_product(A, t, B, C, "hermitian_matrix_right_product");
+
+  Impl::signal_kokkos_impl_called("updating_hermitian_matrix_right_product");
+
+  constexpr bool lower = std::is_same_v<Triangle, std::experimental::linalg::lower_triangle_t>;
+  using std::experimental::linalg::impl::conj_if_needed;
+
+  matproduct_impl::product(ExecSpace(), A, B, E, C,
+    KOKKOS_LAMBDA(const auto i, const auto j, const auto k,
+                  auto &&cij, auto A_view, auto B_view) {
+      const bool flip = lower ? j >= k : j <= k;
+      const auto akj = flip ? conj_if_needed(A_view(j, k)) : A_view(k, j);
+      cij += B(i, k) * akj;
+    });
+}
+
 } // namespace KokkosKernelsSTD
 #endif
