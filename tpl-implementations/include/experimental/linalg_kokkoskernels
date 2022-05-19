@@ -3,6 +3,8 @@
 #include<KokkosBlas.hpp>
 #include "__p1673_bits/kokkos-kernels/mdspan_to_view_mapper_kk.hpp"
 #include "__p1673_bits/kokkos-kernels/kokkos_conjugate.hpp"
+
+// blas1 (according to P1673)
 #include "__p1673_bits/kokkos-kernels/blas1_dot_kk.hpp"
 #include "__p1673_bits/kokkos-kernels/blas1_add_kk.hpp"
 #include "__p1673_bits/kokkos-kernels/blas1_scale_kk.hpp"
@@ -10,8 +12,14 @@
 #include "__p1673_bits/kokkos-kernels/blas1_vector_norm2_kk.hpp"
 #include "__p1673_bits/kokkos-kernels/blas1_vector_abs_sum_kk.hpp"
 #include "__p1673_bits/kokkos-kernels/blas1_vector_sum_of_squares_kk.hpp"
+#include "__p1673_bits/kokkos-kernels/blas1_matrix_frob_norm_kk.hpp"
+#include "__p1673_bits/kokkos-kernels/blas1_matrix_inf_norm_kk.hpp"
+#include "__p1673_bits/kokkos-kernels/blas1_matrix_one_norm_kk.hpp"
+#include "__p1673_bits/kokkos-kernels/blas1_swap_elements_kk.hpp"
+#include "__p1673_bits/kokkos-kernels/blas1_copy_kk.hpp"
+
+// blas2 (according to P1673)
 #include "__p1673_bits/kokkos-kernels/blas2_matrix_rank_1_update.hpp"
 #include "__p1673_bits/kokkos-kernels/blas2_matrix_rank_2_update.hpp"
-#include "__p1673_bits/kokkos-kernels/blas1_swap_elements_kk.hpp"
 #include "__p1673_bits/kokkos-kernels/blas2_gemv_kk.hpp"
 #include "__p1673_bits/kokkos-kernels/blas2_symv_kk.hpp"
