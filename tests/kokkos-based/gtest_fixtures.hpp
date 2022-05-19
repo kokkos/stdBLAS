@@ -175,18 +175,18 @@ public:
       const auto b_i = static_cast<double>( 43);
       UnifDist<double> randObj_i(a_i, b_i);
 
-      fill_random_mdspan(randObj_r, randObj_i, x_view);
-      fill_random_mdspan(randObj_r, randObj_i, y_view);
-      fill_random_mdspan(randObj_r, randObj_i, z_view);
+      fill_random_mdspan(randObj_r, randObj_i, x);
+      fill_random_mdspan(randObj_r, randObj_i, y);
+      fill_random_mdspan(randObj_r, randObj_i, z);
     }
     else{
       const auto a = static_cast<value_type>(-11);
       const auto b = static_cast<value_type>( 23);
       UnifDist<value_type> randObj(a, b);
 
-      fill_random_mdspan(randObj, x_view);
-      fill_random_mdspan(randObj, y_view);
-      fill_random_mdspan(randObj, z_view);
+      fill_random_mdspan(randObj, x);
+      fill_random_mdspan(randObj, y);
+      fill_random_mdspan(randObj, z);
     }
   }
 
