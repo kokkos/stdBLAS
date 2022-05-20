@@ -169,19 +169,17 @@ template <class ExecSpace,
           class UpdateFunc>
 void product(ExecSpace &&exec, AType A, BType B, CType C, InitFunc init, UpdateFunc update)
 {
+  using size_type = typename std::experimental::extents<>::size_type;
   const auto A_view = Impl::mdspan_to_view(A);
   const auto B_view = Impl::mdspan_to_view(B);
   auto C_view = Impl::mdspan_to_view(C);
-
-  using c_element_type = typename decltype(C_view)::non_const_value_type;
-  using size_type = typename std::experimental::extents<>::size_type;
+  const size_type ext1 = A_view.extent(1);
 
   KokkosKernelsSTD::Impl::ParallelMatrixVisitor(
         std::move(exec), C_view).for_each_matrix_element(
     KOKKOS_LAMBDA(const auto i, const auto j) {
       decltype(auto) cij = C_view(i, j);
       init(cij, i, j);
-      const size_type ext1 = A_view.extent(1);
       for (size_type k = 0; k < ext1; ++k) {
         update(i, j, k, cij, A_view, B_view);
       }
@@ -210,11 +208,12 @@ template <class ExecSpace,
           std::experimental::extents<>::size_type numRows_C,
           std::experimental::extents<>::size_type numCols_C,
           class Layout_C,
-          class UpdateFunc>
-void product(ExecSpace &&exec, AType A, BType B, EType E,
-             std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C,
-                std::experimental::default_accessor<ElementType_C>> C, // disambiguate with init()
-             UpdateFunc update)
+          class UpdateFunc,
+          // make CType specific to disambiguate with InitFunc
+          class CType = std::experimental::mdspan<ElementType_C,
+              std::experimental::extents<numRows_C, numCols_C>, Layout_C,
+              std::experimental::default_accessor<ElementType_C>>>
+void product(ExecSpace &&exec, AType A, BType B, EType E, CType C, UpdateFunc update)
 {
   const auto E_view = Impl::mdspan_to_view(E);
   product(std::move(exec), A, B, C,
@@ -257,7 +256,7 @@ void symmetric_matrix_left_product(
     std::experimental::default_accessor<ElementType_C>> C)
 {
   matproduct_impl::check_left_product(A, t, B, C, "symmetric_matrix_left_product");
- 
+
   Impl::signal_kokkos_impl_called("overwriting_symmetric_matrix_left_product");
 
   constexpr bool lower = std::is_same_v<Triangle, std::experimental::linalg::lower_triangle_t>;
@@ -356,7 +355,7 @@ void symmetric_matrix_right_product(
     std::experimental::default_accessor<ElementType_C>> C)
 {
   matproduct_impl::check_right_product(A, t, B, C, "symmetric_matrix_right_product");
- 
+
   Impl::signal_kokkos_impl_called("overwriting_symmetric_matrix_right_product");
 
   constexpr bool lower = std::is_same_v<Triangle, std::experimental::linalg::lower_triangle_t>;
