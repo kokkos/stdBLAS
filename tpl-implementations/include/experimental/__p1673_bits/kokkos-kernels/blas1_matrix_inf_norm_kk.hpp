@@ -32,13 +32,15 @@ Scalar matrix_inf_norm(kokkos_exec<ExeSpace> /*kexe*/,
 
   Scalar result = {};
   Kokkos::Max<Scalar> reducer(result);
-  Kokkos::parallel_reduce(Kokkos::RangePolicy(ExeSpace(), 0, A_view.extent(0)*A_view.extent(1)),
+  Kokkos::parallel_reduce(Kokkos::RangePolicy(ExeSpace(), 0, A_view.extent(0)),
 			  KOKKOS_LAMBDA (const std::size_t i, Scalar & update)
 			  {
 			    using ats = Kokkos::Details::ArithTraits<ElementType>;
-			    const auto i = k / A_view.extent(1);
-			    const auto j = k % A_view.extent(1);
-			    reducer.join(update, ats::abs(A_view(i, j)));
+			    Scalar mysum = ats::abs(A_view(i,0));
+			    for (std::size_t j=1; j<A_view.extent(1); ++j){
+			      mysum += ats::abs(A_view(i,j));
+			    }
+			    reducer.join(update, mysum);
 			  }, reducer);
 
   // fence not needed because reducing into result
