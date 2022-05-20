@@ -7,8 +7,6 @@
 
 namespace KokkosKernelsSTD {
 
-} //end trmv_impl namespace
-
 //
 // Overwriting triangular matrix-vector product: y = Ax
 //
