@@ -51,7 +51,7 @@ void kokkos_blas_overwriting_gemv_impl(A_t A, x_t x, y_t y)
     // check A and y
     std::size_t count=0;
     for (std::size_t i=0; i<extent0; ++i){
-      EXPECT_FLOAT_EQ(y(i), y_gold(i));
+      EXPECT_NEAR(y(i), y_gold(i), 1e-2);
       for (std::size_t j=0; j<extent1; ++j){
 	EXPECT_FLOAT_EQ(A(i,j), A_preKernel[count++]);
       }
@@ -67,7 +67,7 @@ void kokkos_blas_overwriting_gemv_impl(A_t A, x_t x, y_t y)
     // check A and y
     std::size_t count=0;
     for (std::size_t i=0; i<extent0; ++i){
-      EXPECT_DOUBLE_EQ(y(i), y_gold(i));
+      EXPECT_NEAR(y(i), y_gold(i), 1e-9);
       for (std::size_t j=0; j<extent1; ++j){
 	EXPECT_DOUBLE_EQ(A(i,j), A_preKernel[count++]);
       }
@@ -84,8 +84,8 @@ void kokkos_blas_overwriting_gemv_impl(A_t A, x_t x, y_t y)
     // check A and y
     std::size_t count=0;
     for (std::size_t i=0; i<extent0; ++i){
-      EXPECT_DOUBLE_EQ(y(i).real(), y_gold(i).real());
-      EXPECT_DOUBLE_EQ(y(i).imag(), y_gold(i).imag());
+      EXPECT_NEAR(y(i).real(), y_gold(i).real(), 1e-9);
+      EXPECT_NEAR(y(i).imag(), y_gold(i).imag(), 1e-9);
 
       for (std::size_t j=0; j<extent1; ++j){
 	EXPECT_DOUBLE_EQ(A(i,j).real(), A_preKernel[count].real());

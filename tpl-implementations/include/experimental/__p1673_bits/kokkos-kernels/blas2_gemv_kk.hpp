@@ -15,12 +15,13 @@ T get_scaling_factor(Accessor /*a*/, T /*v*/) {
 
 template<class Accessor, class S, class T>
 auto get_scaling_factor(std::experimental::linalg::accessor_scaled<Accessor,S> a,
-			T /*v*/)
+      T /*v*/)
 {
   return T(a.scale_factor());
 }
 
-} //end anon namespace
+} //end gemv_impl namespace
+
 
 //
 // overwriting gemv: y = Ax
@@ -193,7 +194,10 @@ template<//class ExecSpace,
          class ElementType_z,
          std::experimental::extents<>::size_type ext_z,
          class Layout_z>
-void matrix_vector_product(kokkos_exec<>,
+std::enable_if_t<
+  !std::is_same_v< Accessor_y, std::experimental::default_accessor<ElementType_y>>
+  >
+matrix_vector_product(kokkos_exec<>,
 			   std::experimental::mdspan<
 			    ElementType_A,
 			    std::experimental::extents<numRows_A, numCols_A>,
@@ -235,8 +239,8 @@ void matrix_vector_product(kokkos_exec<>,
   using yv_t = typename decltype(y)::value_type;
   using zv_t = typename decltype(z)::value_type;
 
-  // z = alpha1*y
-  auto alpha1 = gemv_impl::get_scaling_factor(y.accessor(), yv_t{});
+  // z = alpha1*y, we know from constraint y has non default accessor
+  auto alpha1 = y.accessor().scale_factor();
   constexpr zv_t zero(0);
   KokkosBlas::axpby(alpha1, y_view, zero, z_view);
 
