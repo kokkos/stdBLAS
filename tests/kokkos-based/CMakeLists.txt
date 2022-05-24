@@ -83,6 +83,7 @@ linalg_add_test_kokkos(
 linalg_add_test_kokkos(
   vector_sum_of_squares_kokkos
   "vector_sum_of_squares: kokkos impl")
+
 linalg_add_test_kokkos(
   vector_abs_sum_kokkos
   "vector_abs_sum: kokkos impl")
@@ -118,6 +119,7 @@ linalg_add_test_kokkos(
   updating_matrix_vector_product
   "updating_matrix_vector_product: kokkos impl")
 
+# symmetric_matrix_vector_product
 linalg_add_test_kokkos(
   overwriting_symmetric_matrix_vector_product
   "overwriting_symmetric_matrix_vector_product_lower: kokkos impl" USE_LOWER lower)
@@ -131,6 +133,7 @@ linalg_add_test_kokkos(
   updating_symmetric_matrix_vector_product
   "updating_symmetric_matrix_vector_product_upper: kokkos impl" USE_UPPER upper)
 
+# hermitian_matrix_vector_product
 linalg_add_test_kokkos(
   overwriting_hermitian_matrix_vector_product
   "overwriting_hermitian_matrix_vector_product_lower: kokkos impl" USE_LOWER lower)
@@ -144,7 +147,7 @@ linalg_add_test_kokkos(
   updating_hermitian_matrix_vector_product
   "updating_hermitian_matrix_vector_product_upper: kokkos impl" USE_UPPER upper)
 
-
+# triangular_matrix_vector_product
 linalg_add_test_kokkos(
   overwriting_triangular_matrix_vector_product
   "overwriting_triangular_matrix_vector_product_lower: kokkos impl" USE_LOWER lower)
@@ -158,24 +161,77 @@ linalg_add_test_kokkos(
   updating_triangular_matrix_vector_product
   "updating_triangular_matrix_vector_product_upper: kokkos impl" USE_UPPER upper)
 
+linalg_add_test_kokkos(
+  matrix_rank1_update_kokkos
+  "matrix_rank1_update: kokkos impl")
 
-# add tests for triangular_matrix_vector_solve
+linalg_add_test_kokkos(
+  symmetric_matrix_rank1_update_kokkos
+  "symmetric_matrix_rank1_update: kokkos impl")
+linalg_add_test_kokkos(
+  hermitian_matrix_rank1_update_kokkos
+  "hermitian_matrix_rank1_update: kokkos impl")
 
-# FRIZI: leaving these commented out because they don't compile for me
-# so Mikolaj is going to finalize them
-# linalg_add_test_kokkos(
-#   matrix_rank1_update_kokkos
-#   "matrix_rank1_update_kokkos: kokkos impl")
-# linalg_add_test_kokkos(
-#   symmetric_matrix_rank1_update_kokkos
-#   "symmetric_matrix_rank1_update_kokkos: kokkos impl")
-# linalg_add_test_kokkos(
-#   hermitian_matrix_rank1_update_kokkos
-#   "hermitian_matrix_rank1_update_kokkos: kokkos impl")
+linalg_add_test_kokkos(
+  symmetric_matrix_rank2_update_kokkos
+  "symmetric_matrix_rank2_update: kokkos impl")
+linalg_add_test_kokkos(
+  hermitian_matrix_rank2_update_kokkos
+  "hermitian_matrix_rank2_update: kokkos impl")
 
-# linalg_add_test_kokkos(
-#   symmetric_matrix_rank2_update_kokkos
-#   "symmetric_matrix_rank2_update_kokkos: kokkos impl")
-# linalg_add_test_kokkos(
-#   hermitian_matrix_rank2_update_kokkos
-#   "hermitian_matrix_rank2_update_kokkos: kokkos impl")
+#
+# blas3 (according to P1673)
+#
+
+# matrix_product
+linalg_add_test_kokkos(
+  gemm_C_AB
+  "gemm_C_AB_product: kokkos impl")
+linalg_add_test_kokkos(
+  gemm_C_ABT
+  "gemm_C_ABT_product: kokkos impl")
+linalg_add_test_kokkos(
+  gemm_C_ATB
+  "gemm_C_ATB_product: kokkos impl")
+
+linalg_add_test_kokkos(
+  triangular_matrix_left_product_kokkos
+  "triangular_matrix_left_product_kokkos: kokkos impl")
+linalg_add_test_kokkos(
+  triangular_matrix_right_product_kokkos
+  "triangular_matrix_right_product_kokkos: kokkos impl")
+
+# {symmetric,hermitian}_matrix_{left}
+linalg_add_test_kokkos(
+  symmetric_matrix_left_product_kokkos
+  "symmetric_matrix_left_product: kokkos impl")
+linalg_add_test_kokkos(
+  symmetric_matrix_right_product_kokkos
+  "symmetric_matrix_right_product: kokkos impl")
+linalg_add_test_kokkos(
+  hermitian_matrix_left_product_kokkos
+  "hermitian_matrix_left_product: kokkos impl")
+linalg_add_test_kokkos(
+  hermitian_matrix_right_product_kokkos
+  "hermitian_matrix_right_product: kokkos impl")
+
+linalg_add_test_kokkos(
+  triangular_matrix_matrix_left_solve
+  "triangular_matrix_matrix_left_solve: kokkos impl")
+linalg_add_test_kokkos(
+  triangular_matrix_matrix_right_solve
+  "triangular_matrix_matrix_right_solve: kokkos impl")
+
+linalg_add_test_kokkos(
+  symmetric_matrix_rank_2k_update_kokkos
+  "symmetric_matrix_rank_2k_update: kokkos impl")
+linalg_add_test_kokkos(
+  hermitian_matrix_rank_2k_update_kokkos
+  "hermitian_matrix_rank_2k_update: kokkos impl")
+
+linalg_add_test_kokkos(
+  symmetric_matrix_rank_k_update_kokkos
+  "symmetric_matrix_rank_k_update: kokkos impl")
+linalg_add_test_kokkos(
+  hermitian_matrix_rank_k_update_kokkos
+  "hermitian_matrix_rank_k_update: kokkos impl")
