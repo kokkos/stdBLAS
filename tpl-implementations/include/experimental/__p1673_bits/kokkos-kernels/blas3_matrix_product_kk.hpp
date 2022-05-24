@@ -169,7 +169,7 @@ template <class ExecSpace,
           class CType,
           class InitFunc,
           class UpdateFunc>
-void product(ExecSpace &&exec, AType A, BType B, CType C, InitFunc init, UpdateFunc update)
+void product_impl(ExecSpace &&exec, AType A, BType B, CType C, InitFunc init, UpdateFunc update)
 {
   using size_type = typename std::experimental::extents<>::size_type;
   const auto A_view = Impl::mdspan_to_view(A);
@@ -195,7 +195,7 @@ template <class ExecSpace,
           class UpdateFunc>
 void product(ExecSpace &&exec, AType A, BType B, CType C, UpdateFunc update)
 {
-  product(std::move(exec), A, B, C,
+  product_impl(std::move(exec), A, B, C,
     KOKKOS_LAMBDA(auto &&cij, const auto i, const auto j) {
       using c_element_type = std::remove_cvref_t<decltype(cij)>;
       cij = c_element_type{}; // zero
@@ -206,19 +206,12 @@ template <class ExecSpace,
           class AType,
           class BType,
           class EType,
-          class ElementType_C,
-          std::experimental::extents<>::size_type numRows_C,
-          std::experimental::extents<>::size_type numCols_C,
-          class Layout_C,
-          class UpdateFunc,
-          // make CType specific to disambiguate with InitFunc
-          class CType = std::experimental::mdspan<ElementType_C,
-              std::experimental::extents<numRows_C, numCols_C>, Layout_C,
-              std::experimental::default_accessor<ElementType_C>>>
+          class CType,
+          class UpdateFunc>
 void product(ExecSpace &&exec, AType A, BType B, EType E, CType C, UpdateFunc update)
 {
   const auto E_view = Impl::mdspan_to_view(E);
-  product(std::move(exec), A, B, C,
+  product_impl(std::move(exec), A, B, C,
     KOKKOS_LAMBDA(auto &&cij, const auto i, const auto j) {
       cij = E_view(i, j);
     }, update);
