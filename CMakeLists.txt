@@ -85,6 +85,15 @@ option(LINALG_ENABLE_BLAS
   "Assume that we are linking with a BLAS library."
   ${BLAS_FOUND})
 
+find_package(KokkosKernels)
+option(LINALG_ENABLE_KOKKOS
+  "Enable Kokkos-based implementation. Default: autodetect Kokkos installation."
+  ${KokkosKernels_FOUND})
+if(LINALG_ENABLE_KOKKOS)
+  find_package(Kokkos REQUIRED)
+  find_package(KokkosKernels REQUIRED)
+endif()
+
 ################################################################################
 
 CONFIGURE_FILE(include/experimental/__p1673_bits/linalg_config.h.in
@@ -98,9 +107,8 @@ add_library(linalg INTERFACE)
 add_library(std::linalg ALIAS linalg)
 
 target_link_libraries(linalg INTERFACE std::mdspan)
+
 if(LINALG_ENABLE_KOKKOS)
-  find_package(Kokkos REQUIRED)
-  find_package(KokkosKernels REQUIRED)
   target_link_libraries(linalg INTERFACE Kokkos::kokkos)
   target_link_libraries(linalg INTERFACE Kokkos::kokkoskernels)
   target_include_directories(linalg INTERFACE
