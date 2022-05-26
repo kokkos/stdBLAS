@@ -1,6 +1,9 @@
 
-macro(linalg_add_test_kokkos TESTNAME FINDSTR)
-
+function(linalg_add_test_kokkos TESTNAME FINDSTR)
+  list(FIND STDBLAS_TESTS_EXCLUDE ${TESTNAME} FOUND)
+  if (NOT FOUND EQUAL -1)
+    return()
+  endif()
   # the macro might have extra args
   set(appendToTestName "")
   set(compileDefs "")
@@ -40,7 +43,7 @@ macro(linalg_add_test_kokkos TESTNAME FINDSTR)
     set_tests_properties(
       ${testNameFinal} PROPERTIES
       FAIL_REGULAR_EXPRESSION "[^a-z]Error;ERROR;Failed;FAILED")
-endmacro()
+endfunction()
 
 # add tests below
 

@@ -106,6 +106,12 @@ if(LINALG_ENABLE_KOKKOS)
   target_include_directories(linalg INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tpl-implementations/include>
   )
+  if(LINALG_ENABLE_KOKKOS_DEFAULT)
+    # Disable native tests that fail when executed with Kokkos implementation:
+    list(APPEND STDBLAS_TESTS_EXCLUDE
+      gemm # wraps input matrices with `transposed` and `scaled` accessors
+    )
+  endif()
 endif()
 
 target_include_directories(linalg INTERFACE
@@ -151,6 +157,9 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/LinAlgConfig.cmake ${CMAKE_CURRENT_BIN
 ################################################################################
 
 if(LINALG_ENABLE_TESTS)
+  if (STDBLAS_TESTS_EXCLUDE)
+    message(STATUS "Following tests are disabled in current configuration: ${STDBLAS_TESTS_EXCLUDE}")
+  endif()
   enable_testing()
   add_subdirectory(tests)
   add_subdirectory(compilation_tests)
