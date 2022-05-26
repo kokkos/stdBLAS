@@ -254,22 +254,28 @@ void trmm_left(KokkosExecSpace &&exec, Triangle t, DiagonalStorage d,
       std::experimental::linalg::lower_triangle_t>;
   constexpr bool explicit_diag = std::is_same_v<DiagonalStorage,
       std::experimental::linalg::explicit_diagonal_t>;
-  const auto C_ext0 = C_view.extent(0);
+  const auto C_ext0 = C_view.extent(0); // == A_ext0 == A_ext1
+  const auto C_ext1 = C_view.extent(1);
 
-  KokkosKernelsSTD::Impl::ParallelMatrixVisitor v(std::move(exec), C_view);
-  v.for_each_matrix_element(
-    KOKKOS_LAMBDA(const auto i, const auto j) {
-      decltype(auto) cij = C_view(i, j);
-      cij = c_element_type{};
-      const size_type k0 = lower ? (explicit_diag ? i : i + 1) : 0;
-      const size_type k1 = lower ? C_ext0 :(explicit_diag ? i + 1 : i);
-      for (size_type k = k0; k < k1; ++k) {
-        cij += A_view(i, k) * B_view(k, j);
-      }
-      if constexpr (!explicit_diag) {
-        C_view(i, j) += /* 1 times */ B_view(i, j);
-      }
-    });
+  // Note: This routine can be called in-place with B_view=C_view
+  // because (i,j) indexing respects C updating order
+  // and parallelism is restricted accordingly
+  for (size_type ii = 0; ii < C_ext0; ++ii) {
+    const auto i = lower ? ii : C_ext0 - 1 - ii;
+    Kokkos::parallel_for(Kokkos::RangePolicy(exec, 0, C_ext1),
+		  KOKKOS_LAMBDA (const size_type j) {
+        c_element_type t{};
+        const size_type k0 = lower ? (explicit_diag ? i : i + 1) : 0;
+        const size_type k1 = lower ? C_ext0 :(explicit_diag ? i + 1 : i);
+        for (size_type k = k0; k < k1; ++k) {
+          t += A_view(i, k) * B_view(k, j);
+        }
+        if constexpr (!explicit_diag) {
+          t += /* 1 times */ B_view(i, j);
+        }
+        C_view(i, j) = t;
+      });
+  }
 }
 
 template <class KokkosExecSpace,
@@ -287,23 +293,29 @@ void trmm_right(KokkosExecSpace &&exec, Triangle t, DiagonalStorage d,
       std::experimental::linalg::lower_triangle_t>;
   constexpr bool explicit_diag = std::is_same_v<DiagonalStorage,
       std::experimental::linalg::explicit_diagonal_t>;
-  const auto C_ext1 = C_view.extent(1);
+  const auto C_ext0 = C_view.extent(0);
+  const auto C_ext1 = C_view.extent(1); // == A_ext0 == A_ext1
 
-  KokkosKernelsSTD::Impl::ParallelMatrixVisitor v(std::move(exec), C_view);
-  v.for_each_matrix_element(
-    KOKKOS_LAMBDA(const auto i, const auto j) {
-      decltype(auto) cij = C_view(i, j);
-      cij = c_element_type{};
-      // Note: lower triangle of A(k, j) means k <= j
-      const auto k0 = lower ? 0 : (explicit_diag ? j : j + 1);
-      const auto k1 = lower ? (explicit_diag ? j + 1 : j) : C_ext1;
-      for (size_type k = k0; k < k1; ++k) {
-        cij += B_view(i, k) * A_view(k, j);
-      }
-      if constexpr (!explicit_diag) {
-        C_view(i, j) += B_view(i, j) /* times 1 */;
-      }
-    });
+  // Note: This routine can be called in-place with B_view=C_view
+  // because (i,j) indexing respects C updating order
+  // and parallelism is restricted accordingly
+  for (size_type jj = 0; jj < C_ext1; ++jj) {
+    const size_type j = lower ? C_ext1 - 1 - jj : jj;
+    Kokkos::parallel_for(Kokkos::RangePolicy(exec, 0, C_ext0),
+		  KOKKOS_LAMBDA (const size_type i) {
+        c_element_type t{};
+        // Note: lower triangle of A(k, j) means k <= j
+        const auto k0 = lower ? 0 : (explicit_diag ? j : j + 1);
+        const auto k1 = lower ? (explicit_diag ? j + 1 : j) : C_ext1;
+        for (size_type k = k0; k < k1; ++k) {
+          t += B_view(i, k) * A_view(k, j);
+        }
+        if constexpr (!explicit_diag) {
+          t += B_view(i, j) /* times 1 */;
+        }
+        C_view(i, j) = t;
+      });
+  }
 }
 
 } // namespace matproduct_impl
@@ -743,7 +755,7 @@ void triangular_matrix_left_product(
 {
   matproduct_impl::check_left_product(A, t, B, C, "triangular_matrix_left_product");
 
-  Impl::signal_kokkos_impl_called("updating_triangular_matrix_left_product_kokkos");
+  Impl::signal_kokkos_impl_called("overwriting_triangular_matrix_left_product_kokkos");
 
   // convert mdspans to views
   const auto A_view = Impl::mdspan_to_view(A);
@@ -757,6 +769,50 @@ void triangular_matrix_left_product(
     matproduct_impl::trmm_left(ExecSpace(), t, d, A_view, B_view, C_view);
   } else {
     Kokkos::deep_copy(C_view, B_view);
+    matproduct_impl::trmm_kk(std::experimental::linalg::left_side, t, d, A_view, C_view);
+  }
+}
+
+// Overwriting triangular matrix-matrix left product
+// performs in-place BLAS xTRMM: C = A x C
+
+MDSPAN_TEMPLATE_REQUIRES(class ExecSpace,
+    class ElementType_A,
+    std::experimental::extents<>::size_type numRows_A,
+    std::experimental::extents<>::size_type numCols_A,
+    class Layout_A,
+    class Triangle,
+    class DiagonalStorage,
+    class ElementType_C,
+    std::experimental::extents<>::size_type numRows_C,
+    std::experimental::extents<>::size_type numCols_C,
+    class Layout_C,
+    /* requires */ (Impl::is_unique_layout_v<Layout_C, numRows_C, numCols_C>
+        and (Impl::is_unique_layout_v<Layout_A, numRows_A, numCols_A>
+        or Impl::is_layout_blas_packed_v<Layout_A>)))
+void triangular_matrix_left_product(
+  kokkos_exec<ExecSpace>&& exec,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A,
+    std::experimental::default_accessor<ElementType_A>> A,
+  Triangle t,
+  DiagonalStorage d,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C,
+    std::experimental::default_accessor<ElementType_C>> C)
+{
+  matproduct_impl::check_left_product(A, t, C, C, "triangular_matrix_left_product");
+
+  Impl::signal_kokkos_impl_called("overwriting_inplace_triangular_matrix_left_product_kokkos");
+
+  // convert mdspans to views
+  const auto A_view = Impl::mdspan_to_view(A);
+  auto C_view = Impl::mdspan_to_view(C);
+
+  // implicit diagonal is not supported by KK implementation of TRSM
+  // and the execution space is ignored
+  if constexpr (std::is_same_v<DiagonalStorage,
+                std::experimental::linalg::implicit_unit_diagonal_t>) {
+    matproduct_impl::trmm_left(ExecSpace(), t, d, A_view, C_view, C_view);
+  } else {
     matproduct_impl::trmm_kk(std::experimental::linalg::left_side, t, d, A_view, C_view);
   }
 }
@@ -796,7 +852,7 @@ void triangular_matrix_right_product(
 {
   matproduct_impl::check_right_product(A, t, B, C, "triangular_matrix_right_product");
 
-  Impl::signal_kokkos_impl_called("updating_triangular_matrix_right_product_kokkos");
+  Impl::signal_kokkos_impl_called("overwriting_triangular_matrix_right_product_kokkos");
 
   // convert mdspans to views
   const auto A_view = Impl::mdspan_to_view(A);
@@ -810,6 +866,50 @@ void triangular_matrix_right_product(
     matproduct_impl::trmm_right(ExecSpace(), t, d, A_view, B_view, C_view);
   } else {
     Kokkos::deep_copy(C_view, B_view);
+    matproduct_impl::trmm_kk(std::experimental::linalg::right_side, t, d, A_view, C_view);
+  }
+}
+
+// Overwriting triangular matrix-matrix right product
+// performs in-place BLAS xTRMM: C = C x A
+
+MDSPAN_TEMPLATE_REQUIRES(class ExecSpace,
+    class ElementType_A,
+    std::experimental::extents<>::size_type numRows_A,
+    std::experimental::extents<>::size_type numCols_A,
+    class Layout_A,
+    class Triangle,
+    class DiagonalStorage,
+    class ElementType_C,
+    std::experimental::extents<>::size_type numRows_C,
+    std::experimental::extents<>::size_type numCols_C,
+    class Layout_C,
+    /* requires */ (Impl::is_unique_layout_v<Layout_C, numRows_C, numCols_C>
+        and (Impl::is_unique_layout_v<Layout_A, numRows_A, numCols_A>
+        or Impl::is_layout_blas_packed_v<Layout_A>)))
+void triangular_matrix_right_product(
+  kokkos_exec<ExecSpace>&& exec,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A,
+    std::experimental::default_accessor<ElementType_A>> A,
+  Triangle t,
+  DiagonalStorage d,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C,
+    std::experimental::default_accessor<ElementType_C>> C)
+{
+  matproduct_impl::check_right_product(A, t, C, C, "triangular_matrix_right_product");
+
+  Impl::signal_kokkos_impl_called("overwriting_inplace_triangular_matrix_right_product_kokkos");
+
+  // convert mdspans to views
+  const auto A_view = Impl::mdspan_to_view(A);
+  auto C_view = Impl::mdspan_to_view(C);
+
+  // implicit diagonal is not supported by KK implementation of TRSM
+  // and the execution space is ignored
+  if constexpr (std::is_same_v<DiagonalStorage,
+                std::experimental::linalg::implicit_unit_diagonal_t>) {
+    matproduct_impl::trmm_right(ExecSpace(), t, d, A_view, C_view, C_view);
+  } else {
     matproduct_impl::trmm_kk(std::experimental::linalg::right_side, t, d, A_view, C_view);
   }
 }

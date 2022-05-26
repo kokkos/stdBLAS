@@ -58,19 +58,26 @@ void updating_triangular_matrix_right_product_gold_solution(A_t A,
       std::experimental::linalg::explicit_diagonal_t>;
   constexpr bool lower = std::is_same_v<Triangle,
       std::experimental::linalg::lower_triangle_t>;
+  const auto C_ext0 = C.extent(0);
+  const auto C_ext1 = C.extent(1); // == A_ext0 == A_ext1
 
-  for (size_type i = 0; i < C.extent(0); ++i) {
-    for (size_type j = 0; j < C.extent(1); ++j) {
-      C(i, j) = E(i, j);
+  // Note: This routine can be called in-place (B=C)
+  // because (i,j) indexing respects C updating order
+  // and parallelism is restricted accordingly.
+  for (size_type jj = 0; jj < C_ext1; ++jj) {
+    const size_type j = lower ? C_ext1 - 1 - jj : jj;
+    for (size_type i = 0; i < C_ext0; ++i) {
+      c_element_type t = E(i, j);
       // Note: lower triangle of A(k, j) means k <= j
       const auto k0 = lower ? 0 : (explicit_diag ? j : j + 1);
       const auto k1 = lower ? (explicit_diag ? j + 1 : j) : C.extent(1);
       for (size_type k = k0; k < k1; ++k) {
-        C(i, j) += B(i, k) * A(k, j);
+        t += B(i, k) * A(k, j);
       }
       if constexpr (!explicit_diag) {
-        C(i, j) += B(i, j) /* times 1 */;
+        t += B(i, j) /* times 1 */;
       }
+      C(i, j) = t;
     }
   }
 }
@@ -90,6 +97,22 @@ void test_overwriting_triangular_matrix_right_product_impl(A_t A, B_t B, C_t C, 
   test_op_CAB(A, B, C, tol, get_gold, compute);
 }
 
+// in-place
+template<class A_t, class C_t, class Triangle, class Diagonal>
+void test_overwriting_triangular_matrix_right_product_impl(A_t A, C_t C, Triangle t, Diagonal d)
+{
+  const auto get_gold = [&](auto C_gold) {
+      set(C_gold, 0);
+      updating_triangular_matrix_right_product_gold_solution(A, t, d, C, C_gold, C_gold);
+    };
+  const auto compute = [&]() {
+      std::experimental::linalg::triangular_matrix_right_product(
+        KokkosKernelsSTD::kokkos_exec<>(), A, t, d, C);
+    };
+  const auto tol = tolerance<typename C_t::value_type>(1e-20, 1e-10f);
+  test_op_CA(A, C, tol, get_gold, compute);
+}
+
 } // anonymous namespace
 
 #define DEFINE_TESTS(blas_val_type)                                                 \
@@ -102,10 +125,18 @@ TEST_F(blas3_signed_##blas_val_type##_fixture,                                  
     auto B_data = create_stdvector_and_copy_rowwise(C_e2e0);                        \
     auto B_e2e0 = make_mdspan(B_data.data(), C_e2e0.extent(0), C_e2e0.extent(1));   \
                                                                                     \
+    /* overwriting, not-in-place */                                                 \
     test_overwriting_triangular_matrix_right_product_impl(A_sym_e0, B_e2e0, C_e2e0, \
                             std::experimental::linalg::lower_triangle,              \
                             std::experimental::linalg::implicit_unit_diagonal);     \
     test_overwriting_triangular_matrix_right_product_impl(A_sym_e0, B_e2e0, C_e2e0, \
+                            std::experimental::linalg::upper_triangle,              \
+                            std::experimental::linalg::explicit_diagonal);          \
+    /* overwriting, in-place */                                                     \
+    test_overwriting_triangular_matrix_right_product_impl(A_sym_e0, C_e2e0,         \
+                            std::experimental::linalg::lower_triangle,              \
+                            std::experimental::linalg::implicit_unit_diagonal);     \
+    test_overwriting_triangular_matrix_right_product_impl(A_sym_e0, C_e2e0,         \
                             std::experimental::linalg::upper_triangle,              \
                             std::experimental::linalg::explicit_diagonal);          \
                                                                                     \
