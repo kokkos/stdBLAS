@@ -24,7 +24,7 @@ template<class T> inline constexpr bool is_inline_exec_v = is_inline_exec<T>::va
 }
 
 
-#if defined(LINALG_ENABLE_KOKKOS) && defined(LINALG_ENABLE_KOKKOS_DEFAULT)
+#if defined(LINALG_ENABLE_KOKKOS)
 #include <experimental/__p1673_bits/kokkos-kernels/exec_policy_wrapper_kk.hpp>
 #endif
 
