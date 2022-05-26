@@ -47,7 +47,7 @@
 #include <experimental/mdspan>
 #include <random>
 
-#if KOKKOS_VERSION <= 30600
+#if KOKKOS_VERSION < 30699
 namespace Kokkos {
   using Experimental::abs;
 }
