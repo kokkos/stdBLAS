@@ -64,9 +64,9 @@ void triangular_matrix_vector_solve_gold_solution(A_t A, Triangle t, DiagonalSto
   const size_type ext1 = A.extent(1);
 
   for (size_type ii = 0; ii < ext0; ++ii) {
-    const size_type i = lower_triangle ? ext0 - 1 - ii : ii;
-    const size_type j0 = lower_triangle ? i + 1 : 0;
-    const size_type j1 = lower_triangle ? ext1 : i;
+    const size_type i = lower_triangle ? ii : ext0 - 1 - ii;
+    const size_type j0 = lower_triangle ? 0 : i + 1;
+    const size_type j1 = lower_triangle ? i : ext1;
     for (size_type j = j0; j < j1; ++j) {
       x(i) -= A(i, j) * x(j);
     }
