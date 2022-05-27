@@ -47,6 +47,12 @@
 #include <experimental/mdspan>
 #include <random>
 
+#if KOKKOS_VERSION < 30699
+namespace Kokkos {
+  using Experimental::abs;
+}
+#endif
+
 namespace kokkostesting{
 
 template<class T>
