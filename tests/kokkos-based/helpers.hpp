@@ -598,5 +598,37 @@ void test_op_CAB(A_t A, B_t B, C_t C, CToleranceType C_tol, GoldType get_gold, A
   EXPECT_TRUE(is_same_matrix(B, B_preKernel));
 }
 
+// drives x = F(A, ...) operation test
+template<class A_t, class x_t, class ToleranceType, class GoldType, class ActionType>
+void test_op_xA(A_t A, x_t x, ToleranceType x_tol, GoldType get_gold, ActionType action)
+{
+  // backup A to verify it is not changed after kernel
+  auto A_preKernel = create_stdvector_and_copy_rowwise(A);
+
+  // compute gold
+  auto x_copy = create_stdvector_and_copy(x);
+  auto x_gold = make_mdspan(x_copy);
+  get_gold(x_gold);
+
+  // run tested routine
+  action();
+
+  // compare results with gold
+  EXPECT_LE(vector_rel_diff(x_gold, x), x_tol);
+
+  // A should not change after kernel
+  EXPECT_TRUE(is_same_matrix(A, A_preKernel));
+}
+
+// drives x = F(A, b, ...) operation test
+template<class A_t, class b_t, class x_t, class ToleranceType, class GoldType, class ActionType>
+void test_op_xAb(A_t A, b_t b, x_t x, ToleranceType x_tol, GoldType get_gold, ActionType action)
+{
+  auto b_preKernel = create_stdvector_and_copy(b);
+  test_op_xA(A, x, x_tol, get_gold, action);
+  EXPECT_TRUE(is_same_vector(b, b_preKernel));
+}
+
+
 }
 #endif
