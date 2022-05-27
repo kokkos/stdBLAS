@@ -65,11 +65,11 @@ void updating_triangular_matrix_left_product_gold_solution(A_t A,
   // because (i,j) indexing respects C updating order
   // and parallelism is restricted accordingly.
   for (size_type ii = 0; ii < C_ext0; ++ii) {
-    const size_type i = lower ? ii : C_ext0 - 1 - ii;
+    const size_type i = lower ? C_ext0 - 1 - ii : ii;
     for (size_type j = 0; j < C_ext1; ++j) {
       c_element_type t = E(i, j);
-      const size_type k0 = lower ? (explicit_diag ? i : i + 1) : 0;
-      const size_type k1 = lower ? C_ext0 :(explicit_diag ? i + 1 : i);
+      const size_type k0 = lower ? 0 : (explicit_diag ? i : i + 1);
+      const size_type k1 = lower ? (explicit_diag ? i + 1 : i) : C_ext0;
       for (size_type k = k0; k < k1; ++k) {
         t += A(i, k) * B(k, j);
       }
