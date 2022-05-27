@@ -24,7 +24,7 @@ Scalar matrix_inf_norm(kokkos_exec<ExeSpace> /*kexe*/,
 
   Impl::signal_kokkos_impl_called("matrix_inf_norm");
 
-  if (A.extent(0) == 0){
+  if (A.extent(0) == 0 || A.extent(1) == 0){
     return init;
   }
 
