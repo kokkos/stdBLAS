@@ -2,21 +2,20 @@
 
 This is a reference implementation of P1673,
 "A free function linear algebra interface based on the BLAS."
-You can find the latest revision of P1673 at wg21.link/p1673.
+You can find the latest submitted revision of P1673
+[at this URL](https://wg21.link/p1673).
 
 ## Requirements
 
   - CMake >= 3.17 (earlier versions may work, but are not tested)
-  - C++ build environment that supports C++20
+  - C++ build environment that supports C++17 or greater
 
 ## Tested compilers
 
 We run github's automated tests on every pull request.
 Automated tests use "ubuntu-latest",
 which presumably defaults to a fairly new GCC.
-
-Before we started requiring concepts, MSVC 2019 16.7.0 was able to build and run tests and examples as of 2021/05/27.
-We will start testing on MSVC 2019 16.10 soon, which claims full support for C++20.
+Other compilers, including MSVC 2019, have been tested in the past.
 
 ## Brief build instructions
 
