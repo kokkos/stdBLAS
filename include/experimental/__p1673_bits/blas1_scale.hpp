@@ -43,8 +43,6 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_SCALE_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_SCALE_HPP_
 
-#include<execution>
-
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
