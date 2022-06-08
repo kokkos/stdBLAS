@@ -11,7 +11,7 @@
 
 #define P1673_CONJUGATED_SCALAR_ARITHMETIC_OPERATORS_REFERENCE_OVERLOADS 1
 
-//#include <https://raw.githubusercontent.com/kokkos/mdspan/single-header/mdspan.hpp>
+#include "gtest/gtest.h"
 
 #ifdef __cpp_lib_atomic_ref
 #  include <atomic>
@@ -429,41 +429,23 @@ FakeComplex conj(const FakeComplex& z) { return {z.real, -z.imag}; }
 template<class Real>
 void test_real_conj_if_needed()
 {
-    Real z(2.0);
-    const Real z_conj_expected(2.0);
+  Real z(2.0);
+  const Real z_conj_expected(2.0);
 
-    auto z_conj = impl::conj_if_needed(z);
-    static_assert(std::is_same_v<decltype(z_conj), Real>);
-    assert(z_conj == z_conj_expected);
+  auto z_conj = impl::conj_if_needed(z);
+  static_assert(std::is_same_v<decltype(z_conj), Real>);
+  EXPECT_EQ(z_conj, z_conj_expected);
 }
 
 template<class Real>
 void test_complex_conj_if_needed()
 {
-    std::complex<Real> z(2.0, -3.0);
-    const std::complex<Real> z_conj_expected(2.0, 3.0);
+  std::complex<Real> z(2.0, -3.0);
+  const std::complex<Real> z_conj_expected(2.0, 3.0);
 
-    auto z_conj = impl::conj_if_needed(z);
-    static_assert(std::is_same_v<decltype(z_conj), std::complex<Real>>);
-    assert(z_conj == z_conj_expected);
-}
-
-void test_conj_if_needed()
-{
-    std::cerr << "test_conj_if_needed" << std::endl;
-
-    test_complex_conj_if_needed<float>();
-    test_complex_conj_if_needed<double>();
-    test_complex_conj_if_needed<long double>();
-
-    test_real_conj_if_needed<float>();
-    test_real_conj_if_needed<double>();
-    test_real_conj_if_needed<long double>();
-
-    test_real_conj_if_needed<int32_t>();
-    test_real_conj_if_needed<uint32_t>();
-    test_real_conj_if_needed<int64_t>();
-    test_real_conj_if_needed<uint64_t>();
+  auto z_conj = impl::conj_if_needed(z);
+  static_assert(std::is_same_v<decltype(z_conj), std::complex<Real>>);
+  EXPECT_EQ(z_conj, z_conj_expected);
 }
 
 ///////////////////////////////////////////////////////////
@@ -491,309 +473,309 @@ FakeComplex get_test_xvalue(const FakeComplex&)
 template<class Reference, class Value>
 void test_conjugated_scalar_from_reference(Reference zd, Value zd_orig)
 {
-    using test_helpers::is_atomic_ref_not_arithmetic_v;  
-    using impl::conj_if_needed;
-    using value_type = typename std::remove_cv_t<Value>;
+  using test_helpers::is_atomic_ref_not_arithmetic_v;  
+  using impl::conj_if_needed;
+  using value_type = typename std::remove_cv_t<Value>;
 
 #ifdef P1673_CONJUGATED_SCALAR_ARITHMETIC_OPERATORS_REFERENCE_OVERLOADS
-    constexpr bool test_references = true;
+  constexpr bool test_references = true;
 #else
-    constexpr bool test_references = is_atomic_ref_not_arithmetic_v<Reference>;
+  constexpr bool test_references = is_atomic_ref_not_arithmetic_v<Reference>;
 #endif
 
-    std::cerr << "test_conjugated_scalar_from_reference" << std::endl;
+  std::cerr << "test_conjugated_scalar_from_reference" << std::endl;
 
-    // Test conjugated_scalar constructor
-    conjugated_scalar<Reference, value_type> cszd(zd);
-    if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  // Test conjugated_scalar constructor
+  conjugated_scalar<Reference, value_type> cszd(zd);
+  if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    if constexpr (test_references) {
-	std::cerr << "Test conjugated_scalar + Reference" << std::endl;
-	value_type left_add_result = cszd + zd;
-	value_type left_add_result_expected = conj_if_needed(zd_orig) + zd_orig;
-	assert(left_add_result == left_add_result_expected);
-	if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
-            assert(zd.load() == zd_orig);
-        } else {
-            assert(zd == zd_orig);
-        }
+  if constexpr (test_references) {
+      std::cerr << "Test conjugated_scalar + Reference" << std::endl;
+      value_type left_add_result = cszd + zd;
+      value_type left_add_result_expected = conj_if_needed(zd_orig) + zd_orig;
+      EXPECT_EQ(left_add_result, left_add_result_expected);
+      if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
+        EXPECT_EQ(zd.load(), zd_orig);
+      } else {
+	EXPECT_EQ(zd, zd_orig);
+      }
 
-	std::cerr << "Test conjugated_scalar - Reference" << std::endl;
-	value_type left_sub_result = cszd - zd;
-	value_type left_sub_result_expected = conj_if_needed(zd_orig) - zd_orig;
-	assert(left_sub_result == left_sub_result_expected);
-	if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
-            assert(zd.load() == zd_orig);
-        } else {
-            assert(zd == zd_orig);
-        }
+      std::cerr << "Test conjugated_scalar - Reference" << std::endl;
+      value_type left_sub_result = cszd - zd;
+      value_type left_sub_result_expected = conj_if_needed(zd_orig) - zd_orig;
+      EXPECT_EQ(left_sub_result, left_sub_result_expected);
+      if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
+        EXPECT_EQ(zd.load(), zd_orig);
+      } else {
+        EXPECT_EQ(zd, zd_orig);
+      }
 
-	std::cerr << "Test conjugated_scalar * Reference" << std::endl;
-	value_type left_mul_result = cszd * zd;
-	value_type left_mul_result_expected = conj_if_needed(zd_orig) * zd_orig;
-	assert(left_mul_result == left_mul_result_expected);
-        if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {    
-            assert(zd.load() == zd_orig);
-        } else {
-            assert(zd == zd_orig);
-        }
+      std::cerr << "Test conjugated_scalar * Reference" << std::endl;
+      value_type left_mul_result = cszd * zd;
+      value_type left_mul_result_expected = conj_if_needed(zd_orig) * zd_orig;
+      EXPECT_EQ(left_mul_result, left_mul_result_expected);
+      if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) { 
+        EXPECT_EQ(zd.load(), zd_orig);
+      } else {
+        EXPECT_EQ(zd, zd_orig);
+      }
 
-	std::cerr << "Test conjugated_scalar / Reference" << std::endl;
-	value_type left_div_result = cszd / zd;
-	value_type left_div_result_expected = conj_if_needed(zd_orig) / zd_orig;
-	assert(left_div_result == left_div_result_expected);
-	if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {    
-            assert(zd.load() == zd_orig);
-        } else {
-            assert(zd == zd_orig);
-        }
+      std::cerr << "Test conjugated_scalar / Reference" << std::endl;
+      value_type left_div_result = cszd / zd;
+      value_type left_div_result_expected = conj_if_needed(zd_orig) / zd_orig;
+      EXPECT_EQ(left_div_result, left_div_result_expected);
+      if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {    
+        EXPECT_EQ(zd.load(), zd_orig);
+      } else {
+        EXPECT_EQ(zd, zd_orig);
+      }
     } // test_references
 
-    std::cerr << "Test conjugated_scalar + value_type&&" << std::endl;
-    value_type left_add_result2 = cszd + get_test_xvalue(value_type{});
-    value_type left_add_result2_expected =
-      conj_if_needed(zd_orig) + get_test_xvalue(value_type{});
-    assert(left_add_result2 == left_add_result2_expected);
-    if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  std::cerr << "Test conjugated_scalar + value_type&&" << std::endl;
+  value_type left_add_result2 = cszd + get_test_xvalue(value_type{});
+  value_type left_add_result2_expected =
+    conj_if_needed(zd_orig) + get_test_xvalue(value_type{});
+  EXPECT_EQ(left_add_result2, left_add_result2_expected);
+  if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    std::cerr << "Test conjugated_scalar - value_type&&" << std::endl;
-    value_type left_sub_result2 = cszd - get_test_xvalue(value_type{});
-    value_type left_sub_result2_expected =
-      conj_if_needed(zd_orig) - get_test_xvalue(value_type{});
-    assert(left_sub_result2 == left_sub_result2_expected);
-    if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {    
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  std::cerr << "Test conjugated_scalar - value_type&&" << std::endl;
+  value_type left_sub_result2 = cszd - get_test_xvalue(value_type{});
+  value_type left_sub_result2_expected =
+    conj_if_needed(zd_orig) - get_test_xvalue(value_type{});
+  EXPECT_EQ(left_sub_result2, left_sub_result2_expected);
+  if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {    
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    std::cerr << "Test conjugated_scalar * value_type&&" << std::endl;
-    value_type left_mul_result2 = cszd * get_test_xvalue(value_type{});
-    value_type left_mul_result2_expected =
-      conj_if_needed(zd_orig) * get_test_xvalue(value_type{});
-    assert(left_mul_result2 == left_mul_result2_expected);
-    if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  std::cerr << "Test conjugated_scalar * value_type&&" << std::endl;
+  value_type left_mul_result2 = cszd * get_test_xvalue(value_type{});
+  value_type left_mul_result2_expected =
+    conj_if_needed(zd_orig) * get_test_xvalue(value_type{});
+  EXPECT_EQ(left_mul_result2, left_mul_result2_expected);
+  if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    std::cerr << "Test conjugated_scalar / value_type&&" << std::endl;
-    value_type left_div_result2 = cszd / get_test_xvalue(value_type{});
-    value_type left_div_result2_expected =
-        conj_if_needed(zd_orig) / get_test_xvalue(value_type{});
-    assert(left_div_result2 == left_div_result2_expected);
-    if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  std::cerr << "Test conjugated_scalar / value_type&&" << std::endl;
+  value_type left_div_result2 = cszd / get_test_xvalue(value_type{});
+  value_type left_div_result2_expected =
+    conj_if_needed(zd_orig) / get_test_xvalue(value_type{});
+  EXPECT_EQ(left_div_result2, left_div_result2_expected);
+  if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    if constexpr (test_references) {
+  if constexpr (test_references) {
 
     std::cerr << "Test Reference + conjugated_scalar" << std::endl;
     value_type right_add_result = zd + cszd;
     value_type right_add_result_expected = zd_orig + conj_if_needed(zd_orig);
-    assert(right_add_result == right_add_result_expected);
+    EXPECT_EQ(right_add_result, right_add_result_expected);
     if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
-        assert(zd.load() == zd_orig);
+      EXPECT_EQ(zd.load(), zd_orig);
     } else {
-        assert(zd == zd_orig);
+      EXPECT_EQ(zd, zd_orig);
     }
 
     std::cerr << "Test Reference - conjugated_scalar" << std::endl;
     value_type right_sub_result = zd - cszd;
     value_type right_sub_result_expected = zd_orig - conj_if_needed(zd_orig);
-    assert(right_sub_result == right_sub_result_expected);
+    EXPECT_EQ(right_sub_result, right_sub_result_expected);
     if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
-        assert(zd.load() == zd_orig);
+      EXPECT_EQ(zd.load(), zd_orig);
     } else {
-        assert(zd == zd_orig);
+      EXPECT_EQ(zd, zd_orig);
     }
 
     std::cerr << "Test Reference * conjugated_scalar" << std::endl;
     value_type right_mul_result = zd * cszd;
     value_type right_mul_result_expected = zd_orig * conj_if_needed(zd_orig);
-    assert(right_mul_result == right_mul_result_expected);
+    EXPECT_EQ(right_mul_result, right_mul_result_expected);
     if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
-        assert(zd.load() == zd_orig);
+      EXPECT_EQ(zd.load(), zd_orig);
     } else {
-        assert(zd == zd_orig);
+      EXPECT_EQ(zd, zd_orig);
     }
 
     std::cerr << "Test Reference / conjugated_scalar" << std::endl;
     value_type right_div_result = zd / cszd;
     value_type right_div_result_expected = zd_orig / conj_if_needed(zd_orig);
-    assert(right_div_result == right_div_result_expected);
+    EXPECT_EQ(right_div_result, right_div_result_expected);
     if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
-        assert(zd.load() == zd_orig);
+      EXPECT_EQ(zd.load(), zd_orig);
     } else {
-        assert(zd == zd_orig);
+      EXPECT_EQ(zd, zd_orig);
     }
 
-    } // test_references
+  } // test_references
 
-    std::cerr << "Test value_type&& + conjugated_scalar" << std::endl;
-    value_type right_add_result2 = get_test_xvalue(value_type{}) + cszd;
-    value_type right_add_result2_expected =
-      get_test_xvalue(value_type{}) + conj_if_needed(zd_orig);
-    assert(right_add_result2 == right_add_result2_expected);
-    if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  std::cerr << "Test value_type&& + conjugated_scalar" << std::endl;
+  value_type right_add_result2 = get_test_xvalue(value_type{}) + cszd;
+  value_type right_add_result2_expected =
+    get_test_xvalue(value_type{}) + conj_if_needed(zd_orig);
+  EXPECT_EQ(right_add_result2, right_add_result2_expected);
+  if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    std::cerr << "Test value_type&& - conjugated_scalar" << std::endl;
-    value_type right_sub_result2 = get_test_xvalue(value_type{}) - cszd;
-    value_type right_sub_result2_expected =
-      get_test_xvalue(value_type{}) - conj_if_needed(zd_orig);
-    assert(right_sub_result2 == right_sub_result2_expected);
-    if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  std::cerr << "Test value_type&& - conjugated_scalar" << std::endl;
+  value_type right_sub_result2 = get_test_xvalue(value_type{}) - cszd;
+  value_type right_sub_result2_expected =
+    get_test_xvalue(value_type{}) - conj_if_needed(zd_orig);
+  EXPECT_EQ(right_sub_result2, right_sub_result2_expected);
+  if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    std::cerr << "Test value_type&& * conjugated_scalar" << std::endl;
-    value_type right_mul_result2 = get_test_xvalue(value_type{}) * cszd;
-    value_type right_mul_result2_expected =
-        get_test_xvalue(value_type{}) * conj_if_needed(zd_orig);
-    assert(right_mul_result2 == right_mul_result2_expected);
-    if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  std::cerr << "Test value_type&& * conjugated_scalar" << std::endl;
+  value_type right_mul_result2 = get_test_xvalue(value_type{}) * cszd;
+  value_type right_mul_result2_expected =
+    get_test_xvalue(value_type{}) * conj_if_needed(zd_orig);
+  EXPECT_EQ(right_mul_result2, right_mul_result2_expected);
+  if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    std::cerr << "Test value_type&& / conjugated_scalar" << std::endl;
-    value_type right_div_result2 = get_test_xvalue(value_type{}) / cszd;
-    value_type right_div_result2_expected =
-        get_test_xvalue(value_type{}) / conj_if_needed(zd_orig);
-    assert(right_div_result2 == right_div_result2_expected);
-    if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  std::cerr << "Test value_type&& / conjugated_scalar" << std::endl;
+  value_type right_div_result2 = get_test_xvalue(value_type{}) / cszd;
+  value_type right_div_result2_expected =
+    get_test_xvalue(value_type{}) / conj_if_needed(zd_orig);
+  EXPECT_EQ(right_div_result2, right_div_result2_expected);
+  if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    std::cerr << "Test that unary negate can be assigned to value_type" << std::endl;
-    value_type unary_negate_result = -cszd;
-    value_type unary_negate_result_expected = -conj_if_needed(zd_orig);
-    assert(unary_negate_result == unary_negate_result_expected);
-    if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  std::cerr << "Test that unary negate can be assigned to value_type" << std::endl;
+  value_type unary_negate_result = -cszd;
+  value_type unary_negate_result_expected = -conj_if_needed(zd_orig);
+  EXPECT_EQ(unary_negate_result, unary_negate_result_expected);
+  if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    if constexpr (test_references) {
+  if constexpr (test_references) {
 
     std::cerr << "Test (unary negate) + Reference" << std::endl;
     value_type unary_negate_ref_result;
     if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
-        unary_negate_ref_result = -cszd + zd.load();
+      unary_negate_ref_result = -cszd + zd.load();
     } else {
-        unary_negate_ref_result = -cszd + zd;
+      unary_negate_ref_result = -cszd + zd;
     }
     value_type unary_negate_ref_result_expected =
-        -conj_if_needed(zd_orig) + zd_orig;
-    assert(unary_negate_ref_result == unary_negate_ref_result_expected);
+      -conj_if_needed(zd_orig) + zd_orig;
+    EXPECT_EQ(unary_negate_ref_result, unary_negate_ref_result_expected);
     if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
-        assert(zd.load() == zd_orig);
+      EXPECT_EQ(zd.load(), zd_orig);
     } else {
-        assert(zd == zd_orig);
+      EXPECT_EQ(zd, zd_orig);
     }
 
     std::cerr << "Test Reference + (unary negate)" << std::endl;
     value_type unary_negate_ref2_result;
     if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
-        unary_negate_ref2_result = zd.load() + (-cszd);
+      unary_negate_ref2_result = zd.load() + (-cszd);
     } else {
-        unary_negate_ref2_result = zd + (-cszd);
+      unary_negate_ref2_result = zd + (-cszd);
     }
     value_type unary_negate_ref2_result_expected =
-        zd_orig + (-conj_if_needed(zd_orig));
-    assert(unary_negate_ref2_result == unary_negate_ref2_result_expected);
+      zd_orig + (-conj_if_needed(zd_orig));
+    EXPECT_EQ(unary_negate_ref2_result, unary_negate_ref2_result_expected);
     if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
-        assert(zd.load() == zd_orig);
+      EXPECT_EQ(zd.load(), zd_orig);
     } else {
-        assert(zd == zd_orig);
+      EXPECT_EQ(zd, zd_orig);
     }
 
-    } // test_references
+  } // test_references
 
-    // Test (unary negate) + value_type&&
-    value_type unary_negate_expr_result = -cszd + get_test_xvalue(value_type{});
-    value_type unary_negate_expr_result_expected =
-        -conj_if_needed(zd_orig) + get_test_xvalue(value_type{});
-    assert(unary_negate_expr_result == unary_negate_expr_result_expected);
-    if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  // Test (unary negate) + value_type&&
+  value_type unary_negate_expr_result = -cszd + get_test_xvalue(value_type{});
+  value_type unary_negate_expr_result_expected =
+    -conj_if_needed(zd_orig) + get_test_xvalue(value_type{});
+  EXPECT_EQ(unary_negate_expr_result, unary_negate_expr_result_expected);
+  if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    // Test value_type&& + (unary negate)
-    value_type unary_negate_expr2_result =
-        get_test_xvalue(value_type{}) + (-cszd);
-    value_type unary_negate_expr2_result_expected =
-        get_test_xvalue(value_type{}) + (-conj_if_needed(zd_orig));
-    assert(unary_negate_expr2_result == unary_negate_expr2_result_expected);
-    if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  // Test value_type&& + (unary negate)
+  value_type unary_negate_expr2_result =
+    get_test_xvalue(value_type{}) + (-cszd);
+  value_type unary_negate_expr2_result_expected =
+    get_test_xvalue(value_type{}) + (-conj_if_needed(zd_orig));
+  EXPECT_EQ(unary_negate_expr2_result, unary_negate_expr2_result_expected);
+  if constexpr (is_atomic_ref_not_arithmetic_v<Reference>) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 }
 
 template<class Real>
 void test_complex_conjugated_scalar()
 {
-    std::cerr << "test_complex_conjugated_scalar" << std::endl;
+  std::cerr << "test_complex_conjugated_scalar" << std::endl;
 
-    std::complex<Real> zd_orig{2.0, -3.0};
-    std::complex<Real> zd{2.0, -3.0};
-    test_conjugated_scalar_from_reference<
-        std::complex<Real>&, std::complex<Real>>(zd, zd_orig);
+  std::complex<Real> zd_orig{2.0, -3.0};
+  std::complex<Real> zd{2.0, -3.0};
+  test_conjugated_scalar_from_reference<
+    std::complex<Real>&, std::complex<Real>>(zd, zd_orig);
 
-    const std::complex<Real> zd2_orig{-1.0, 3.0};
-    const std::complex<Real> zd2{-1.0, 3.0};
-    test_conjugated_scalar_from_reference<
-        const std::complex<Real>&, std::complex<Real>>(zd2, zd2_orig);
+  const std::complex<Real> zd2_orig{-1.0, 3.0};
+  const std::complex<Real> zd2{-1.0, 3.0};
+  test_conjugated_scalar_from_reference<
+    const std::complex<Real>&, std::complex<Real>>(zd2, zd2_orig);
 
 #ifdef __cpp_lib_atomic_ref
-    const std::complex<Real> zd3_orig{-1.0, -2.0};
-    std::complex<Real> zd3{-1.0, -2.0};
-    test_conjugated_scalar_from_reference<
-      std::atomic_ref<std::complex<Real>>, std::complex<Real>>(
-          std::atomic_ref{zd3}, zd3_orig);
+  const std::complex<Real> zd3_orig{-1.0, -2.0};
+  std::complex<Real> zd3{-1.0, -2.0};
+  test_conjugated_scalar_from_reference<
+    std::atomic_ref<std::complex<Real>>, std::complex<Real>>(
+							     std::atomic_ref{zd3}, zd3_orig);
 #endif // __cpp_lib_atomic_ref
 
-    // FIXME (mfh 2022/06/03) We might not need to worry about the comment below.
-    //
-    // float * atomic_ref<complex<float>> isn't a defined operator,
-    // so unless we want to define it, we have to use a different reference type.
-    {
-        using value_type = std::complex<Real>;
-        using inner_reference_type = value_type&;
-        using reference_type = scaled_scalar<Real, inner_reference_type, value_type>;
+  // FIXME (mfh 2022/06/03) We might not need to worry about the comment below.
+  //
+  // float * atomic_ref<complex<float>> isn't a defined operator,
+  // so unless we want to define it, we have to use a different reference type.
+  {
+    using value_type = std::complex<Real>;
+    using inner_reference_type = value_type&;
+    using reference_type = scaled_scalar<Real, inner_reference_type, value_type>;
 
-        const Real scalingFactor = 3.0;
-        const value_type zd4_orig = scalingFactor * value_type{-1.0, -2.0};
-        value_type zd4{-1.0, -2.0};
-        test_conjugated_scalar_from_reference<reference_type, value_type>(
-            reference_type(scalingFactor, inner_reference_type(zd4)),
-            zd4_orig);
-    }
+    const Real scalingFactor = 3.0;
+    const value_type zd4_orig = scalingFactor * value_type{-1.0, -2.0};
+    value_type zd4{-1.0, -2.0};
+    test_conjugated_scalar_from_reference<reference_type, value_type>(
+								      reference_type(scalingFactor, inner_reference_type(zd4)),
+								      zd4_orig);
+  }
 }
 
 template<class Value>
@@ -801,24 +783,23 @@ void test_arithmetic_conjugated_scalar()
 {
   static_assert(std::is_arithmetic_v<Value>);
   
-    std::cerr << "test_arithmetic_conjugated_scalar" << std::endl;
+  std::cerr << "test_arithmetic_conjugated_scalar" << std::endl;
 
-    Value zd_orig{2};
-    Value zd{2};
-    test_conjugated_scalar_from_reference<
-        Value&, Value>(zd, zd_orig);
+  Value zd_orig{2};
+  Value zd{2};
+  test_conjugated_scalar_from_reference<
+    Value&, Value>(zd, zd_orig);
 
-    const Value zd2_orig{3};
-    const Value zd2{3};
-    test_conjugated_scalar_from_reference<
-        const Value&, Value>(zd2, zd2_orig);
+  const Value zd2_orig{3};
+  const Value zd2{3};
+  test_conjugated_scalar_from_reference<
+    const Value&, Value>(zd2, zd2_orig);
 
 #ifdef __cpp_lib_atomic_ref
-    const Value zd3_orig{4};
-    Value zd3{4};
-    test_conjugated_scalar_from_reference<
-      std::atomic_ref<Value>, Value>(
-          std::atomic_ref{zd3}, zd3_orig);
+  const Value zd3_orig{4};
+  Value zd3{4};
+  test_conjugated_scalar_from_reference<
+    std::atomic_ref<Value>, Value>(std::atomic_ref{zd3}, zd3_orig);
 #endif // __cpp_lib_atomic_ref    
 }
 
@@ -845,353 +826,329 @@ void test_FakeComplex_conjugated_scalar()
 #endif // __cpp_lib_atomic_ref
 }
 
-void test_conjugated_scalar()
-{
-    std::cerr << "test_conjugated_scalar" << std::endl;
-
-    test_complex_conjugated_scalar<float>();
-    test_complex_conjugated_scalar<double>();
-    test_complex_conjugated_scalar<long double>();
-
-    test_arithmetic_conjugated_scalar<float>();
-    test_arithmetic_conjugated_scalar<double>();
-    test_arithmetic_conjugated_scalar<long double>();
-
-    test_arithmetic_conjugated_scalar<int32_t>();
-    test_arithmetic_conjugated_scalar<uint32_t>();
-    test_arithmetic_conjugated_scalar<int64_t>();
-    test_arithmetic_conjugated_scalar<uint64_t>();
-
-    test_FakeComplex_conjugated_scalar();
-
-    FakeRealNumber fn;
-    conjugated_scalar<FakeRealNumber&, FakeRealNumber> fncs(fn);
-    assert(fn == FakeRealNumber(fncs));
-}
-
 template<class ScalingFactor, class Reference, class Value>
 void test_scaled_scalar_from_reference(
     ScalingFactor sf, Reference zd, Value zd_orig)
 {
-    std::cerr << "test_scaled_scalar_from_reference" << std::endl;
+  std::cerr << "test_scaled_scalar_from_reference" << std::endl;
 
-    using value_type = typename std::remove_cv_t<Value>;
-    constexpr bool is_atomic_ref_not_arithmetic = test_helpers::is_atomic_ref_not_arithmetic_v<Reference>;
+  using value_type = typename std::remove_cv_t<Value>;
+  constexpr bool is_atomic_ref_not_arithmetic = test_helpers::is_atomic_ref_not_arithmetic_v<Reference>;
 
 #ifdef P1673_CONJUGATED_SCALAR_ARITHMETIC_OPERATORS_REFERENCE_OVERLOADS
-    constexpr bool test_references = true;
+  constexpr bool test_references = true;
 #else
-    constexpr bool test_references = is_atomic_ref_not_arithmetic;
+  constexpr bool test_references = is_atomic_ref_not_arithmetic;
 #endif
 
-    // Test scaled_scalar constructor
-    scaled_scalar<ScalingFactor, Reference, Value> cszd(sf, zd);
-    if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  // Test scaled_scalar constructor
+  scaled_scalar<ScalingFactor, Reference, Value> cszd(sf, zd);
+  if constexpr (is_atomic_ref_not_arithmetic) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    if constexpr (test_references) {
+  if constexpr (test_references) {
 
     // Test scaled_scalar + Reference
     value_type left_add_result = cszd + zd;
     value_type left_add_result_expected = (sf * zd_orig) + zd_orig;
-    assert(left_add_result == left_add_result_expected);
+    EXPECT_EQ(left_add_result, left_add_result_expected);
     if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
+      EXPECT_EQ(zd.load(), zd_orig);
     } else {
-        assert(zd == zd_orig);
+      EXPECT_EQ(zd, zd_orig);
     }
 
     // Test scaled_scalar - Reference
     value_type left_sub_result = cszd - zd;
     value_type left_sub_result_expected = (sf * zd_orig) - zd_orig;
-    assert(left_sub_result == left_sub_result_expected);
+    EXPECT_EQ(left_sub_result, left_sub_result_expected);
     if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
+      EXPECT_EQ(zd.load(), zd_orig);
     } else {
-        assert(zd == zd_orig);
+      EXPECT_EQ(zd, zd_orig);
     }
 
     // Test scaled_scalar * Reference
     value_type left_mul_result = cszd * zd;
     value_type left_mul_result_expected = (sf * zd_orig) * zd_orig;
-    assert(left_mul_result == left_mul_result_expected);
+    EXPECT_EQ(left_mul_result, left_mul_result_expected);
     if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
+      EXPECT_EQ(zd.load(), zd_orig);
     } else {
-        assert(zd == zd_orig);
+      EXPECT_EQ(zd, zd_orig);
     }
 
     // Test scaled_scalar / Reference
     value_type left_div_result = cszd / zd;
     value_type left_div_result_expected = (sf * zd_orig) / zd_orig;
-    assert(left_div_result == left_div_result_expected);
+    EXPECT_EQ(left_div_result, left_div_result_expected);
     if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
+      EXPECT_EQ(zd.load(), zd_orig);
     } else {
-        assert(zd == zd_orig);
+      EXPECT_EQ(zd, zd_orig);
     }
 
-    } // test_references
+  } // test_references
 
-    // Test scaled_scalar + value_type&&
-    value_type left_add_result2 = cszd + get_test_xvalue(value_type{});
-    value_type left_add_result2_expected =
-      (sf * zd_orig) + get_test_xvalue(value_type{});
-    assert(left_add_result2 == left_add_result2_expected);
-    if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  // Test scaled_scalar + value_type&&
+  value_type left_add_result2 = cszd + get_test_xvalue(value_type{});
+  value_type left_add_result2_expected =
+    (sf * zd_orig) + get_test_xvalue(value_type{});
+  EXPECT_EQ(left_add_result2, left_add_result2_expected);
+  if constexpr (is_atomic_ref_not_arithmetic) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    // Test scaled_scalar - value_type&&
-    value_type left_sub_result2 = cszd - get_test_xvalue(value_type{});
-    value_type left_sub_result2_expected =
-      (sf * zd_orig) - get_test_xvalue(value_type{});
-    assert(left_sub_result2 == left_sub_result2_expected);
-    if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  // Test scaled_scalar - value_type&&
+  value_type left_sub_result2 = cszd - get_test_xvalue(value_type{});
+  value_type left_sub_result2_expected =
+    (sf * zd_orig) - get_test_xvalue(value_type{});
+  EXPECT_EQ(left_sub_result2, left_sub_result2_expected);
+  if constexpr (is_atomic_ref_not_arithmetic) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    // Test scaled_scalar * value_type&&
-    value_type left_mul_result2 = cszd * get_test_xvalue(value_type{});
-    value_type left_mul_result2_expected =
-      (sf * zd_orig) * get_test_xvalue(value_type{});
-    assert(left_mul_result2 == left_mul_result2_expected);
-    if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  // Test scaled_scalar * value_type&&
+  value_type left_mul_result2 = cszd * get_test_xvalue(value_type{});
+  value_type left_mul_result2_expected =
+    (sf * zd_orig) * get_test_xvalue(value_type{});
+  EXPECT_EQ(left_mul_result2, left_mul_result2_expected);
+  if constexpr (is_atomic_ref_not_arithmetic) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    // Test scaled_scalar / value_type&&
-    value_type left_div_result2 = cszd / get_test_xvalue(value_type{});
-    value_type left_div_result2_expected =
-        (sf * zd_orig) / get_test_xvalue(value_type{});
-    assert(left_div_result2 == left_div_result2_expected);
-    if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  // Test scaled_scalar / value_type&&
+  value_type left_div_result2 = cszd / get_test_xvalue(value_type{});
+  value_type left_div_result2_expected =
+    (sf * zd_orig) / get_test_xvalue(value_type{});
+  EXPECT_EQ(left_div_result2, left_div_result2_expected);
+  if constexpr (is_atomic_ref_not_arithmetic) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    if constexpr (test_references) {
+  if constexpr (test_references) {
 
     // Test Reference + scaled_scalar
     value_type right_add_result = zd + cszd;
     value_type right_add_result_expected = zd_orig + (sf * zd_orig);
-    assert(right_add_result == right_add_result_expected);
+    EXPECT_EQ(right_add_result, right_add_result_expected);
     if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
+      EXPECT_EQ(zd.load(), zd_orig);
     } else {
-        assert(zd == zd_orig);
+      EXPECT_EQ(zd, zd_orig);
     }
 
     // Test Reference - scaled_scalar
     value_type right_sub_result = zd - cszd;
     value_type right_sub_result_expected = zd_orig - (sf * zd_orig);
-    assert(right_sub_result == right_sub_result_expected);
+    EXPECT_EQ(right_sub_result, right_sub_result_expected);
     if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
+      EXPECT_EQ(zd.load(), zd_orig);
     } else {
-        assert(zd == zd_orig);
+      EXPECT_EQ(zd, zd_orig);
     }
 
     // Test Reference * scaled_scalar
     value_type right_mul_result = zd * cszd;
     value_type right_mul_result_expected = zd_orig * (sf * zd_orig);
-    assert(right_mul_result == right_mul_result_expected);
+    EXPECT_EQ(right_mul_result, right_mul_result_expected);
     if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
+      EXPECT_EQ(zd.load(), zd_orig);
     } else {
-        assert(zd == zd_orig);
+      EXPECT_EQ(zd, zd_orig);
     }
 
     // Test Reference / scaled_scalar
     value_type right_div_result = zd / cszd;
     value_type right_div_result_expected = zd_orig / (sf * zd_orig);
-    assert(right_div_result == right_div_result_expected);
+    EXPECT_EQ(right_div_result, right_div_result_expected);
     if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
+      EXPECT_EQ(zd.load(), zd_orig);
     } else {
-        assert(zd == zd_orig);
+      EXPECT_EQ(zd, zd_orig);
     }
 
-    } // test_references
+  } // test_references
 
-    // Test value_type&& + scaled_scalar
-    value_type right_add_result2 = get_test_xvalue(value_type{}) + cszd;
-    value_type right_add_result2_expected =
-      get_test_xvalue(value_type{}) + (sf * zd_orig);
-    assert(right_add_result2 == right_add_result2_expected);
-    if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  // Test value_type&& + scaled_scalar
+  value_type right_add_result2 = get_test_xvalue(value_type{}) + cszd;
+  value_type right_add_result2_expected =
+    get_test_xvalue(value_type{}) + (sf * zd_orig);
+  EXPECT_EQ(right_add_result2, right_add_result2_expected);
+  if constexpr (is_atomic_ref_not_arithmetic) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    // Test value_type&& - scaled_scalar
-    value_type right_sub_result2 = get_test_xvalue(value_type{}) - cszd;
-    value_type right_sub_result2_expected =
-      get_test_xvalue(value_type{}) - (sf * zd_orig);
-    assert(right_sub_result2 == right_sub_result2_expected);
-    if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  // Test value_type&& - scaled_scalar
+  value_type right_sub_result2 = get_test_xvalue(value_type{}) - cszd;
+  value_type right_sub_result2_expected =
+    get_test_xvalue(value_type{}) - (sf * zd_orig);
+  EXPECT_EQ(right_sub_result2, right_sub_result2_expected);
+  if constexpr (is_atomic_ref_not_arithmetic) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    // Test value_type&& * scaled_scalar
-    value_type right_mul_result2 = get_test_xvalue(value_type{}) * cszd;
-    value_type right_mul_result2_expected =
-        get_test_xvalue(value_type{}) * (sf * zd_orig);
-    assert(right_mul_result2 == right_mul_result2_expected);
-    if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  // Test value_type&& * scaled_scalar
+  value_type right_mul_result2 = get_test_xvalue(value_type{}) * cszd;
+  value_type right_mul_result2_expected =
+    get_test_xvalue(value_type{}) * (sf * zd_orig);
+  EXPECT_EQ(right_mul_result2, right_mul_result2_expected);
+  if constexpr (is_atomic_ref_not_arithmetic) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    // Test value_type&& / scaled_scalar
-    value_type right_div_result2 = get_test_xvalue(value_type{}) / cszd;
-    value_type right_div_result2_expected =
-        get_test_xvalue(value_type{}) / (sf * zd_orig);
-    assert(right_div_result2 == right_div_result2_expected);
-    if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  // Test value_type&& / scaled_scalar
+  value_type right_div_result2 = get_test_xvalue(value_type{}) / cszd;
+  value_type right_div_result2_expected =
+    get_test_xvalue(value_type{}) / (sf * zd_orig);
+  EXPECT_EQ(right_div_result2, right_div_result2_expected);
+  if constexpr (is_atomic_ref_not_arithmetic) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    // Test that unary negate can be assigned to value_type.
-    value_type unary_negate_result = -cszd;
-    value_type unary_negate_result_expected = -(sf * zd_orig);
-    assert(unary_negate_result == unary_negate_result_expected);
-    if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  // Test that unary negate can be assigned to value_type.
+  value_type unary_negate_result = -cszd;
+  value_type unary_negate_result_expected = -(sf * zd_orig);
+  EXPECT_EQ(unary_negate_result, unary_negate_result_expected);
+  if constexpr (is_atomic_ref_not_arithmetic) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    if constexpr (test_references) {
+  if constexpr (test_references) {
 
     // Test (unary negate) + Reference
     value_type unary_negate_ref_result = -cszd + zd;
     value_type unary_negate_ref_result_expected =
-        -(sf * zd_orig) + zd_orig;
-    assert(unary_negate_ref_result == unary_negate_ref_result_expected);
+      -(sf * zd_orig) + zd_orig;
+    EXPECT_EQ(unary_negate_ref_result, unary_negate_ref_result_expected);
     if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
+      EXPECT_EQ(zd.load(), zd_orig);
     } else {
-        assert(zd == zd_orig);
+      EXPECT_EQ(zd, zd_orig);
     }
 
     // Test Reference + (unary negate)
     value_type unary_negate_ref2_result = zd + (-cszd);
     value_type unary_negate_ref2_result_expected =
-        zd_orig + (-(sf * zd_orig));
-    assert(unary_negate_ref2_result == unary_negate_ref2_result_expected);
+      zd_orig + (-(sf * zd_orig));
+    EXPECT_EQ(unary_negate_ref2_result, unary_negate_ref2_result_expected);
     if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
+      EXPECT_EQ(zd.load(), zd_orig);
     } else {
-        assert(zd == zd_orig);
+      EXPECT_EQ(zd, zd_orig);
     }
 
-    } // test_references
+  } // test_references
 
-    // Test (unary negate) + value_type&&
-    value_type unary_negate_expr_result = -cszd + get_test_xvalue(value_type{});
-    value_type unary_negate_expr_result_expected =
-        -(sf * zd_orig) + get_test_xvalue(value_type{});
-    assert(unary_negate_expr_result == unary_negate_expr_result_expected);
-    if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  // Test (unary negate) + value_type&&
+  value_type unary_negate_expr_result = -cszd + get_test_xvalue(value_type{});
+  value_type unary_negate_expr_result_expected =
+    -(sf * zd_orig) + get_test_xvalue(value_type{});
+  EXPECT_EQ(unary_negate_expr_result, unary_negate_expr_result_expected);
+  if constexpr (is_atomic_ref_not_arithmetic) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    // Test value_type&& + (unary negate)
-    value_type unary_negate_expr2_result =
-        get_test_xvalue(value_type{}) + (-cszd);
-    value_type unary_negate_expr2_result_expected =
-        get_test_xvalue(value_type{}) + (-(sf * zd_orig));
-    assert(unary_negate_expr2_result == unary_negate_expr2_result_expected);
-    if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  // Test value_type&& + (unary negate)
+  value_type unary_negate_expr2_result =
+    get_test_xvalue(value_type{}) + (-cszd);
+  value_type unary_negate_expr2_result_expected =
+    get_test_xvalue(value_type{}) + (-(sf * zd_orig));
+  EXPECT_EQ(unary_negate_expr2_result, unary_negate_expr2_result_expected);
+  if constexpr (is_atomic_ref_not_arithmetic) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 }
 
 template<class ScalingFactor, class Reference, class Value>
 void test_two_scaled_scalars_from_reference(
-    ScalingFactor sf, Reference zd, Value zd_orig,
-    const char scalingFactorName[],
-    const char referenceName[],
-    const char valueName[])
+  ScalingFactor sf, Reference zd, Value zd_orig,
+  const char scalingFactorName[],
+  const char referenceName[],
+  const char valueName[])
 {
-    std::cerr << "test_two_scaled_scalars_from_reference<"
-      << scalingFactorName << ", " << referenceName << ", " << valueName
-      << ">" << std::endl;
+  std::cerr << "test_two_scaled_scalars_from_reference<"
+	    << scalingFactorName << ", " << referenceName
+	    << ", " << valueName << ">" << std::endl;
 
-    using value_type = typename std::remove_cv_t<Value>;
-    constexpr bool is_atomic_ref_not_arithmetic =
-      test_helpers::is_atomic_ref_not_arithmetic_v<Reference>;
+  using value_type = typename std::remove_cv_t<Value>;
+  constexpr bool is_atomic_ref_not_arithmetic =
+    test_helpers::is_atomic_ref_not_arithmetic_v<Reference>;
 
-    // Test scaled_scalar constructor
-    scaled_scalar<ScalingFactor, Reference, Value> cszd1(sf, zd);
-    if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  // Test scaled_scalar constructor
+  scaled_scalar<ScalingFactor, Reference, Value> cszd1(sf, zd);
+  if constexpr (is_atomic_ref_not_arithmetic) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    scaled_scalar<ScalingFactor, Reference, Value> cszd2(sf, zd);
+  scaled_scalar<ScalingFactor, Reference, Value> cszd2(sf, zd);
 
-    std::cerr << "- Test scaled_scalar + scaled_scalar" << std::endl;
-    value_type left_add_result = cszd1 + cszd2;
-    value_type left_add_result_expected = (sf * zd_orig) + (sf * zd_orig);
-    assert(left_add_result == left_add_result_expected);
-    if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  std::cerr << "- Test scaled_scalar + scaled_scalar" << std::endl;
+  value_type left_add_result = cszd1 + cszd2;
+  value_type left_add_result_expected = (sf * zd_orig) + (sf * zd_orig);
+  EXPECT_EQ(left_add_result, left_add_result_expected);
+  if constexpr (is_atomic_ref_not_arithmetic) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    std::cerr << "- Test scaled_scalar - scaled_scalar" << std::endl;
-    value_type left_sub_result = cszd1 - cszd2;
-    value_type left_sub_result_expected = (sf * zd_orig) - (sf * zd_orig);
-    assert(left_sub_result == left_sub_result_expected);
-    if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  std::cerr << "- Test scaled_scalar - scaled_scalar" << std::endl;
+  value_type left_sub_result = cszd1 - cszd2;
+  value_type left_sub_result_expected = (sf * zd_orig) - (sf * zd_orig);
+  EXPECT_EQ(left_sub_result, left_sub_result_expected);
+  if constexpr (is_atomic_ref_not_arithmetic) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    std::cerr << "- Test scaled_scalar * scaled_scalar" << std::endl;
-    value_type left_mul_result = cszd1 * cszd2;
-    value_type left_mul_result_expected = (sf * zd_orig) * (sf * zd_orig);
-    assert(left_mul_result == left_mul_result_expected);
-    if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  std::cerr << "- Test scaled_scalar * scaled_scalar" << std::endl;
+  value_type left_mul_result = cszd1 * cszd2;
+  value_type left_mul_result_expected = (sf * zd_orig) * (sf * zd_orig);
+  EXPECT_EQ(left_mul_result, left_mul_result_expected);
+  if constexpr (is_atomic_ref_not_arithmetic) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 
-    std::cerr << "- Test scaled_scalar / scaled_scalar" << std::endl;
-    value_type left_div_result = cszd1 / cszd2;
-    value_type left_div_result_expected = (sf * zd_orig) / (sf * zd_orig);
-    assert(left_div_result == left_div_result_expected);
-    if constexpr (is_atomic_ref_not_arithmetic) {
-        assert(zd.load() == zd_orig);
-    } else {
-        assert(zd == zd_orig);
-    }
+  std::cerr << "- Test scaled_scalar / scaled_scalar" << std::endl;
+  value_type left_div_result = cszd1 / cszd2;
+  value_type left_div_result_expected = (sf * zd_orig) / (sf * zd_orig);
+  EXPECT_EQ(left_div_result, left_div_result_expected);
+  if constexpr (is_atomic_ref_not_arithmetic) {
+    EXPECT_EQ(zd.load(), zd_orig);
+  } else {
+    EXPECT_EQ(zd, zd_orig);
+  }
 }
 
 template<class ScalingFactor, class Real>
@@ -1237,23 +1194,23 @@ void test_arithmetic_scaled_scalar(const char valueName[])
 {
   static_assert(std::is_arithmetic_v<Value>);
 
-    std::cerr << "test_arithmetic_scaled_scalar" << std::endl;
+  std::cerr << "test_arithmetic_scaled_scalar" << std::endl;
 
-    const Value scalingFactor(3);
-    Value zd_orig{2};
-    Value zd{2};
-    test_scaled_scalar_from_reference<
-        Value, Value&, Value>(scalingFactor, zd, zd_orig);
+  const Value scalingFactor(3);
+  Value zd_orig{2};
+  Value zd{2};
+  test_scaled_scalar_from_reference<
+    Value, Value&, Value>(scalingFactor, zd, zd_orig);
 
-    const Value zd2_orig{3};
-    const Value zd2{3};
-    test_scaled_scalar_from_reference<
-        Value, const Value&, Value>(scalingFactor, zd2, zd2_orig);
+  const Value zd2_orig{3};
+  const Value zd2{3};
+  test_scaled_scalar_from_reference<
+    Value, const Value&, Value>(scalingFactor, zd2, zd2_orig);
     
-    const std::string valueRefName = std::string("const ") + valueName + "&";
-    test_two_scaled_scalars_from_reference<
-        Value, const Value&, Value>(scalingFactor, zd2, zd2_orig,
-        valueName, valueRefName.c_str(), valueName);
+  const std::string valueRefName = std::string("const ") + valueName + "&";
+  test_two_scaled_scalars_from_reference<
+    Value, const Value&, Value>(scalingFactor, zd2, zd2_orig,
+				valueName, valueRefName.c_str(), valueName);
 }
 
 template<class ScalingFactor>
@@ -1274,10 +1231,47 @@ void test_FakeComplex_scaled_scalar(const ScalingFactor& scalingFactor)
             scalingFactor, zd2, zd2_orig);
 }
 
-void test_scaled_scalar()
-{
-    std::cerr << "test_scaled_scalar" << std::endl;
+namespace {
+  TEST(proxy_refs, conj_if_needed)
+  {
+    test_complex_conj_if_needed<float>();
+    test_complex_conj_if_needed<double>();
+    test_complex_conj_if_needed<long double>();
 
+    test_real_conj_if_needed<float>();
+    test_real_conj_if_needed<double>();
+    test_real_conj_if_needed<long double>();
+
+    test_real_conj_if_needed<int32_t>();
+    test_real_conj_if_needed<uint32_t>();
+    test_real_conj_if_needed<int64_t>();
+    test_real_conj_if_needed<uint64_t>();
+  }
+
+  TEST(proxy_refs, conjugated_scalar)
+  {
+    test_complex_conjugated_scalar<float>();
+    test_complex_conjugated_scalar<double>();
+    test_complex_conjugated_scalar<long double>();
+
+    test_arithmetic_conjugated_scalar<float>();
+    test_arithmetic_conjugated_scalar<double>();
+    test_arithmetic_conjugated_scalar<long double>();
+
+    test_arithmetic_conjugated_scalar<int32_t>();
+    test_arithmetic_conjugated_scalar<uint32_t>();
+    test_arithmetic_conjugated_scalar<int64_t>();
+    test_arithmetic_conjugated_scalar<uint64_t>();
+
+    test_FakeComplex_conjugated_scalar();
+
+    FakeRealNumber fn;
+    conjugated_scalar<FakeRealNumber&, FakeRealNumber> fncs(fn);
+    EXPECT_EQ(fn, FakeRealNumber(fncs));
+  }
+
+  TEST(proxy_refs, scaled_scalar)
+  {
     test_complex_scaled_scalar<float, float>(float(4.0), "float", "float");
     test_complex_scaled_scalar<double, double>(double(4.0), "double", "double");
     {
@@ -1312,13 +1306,5 @@ void test_scaled_scalar()
 
     test_FakeComplex_scaled_scalar(double(4.0));
     test_FakeComplex_scaled_scalar(FakeComplex{4.0, 5.0});
-}
-
-//namespace stdex = std::experimental;
-
-int main() {
-    test_conj_if_needed();
-    test_conjugated_scalar();
-    test_scaled_scalar();
-    return 0;
-}
+  }
+} // namespace (anonymous)
