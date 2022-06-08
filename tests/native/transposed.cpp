@@ -1,7 +1,8 @@
+#include "gtest/gtest.h"
+
 #include <experimental/linalg>
 #include <experimental/mdspan>
 #include <vector>
-#include "gtest/gtest.h"
 
 namespace {
   using std::experimental::dynamic_extent;

@@ -1,16 +1,8 @@
+#include "gtest/gtest.h"
+
 #include <experimental/linalg>
 #include <experimental/mdspan>
-
-// FIXME I can't actually test the executor overloads, since my GCC
-// (9.1.0, via Homebrew) isn't set up correctly:
-//
-// .../gcc/9.1.0/include/c++/9.1.0/pstl/parallel_backend_tbb.h:19:10: fatal error: tbb/blocked_range.h: No such file or directory
-//   19 | #include <tbb/blocked_range.h>
-//      |          ^~~~~~~~~~~~~~~~~~~~~
-
-//#include <execution>
 #include <vector>
-#include "gtest/gtest.h"
 
 namespace {
   using std::experimental::dynamic_extent;

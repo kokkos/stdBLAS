@@ -43,9 +43,10 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_FIXTURES_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_FIXTURES_HPP_
 
-#include <experimental/mdspan>
-
 #include "gtest/gtest.h"
+
+#include <experimental/mdspan>
+#include <complex>
 #include <vector>
 
   using std::experimental::dynamic_extent;

@@ -1,3 +1,5 @@
+#include "gtest/gtest.h"
+
 #include <experimental/linalg>
 #include <experimental/mdspan>
 #include <algorithm>
@@ -6,7 +8,6 @@
 #include <type_traits>
 #include <typeinfo>
 #include <vector>
-#include "gtest/gtest.h"
 
 namespace {
   using std::experimental::full_extent;
