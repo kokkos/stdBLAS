@@ -1,5 +1,6 @@
 #pragma once
 
+#cmakedefine LINALG_ENABLE_ATOMIC_REF
 #cmakedefine LINALG_ENABLE_BLAS
 #cmakedefine LINALG_ENABLE_CONCEPTS
 #cmakedefine LINALG_ENABLE_KOKKOS

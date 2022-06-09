@@ -198,10 +198,10 @@ constexpr bool is_complex_v<FakeComplex> = true;
 template<class T>
 static constexpr bool is_atomic_ref_not_arithmetic_v = false;
 
-#ifdef __cpp_lib_atomic_ref
+#if defined(__cpp_lib_atomic_ref) && defined(LINALG_ENABLE_ATOMIC_REF)
 template<class U>
 static constexpr bool is_atomic_ref_not_arithmetic_v<std::atomic_ref<U>> = ! std::is_arithmetic_v<U>;
-#endif // __cpp_lib_atomic_ref
+#endif
 
 } // namespace test_helpers
 
@@ -544,13 +544,13 @@ void test_complex_conjugated_scalar()
   test_conjugated_scalar_from_reference<
     const std::complex<Real>&, std::complex<Real>>(zd2, zd2_orig);
 
-#ifdef __cpp_lib_atomic_ref
+#if defined(__cpp_lib_atomic_ref) && defined(LINALG_ENABLE_ATOMIC_REF)
   const std::complex<Real> zd3_orig{-1.0, -2.0};
   std::complex<Real> zd3{-1.0, -2.0};
   test_conjugated_scalar_from_reference<
     std::atomic_ref<std::complex<Real>>, std::complex<Real>>
       (std::atomic_ref{zd3}, zd3_orig);
-#endif // __cpp_lib_atomic_ref
+#endif
 
   // FIXME (mfh 2022/06/03) We might not need to worry about the comment below.
   //
@@ -588,12 +588,12 @@ void test_arithmetic_conjugated_scalar()
   test_conjugated_scalar_from_reference<
     const Value&, Value>(zd2, zd2_orig);
 
-#ifdef __cpp_lib_atomic_ref
+#if defined(__cpp_lib_atomic_ref) && defined(LINALG_ENABLE_ATOMIC_REF)
   const Value zd3_orig{4};
   Value zd3{4};
   test_conjugated_scalar_from_reference<
     std::atomic_ref<Value>, Value>(std::atomic_ref{zd3}, zd3_orig);
-#endif // __cpp_lib_atomic_ref    
+#endif
 }
 
 void test_FakeComplex_conjugated_scalar()
@@ -610,13 +610,13 @@ void test_FakeComplex_conjugated_scalar()
     test_conjugated_scalar_from_reference<
         const FakeComplex&, FakeComplex>(zd2, zd2_orig);
 
-#ifdef __cpp_lib_atomic_ref    
+#if defined(__cpp_lib_atomic_ref) && defined(LINALG_ENABLE_ATOMIC_REF)
     const FakeComplex zd3_orig{-1.0, -2.0};
     FakeComplex zd3{-1.0, -2.0};
     test_conjugated_scalar_from_reference<
       std::atomic_ref<FakeComplex>, FakeComplex>(
           std::atomic_ref{zd3}, zd3_orig);
-#endif // __cpp_lib_atomic_ref
+#endif
 }
 
 template<class ScalingFactor, class Reference, class Value>
@@ -967,13 +967,13 @@ void test_complex_scaled_scalar(const ScalingFactor& scalingFactor,
     // a result of atomic_ref<complex<R>> not having arithmetic
     // operators, not a result of our design.
 #if 0
-#ifdef __cpp_lib_atomic_ref
+#if defined(__cpp_lib_atomic_ref) && defined(LINALG_ENABLE_ATOMIC_REF)
     const std::complex<Real> zd3_orig{-1.0, -2.0};
     std::complex<Real> zd3{-1.0, -2.0};
     test_scaled_scalar_from_reference<
         ScalingFactor, std::atomic_ref<std::complex<Real>>, std::complex<Real>>(
             scalingFactor, std::atomic_ref{zd3}, zd3_orig);
-#endif // __cpp_lib_atomic_ref
+#endif
 #endif // 0
 
     const std::string valueName = std::string("std::complex<") + realName + ">";

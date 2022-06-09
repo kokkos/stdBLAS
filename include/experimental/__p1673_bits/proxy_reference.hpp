@@ -44,9 +44,9 @@
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_PROXY_REFERENCE_HPP_
 
 #include "conjugate_if_needed.hpp"
-#ifdef __cpp_lib_atomic_ref
+#if defined(__cpp_lib_atomic_ref) && defined(LINALG_ENABLE_ATOMIC_REF)
 #  include <atomic>
-#endif // __cpp_lib_atomic_ref
+#endif
 #if __cplusplus >= 202002L
 #  include <concepts>
 #endif // __cplusplus >= 202002L
@@ -62,10 +62,10 @@ namespace impl {
 template<class T>
 static constexpr bool is_atomic_ref_not_arithmetic_v = false;
 
-#ifdef __cpp_lib_atomic_ref
+#if defined(__cpp_lib_atomic_ref) && defined(LINALG_ENABLE_ATOMIC_REF)
 template<class U>
 static constexpr bool is_atomic_ref_not_arithmetic_v<std::atomic_ref<U>> = ! std::is_arithmetic_v<U>;
-#endif // __cpp_lib_atomic_ref  
+#endif
 
 // A "tag" for identifying the proxy reference types in this proposal.
 // It's helpful for this tag to be a complete type, so that we can use
