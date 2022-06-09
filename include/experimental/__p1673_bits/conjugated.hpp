@@ -44,135 +44,92 @@
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATED_HPP_
 
 #include <experimental/mdspan>
-#include <complex>
 
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
-template<class T>
-class conjugated_scalar {
-public:
-  using value_type = T;
-
-  conjugated_scalar(const T& v) : val(v) {}
-
-  operator T() const { return conj(val); }
-
-  template<class T2>
-  T operator* (const T2 upd) const {
-    return conj(val) * upd;
-  }
-
-  template<class T2>
-  T operator+ (const T2 upd) const {
-    return conj(val) + upd;
-  }
-
-  template<class T2>
-  bool operator== (const T2 upd) const {
-    return conj(val) == upd;
-  }
-
-  template<class T2>
-  bool operator!= (const T2 upd) const {
-    return conj(val) != upd;
-  }
-
-private:
-  const T& val;
-};
-
-template<class T1, class T2>
-auto operator* (const T1 x, const conjugated_scalar<T2> y) {
-  using std::conj;
-  return x * T2(y);
-}
-
-template<class Accessor, class T>
+template<class Accessor>
 class accessor_conjugate {
 private:
-  using size_type = typename extents<>::size_type;
+  Accessor accessor_;
+
+  using accessor_value_type =
+    std::remove_cv_t<typename Accessor::element_type>;
+  static constexpr bool accessor_value_is_arith =
+    std::is_arithmetic_v<accessor_value_type>;
+
 public:
-  using element_type  = typename Accessor::element_type;
-  using pointer       = typename Accessor::pointer;
-  using reference     = typename Accessor::reference;
-  using offset_policy = typename Accessor::offset_policy;
+  using reference =
+    std::conditional_t<accessor_value_is_arith,
+      typename Accessor::reference,
+      conjugated_scalar<typename Accessor::reference, accessor_value_type>>;
 
-  accessor_conjugate() = default;
-
-  accessor_conjugate(Accessor a) : acc(a) {}
-
-  reference access(pointer p, size_type i) const noexcept {
-    return reference(acc.access(p, i));
-  }
-
-  typename offset_policy::pointer offset(pointer p, size_type i) const noexcept {
-    return acc.offset(p, i);
-  }
-
-  element_type* decay(pointer p) const noexcept {
-    return acc.decay(p);
-  }
 private:
-  Accessor acc;
-};
-
-template<class Accessor, class T>
-class accessor_conjugate<Accessor, std::complex<T>> {
-private:
-  using size_type = typename extents<>::size_type;
+  using pre_const_element_type =
+    std::conditional_t<accessor_value_is_arith,
+      typename Accessor::element_type,
+      typename reference::value_type>;
+  
 public:
-  // FIXME If BLAS functions want to strip off accessor_conjugate for
-  // optimization, they will need a way to work with th underlying
-  // Accessor (which may not be the default one).
-
-  using element_type  = typename Accessor::element_type;
+  using element_type  = std::add_const_t<pre_const_element_type>;
   using pointer       = typename Accessor::pointer;
-  // FIXME Do we actually need to template conjugated_scalar
-  // on the Reference type as well as T ?
-  using reference     =
-    conjugated_scalar< /* typename Accessor::reference, */ std::complex<T>>;
   using offset_policy =
-    accessor_conjugate<typename Accessor::offset_policy, std::complex<T>>;
+    std::conditional_t<accessor_value_is_arith,
+		       typename Accessor::offset_policy,
+		       accessor_conjugate<typename Accessor::offset_policy>>;
 
-  accessor_conjugate() = default;
+  accessor_conjugate(Accessor accessor) : accessor_(accessor) {}
 
-  accessor_conjugate(Accessor a) : acc(a) {}
+  MDSPAN_TEMPLATE_REQUIRES(
+    class OtherElementType,
+    /* requires */ (std::is_convertible_v<
+      typename default_accessor<OtherElementType>::element_type(*)[],
+      typename Accessor::element_type(*)[]
+    >)
+  )
+  accessor_conjugate(default_accessor<Accessor> accessor) : accessor_(accessor) {}
 
-  reference access(pointer p, size_type i) const noexcept {
-    return reference(acc.access(p, i));
+  reference access(pointer p, extents<>::size_type i) const
+    noexcept(noexcept(reference(accessor_.access(p, i))))
+  {
+    return reference(accessor_.access(p, i));
   }
 
-  typename offset_policy::pointer offset(pointer p, size_type i) const noexcept {
-    return acc.offset(p,i);
+  typename offset_policy::pointer offset(pointer p, extents<>::size_type i) const
+    noexcept(noexcept(accessor_.offset(p, i)))
+  {
+    return accessor_.offset(p, i);
   }
 
-  element_type* decay(pointer p) const noexcept {
-    return acc.decay(p);
-  }
-
-  // NOT IN PROPOSAL
-  //
-  // This isn't marked noexcept because that would impose a constraint
-  // on Accessor's copy constructor.
-  Accessor nested_accessor() const {
-    return acc;
-  }
-
-private:
-  Accessor acc;
+  Accessor nested_accessor() const { return accessor_; }
 };
 
-template<class EltType, class Extents, class Layout, class Accessor>
-mdspan<EltType, Extents, Layout,
-             accessor_conjugate<Accessor, EltType>>
-conjugated(mdspan<EltType, Extents, Layout, Accessor> a)
+template<class ElementType, class Extents, class Layout, class Accessor>
+auto conjugated(mdspan<ElementType, Extents, Layout, Accessor> a)
 {
-  using accessor_t = accessor_conjugate<Accessor, EltType>;
-  return mdspan<EltType, Extents, Layout, accessor_t> (
-    a.data (), a.mapping (), accessor_t (a.accessor ()));
+  if constexpr (std::is_arithmetic_v<std::remove_cv_t<ElementType>>) {
+    return mdspan<ElementType, Extents, Layout, Accessor>
+      (a.data(), a.mapping(), a.accessor());
+  } else {
+    using return_element_type =
+      typename accessor_conjugate<Accessor>::element_type;
+    using return_accessor_type = accessor_conjugate<Accessor>;
+    return mdspan<return_element_type, Extents, Layout, return_accessor_type>
+      (a.data(), a.mapping(), return_accessor_type(a.accessor()));
+  }
+}
+
+// Conjugation is self-annihilating
+template<class ElementType, class Extents, class Layout, class NestedAccessor>
+auto conjugated(
+  mdspan<ElementType, Extents, Layout, accessor_conjugate<NestedAccessor>> a)
+{
+  using return_element_type = typename NestedAccessor::element_type;
+  using return_accessor_type = NestedAccessor;
+  return mdspan<return_element_type, Extents, Layout, return_accessor_type>
+    (a.data(), a.mapping(), a.nested_accessor());
 }
 
 } // end namespace linalg

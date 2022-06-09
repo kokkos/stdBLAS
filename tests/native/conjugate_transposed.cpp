@@ -56,11 +56,11 @@ namespace {
         EXPECT_EQ( A(i,j), val );
         EXPECT_EQ( B(i,j), -val );
 
-        EXPECT_EQ( A_h(j,i), conj(val) );
-        EXPECT_EQ( B_h(j,i), -conj(val) );
+        EXPECT_EQ( scalar_t(A_h(j,i)), conj(val) );
+        EXPECT_EQ( scalar_t(B_h(j,i)), -conj(val) );
 
-        EXPECT_EQ( A_h(j,i), conj(A(i,j)) );
-        EXPECT_EQ( B_h(j,i), conj(B(i,j)) );
+        EXPECT_EQ( scalar_t(A_h(j,i)), conj(A(i,j)) );
+        EXPECT_EQ( scalar_t(B_h(j,i)), conj(B(i,j)) );
       }
     }
   }

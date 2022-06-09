@@ -39,9 +39,8 @@ namespace {
       using accessor_t = vector_t::accessor_type;
       using std::experimental::linalg::accessor_scaled;
       using scaled_accessor_t =
-        accessor_scaled<accessor_t, scaling_factor_type>;
-      scaled_accessor_t accessor0;
-      scaled_accessor_t accessor1 (y.accessor (), scalingFactor);
+        accessor_scaled<scaling_factor_type, accessor_t>;
+      scaled_accessor_t accessor0{scalingFactor, y.accessor()};
     }
 
     auto y_scaled = scaled (scalingFactor, y);

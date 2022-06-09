@@ -12,220 +12,7 @@
 #define P1673_CONJUGATED_SCALAR_ARITHMETIC_OPERATORS_REFERENCE_OVERLOADS 1
 
 #include "gtest/gtest.h"
-
-#ifdef __cpp_lib_atomic_ref
-#  include <atomic>
-#endif // __cpp_lib_atomic_ref
-#include <cassert>
-#include <complex>
-#if __cplusplus >= 202002L
-#  include <concepts>
-#endif // __cplusplus >= 202002L
-#include <cstdint>
-#include <iostream>
-#include <type_traits>
-
-///////////////////////////////////////////////////////////
-// conj_if_needed implementation
-///////////////////////////////////////////////////////////
-
-namespace impl {
-
-template<class T>
-static constexpr bool is_atomic_ref_not_arithmetic_v = false;
-
-#ifdef __cpp_lib_atomic_ref
-template<class U>
-static constexpr bool is_atomic_ref_not_arithmetic_v<std::atomic_ref<U>> = ! std::is_arithmetic_v<U>;
-#endif // __cpp_lib_atomic_ref  
-
-template<class T, std::enable_if_t<! std::is_arithmetic_v<T>, bool> = true>  
-auto conj_if_needed(const T& t) // <it>exposition only</it>
-{
-    using std::conj;
-    return conj(t);
-}
-
-template<class T, std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
-T conj_if_needed(const T& t) // <it>exposition only</it>
-{
-    return t;
-}
-
-} // namespace impl
-
-///////////////////////////////////////////////////////////
-// conjugated_scalar declaration and definition
-///////////////////////////////////////////////////////////
-
-namespace impl {
-
-// A "tag" for identifying the proxy reference types in this proposal.
-// It's helpful for this tag to be a complete type, so that we can use
-// it inside proxy_reference (proxy_reference isn't really complete
-// inside itself).
-class proxy_reference_base {};
-
-// Mixin that will provide all the arithmetic operators
-// for the proxy reference types, to be defined below.
-//
-// NOTE (mfh 2022/06/03) Consider getting rid of Value, since it can
-// be deduced as the return type of Derived::to_value(Reference).
-// However, Derived isn't really a complete type in this class,
-// so doing this isn't so easy.
-template<class Reference, class Value, class Derived>
-class proxy_reference : proxy_reference_base {
-private:
-  static_assert(std::is_same_v<Value, std::remove_cv_t<Value>>);
-  using this_type = proxy_reference<Reference, Value, Derived>;
-  
-  Reference reference_;
-
-public:
-  using reference_type = Reference;
-  using value_type = Value;
-  using derived_type = Derived;
-
-  // NOTE (mfh 2022/06/03) "explicit" may prevent implicit conversions
-  // that cause ambiguity among overloaded operator selection.
-  explicit proxy_reference(Reference reference) : reference_(reference) {}
-
-  operator value_type() const {
-    return static_cast<const Derived&>(*this).to_value(reference_);
-  }
-
-  ////////////////////////////////////////////////////////////
-  // Unary negation
-  ////////////////////////////////////////////////////////////
-  
-  friend auto operator-(const derived_type& cs)
-  {
-    return -value_type(cs);
-  }
-
-  // Case 1: rhs is a subclass of proxy_reference of a possibly different type.    
-#define P1673_PROXY_REFERENCE_ARITHMETIC_OPERATOR_CASE1( SYMBOL ) \
-  template<class Rhs, std::enable_if_t<std::is_base_of_v<proxy_reference_base, Rhs>, bool> = true> \
-  friend auto \
-  operator SYMBOL (derived_type lhs, Rhs rhs) \
-  { \
-    using rhs_value_type = typename Rhs::value_type; \
-    return value_type(lhs) SYMBOL rhs_value_type(rhs); \
-  }
-  
-  // Case 2: rhs is NOT a subclass of proxy_reference
-  //
-  // Another way to work around the lack of overloaded operators for
-  // atomic_ref<complex<R>> would be to provide a function that makes
-  // an mdspan "atomic," and for that function to use something other
-  // than atomic_ref if the value_type is complex<R>.
-#define P1673_PROXY_REFERENCE_ARITHMETIC_OPERATOR_CASE2( SYMBOL ) \
-  template<class Rhs, std::enable_if_t<! std::is_base_of_v<proxy_reference_base, Rhs>, bool> = true> \
-  friend auto				   \
-  operator SYMBOL (derived_type lhs, Rhs rhs) \
-  { \
-    if constexpr (impl::is_atomic_ref_not_arithmetic_v<Rhs>) { \
-      return value_type(lhs) SYMBOL rhs.load(); \
-    } else { \
-      return value_type(lhs) SYMBOL rhs; \
-    } \
-  }
-
-  // Case 3: lhs is not a subclass of proxy_reference, rhs is derived_type.
-#define P1673_PROXY_REFERENCE_ARITHMETIC_OPERATOR_CASE3( SYMBOL ) \
-  template<class Lhs, std::enable_if_t<! std::is_base_of_v<proxy_reference_base, Lhs>, bool> = true> \
-  friend auto				   \
-  operator SYMBOL (Lhs lhs, derived_type rhs) \
-  { \
-    if constexpr (impl::is_atomic_ref_not_arithmetic_v<Lhs>) { \
-      return lhs.load() SYMBOL value_type(rhs); \
-    } else { \
-      return lhs SYMBOL value_type(rhs); \
-    } \
-  }
-
-#define P1673_PROXY_REFERENCE_ARITHMETIC_OPERATOR( SYMBOL ) \
-  P1673_PROXY_REFERENCE_ARITHMETIC_OPERATOR_CASE1( SYMBOL ) \
-  P1673_PROXY_REFERENCE_ARITHMETIC_OPERATOR_CASE2( SYMBOL ) \
-  P1673_PROXY_REFERENCE_ARITHMETIC_OPERATOR_CASE3( SYMBOL )
-  
-  ////////////////////////////////////////////////////////////
-  // Binary plus, minus, times, and divide
-  ////////////////////////////////////////////////////////////
-
-  P1673_PROXY_REFERENCE_ARITHMETIC_OPERATOR( + )
-  P1673_PROXY_REFERENCE_ARITHMETIC_OPERATOR( - )
-  P1673_PROXY_REFERENCE_ARITHMETIC_OPERATOR( * )
-  P1673_PROXY_REFERENCE_ARITHMETIC_OPERATOR( / )
-};
-
-} // namespace impl
-
-// The point of ReferenceValue is so that we can cast the input of
-// to_value to a value immediately, before we apply any
-// transformations.  This has two goals.
-//
-// 1. Ensure the original order of operations (as if computing nonlazily)
-//
-// 2. Make it possible to use reference types that don't have
-//    arithmetic operators defined, such as
-//    std::atomic_ref<std::complex<R>>.  (atomic_ref<T> for arithmetic
-//    types T _does_ have arithmetic operators.)
-
-template<class Reference, class ReferenceValue>
-class conjugated_scalar :
-  public impl::proxy_reference<Reference, ReferenceValue, conjugated_scalar<Reference, ReferenceValue>>
-{
-private:
-  using my_type = conjugated_scalar<Reference, ReferenceValue>;
-  using base_type = impl::proxy_reference<Reference, ReferenceValue, my_type>;
-
-public:
-  explicit conjugated_scalar(Reference reference) : base_type(reference) {}
-
-  // NOTE (mfh 2022/06/03) Consider moving this to proxy_reference,
-  // since it's duplicated in all the proxy reference "base" types.
-  // Doing so isn't easy, because this class is an incomplete type
-  // inside proxy_reference at the time when we need it to deduce this
-  // type.
-  using value_type = decltype(impl::conj_if_needed(ReferenceValue(std::declval<Reference>())));
-  static auto to_value (Reference reference) {
-    return impl::conj_if_needed(ReferenceValue(reference));
-  }
-};
-
-///////////////////////////////////////////////////////////
-// scaled_scalar implementation
-///////////////////////////////////////////////////////////
-
-template<class ScalingFactor, class Reference, class ReferenceValue>
-class scaled_scalar :
-  public impl::proxy_reference<Reference, ReferenceValue, scaled_scalar<ScalingFactor, Reference, ReferenceValue>>
-{
-private:
-  ScalingFactor scaling_factor_;
-
-  using my_type = scaled_scalar<ScalingFactor, Reference, ReferenceValue>;
-  using base_type = impl::proxy_reference<Reference, ReferenceValue, my_type>;
-public:
-  explicit scaled_scalar(ScalingFactor scaling_factor, Reference reference) :
-    base_type(reference),
-    scaling_factor_(std::move(scaling_factor))
-  {}
-
-  using value_type = decltype(scaling_factor_ * ReferenceValue(std::declval<Reference>()));
-  value_type to_value (Reference reference) const {
-    return scaling_factor_ * ReferenceValue(reference);
-  }
-
-  // scaled_scalar operator== is just for tests.
-  friend bool operator==(
-    const my_type& lhs,
-    const value_type& rhs)
-  {
-    return value_type(static_cast<const base_type&>(lhs)) == rhs;
-  }
-};
+#include <experimental/linalg>
 
 ///////////////////////////////////////////////////////////
 // Custom real number type for tests
@@ -429,10 +216,12 @@ FakeComplex conj(const FakeComplex& z) { return {z.real, -z.imag}; }
 template<class Real>
 void test_real_conj_if_needed()
 {
+  using std::experimental::linalg::impl::conj_if_needed;
+
   Real z(2.0);
   const Real z_conj_expected(2.0);
 
-  auto z_conj = impl::conj_if_needed(z);
+  auto z_conj = conj_if_needed(z);
   static_assert(std::is_same_v<decltype(z_conj), Real>);
   EXPECT_EQ(z_conj, z_conj_expected);
 }
@@ -440,10 +229,12 @@ void test_real_conj_if_needed()
 template<class Real>
 void test_complex_conj_if_needed()
 {
+  using std::experimental::linalg::impl::conj_if_needed;
+  
   std::complex<Real> z(2.0, -3.0);
   const std::complex<Real> z_conj_expected(2.0, 3.0);
 
-  auto z_conj = impl::conj_if_needed(z);
+  auto z_conj = conj_if_needed(z);
   static_assert(std::is_same_v<decltype(z_conj), std::complex<Real>>);
   EXPECT_EQ(z_conj, z_conj_expected);
 }
@@ -473,8 +264,9 @@ FakeComplex get_test_xvalue(const FakeComplex&)
 template<class Reference, class Value>
 void test_conjugated_scalar_from_reference(Reference zd, Value zd_orig)
 {
-  using test_helpers::is_atomic_ref_not_arithmetic_v;  
-  using impl::conj_if_needed;
+  using test_helpers::is_atomic_ref_not_arithmetic_v;
+  using std::experimental::linalg::impl::conj_if_needed;
+  using std::experimental::linalg::conjugated_scalar;  
   using value_type = typename std::remove_cv_t<Value>;
 
 #ifdef P1673_CONJUGATED_SCALAR_ARITHMETIC_OPERATORS_REFERENCE_OVERLOADS
@@ -756,8 +548,8 @@ void test_complex_conjugated_scalar()
   const std::complex<Real> zd3_orig{-1.0, -2.0};
   std::complex<Real> zd3{-1.0, -2.0};
   test_conjugated_scalar_from_reference<
-    std::atomic_ref<std::complex<Real>>, std::complex<Real>>(
-							     std::atomic_ref{zd3}, zd3_orig);
+    std::atomic_ref<std::complex<Real>>, std::complex<Real>>
+      (std::atomic_ref{zd3}, zd3_orig);
 #endif // __cpp_lib_atomic_ref
 
   // FIXME (mfh 2022/06/03) We might not need to worry about the comment below.
@@ -767,6 +559,7 @@ void test_complex_conjugated_scalar()
   {
     using value_type = std::complex<Real>;
     using inner_reference_type = value_type&;
+    using std::experimental::linalg::scaled_scalar;
     using reference_type = scaled_scalar<Real, inner_reference_type, value_type>;
 
     const Real scalingFactor = 3.0;
@@ -832,6 +625,7 @@ void test_scaled_scalar_from_reference(
 {
   std::cerr << "test_scaled_scalar_from_reference" << std::endl;
 
+  using std::experimental::linalg::scaled_scalar;
   using value_type = typename std::remove_cv_t<Value>;
   constexpr bool is_atomic_ref_not_arithmetic = test_helpers::is_atomic_ref_not_arithmetic_v<Reference>;
 
@@ -1096,6 +890,7 @@ void test_two_scaled_scalars_from_reference(
 	    << scalingFactorName << ", " << referenceName
 	    << ", " << valueName << ">" << std::endl;
 
+  using std::experimental::linalg::scaled_scalar;  
   using value_type = typename std::remove_cv_t<Value>;
   constexpr bool is_atomic_ref_not_arithmetic =
     test_helpers::is_atomic_ref_not_arithmetic_v<Reference>;
@@ -1266,6 +1061,7 @@ namespace {
     test_FakeComplex_conjugated_scalar();
 
     FakeRealNumber fn;
+    using std::experimental::linalg::conjugated_scalar;
     conjugated_scalar<FakeRealNumber&, FakeRealNumber> fncs(fn);
     EXPECT_EQ(fn, FakeRealNumber(fncs));
   }
