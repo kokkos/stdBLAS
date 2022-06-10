@@ -2,6 +2,7 @@
 
 #include <experimental/linalg>
 #include <experimental/mdspan>
+#include <type_traits>
 #include <vector>
 
 namespace {
@@ -9,6 +10,27 @@ namespace {
   using std::experimental::extents;
   using std::experimental::mdspan;
   using std::experimental::linalg::scaled;
+
+  // scaled(1 << 20, scaled(1 << 20, x)) with x having value_type double
+  // should not overflow int.
+  TEST(scaled, preserve_original_evaluation_order)
+  {
+    constexpr double d = 4.2;
+    constexpr auto computed_val = (1 << 20) * ((1 << 20) * d);
+    static_assert(std::is_same_v<std::remove_cv_t<decltype(computed_val)>, double>);
+    constexpr auto expected_val = 1099511627776uLL * d;
+    static_assert(computed_val == expected_val);
+
+    double x_element = d;
+    mdspan<double, extents<1>> x(&x_element);
+    EXPECT_EQ(x[0], d);
+    auto x_scaled = scaled(1 << 20, x);
+    EXPECT_EQ(x_scaled[0], (1 << 20) * d);
+    auto x_scaled_scaled = scaled(1 << 20, x_scaled);
+    EXPECT_EQ(x_scaled_scaled[0], expected_val);
+    static_assert(std::is_same_v<decltype(x_scaled_scaled)::value_type, double>);
+    static_assert(std::is_same_v<decltype(x_scaled_scaled)::element_type, const double>);    
+  }
 
   TEST(scaled, mdspan_double_scalar_float)
   {

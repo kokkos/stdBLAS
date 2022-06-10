@@ -86,10 +86,6 @@ public:
     return accessor_.offset(p, i);
   }
 
-  // NOT IN PROPOSAL
-  //
-  // This isn't marked noexcept because that would impose a constraint
-  // on Accessor's copy constructor.
   Accessor nested_accessor() const {
     return accessor_;
   }
@@ -108,22 +104,10 @@ namespace impl {
 template<class ScalingFactor,
          class Accessor>
 using scaled_element_type =
-  typename accessor_scaled<ScalingFactor, Accessor>::element_type;
-
-template<class ScalingFactor,
-         class Accessor>
-using scaled_accessor_type = accessor_scaled<ScalingFactor, Accessor>;
-
-// FIXME (mfh 2022/06/08) Nested scaled applications need to preserve
-// the type of the nonlazy operation.  This means preserving the
-// original multiplication order and not reparenthesizing, unless they
-// can prove that the type would be the same regardless.
+  std::add_const_t<typename accessor_scaled<ScalingFactor, Accessor>::element_type>;
 
 } // namespace impl
 
-// FIXME (mfh 2022/06/08) Spec is wrong here,
-// because it doesn't preserve the type.
-  
 template<class ScalingFactor,
          class ElementType,
          class Extents,
@@ -132,13 +116,12 @@ template<class ScalingFactor,
 mdspan<impl::scaled_element_type<ScalingFactor, Accessor>,
        Extents,
        Layout,
-       impl::scaled_accessor_type<ScalingFactor, Accessor>>
+       accessor_scaled<ScalingFactor, Accessor>>
 scaled(ScalingFactor scaling_factor,
-       mdspan<ElementType, Extents, Layout, Accessor> a)
+       mdspan<ElementType, Extents, Layout, Accessor> x)
 {
-  using return_accessor_type = accessor_scaled<ScalingFactor, Accessor>;
-  return {a.data(), a.mapping(),
-	  return_accessor_type{scaling_factor, a.accessor()}};
+  using acc_type = accessor_scaled<ScalingFactor, Accessor>;
+  return {x.data(), x.mapping(), acc_type{scaling_factor, x.accessor()}};
 }
 
 } // end namespace linalg
