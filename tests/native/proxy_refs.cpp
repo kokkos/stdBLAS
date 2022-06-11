@@ -206,8 +206,16 @@ static constexpr bool is_atomic_ref_not_arithmetic_v<std::atomic_ref<U>> = ! std
 } // namespace test_helpers
 
 // FakeComplex conj implementation
-
 FakeComplex conj(const FakeComplex& z) { return {z.real, -z.imag}; }
+
+// FakeComplex abs implementation
+auto abs(const FakeComplex& z) { return sqrt(z.real * z.real + z.imag * z.imag); }
+
+// FakeComplex real implementation
+auto real(const FakeComplex& z) { return z.real; }
+
+// FakeComplex imag implementation
+auto imag(const FakeComplex& z) { return z.imag; }
 
 ///////////////////////////////////////////////////////////
 // conj_if_needed tests
@@ -877,6 +885,20 @@ void test_scaled_scalar_from_reference(
   } else {
     EXPECT_EQ(zd, zd_orig);
   }
+
+  // Test abs
+  {
+    auto abs_result = abs(cszd);
+    auto abs_result_expected = [&]() {
+      // Unsigned integers don't work nicely with abs.
+      if constexpr (std::is_unsigned_v<value_type>) {
+        return sf * zd;
+      } else {
+        return abs(sf * zd);
+      }
+    }();
+    EXPECT_EQ(abs_result, abs_result_expected);
+  }
 }
 
 template<class ScalingFactor, class Reference, class Value>
@@ -1043,6 +1065,132 @@ namespace {
     test_real_conj_if_needed<uint64_t>();
   }
 
+  template<class R>
+  void test_imag_part_complex()
+  {
+    using std::experimental::linalg::impl::imag_part;
+    std::complex<R> z{R(3.0), R(4.0)};
+    auto z_imag = imag_part(z);
+    EXPECT_EQ(z_imag, R(4.0));
+    static_assert(std::is_same_v<decltype(z_imag), R>);
+  }
+  template<class T>
+  void test_imag_part_floating_point()
+  {
+    using std::experimental::linalg::impl::imag_part;
+    T x = 9.0;
+    auto x_imag = imag_part(x);
+    EXPECT_EQ(x_imag, T(0.0));
+    static_assert(std::is_same_v<decltype(x_imag), T>);
+  }
+  template<class T>
+  void test_imag_part_integral()
+  {
+    using std::experimental::linalg::impl::imag_part;
+    T x = 3;
+    auto x_imag = imag_part(x);
+    EXPECT_EQ(x_imag, T(0));
+    static_assert(std::is_same_v<decltype(x_imag), T>);
+  }
+
+  TEST(proxy_refs, imag_part)
+  {
+    test_imag_part_complex<float>();
+    test_imag_part_complex<double>();
+    test_imag_part_complex<long double>();
+    
+    test_imag_part_floating_point<float>();
+    test_imag_part_floating_point<double>();
+    test_imag_part_floating_point<long double>();    
+
+    test_imag_part_integral<int8_t>();
+    test_imag_part_integral<uint8_t>();    
+    test_imag_part_integral<int16_t>();
+    test_imag_part_integral<uint16_t>();    
+    test_imag_part_integral<int32_t>();
+    test_imag_part_integral<uint32_t>();    
+    test_imag_part_integral<int64_t>();
+    test_imag_part_integral<uint64_t>();    
+
+    {
+      using std::experimental::linalg::impl::imag_part;
+      FakeComplex z{3.0, 4.0};
+      auto z_imag = imag_part(z);
+      EXPECT_EQ(z_imag, 4.0);
+      static_assert(std::is_same_v<decltype(z_imag), decltype(z.imag)>);
+    }
+    {
+      using std::experimental::linalg::impl::imag_part;
+      FakeRealNumber x{3.0};
+      auto x_imag = imag_part(x);
+      EXPECT_EQ(x_imag, FakeRealNumber{});
+      static_assert(std::is_same_v<decltype(x_imag), FakeRealNumber>);
+    }
+  }
+
+  template<class R>
+  void test_real_part_complex()
+  {
+    using std::experimental::linalg::impl::real_part;
+    std::complex<R> z{R(3.0), R(4.0)};
+    auto z_imag = real_part(z);
+    EXPECT_EQ(z_imag, R(3.0));
+    static_assert(std::is_same_v<decltype(z_imag), R>);
+  }
+  template<class T>
+  void test_real_part_floating_point()
+  {
+    using std::experimental::linalg::impl::real_part;
+    T x = 9.0;
+    auto x_imag = real_part(x);
+    EXPECT_EQ(x_imag, T(9.0));
+    static_assert(std::is_same_v<decltype(x_imag), T>);
+  }
+  template<class T>
+  void test_real_part_integral()
+  {
+    using std::experimental::linalg::impl::real_part;
+    T x = 3;
+    auto x_imag = real_part(x);
+    EXPECT_EQ(x_imag, T(3));
+    static_assert(std::is_same_v<decltype(x_imag), T>);
+  }
+
+  TEST(proxy_refs, real_part)
+  {
+    test_real_part_complex<float>();
+    test_real_part_complex<double>();
+    test_real_part_complex<long double>();
+    
+    test_real_part_floating_point<float>();
+    test_real_part_floating_point<double>();
+    test_real_part_floating_point<long double>();    
+
+    test_real_part_integral<int8_t>();
+    test_real_part_integral<uint8_t>();    
+    test_real_part_integral<int16_t>();
+    test_real_part_integral<uint16_t>();    
+    test_real_part_integral<int32_t>();
+    test_real_part_integral<uint32_t>();    
+    test_real_part_integral<int64_t>();
+    test_real_part_integral<uint64_t>();    
+
+    {
+      using std::experimental::linalg::impl::real_part;
+      FakeComplex z{3.0, 4.0};
+      auto z_imag = real_part(z);
+      EXPECT_EQ(z_imag, 3.0);
+      static_assert(std::is_same_v<decltype(z_imag), decltype(z.imag)>);
+    }
+    {
+      using std::experimental::linalg::impl::real_part;
+      FakeRealNumber x{3.0};
+      auto x_real = real_part(x);
+      EXPECT_EQ(x_real, FakeRealNumber{3.0});
+      static_assert(std::is_same_v<decltype(x_real), FakeRealNumber>);
+    }
+  }
+  
   TEST(proxy_refs, conjugated_scalar)
   {
     test_complex_conjugated_scalar<float>();

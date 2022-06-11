@@ -67,6 +67,72 @@ template<class U>
 static constexpr bool is_atomic_ref_not_arithmetic_v<std::atomic_ref<U>> = ! std::is_arithmetic_v<U>;
 #endif
 
+template<class T, class = void>
+struct has_imag : std::false_type {};
+
+// If I can find unqualified imag via overload resolution,
+// then assume that imag(t) returns the imaginary part of t.
+template<class T>
+struct has_imag<T, decltype(imag(std::declval<T>()), void())> : std::true_type {};
+
+template<class T>
+T imag_part_impl(const T& t, std::false_type)
+{
+  return T{};
+}
+
+template<class T>
+auto imag_part_impl(const T& t, std::true_type)
+{
+  if constexpr (std::is_arithmetic_v<T>) {
+    return T{};
+  } else {
+    return imag(t);
+  }
+}
+
+template<class T>
+auto imag_part(const T& t)
+{
+  return imag_part_impl(t, has_imag<T>{});
+}
+
+template<class T, class = void>
+struct has_real : std::false_type {};
+
+// If I can find unqualified real via overload resolution,
+// then assume that real(t) returns the real part of t.
+template<class T>
+struct has_real<T, decltype(real(std::declval<T>()), void())> : std::true_type {};
+
+template<class T>
+T real_part_impl(const T& t, std::false_type)
+{
+  return t;
+}
+
+template<class T>
+auto real_part_impl(const T& t, std::true_type)
+{
+  if constexpr (std::is_arithmetic_v<T>) {
+    return t;
+  } else {
+    return real(t);
+  }
+}
+
+template<class T>
+auto real_part(const T& t)
+{
+  return real_part_impl(t, has_real<T>{});
+}
+
+// template<class R>
+// R imag_part(const std::complex<R>& z)
+// {
+//   return std::imag(z);
+// }
+
 // A "tag" for identifying the proxy reference types in this proposal.
 // It's helpful for this tag to be a complete type, so that we can use
 // it inside proxy_reference (proxy_reference isn't really complete
@@ -164,6 +230,22 @@ public:
   P1673_PROXY_REFERENCE_ARITHMETIC_OPERATOR( - )
   P1673_PROXY_REFERENCE_ARITHMETIC_OPERATOR( * )
   P1673_PROXY_REFERENCE_ARITHMETIC_OPERATOR( / )
+
+  friend auto abs(const derived_type& x) {
+    if constexpr (std::is_unsigned_v<value_type>) {
+      return value_type(static_cast<const this_type&>(x));
+    } else {
+      return abs(value_type(static_cast<const this_type&>(x)));
+    }
+  }
+
+  friend auto real(const derived_type& x) {
+    return real_part(value_type(static_cast<const this_type&>(x)));
+  }
+  
+  friend auto imag(const derived_type& x) {
+    return imag_part(value_type(static_cast<const this_type&>(x)));
+  }
 };
 
 } // namespace impl

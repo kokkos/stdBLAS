@@ -100,4 +100,34 @@ namespace {
       EXPECT_EQ( 1.0 / y_scaled_ref, 1.0 / y_k_scaled );
     }
   }
+
+  TEST(scaled, mdspan_complex)
+  {
+    using vector_element_type = std::complex<double>;
+    using scaling_factor_type = std::complex<double>;
+
+    using vector_t =
+      mdspan<vector_element_type, extents<dynamic_extent>>;
+
+    constexpr std::size_t vectorSize(5);
+    constexpr std::size_t storageSize = vectorSize;
+    std::vector<vector_element_type> storage(storageSize);
+
+    vector_t x(storage.data(), vectorSize);
+
+    for (std::size_t k = 0; k < vectorSize; ++k) {
+      const vector_element_type x_k = vector_element_type(k) + 1.0;
+      x(k) = x_k;
+    }
+
+    const scaling_factor_type scalingFactor (-3.0);
+    auto x_scaled = scaled (scalingFactor, x);
+
+    using std::abs;
+
+    for (std::size_t k = 0; k < vectorSize; ++k) {
+      auto abs_x_scaled_k = abs(x_scaled[k]);
+      EXPECT_EQ(abs_x_scaled_k, std::abs(scalingFactor * x[k]));
+    }
+  }
 }
