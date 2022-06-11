@@ -40,10 +40,11 @@
 //@HEADER
 */
 
-#include <cassert>
-
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS3_MATRIX_PRODUCT_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS3_MATRIX_PRODUCT_HPP_
+
+#include <cassert>
+#include <optional>
 
 namespace std {
 namespace experimental {
@@ -184,28 +185,25 @@ struct BlasGemm<std::complex<float>> {
 };
 
 template<class in_matrix_t>
-constexpr bool valid_input_blas_accessor ()
+constexpr bool valid_input_blas_accessor()
 {
-  using elt_t = typename in_matrix_t::element_type;
-  using acc_t = typename in_matrix_t::accessor_type;
+  using elt_type = typename in_matrix_t::element_type;  
+  using val_type = typename in_matrix_t::value_type;
+  using acc_type = typename in_matrix_t::accessor_type;
 
-  using valid_acc_t_0 = default_accessor<elt_t>;
-  using valid_acc_t_1 = accessor_scaled<
-    default_accessor<elt_t>, elt_t>;
-  // NOTE accessors don't necessarily commute.
-  using valid_acc_t_2 = accessor_scaled<
-    accessor_conjugate<default_accessor<elt_t>, elt_t>,
-    elt_t>;
-  using valid_acc_t_3 = accessor_conjugate<
-    accessor_scaled<default_accessor<elt_t>, elt_t>,
-    elt_t>;
+  using def_acc_type = default_accessor<elt_type>;
+  using conj_def_acc_type = accessor_conjugate<def_acc_type>;
+  using scal_def_acc_type = accessor_scaled<val_type, def_acc_type>;
+  using scal_conj_acc_type = accessor_scaled<val_type, conj_def_acc_type>;
+  using conj_scal_acc_type = accessor_conjugate<scal_def_acc_type>;
 
   // The two matrices' accessor types need not be the same.
   // Input matrices may be scaled or transposed.
-  return std::is_same_v<acc_t, valid_acc_t_0> ||
-    std::is_same_v<acc_t, valid_acc_t_1> ||
-    std::is_same_v<acc_t, valid_acc_t_2> ||
-    std::is_same_v<acc_t, valid_acc_t_3>;
+  return std::is_same_v<acc_type, def_acc_type> ||
+    std::is_same_v<acc_type, conj_def_acc_type> ||
+    std::is_same_v<acc_type, scal_def_acc_type> ||
+    std::is_same_v<acc_type, scal_conj_acc_type> ||
+    std::is_same_v<acc_type, conj_scal_acc_type>;    
 }
 
 template<class inout_matrix_t>
@@ -221,36 +219,26 @@ constexpr bool valid_output_blas_accessor ()
 template<class in_matrix_t>
 constexpr bool valid_input_blas_layout()
 {
-  // Either input matrix may have a transposed layout, but the
-  // underlying layout of all matrices must be layout_left (or
-  // layout_blas_general<column_major_t>, once we finish implementing
-  // that).  layout_right and layout_blas_general<row_major_t> can
-  // work if you pretend they are transposes, but we don't try that
-  // optimization here.  Another option is a CBLAS implementation,
-  // which admits row-major as well as column-major matrices.
-
+  // transposed(A) transforms
+  //
+  // * layout_left into layout_right,
+  // * layout_right into layout_left,
+  // * layout_stride into layout_stride,
+  // * layout_blas_general<column_major_t> into layout_blas_general<row_major_t>, and
+  // * layout_blas_general<row_major_t> into layout_blas_general<column_major_t>.
+  //
+  // Thus, layout_transpose would never occur with a valid BLAS layout.
+  //
+  // For now, we only support column-major layouts.
   using layout_type = typename in_matrix_t::layout_type;
-  using valid_layout_0 = layout_left;
-  using valid_layout_1 = layout_transpose<layout_left>;
-  // using valid_layout_2 = layout_blas_general<column_major_t>;
-  // using valid_layout_3 =
-  //   layout_transpose<layout_blas_general<column_major_t>>
-
-  return std::is_same_v<layout_type, valid_layout_0> ||
-    std::is_same_v<layout_type, valid_layout_1>; /* ||
-    std::is_same_v<layout_type, valid_layout_2> ||
-    std::is_same_v<layout_type, valid_layout_3>; */
+  return std::is_same_v<layout_type, layout_left>;
 }
 
 template<class inout_matrix_t>
 constexpr bool valid_output_blas_layout()
 {
   using layout_type = typename inout_matrix_t::layout_type;
-  using valid_layout_0 = layout_left;
-  // using valid_layout_1 = layout_blas_general<column_major_t>;
-
-  return std::is_same_v<layout_type, valid_layout_0>; /* ||
-    std::is_same_v<layout_type, valid_layout_1>; */
+  return std::is_same_v<layout_type, layout_left>;
 }
 
 template<class in_matrix_1_t,
@@ -301,39 +289,45 @@ matrix_product_dispatch_to_blas()
     in1_layout_ok && in2_layout_ok && out_layout_ok;
 }
 
+template<class Accessor, class ValueType>
+static constexpr bool is_compatible_accessor_scaled_v = false;
+
+template<class ScalingFactor, class NestedAccessor, class ValueType>
+static constexpr bool is_compatible_accessor_scaled_v<
+  accessor_scaled<ScalingFactor, NestedAccessor>, ValueType> =
+    std::is_same_v<typename accessor_scaled<ScalingFactor, NestedAccessor>::value_type, ValueType>;
+
+template<class Accessor>
+static constexpr bool is_accessor_conjugate_v = false;
+
+template<class NestedAccessor>
+static constexpr bool is_accessor_conjugate_v<accessor_conjugate<NestedAccessor>> = true;
+
 template<class in_matrix_t>
-typename in_matrix_t::element_type
-extractScalingFactor (const in_matrix_t& A,
-                      const typename in_matrix_t::element_type defaultValue)
+typename in_matrix_t::value_type
+extractScalingFactor(in_matrix_t A,
+		     const typename in_matrix_t::value_type defaultValue)
 {
   using acc_t = typename in_matrix_t::accessor_type;
-  using elt_t = typename in_matrix_t::element_type;
+  using val_t = typename in_matrix_t::value_type;
 
-  using scaled_acc_t_1 = accessor_scaled<
-    default_accessor<elt_t>, elt_t>;
-  using scaled_acc_t_2 = accessor_scaled<
-    accessor_conjugate<default_accessor<elt_t>, elt_t>,
-    elt_t>;
-  using scaled_acc_t_3 = accessor_conjugate<
-    accessor_scaled<default_accessor<elt_t>, elt_t>,
-    elt_t>;
-
-  if constexpr (std::is_same_v<acc_t, scaled_acc_t_1>) {
-    return A.accessor().scale_factor();
-  }
-  else if constexpr (std::is_same_v<acc_t, scaled_acc_t_2>) {
-    return A.accessor().scale_factor();
-  }
-  else if constexpr (std::is_same_v<acc_t, scaled_acc_t_3>) {
-    return A.accessor().nested_accessor().scale_factor();
-  }
-  else {
+  if constexpr (is_compatible_accessor_scaled_v<acc_t, val_t>) {
+    return A.accessor.scale_factor();
+  } else if constexpr (is_accessor_conjugate_v<acc_t>) {
+    // conjugated(scaled(alpha, A)) means that both alpha and A are conjugated.
+    using nested_acc_t = decltype(A.accessor().nested_accessor());
+    if constexpr (is_compatible_accessor_scaled_v<nested_acc_t>) {
+      return impl::conj_if_needed(extractScalingFactor(A.accessor.nested_accessor()));
+    } else {
+      return defaultValue;
+    }
+  } else {
     return defaultValue;
   }
 }
 
 template<class in_matrix_t>
-constexpr bool extractTrans ()
+constexpr bool extractTrans()
 {
   using layout_type = typename in_matrix_t::layout_type;
   using valid_trans_layout_0 = layout_transpose<layout_left>;
@@ -346,24 +340,26 @@ constexpr bool extractTrans ()
   return A_trans;
 }
 
-template<class in_matrix_t>
-constexpr bool extractConj ()
+template<class Accessor>
+constexpr bool extractConjImpl(Accessor a)
 {
-  using acc_t = typename in_matrix_t::accessor_type;
-  using elt_t = typename in_matrix_t::element_type;
-  using valid_acc_t_0 = accessor_conjugate<
-    default_accessor<elt_t>, elt_t>;
-  using valid_acc_t_1 = accessor_scaled<
-    accessor_conjugate<default_accessor<elt_t>, elt_t>,
-    elt_t>;
-  using valid_acc_t_2 = accessor_conjugate<
-    accessor_scaled<default_accessor<elt_t>, elt_t>,
-    elt_t>;
+  using elt_t = typename Accessor::element_type;
 
-  constexpr bool A_conj = std::is_same_v<acc_t, valid_acc_t_0> ||
-    std::is_same_v<acc_t, valid_acc_t_1> ||
-    std::is_same_v<acc_t, valid_acc_t_2>;
-  return A_conj;
+  using def_acc_t = default_accessor<elt_t>;
+  using conj_def_acc_t = accessor_conjugate<def_acc_t>;
+  if constexpr (std::is_same_v<Accessor, def_acc_t>) {
+    return false;
+  } else if constexpr (std::is_same_v<Accessor, conj_def_acc_t>) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+template<class in_matrix_t>
+constexpr bool extractConj(in_matrix_t A)
+{
+  return extractConjImpl(A.accessor());
 }
 
 #endif // LINALG_ENABLE_BLAS
@@ -697,11 +693,11 @@ void matrix_product(
     using element_type = typename out_matrix_t::element_type;
 
     constexpr bool A_trans = extractTrans<in_matrix_1_t>();
-    constexpr bool A_conj = extractConj<in_matrix_1_t>();
+    const bool A_conj = extractConj(A);
     const char TRANSA = A_trans ? (A_conj ? 'C' : 'T') : 'N';
 
     constexpr bool B_trans = extractTrans<in_matrix_2_t>();
-    constexpr bool B_conj = extractConj<in_matrix_2_t>();
+    const bool B_conj = extractConj(B);
     const char TRANSB = B_trans ? (B_conj ? 'C' : 'T') : 'N';
 
     const int M = C.extent(0);
