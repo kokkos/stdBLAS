@@ -10,6 +10,7 @@ macro(linalg_add_test name)
     target_link_libraries(${name} linalg GTest::GTest GTest::Main)
   endif()
   add_test(${name} ${name})
+  set_target_properties(${name} PROPERTIES FOLDER "Tests")
 endmacro()
 
 linalg_add_test(abs_sum)

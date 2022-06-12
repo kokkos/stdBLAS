@@ -1,0 +1,34 @@
+# Copyright (c) 2022 Hartmut Kaiser
+
+name: HPX Backend CI (Debug)
+
+on: [pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: stellargroup/hpx:dev
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Configure
+      shell: bash
+      run: |
+          cmake \
+              . \
+              -Bbuild \
+              -GNinja \
+              -DCMAKE_BUILD_TYPE=Debug \
+              -DLINALG_ENABLE_TESTS=On \
+              -DLINALG_ENABLE_HPX=On \
+              -DLINALG_ENABLE_HPX_DEFAULT=On \
+              -DHPX_DIR=/hpx/build/lib/cmake/HPX
+    - name: Build
+      shell: bash
+      run: |
+          make install
+    - name: Test
+      shell: bash
+      run: |
+          cd build
+          ctest --output-on-failure

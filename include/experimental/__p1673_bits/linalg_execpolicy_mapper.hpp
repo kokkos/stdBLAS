@@ -33,6 +33,9 @@ template<class T> inline constexpr bool is_inline_exec_v = is_inline_exec<T>::va
 #include <experimental/__p1673_bits/kokkos-kernels/exec_policy_wrapper_kk.hpp>
 #endif
 
+#if defined(LINALG_ENABLE_HPX)
+#include <experimental/__p1673_bits/hpx-kernels/exec_policy_wrapper_hpx.hpp>
+#endif
 
 namespace std {
 namespace experimental {
