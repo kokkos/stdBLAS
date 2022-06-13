@@ -246,6 +246,10 @@ public:
   friend auto imag(const derived_type& x) {
     return imag_part(value_type(static_cast<const this_type&>(x)));
   }
+
+  friend auto conj(const derived_type& x) {
+    return impl::conj_if_needed(value_type(static_cast<const this_type&>(x)));
+  }
 };
 
 } // namespace impl

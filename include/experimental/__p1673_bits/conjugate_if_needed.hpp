@@ -44,6 +44,7 @@
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATE_IF_NEEDED_HPP_
 
 #include <complex>
+#include <type_traits>
 
 namespace std {
 namespace experimental {
@@ -59,16 +60,34 @@ template<> struct is_complex<std::complex<long double>> : std::true_type{};
 
 template<class T> inline constexpr bool is_complex_v = is_complex<T>::value;
 
-auto conj_if_needed = [](const auto value)
+template<class T, class = void>
+struct has_conj : std::false_type {};
+
+// If I can find unqualified conj via overload resolution,
+// then assume that conj(t) returns the conjugate of t.
+template<class T>
+struct has_conj<T, decltype(conj(std::declval<T>()), void())> : std::true_type {};
+
+template<class T>
+T conj_if_needed_impl(const T& t, std::false_type)
 {
-  using std::conj;
-  // we need to use remove_cv because in some cases, e.g. gcc10,
-  // decltype(value) carries a const qualification
-  if constexpr (is_complex_v<std::remove_cv_t<decltype(value)>>) {
-    return conj(value);
+  return t;
+}
+
+template<class T>
+auto conj_if_needed_impl(const T& t, std::true_type)
+{
+  if constexpr (std::is_arithmetic_v<T>) {
+    return t;
   } else {
-    return value;
+    return conj(t);
   }
+}
+  
+auto conj_if_needed = [](const auto& t)
+{
+  using T = std::remove_const_t<decltype(t)>;
+  return conj_if_needed_impl(t, has_conj<T>{});
 };
 
 } // end namespace impl

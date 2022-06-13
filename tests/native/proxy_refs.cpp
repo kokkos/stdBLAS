@@ -535,6 +535,26 @@ void test_conjugated_scalar_from_reference(Reference zd, Value zd_orig)
   } else {
     EXPECT_EQ(zd, zd_orig);
   }
+
+  // Test abs
+  {
+    auto abs_result = abs(cszd);
+    auto abs_result_expected = [&]() {
+      if constexpr (std::is_unsigned_v<value_type>) {
+	return zd_orig;
+      } else {
+	return abs(conj_if_needed(zd_orig));
+      }
+    }();
+    EXPECT_EQ(abs_result, abs_result_expected);
+  }
+
+  // Test conj
+  {
+    auto conj_result = conj(cszd);
+    auto conj_result_expected = zd_orig;
+    EXPECT_EQ(conj_result, conj_result_expected);
+  }
 }
 
 template<class Real>
@@ -633,9 +653,11 @@ void test_scaled_scalar_from_reference(
 {
   std::cerr << "test_scaled_scalar_from_reference" << std::endl;
 
+  using std::experimental::linalg::impl::conj_if_needed;  
   using std::experimental::linalg::scaled_scalar;
   using value_type = typename std::remove_cv_t<Value>;
-  constexpr bool is_atomic_ref_not_arithmetic = test_helpers::is_atomic_ref_not_arithmetic_v<Reference>;
+  constexpr bool is_atomic_ref_not_arithmetic =
+    test_helpers::is_atomic_ref_not_arithmetic_v<Reference>;
 
 #ifdef P1673_CONJUGATED_SCALAR_ARITHMETIC_OPERATORS_REFERENCE_OVERLOADS
   constexpr bool test_references = true;
@@ -898,6 +920,13 @@ void test_scaled_scalar_from_reference(
       }
     }();
     EXPECT_EQ(abs_result, abs_result_expected);
+  }
+
+  // Test conj
+  {
+    auto conj_result = conj(cszd);
+    auto conj_result_expected = conj_if_needed(sf * zd);
+    EXPECT_EQ(conj_result, conj_result_expected);
   }
 }
 
