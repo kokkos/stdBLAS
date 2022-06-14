@@ -28,7 +28,8 @@
 // PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL SANDIA CORPORATION OR THE
 // CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
 // EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR
 // PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
 // LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
@@ -50,11 +51,37 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
-namespace {
-  template<extents<>::size_type ext0, extents<>::size_type ext1>
-  extents<ext1, ext0> transpose_extents (extents<ext0, ext1> e)
+namespace impl {
+  template<class Extents>
+  using transpose_extents_t = extents<Extents::static_extent(1), Extents::static_extent(0)>;
+
+  MDSPAN_TEMPLATE_REQUIRES(
+    class Extents,
+    /* requires */ (Extents::rank() == 2)
+  )
+  transpose_extents_t<Extents> transpose_extents(const Extents& e)
   {
-    return extents<ext1, ext0> (e.extent(1), e.extent(0));
+    static_assert(std::is_same_v<
+      typename transpose_extents_t<Extents>::size_type,
+      typename Extents::size_type>, "Please fix transpose_extents_t to account "
+      "for P2553, which adds a template parameter SizeType to extents.");
+    
+    constexpr size_t ext0 = Extents::static_extent(0);
+    constexpr size_t ext1 = Extents::static_extent(1);
+    
+    if constexpr (ext0 == dynamic_extent) {
+      if constexpr (ext1 == dynamic_extent) {
+	return transpose_extents_t<Extents>{e.extent(1), e.extent(0)};
+      } else {
+	return transpose_extents_t<Extents>{/* e.extent(1), */ e.extent(0)};
+      }
+    } else {
+      if constexpr (ext1 == dynamic_extent) {
+	return transpose_extents_t<Extents>{e.extent(1) /* , e.extent(0) */ };
+      } else {
+	return transpose_extents_t<Extents>{}; // all extents are static
+      }
+    }
   }
 }
 
@@ -80,7 +107,7 @@ public:
     }
 
     constexpr auto extents() const noexcept {
-      return transpose_extents(nested_mapping.extents());
+      return impl::transpose_extents(nested_mapping.extents());
     }
 
     constexpr bool is_unique() const noexcept {
