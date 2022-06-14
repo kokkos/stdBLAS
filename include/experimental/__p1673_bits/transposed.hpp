@@ -52,8 +52,19 @@ inline namespace __p1673_version_0 {
 namespace linalg {
 
 namespace impl {
+  // This struct helps us impose the rank constraint
+  // on the type alias itself.
+  MDSPAN_TEMPLATE_REQUIRES(
+    class Extents,
+    /* requires */ (Extents::rank() == 2)
+  )
+  struct transpose_extents_t_impl
+  {
+    using type = extents<Extents::static_extent(1), Extents::static_extent(0)>;
+  };
+  
   template<class Extents>
-  using transpose_extents_t = extents<Extents::static_extent(1), Extents::static_extent(0)>;
+  using transpose_extents_t = typename transpose_extents_t_impl<Extents>::type;
 
   MDSPAN_TEMPLATE_REQUIRES(
     class Extents,
