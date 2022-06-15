@@ -187,14 +187,140 @@ public:
   };
 };
 
-template<class EltType, class Extents, class Layout, class Accessor>
-mdspan<EltType, Extents, layout_transpose<Layout>, Accessor>
-transposed(mdspan<EltType, Extents, Layout, Accessor> a)
+namespace impl {
+
+  template<class ElementType, class Accessor>
+  struct transposed_element_accessor
+  {
+    using element_type = ElementType;
+    using accessor_type = Accessor;
+
+    static accessor_type accessor(const Accessor& a) { return accessor_type(a); }
+  };
+
+  template<class ElementType>
+  struct transposed_element_accessor<
+    ElementType, default_accessor<ElementType>>
+  {
+    using element_type = std::add_const_t<ElementType>;
+    using accessor_type = default_accessor<element_type>;
+
+    static accessor_type accessor(const default_accessor<ElementType>& a) { return accessor_type(a); }
+  };
+
+  template<class Layout>
+  struct transposed_layout {
+    using layout_type = layout_transpose<Layout>;
+
+    template<class OriginalMapping>
+    static auto mapping(const OriginalMapping& orig_map) {
+      using extents_type = transpose_extents_t<typename OriginalMapping::extents_type>;
+      using return_mapping_type = typename layout_type::template mapping<extents_type>;
+      return return_mapping_type{orig_map};
+    }
+  };
+
+  template<>
+  struct transposed_layout<layout_left> {
+    using layout_type = layout_right;
+
+    template<class OriginalExtents>
+    static auto mapping(const typename layout_left::template mapping<OriginalExtents>& orig_map) {
+      using original_mapping_type = typename layout_left::template mapping<OriginalExtents>;
+      using extents_type = transpose_extents_t<typename original_mapping_type::extents_type>;
+      using return_mapping_type = typename layout_type::template mapping<extents_type>;
+      return return_mapping_type{transpose_extents(orig_map.extents())};
+    }
+  };
+
+  template<>
+  struct transposed_layout<layout_right> {
+    using layout_type = layout_left;
+
+    template<class OriginalExtents>
+    static auto mapping(const typename layout_right::template mapping<OriginalExtents>& orig_map) {
+      using original_mapping_type = typename layout_right::template mapping<OriginalExtents>;
+      using extents_type = transpose_extents_t<typename original_mapping_type::extents_type>;
+      using return_mapping_type = typename layout_type::template mapping<extents_type>;
+      return return_mapping_type{transpose_extents(orig_map.extents())};
+    }
+  };
+
+  template<>
+  struct transposed_layout<layout_stride> {
+    using layout_type = layout_stride;
+
+    template<class OriginalExtents>
+    static auto mapping(const typename layout_stride::template mapping<OriginalExtents>& orig_map) {
+      using original_mapping_type = typename layout_stride::template mapping<OriginalExtents>;
+      using extents_type = transpose_extents_t<typename original_mapping_type::extents_type>;
+      using return_mapping_type = typename layout_type::template mapping<extents_type>;
+      return return_mapping_type{
+	transpose_extents(orig_map.extents()),
+	std::array<typename extents_type::size_type, orig_map.rank()>{
+	  orig_map.stride(1),
+	  orig_map.stride(0)}};
+    }
+  };
+
+  template<class StorageOrder>
+  using opposite_storage_t = std::conditional_t<
+    std::is_same_v<StorageOrder, column_major_t>,
+    row_major_t,
+    column_major_t>;
+
+  template<class StorageOrder>
+  struct transposed_layout<layout_blas_general<StorageOrder>> {
+    using layout_type = layout_blas_general<
+      opposite_storage_t<StorageOrder>>;
+
+    template<class OriginalExtents>
+    static auto mapping(const typename layout_blas_general<StorageOrder>::template mapping<OriginalExtents>& orig_map) {
+      using original_mapping_type = typename layout_blas_general<StorageOrder>::template mapping<OriginalExtents>;
+      using extents_type = transpose_extents_t<typename original_mapping_type::extents_type>;
+      using return_mapping_type = typename layout_type::template mapping<extents_type>;
+      const auto whichStride = std::is_same_v<StorageOrder, column_major_t> ? orig_map.stride(1) : orig_map.stride(0);
+      return return_mapping_type{transpose_extents(orig_map.extents()), whichStride};
+    }
+  };
+
+  template<class Triangle>
+  using opposite_triangle_t = std::conditional_t<
+    std::is_same_v<Triangle, upper_triangle_t>,
+    lower_triangle_t,
+    upper_triangle_t>;
+
+  template<class Triangle, class StorageOrder>
+  struct transposed_layout<layout_blas_packed<Triangle, StorageOrder>> {
+    using layout_type = layout_blas_packed<
+      opposite_triangle_t<Triangle>,
+      opposite_storage_t<StorageOrder>>;
+
+    template<class OriginalExtents>
+    static auto mapping(const typename layout_blas_packed<Triangle, StorageOrder>::template mapping<OriginalExtents>& orig_map) {
+      using original_mapping_type = typename layout_blas_packed<Triangle, StorageOrder>::template mapping<OriginalExtents>;
+      using extents_type = transpose_extents_t<typename original_mapping_type::extents_type>;
+      using return_mapping_type = typename layout_type::template mapping<extents_type>;
+      return return_mapping_type{transpose_extents(orig_map.extents())};
+    }
+  };
+
+  template<class NestedLayout>
+  struct transposed_layout<layout_transpose<NestedLayout>> {
+    using layout_type = NestedLayout;
+  };
+} // namespace impl
+
+template<class ElementType, class Extents, class Layout, class Accessor>
+auto transposed(mdspan<ElementType, Extents, Layout, Accessor> a)
 {
-  using layout_type = layout_transpose<Layout>;
-  using mapping_type = typename layout_type::template mapping<Extents>;
-  return mdspan<EltType, Extents, layout_type, Accessor> (
-    a.data (), mapping_type (a.mapping ()), a.accessor ());
+  using element_type = typename impl::transposed_element_accessor<ElementType, Accessor>::element_type;
+  using layout_type = typename impl::transposed_layout<Layout>::layout_type;
+  using accessor_type = typename impl::transposed_element_accessor<ElementType, Accessor>::accessor_type;
+
+  auto mapping = impl::transposed_layout<Layout>::mapping(a.mapping());
+  auto accessor = impl::transposed_element_accessor<ElementType, Accessor>::accessor(a.accessor());
+  return mdspan<element_type, typename decltype(mapping)::extents_type, layout_type, accessor_type>{a.data(), mapping, accessor};
 }
 
 } // end namespace linalg
