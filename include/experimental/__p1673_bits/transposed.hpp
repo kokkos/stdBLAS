@@ -62,7 +62,7 @@ namespace impl {
   {
     using type = extents<Extents::static_extent(1), Extents::static_extent(0)>;
   };
-  
+
   template<class Extents>
   using transpose_extents_t = typename transpose_extents_t_impl<Extents>::type;
 
@@ -76,10 +76,10 @@ namespace impl {
       typename transpose_extents_t<Extents>::size_type,
       typename Extents::size_type>, "Please fix transpose_extents_t to account "
       "for P2553, which adds a template parameter SizeType to extents.");
-    
+
     constexpr size_t ext0 = Extents::static_extent(0);
     constexpr size_t ext1 = Extents::static_extent(1);
-    
+
     if constexpr (ext0 == dynamic_extent) {
       if constexpr (ext1 == dynamic_extent) {
 	return transpose_extents_t<Extents>{e.extent(1), e.extent(0)};
@@ -102,46 +102,88 @@ public:
   template<class Extents>
   struct mapping {
   private:
-    using nested_mapping_type = typename Layout::template mapping<Extents>;
+    using nested_mapping_type =
+      typename Layout::template mapping<impl::transpose_extents_t<Extents>>;
+    nested_mapping_type nested_mapping_;
+
   public:
-    nested_mapping_type nested_mapping;
+    using extents_type = Extents;
+    using size_type = typename extents_type::size_type;
+    using layout_type = layout_transpose;
 
-    mapping() = default;
+    constexpr explicit mapping(const nested_mapping_type& map)
+      : nested_mapping_(map) {}
 
-    mapping(nested_mapping_type map) : nested_mapping(map) {}
-
-    // TODO insert other standard mapping things
-
-    // for non-batched layouts
-    typename Extents::size_type operator() (typename Extents::size_type i, typename Extents::size_type j) const {
-      return nested_mapping(j, i);
+    constexpr extents_type extents() const
+      noexcept(noexcept(nested_mapping_.extents()))
+    {
+      return impl::transpose_extents(nested_mapping_.extents());
     }
 
-    constexpr auto extents() const noexcept {
-      return impl::transpose_extents(nested_mapping.extents());
+    constexpr size_type required_span_size() const
+      noexcept(noexcept(nested_mapping_.required_span_size()))
+    {
+      return nested_mapping_.required_span_size();
     }
 
-    constexpr bool is_unique() const noexcept {
-      return nested_mapping.is_unique();
-    }
-    constexpr bool is_contiguous() const noexcept {
-      return nested_mapping.is_contiguous();
-    }
-    constexpr bool is_strided() const noexcept {
-      return nested_mapping.is_strided();
+    template<class IndexType, class... Indices>
+    typename Extents::size_type operator() (Indices... rest, IndexType i, IndexType j) const
+      noexcept(noexcept(nested_mapping_(rest..., j, i)))
+    {
+      return nested_mapping_(rest..., j, i);
     }
 
-    constexpr typename Extents::size_type stride(size_t r) const noexcept {
-      // FIXME this only works for rank 2
-      return nested_mapping.stride(size_t(1) - r);
+    nested_mapping_type nested_mapping() const
+    {
+      return nested_mapping_;
     }
 
-    // FIXME The overload below doesn't compile
+    static constexpr bool is_always_unique() {
+      return nested_mapping_type::is_always_unique();
+    }
+    static constexpr bool is_always_contiguous() {
+      return nested_mapping_type::is_always_contiguous();
+    }
+    static constexpr bool is_always_strided() {
+      return nested_mapping_type::is_always_strided();
+    }
 
-    // // for batched layouts
-    // ptrdiff_t operator() (ptrdiff_t... rest, ptrdiff_t i, ptrdiff_t j) const {
-    //   return nested_mapping(rest..., j, i);
-    // }
+    constexpr bool is_unique() const
+      noexcept(noexcept(nested_mapping_.is_unique()))
+    {
+      return nested_mapping_.is_unique();
+    }
+    constexpr bool is_contiguous() const
+      noexcept(noexcept(nested_mapping_.is_contiguous()))
+    {
+      return nested_mapping_.is_contiguous();
+    }
+    constexpr bool is_strided() const
+      noexcept(noexcept(nested_mapping_.is_strided()))
+    {
+      return nested_mapping_.is_strided();
+    }
+
+    constexpr size_type stride(size_t r) const
+      noexcept(noexcept(nested_mapping_.stride(r)))
+    {
+      if (r == extents_type::rank() - 1) {
+	return nested_mapping_.stride(extents_type::rank() - 2);
+      }
+      else if (r == extents_type::rank() - 2) {
+	return nested_mapping_.stride(extents_type::rank() - 1);
+      }
+      else {
+	return nested_mapping_.stride(r);
+      }
+    }
+
+    template<class OtherExtents>
+    friend constexpr bool
+    operator==(const mapping& lhs, const mapping<OtherExtents>& rhs) noexcept
+    {
+      return lhs.nested_mapping_ == rhs.nested_mapping_;
+    }
   };
 };
 
