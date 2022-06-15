@@ -3,165 +3,94 @@ name: CMake
 on: [push, pull_request]
 
 env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: RelWithDebInfo
+  CXX: g++-10 # Note: need GCC v10 (or newer) to avoid TBB compilation errors
+  CC: gcc-10  # Note: g++-11 fails with "sorry, unimplemented: unexpected AST of kind nontype_argument_pack"
+  CXX_STANDARD: 17
+  KOKKOS_VERSION: 3.6.00 # develop
+  KK_VERSION: 3.6.00 # develop
+  SHARED_LIBS: ON
 
 jobs:
-  build-mdspan:
+  stdblas:
+    name: Test stdBLAS
     runs-on: ubuntu-latest
-    container:
-      image: amklinv/stdblas:latest
     defaults:
       run:
         shell: bash
 
+    strategy:
+      matrix:
+        implementation: [Native, Kokkos]
+        cmake_build_type: [Release, Debug] # RelWithDebInfo
+
+    env:
+      BUILD_TYPE: ${{ matrix.cmake_build_type }}
+      INSTALL_PATH: ${{ github.workspace }}/install
+      UTILS_PATH: ${{ github.workspace }}/src/stdblas/.github/workflows/utils
+      KOKKOS_BACKEND: Serial # TODO: ${{ matrix.kokkos_backend }} ?
+        # FIXME OpenMP fails tests with: "Kokkos::OpenMP parallel_reduce ERROR: in parallel or not initialized"
+        # FIXME Threads fails tests with: "ThreadsExec::start FAILED : Threads not initialized."
+
     steps:
 
-    - id: get-sha
-      run: echo ::set-output name=sha::$( curl https://api.github.com/repos/kokkos/mdspan/git/ref/heads/stable | jq .object.sha | tr -d '"' )
- 
-    - name: Determine whether mdspan needs to be rebuilt
-      id: cache-mdspan
-      uses: actions/cache@v2
-      with:
-        path: mdspan-install
-        key: mdspan-${{ steps.get-sha.outputs.sha }}
- 
-    - name: Create Build Environment
-      if: steps.cache-mdspan.outputs.cache-hit != 'true'
-      run: cmake -E make_directory mdspan-build
-      
-    - name: Check Out
-      if: steps.cache-mdspan.outputs.cache-hit != 'true'
-      uses: actions/checkout@v2
-      with:
-        repository: kokkos/mdspan
-        path: mdspan-src
-      
-    - name: Configure CMake
-      if: steps.cache-mdspan.outputs.cache-hit != 'true'
-      working-directory: mdspan-build
-      run: cmake $GITHUB_WORKSPACE/mdspan-src -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/mdspan-install
-      
-    - name: Build
-      if: steps.cache-mdspan.outputs.cache-hit != 'true'
-      working-directory: mdspan-build
-      run: make
-      
-    - name: Install
-      if: steps.cache-mdspan.outputs.cache-hit != 'true'
-      working-directory: mdspan-build
-      run: make install
-      
-    - name: Upload
-      uses: actions/upload-artifact@v2
-      with:
-        name: mdspan
-        path: mdspan-install
+      - name: Check out stdBLAS
+        uses: actions/checkout@v2
+        with:
+          path: src/stdblas
 
-  configure-stdblas:
-    runs-on: ubuntu-latest
-    container:
-      image: amklinv/mdspan-dependencies:latest
-    needs: build-mdspan
-    
-    steps:
-    - name: Download mdspan
-      uses: actions/download-artifact@v2
-      with:
-        name: mdspan
-        path: mdspan-install 
-        
-    - name: Create Build Environment
-      run: cmake -E make_directory stdblas-build
-        
-    - name: Check Out
-      uses: actions/checkout@v2
-      with:
-        path: stdblas-src
-        
-    - name: Configure CMake
-      shell: bash
-      working-directory: stdblas-build
-      run: cmake $GITHUB_WORKSPACE/stdblas-src -Dmdspan_DIR=$GITHUB_WORKSPACE/mdspan-install/lib/cmake/mdspan -DLINALG_ENABLE_TESTS=On -DLINALG_ENABLE_EXAMPLES=On -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/stdblas-install
+      - name: Check out mdspan
+        uses: actions/checkout@v2
+        with:
+          repository: kokkos/mdspan
+          path: src/mdspan
 
-    - name: Upload workspace
-      uses: actions/upload-artifact@v2
-      with:
-        name: workspace
-        path: .
-      
-  build-stdblas:
-    runs-on: ubuntu-latest
-    container:
-      image: amklinv/mdspan-dependencies:latest
-    needs: configure-stdblas
-    
-    steps:
-    
-    - name: Download workspace
-      uses: actions/download-artifact@v2
-      with:
-        name: workspace
-        path: .
-        
-    - name: Build
-      working-directory: stdblas-build
-      shell: bash
-      run: make
-      
-    - name: Tar files
-      shell: bash
-      run: tar -cvf stdblas.tar *
+      - name: Build and install mdspan
+        run: $UTILS_PATH/build_mdspan.sh
 
-    - name: Upload workspace
-      uses: actions/upload-artifact@v2
-      with:
-        name: stdblas
-        path: stdblas.tar
-        
-  test-stdBLAS:
-    runs-on: ubuntu-latest
-    container:
-      image: amklinv/mdspan-dependencies:latest
-    needs: build-stdblas
-    
-    steps:
-    
-    - name: Download workspace
-      uses: actions/download-artifact@v2
-      with:
-        name: stdblas
-        path: .
-        
-    - name: Untar files
-      shell: bash
-      run: tar -xvf stdblas.tar
-        
-    - name: Test
-      working-directory: stdblas-build
-      shell: bash
-      run: ctest --output-on-failure
-      
-  install-stdBLAS:
-    runs-on: ubuntu-latest
-    container:
-      image: amklinv/mdspan-dependencies:latest
-    needs: build-stdblas
-    
-    steps:
-    
-    - name: Download workspace
-      uses: actions/download-artifact@v2
-      with:
-        name: stdblas
-        path: .
-        
-    - name: Untar files
-      shell: bash
-      run: tar -xvf stdblas.tar
-        
-    - name: Install
-      working-directory: stdblas-build
-      shell: bash
-      run: make install
+      - name: Check out Kokkos
+        if: matrix.implementation == 'Kokkos'
+        uses: actions/checkout@v2
+        with:
+          repository: kokkos/kokkos
+          path: src/kokkos
+          ref: ${{ env.KOKKOS_VERSION }}
+
+      - name: Build and install Kokkos
+        if: matrix.implementation == 'Kokkos'
+        run: $UTILS_PATH/build_kokkos.sh
+
+      - name: Check out Kokkos-Kernels
+        if: matrix.implementation == 'Kokkos'
+        uses: actions/checkout@v2
+        with:
+          repository: kokkos/kokkos-kernels
+          path: src/kokkos-kernels
+          ref: ${{ env.KK_VERSION }}
+
+      - name: Build and install Kokkos-Kernels
+        if: matrix.implementation == 'Kokkos'
+        run: $UTILS_PATH/build_kokkos-kernels.sh
+
+      - name: Configure stdBLAS
+        run: |
+          [[ ${{ matrix.implementation }} == "Kokkos" ]] && ENABLE_KOKKOS=ON
+          cmake \
+            -S $GITHUB_WORKSPACE/src/stdblas \
+            -B $GITHUB_WORKSPACE/build/stdblas \
+            -DCMAKE_BUILD_TYPE:STRING=${{ matrix.cmake_build_type }} \
+            -DCMAKE_INSTALL_PREFIX:FILEPATH=$GITHUB_WORKSPACE/install \
+            -DBUILD_SHARED_LIBS=$SHARED_LIBS \
+            -DCMAKE_CXX_STANDARD:STRING=$CXX_STANDARD \
+            -DLINALG_ENABLE_TESTS:BOOL=ON \
+            -DLINALG_ENABLE_EXAMPLES:BOOL=On \
+            -DLINALG_ENABLE_CONCEPTS:BOOL=ON \
+            -DLINALG_ENABLE_KOKKOS:BOOL=$ENABLE_KOKKOS \
+            -DLINALG_ENABLE_KOKKOS_DEFAULT:BOOL=$ENABLE_KOKKOS
+
+      - name: Build stdBLAS
+        run: |
+          cmake --build $GITHUB_WORKSPACE/build/stdblas -j $(nproc)
+
+      - name: Test stdBLAS
+        working-directory: build/stdblas
+        run: ctest -j $(nproc) --timeout 60 --output-on-failure
