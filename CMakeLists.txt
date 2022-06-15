@@ -152,7 +152,7 @@ install(TARGETS linalg EXPORT linalgTargets
 install(EXPORT linalgTargets
     FILE linalgTargets.cmake
     NAMESPACE std::
-    DESTINATION cmake
+    DESTINATION lib/cmake/stdBLAS
 )
 
 export(TARGETS linalg
@@ -175,7 +175,7 @@ write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/LinAlgConfigVersion
 )
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/LinAlgConfig.cmake ${CMAKE_CURRENT_BINARY_DIR}/LinAlgConfigVersion.cmake
-    DESTINATION cmake
+    DESTINATION lib/cmake/stdBLAS
 )
 
 ################################################################################

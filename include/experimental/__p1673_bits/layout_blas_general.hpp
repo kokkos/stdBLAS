@@ -47,6 +47,10 @@
 #include "maybe_static_size.hpp"
 #include "layout_tags.hpp"
 
+#include <experimental/__p0009_bits/macros.hpp>
+#include <experimental/__p0009_bits/layout_left.hpp>
+#include <experimental/__p0009_bits/layout_right.hpp>
+
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
