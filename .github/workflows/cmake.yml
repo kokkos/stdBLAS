@@ -18,7 +18,7 @@ jobs:
     steps:
 
     - id: get-sha
-      run: echo ::set-output name=sha::$( curl https://api.github.com/repos/kokkos/mdspan/git/ref/heads/stable | jq .object.sha | tr -d '"' )
+      run: echo ::set-output name=sha::$( curl https://api.github.com/repos/kokkos/mdspan/git/tags/mdspan-0.3.0 | jq .object.sha | tr -d '"' )
  
     - name: Determine whether mdspan needs to be rebuilt
       id: cache-mdspan
