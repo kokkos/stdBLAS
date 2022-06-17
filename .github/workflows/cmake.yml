@@ -9,14 +9,13 @@ env:
 jobs:
   build-mdspan:
     runs-on: ubuntu-latest
-    container:
-      image: amklinv/stdblas:latest
-    defaults:
-      run:
-        shell: bash
-
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - compiler_driver: g++
+          compiler_prefix: /usr/bin
     steps:
-
     - id: get-sha
       run: echo ::set-output name=sha::$( curl https://api.github.com/repos/kokkos/mdspan/git/tags/mdspan-0.3.0 | jq .object.sha | tr -d '"' )
  
@@ -61,8 +60,6 @@ jobs:
 
   configure-stdblas:
     runs-on: ubuntu-latest
-    container:
-      image: amklinv/mdspan-dependencies:latest
     needs: build-mdspan
     
     steps:
@@ -93,8 +90,6 @@ jobs:
       
   build-stdblas:
     runs-on: ubuntu-latest
-    container:
-      image: amklinv/mdspan-dependencies:latest
     needs: configure-stdblas
     
     steps:
@@ -145,8 +140,6 @@ jobs:
       
   install-stdBLAS:
     runs-on: ubuntu-latest
-    container:
-      image: amklinv/mdspan-dependencies:latest
     needs: build-stdblas
     
     steps:
