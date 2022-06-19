@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#if ! defined(__GNUC__) || __GNUC__ > 9
+#if (! defined(__GNUC__)) || (__GNUC__ > 9)
 #  define MDSPAN_EXAMPLES_USE_EXECUTION_POLICIES 1
 #endif
 
