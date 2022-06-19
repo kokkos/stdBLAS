@@ -2,12 +2,6 @@
 
 #include <experimental/linalg>
 #include <experimental/mdspan>
-
-// For GCC 9 (< 10), <execution> unconditionally includes a TBB header file.
-// If GCC < 10 was not built with TBB support, this causes a build error.
-#if (! defined(__GNUC__)) || (__GNUC__ > 9)
-#include <execution>
-#endif
 #include <iostream>
 #include <vector>
 
