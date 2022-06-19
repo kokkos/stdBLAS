@@ -11,6 +11,37 @@ namespace {
   using std::experimental::mdspan;
   using std::experimental::linalg::scaled;
 
+  template<class ScalingFactor, class OriginalValueType>
+  void test_accessor_scaled_element_constification()
+  {
+    using std::experimental::linalg::accessor_scaled;
+    using std::experimental::default_accessor;
+    using std::experimental::linalg::scaled_scalar;
+
+    using nc_def_acc_type = default_accessor<OriginalValueType>;
+    using c_def_acc_type =
+      default_accessor<typename std::add_const_t<OriginalValueType>>;
+    nc_def_acc_type nc_acc;
+    c_def_acc_type c_acc;
+
+    using as_nc_type = accessor_scaled<ScalingFactor, nc_def_acc_type>;
+    using as_c_type = accessor_scaled<ScalingFactor, c_def_acc_type>;
+    ScalingFactor scal{};
+    as_nc_type acc_scal_nc(scal, nc_acc);
+    as_c_type acc_scal_c0(scal, c_acc);
+
+    // Test element_type constification (converting) constructor
+    as_c_type acc_scal_c1(scal, nc_acc);
+  }
+
+  TEST(accessor_scaled, element_constification)
+  {
+    test_accessor_scaled_element_constification<double, double>();
+    test_accessor_scaled_element_constification<int, int>();
+    test_accessor_scaled_element_constification<std::complex<double>, std::complex<double>>();
+    test_accessor_scaled_element_constification<std::complex<float>, std::complex<float>>();
+  }
+
   // scaled(1 << 20, scaled(1 << 20, x)) with x having value_type double
   // should not overflow int.
   TEST(scaled, preserve_original_evaluation_order)
@@ -29,7 +60,7 @@ namespace {
     auto x_scaled_scaled = scaled(1 << 20, x_scaled);
     EXPECT_EQ(x_scaled_scaled[0], expected_val);
     static_assert(std::is_same_v<decltype(x_scaled_scaled)::value_type, double>);
-    static_assert(std::is_same_v<decltype(x_scaled_scaled)::element_type, const double>);    
+    static_assert(std::is_same_v<decltype(x_scaled_scaled)::element_type, const double>);
   }
 
   TEST(scaled, mdspan_double_scalar_float)
