@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
     // Create and initialize mdspan
     // With CTAD working we could do, GCC 11.1 works but some others are buggy
     // mdspan x(x_vec.data(), N);
-    mdspan<double, extents<dynamic_extent>> x(x_vec.data(),N);
+    mdspan<double, extents<std::size_t, dynamic_extent>> x(x_vec.data(),N);
     for(int i=0; i<x.extent(0); i++) x(i) = i;
 
     // Call linalg::scale x = 2.0*x;

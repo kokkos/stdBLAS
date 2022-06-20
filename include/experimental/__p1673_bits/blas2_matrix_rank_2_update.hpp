@@ -99,27 +99,26 @@ struct is_custom_hermitian_matrix_rank_2_update_avail<
 // Rank-2 update of a symmetric matrix
 
 template<class ElementType_x,
-         extents<>::size_type ext_x,
+         class SizeType_x, ::std::size_t ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         extents<>::size_type ext_y,
+         class SizeType_y, ::std::size_t ext_y,
          class Layout_y,
          class Accessor_y,
          class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class Triangle>
 void symmetric_matrix_rank_2_update(
   std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle /* t */)
 {
-  using size_type = typename extents<>::size_type;
+  using size_type = std::common_type_t<SizeType_x, SizeType_y, SizeType_A>;
   constexpr bool lower_tri =
     std::is_same_v<Triangle, lower_triangle_t>;
   for (size_type j = 0; j < A.extent(1); ++j) {
@@ -134,24 +133,23 @@ void symmetric_matrix_rank_2_update(
 
 template<class ExecutionPolicy,
          class ElementType_x,
-         extents<>::size_type ext_x,
+         class SizeType_x, ::std::size_t ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         extents<>::size_type ext_y,
+         class SizeType_y, ::std::size_t ext_y,
          class Layout_y,
          class Accessor_y,
          class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class Triangle>
 void symmetric_matrix_rank_2_update(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t)
 {
 
@@ -169,23 +167,22 @@ void symmetric_matrix_rank_2_update(
 }
 
 template<class ElementType_x,
-         extents<>::size_type ext_x,
+         class SizeType_x, ::std::size_t ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         extents<>::size_type ext_y,
+         class SizeType_y, ::std::size_t ext_y,
          class Layout_y,
          class Accessor_y,
          class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class Triangle>
 void symmetric_matrix_rank_2_update(
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t)
 {
   symmetric_matrix_rank_2_update(std::experimental::linalg::impl::default_exec_t(), x, y, A, t);
@@ -195,27 +192,26 @@ void symmetric_matrix_rank_2_update(
 // Rank-2 update of a Hermitian matrix
 
 template<class ElementType_x,
-         extents<>::size_type ext_x,
+         class SizeType_x, ::std::size_t ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         extents<>::size_type ext_y,
+         class SizeType_y, ::std::size_t ext_y,
          class Layout_y,
          class Accessor_y,
          class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class Triangle>
 void hermitian_matrix_rank_2_update(
   std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle /* t */)
 {
-  using size_type = typename extents<>::size_type;
+  using size_type = std::common_type_t<SizeType_x, SizeType_y, SizeType_A>;
 
   constexpr bool lower_tri =
     std::is_same_v<Triangle, lower_triangle_t>;
@@ -231,24 +227,23 @@ void hermitian_matrix_rank_2_update(
 
 template<class ExecutionPolicy,
          class ElementType_x,
-         extents<>::size_type ext_x,
+         class SizeType_x, ::std::size_t ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         extents<>::size_type ext_y,
+         class SizeType_y, ::std::size_t ext_y,
          class Layout_y,
          class Accessor_y,
          class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class Triangle>
 void hermitian_matrix_rank_2_update(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t)
 {
 
@@ -266,23 +261,22 @@ void hermitian_matrix_rank_2_update(
 }
 
 template<class ElementType_x,
-         extents<>::size_type ext_x,
+         class SizeType_x, ::std::size_t ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         extents<>::size_type ext_y,
+         class SizeType_y, ::std::size_t ext_y,
          class Layout_y,
          class Accessor_y,
          class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class Triangle>
 void hermitian_matrix_rank_2_update(
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t)
 {
   hermitian_matrix_rank_2_update(std::experimental::linalg::impl::default_exec_t(), x, y, A, t);

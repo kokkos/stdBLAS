@@ -19,9 +19,9 @@ int main(int argc, char* argv[]) {
     std::vector<double> y_vec(M*8);
 
     // Create and initialize mdspan
-    mdspan<float, extents<dynamic_extent, 8,4>> A(A_vec.data(),M);
-    mdspan<double, extents<4, dynamic_extent>> x(x_vec.data(),M);
-    mdspan<double, extents<dynamic_extent, 8>> y(y_vec.data(),M);
+    mdspan<float, extents<std::size_t, dynamic_extent, 8,4>> A(A_vec.data(),M);
+    mdspan<double, extents<std::size_t, 4, dynamic_extent>> x(x_vec.data(),M);
+    mdspan<double, extents<std::size_t, dynamic_extent, 8>> y(y_vec.data(),M);
     for(int m=0; m<A.extent(0); m++)
       for(int i=0; i<A.extent(1); i++)
         for(int j=0; j<A.extent(2); j++)

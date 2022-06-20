@@ -1,18 +1,10 @@
+#include "gtest/gtest.h"
+
 #include <experimental/linalg>
 #include <experimental/mdspan>
-
-// FIXME I can't actually test the executor overloads, since my GCC
-// (9.1.0, via Homebrew) isn't set up correctly:
-//
-// .../gcc/9.1.0/include/c++/9.1.0/pstl/parallel_backend_tbb.h:19:10: fatal error: tbb/blocked_range.h: No such file or directory
-//   19 | #include <tbb/blocked_range.h>
-//      |          ^~~~~~~~~~~~~~~~~~~~~
-
-//#include <execution>
 #include <complex>
-#include <vector>
-#include "gtest/gtest.h"
 #include <iostream>
+#include <vector>
 
 namespace {
   using std::experimental::mdspan;
@@ -37,7 +29,7 @@ namespace {
   TEST(BLAS3_hemm, left_lower_tri)
   {
     /* C = A * B, where A is hermitian mxm */
-    using extents_t = extents<dynamic_extent, dynamic_extent>;
+    using extents_t = extents<std::size_t, dynamic_extent, dynamic_extent>;
     using cmatrix_t = mdspan<complex<double>, extents_t, layout_left>;
     using dmatrix_t = mdspan<double, extents_t, layout_left>;
     constexpr double snan = std::numeric_limits<double>::signaling_NaN();
@@ -93,7 +85,7 @@ namespace {
   TEST(BLAS3_hemm, left_upper_tri)
   {
     /* C = A * B, where A is hermitian mxm */
-    using extents_t = extents<dynamic_extent, dynamic_extent>;
+    using extents_t = extents<std::size_t, dynamic_extent, dynamic_extent>;
     using cmatrix_t = mdspan<complex<double>, extents_t, layout_left>;
     using dmatrix_t = mdspan<double, extents_t, layout_left>;
     constexpr double snan = std::numeric_limits<double>::signaling_NaN();
@@ -149,7 +141,7 @@ namespace {
   TEST(BLAS3_hemm, right_lower_tri)
   {
     /* C = B * A, where A is hermitian mxm */
-    using extents_t = extents<dynamic_extent, dynamic_extent>;
+    using extents_t = extents<std::size_t, dynamic_extent, dynamic_extent>;
     using cmatrix_t = mdspan<complex<double>, extents_t, layout_left>;
     using dmatrix_t = mdspan<double, extents_t, layout_left>;
     constexpr double snan = std::numeric_limits<double>::signaling_NaN();
@@ -202,10 +194,10 @@ namespace {
     }
   }
 
-    TEST(BLAS3_hemm, right_upper_tri)
+  TEST(BLAS3_hemm, right_upper_tri)
   {
     /* C = B * A, where A is hermitian mxm */
-    using extents_t = extents<dynamic_extent, dynamic_extent>;
+    using extents_t = extents<std::size_t, dynamic_extent, dynamic_extent>;
     using cmatrix_t = mdspan<complex<double>, extents_t, layout_left>;
     using dmatrix_t = mdspan<double, extents_t, layout_left>;
     constexpr double snan = std::numeric_limits<double>::signaling_NaN();

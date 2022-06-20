@@ -1,7 +1,9 @@
+#include "gtest/gtest.h"
+
 #include <experimental/linalg>
 #include <experimental/mdspan>
+#include <type_traits>
 #include <vector>
-#include "gtest/gtest.h"
 
 namespace {
   using std::experimental::dynamic_extent;
@@ -9,15 +11,90 @@ namespace {
   using std::experimental::mdspan;
   using std::experimental::linalg::transposed;
 
+  template<std::size_t ext0, std::size_t ext1>
+  void test_transpose_extents()
+  {
+    using std::experimental::linalg::impl::transpose_extents_t;
+    using std::experimental::linalg::impl::transpose_extents;
+
+    using extents_type = extents<std::size_t, ext0, ext1>;
+    using expected_transpose_extents_type = extents<std::size_t, ext1, ext0>;
+    using transpose_extents_type = transpose_extents_t<extents_type>;
+    static_assert(std::is_same_v<expected_transpose_extents_type, transpose_extents_type>);
+
+    using size_type = typename extents_type::size_type;
+    constexpr size_type numRows = 666;
+    constexpr size_type numCols = 777;
+
+    if constexpr (ext0 == dynamic_extent) {
+      if constexpr (ext1 == dynamic_extent) {
+	extents_type orig(numRows, numCols);
+	auto xpose = transpose_extents(orig);
+	static_assert(std::is_same_v<expected_transpose_extents_type, decltype(xpose)>);
+	EXPECT_EQ(orig.extent(0), xpose.extent(1));
+	EXPECT_EQ(orig.extent(1), xpose.extent(0));
+      } else {
+	extents_type orig(numRows);
+	auto xpose = transpose_extents(orig);
+	static_assert(std::is_same_v<expected_transpose_extents_type, decltype(xpose)>);
+	EXPECT_EQ(orig.extent(0), xpose.extent(1));
+	EXPECT_EQ(orig.extent(1), xpose.extent(0));
+      }
+    } else {
+      if constexpr (ext1 == dynamic_extent) {
+	extents_type orig(numCols);
+	auto xpose = transpose_extents(orig);
+	static_assert(std::is_same_v<expected_transpose_extents_type, decltype(xpose)>);
+	EXPECT_EQ(orig.extent(0), xpose.extent(1));
+	EXPECT_EQ(orig.extent(1), xpose.extent(0));
+      } else {
+	extents_type orig{};
+	auto xpose = transpose_extents(orig);
+	static_assert(std::is_same_v<expected_transpose_extents_type, decltype(xpose)>);
+	EXPECT_EQ(orig.extent(0), xpose.extent(1));
+	EXPECT_EQ(orig.extent(1), xpose.extent(0));
+      }
+    }
+  }
+
+  TEST(transpose_extents, test0)
+  {
+    test_transpose_extents<3, 3>();
+    test_transpose_extents<3, 4>();
+    test_transpose_extents<4, 3>();
+    test_transpose_extents<dynamic_extent, 3>();
+    test_transpose_extents<3, dynamic_extent>();
+    test_transpose_extents<dynamic_extent, dynamic_extent>();
+  }
+
+  template<std::size_t ext0, std::size_t ext1>
+  void test_layout_transpose()
+  {
+    using std::experimental::linalg::layout_transpose;
+    using std::experimental::layout_left;
+    using extents_type = extents<std::size_t, ext0, ext1>;
+    using mapping_type = typename layout_transpose<layout_left>::mapping<extents_type>;
+  }
+
+  TEST(layout_transpose, test0)
+  {
+    test_layout_transpose<3, 3>();
+    test_layout_transpose<3, 4>();
+    test_layout_transpose<4, 3>();
+    test_layout_transpose<dynamic_extent, 3>();
+    test_layout_transpose<3, dynamic_extent>();
+    test_layout_transpose<dynamic_extent, dynamic_extent>();
+  }
+
   TEST(transposed, mdspan_double)
   {
     using real_t = double;
     using scalar_t = double;
     using matrix_dynamic_t =
-      mdspan<scalar_t, extents<dynamic_extent, dynamic_extent>>;
+      mdspan<scalar_t, extents<std::size_t, dynamic_extent, dynamic_extent>>;
     constexpr std::size_t dim = 5;
     using matrix_static_t =
-      mdspan<scalar_t, extents<dim, dim>>;
+      mdspan<scalar_t, extents<std::size_t, dim, dim>>;
 
     constexpr std::size_t storageSize = std::size_t(dim*dim);
     std::vector<scalar_t> A_storage (storageSize);

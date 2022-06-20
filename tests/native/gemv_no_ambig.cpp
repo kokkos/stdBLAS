@@ -1,22 +1,27 @@
-#include <experimental/linalg>
+#include "gtest/gtest.h"
 
+#include <experimental/linalg>
+#include <experimental/mdspan>
+#include <vector>
 #include <iostream>
 
 #if (! defined(__GNUC__)) || (__GNUC__ > 9)
 #  define MDSPAN_EXAMPLES_USE_EXECUTION_POLICIES 1
 #endif
-
 #ifdef MDSPAN_EXAMPLES_USE_EXECUTION_POLICIES
 #  include <execution>
 #endif
 
-// Make mdspan less verbose
+namespace {
+
 using std::experimental::mdspan;
 using std::experimental::extents;
 using std::experimental::dynamic_extent;
+using std::experimental::linalg::matrix_vector_product;
+using std::experimental::linalg::scaled;
 
-int main(int argc, char* argv[]) {
-  std::cout << "Matrix Vector Product Basic" << std::endl;
+TEST(gemv, no_ambiguity)
+{
   int N = 40, M = 20;
   {
     // Create Data
@@ -24,8 +29,6 @@ int main(int argc, char* argv[]) {
     std::vector<double> x_vec(M);
     std::vector<double> y_vec(N);
 
-    // Create and initialize mdspan
-    // Would look simple with CTAD, GCC 11.1 works but some others are buggy
     mdspan<double, extents<std::size_t, dynamic_extent,dynamic_extent>> A(A_vec.data(),N,M);
     mdspan<double, extents<std::size_t, dynamic_extent>> x(x_vec.data(),M);
     mdspan<double, extents<std::size_t, dynamic_extent>> y(y_vec.data(),N);
@@ -37,19 +40,21 @@ int main(int argc, char* argv[]) {
     for(int i=0; i<y.extent(0); i++)
       y(i) = -1. * i;
 
-    // y = A * x
-    std::experimental::linalg::matrix_vector_product(A, x, y);
+    matrix_vector_product(A, x, y);
+    // The following is an ambiguous call unless the implementation
+    // correctly constraints ExecutionPolicy (the spec would imply
+    // std::is_execution_policy_v, though implementations might define
+    // their own custom "execution policies" that cannot satisfy this).
+    matrix_vector_product(
+       scaled(2.0, A), x,
+       scaled(0.5, y), y);
 
-    // y = 0.5 * y + 2 * A * x
 #ifdef MDSPAN_EXAMPLES_USE_EXECUTION_POLICIES
-    std::experimental::linalg::matrix_vector_product(std::execution::par,
-       std::experimental::linalg::scaled(2.0, A), x,
-       std::experimental::linalg::scaled(0.5, y), y);
-#else
-    std::experimental::linalg::matrix_vector_product(
-       std::experimental::linalg::scaled(2.0, A), x,
-       std::experimental::linalg::scaled(0.5, y), y);
+    matrix_vector_product(std::execution::par,
+       scaled(2.0, A), x,
+       scaled(0.5, y), y);
 #endif
-    for(int i=0; i<y.extent(0); i+=5) std::cout << i << " " << y(i) << std::endl;
   }
+}
+
 }

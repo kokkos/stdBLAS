@@ -83,8 +83,8 @@ struct __maybe_static_value<T, DynSentinel, DynSentinel> {
   static constexpr auto value_static = DynSentinel;
 };
 
-template <extents<>::size_type StaticSize, extents<>::size_type Sentinel=dynamic_extent>
-using __maybe_static_extent = __maybe_static_value<extents<>::size_type, StaticSize, Sentinel>;
+template <::std::size_t StaticSize, ::std::size_t Sentinel=dynamic_extent>
+using __maybe_static_extent = __maybe_static_value<::std::size_t, StaticSize, Sentinel>;
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0

@@ -80,19 +80,20 @@ struct is_custom_matrix_one_norm_avail<
 
 template<
     class ElementType,
-    extents<>::size_type numRows,
-    extents<>::size_type numCols,
+    class SizeType,
+    ::std::size_t numRows,
+    ::std::size_t numCols,
     class Layout,
     class Accessor,
     class Scalar>
 Scalar matrix_one_norm(
   std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A,
+  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A,
   Scalar init)
 {
   using std::abs;
   using std::max;
-  using size_type = typename extents<>::size_type;
+  using size_type = SizeType;
 
   // Handle special cases.
   auto result = init;
@@ -119,14 +120,15 @@ Scalar matrix_one_norm(
 template<
   class ExecutionPolicy,
   class ElementType,
-  extents<>::size_type numRows,
-  extents<>::size_type numCols,
+  class SizeType,
+  ::std::size_t numRows,
+  ::std::size_t numCols,
   class Layout,
   class Accessor,
   class Scalar>
 Scalar matrix_one_norm(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A,
+  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A,
   Scalar init)
 {
 
@@ -144,13 +146,14 @@ Scalar matrix_one_norm(
 
 template<
     class ElementType,
-    extents<>::size_type numRows,
-    extents<>::size_type numCols,
+    class SizeType,
+    ::std::size_t numRows,
+    ::std::size_t numCols,
     class Layout,
     class Accessor,
     class Scalar>
 Scalar matrix_one_norm(
-  std::experimental::mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A,
+  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A,
   Scalar init)
 {
   return matrix_one_norm(std::experimental::linalg::impl::default_exec_t(), A, init);
@@ -162,24 +165,24 @@ namespace matrix_one_norm_detail {
   // The point of this is to do correct ADL for abs,
   // without exposing "using std::abs" in the outer namespace.
   using std::abs;
-  using size_type = typename extents<>::size_type;
   template<
     class ElementType,
-    size_type numRows, size_type numCols,
+    class SizeType, ::std::size_t numRows, ::std::size_t numCols,
     class Layout,
     class Accessor>
   auto matrix_one_norm_return_type_deducer(
-    std::experimental::mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A) -> decltype(abs(A(0,0)));
+    std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A) -> decltype(abs(A(0,0)));
 
 } // namespace matrix_one_norm_detail
 
 template<
   class ElementType,
-  extents<>::size_type numRows, extents<>::size_type numCols,
+  class SizeType,
+  ::std::size_t numRows, ::std::size_t numCols,
   class Layout,
   class Accessor>
 auto matrix_one_norm(
-  std::experimental::mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A)
+  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A)
 -> decltype(matrix_one_norm_detail::matrix_one_norm_return_type_deducer(A))
 {
   using return_t = decltype(matrix_one_norm_detail::matrix_one_norm_return_type_deducer(A));
@@ -188,13 +191,14 @@ auto matrix_one_norm(
 
 template<class ExecutionPolicy,
          class ElementType,
-         extents<>::size_type numRows,
-         extents<>::size_type numCols,
+	 class SizeType,
+         ::std::size_t numRows,
+         ::std::size_t numCols,
          class Layout,
          class Accessor>
 auto matrix_one_norm(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A)
+  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A)
 -> decltype(matrix_one_norm_detail::matrix_one_norm_return_type_deducer(A))
 {
   using return_t = decltype(matrix_one_norm_detail::matrix_one_norm_return_type_deducer(A));

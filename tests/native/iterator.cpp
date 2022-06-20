@@ -1,3 +1,5 @@
+#include "gtest/gtest.h"
+
 #include <experimental/linalg>
 #include <experimental/mdspan>
 #include <algorithm>
@@ -6,45 +8,37 @@
 #include <type_traits>
 #include <typeinfo>
 #include <vector>
-#include "gtest/gtest.h"
 
 namespace {
-  using std::experimental::all;
+  using std::experimental::full_extent;
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::layout_left;
   using std::experimental::layout_right;
   using std::experimental::layout_stride; // does compile
   using std::experimental::mdspan;
-  using std::experimental::subspan;
+  using std::experimental::submdspan;
 
-  template<class ElementType,
-           class Extents,
-           class Layout,
-           class Accessor>
-  class MdspanRandomAccessIterator {};
-
-  template<class ElementType,
-           ptrdiff_t extent,
-           class Layout,
-           class Accessor>
-  class MdspanRandomAccessIterator<
-    ElementType, extents<extent>, Layout, Accessor> :
+  MDSPAN_TEMPLATE_REQUIRES(
+    class ElementType,
+    class Extents,
+    class Layout,
+    class Accessor,
+    /* requires */ (Extents::rank() == 1)
+  )
+  class MdspanRandomAccessIterator :
     public std::iterator<
       std::random_access_iterator_tag,   // iterator_category
-      ElementType, // value_type
-      typename mdspan<ElementType,
-                            extents<extent>,
-                            Layout, Accessor>::difference_type,
-      typename mdspan<ElementType,
-                            extents<extent>,
-                            Layout, Accessor>::pointer,
-      typename mdspan<ElementType,
-                            extents<extent>,
-                            Layout, Accessor>::reference>
+      ElementType,
+      typename mdspan<ElementType, Extents, Layout,
+        Accessor>::difference_type,
+      typename mdspan<ElementType, Extents, Layout,
+	Accessor>::pointer,
+      typename mdspan<ElementType, Extents, Layout,
+        Accessor>::reference>
   {
   public:
-    using extents_t = extents<extent>;
+    using extents_t = Extents;
     using mdspan_t = mdspan<
       ElementType, extents_t, Layout, Accessor>;
     using iterator = MdspanRandomAccessIterator<
@@ -99,14 +93,14 @@ namespace {
       return current_index_ - it.current_index_;
     }
 
-    bool operator==(iterator other) const {
-      return current_index_ == other.current_index_ &&
-        x_.data() == other.x_.data();
+    friend constexpr bool operator==(iterator lhs, iterator rhs) {
+      return lhs.current_index_ == rhs.current_index_ &&
+        lhs.x_.data() == rhs.x_.data();
     }
 
-    bool operator!=(iterator other) const {
-      return current_index_ != other.current_index_ ||
-        x_.data() != other.x_.data();
+    friend constexpr bool operator!=(iterator lhs, iterator rhs) {
+      return lhs.current_index_ != rhs.current_index_ ||
+        lhs.x_.data() != rhs.x_.data();
     }
 
     bool operator<(iterator other) const {
@@ -237,27 +231,30 @@ namespace {
   template<class ElementType>
   using real_t = typename real_traits<ElementType>::type;
 
-  template<class ElementType,
-           ptrdiff_t extent,
-           class Layout,
-           class Accessor>
+  MDSPAN_TEMPLATE_REQUIRES(
+    class ElementType,
+    class Extents,
+    class Layout,
+    class Accessor,
+    /* requires */ (Extents::rank() == 1)
+  )
   bool testRotateSort (
-    mdspan<ElementType, extents<extent>, Layout, Accessor> x)
+    mdspan<ElementType, Extents, Layout, Accessor> x)
   {
-    using mdspan_t = mdspan<
-      ElementType, extents<extent>, Layout, Accessor>;
-    using scalar_t = ElementType;
+    using mdspan_t =
+      mdspan<ElementType, Extents, Layout, Accessor>;
+    using value_type = typename mdspan_t::value_type;
 
     const ptrdiff_t dim = x.extent(0);
     for (ptrdiff_t k = 0; k < dim; ++k) {
-      x(k) = scalar_t(real_t<scalar_t>(k+1));
+      x(k) = value_type(real_t<value_type>(k+1));
     }
     std::rotate(begin(x), begin(x) + 1, end(x));
     std::sort(begin(x), end(x));
 
     for (ptrdiff_t k = 0; k < dim; ++k) {
       const ptrdiff_t km1 = (k + dim) % dim;
-      if (x(km1) != scalar_t(real_t<scalar_t>(k+1))) {
+      if (x(km1) != value_type(real_t<value_type>(k+1))) {
         return false;
       }
     }
@@ -270,7 +267,7 @@ namespace {
     using scalar_t = real_t;
     //using layout_t = layout_stride; // doesn't compile; why?
     using layout_t = layout_right;
-    using extents_t = extents<dynamic_extent, dynamic_extent>;
+    using extents_t = extents<std::size_t, dynamic_extent, dynamic_extent>;
     using matrix_t = mdspan<scalar_t, extents_t, layout_t>;
 
     constexpr ptrdiff_t dim(5);
@@ -292,7 +289,7 @@ namespace {
     // Test layout_stride
     ////////////////////////////////////////////////////////////
 
-    auto A_col0 = subspan(A, all, 0);
+    auto A_col0 = submdspan(A, full_extent, 0);
     EXPECT_TRUE( A_col0.stride(0) != 1 );
     // This works only if A is layout_right
     static_assert(! decltype(A_col0)::is_always_contiguous());
@@ -361,7 +358,7 @@ namespace {
     // Test layout_right
     ////////////////////////////////////////////////////////////
 
-    auto A_row0 = subspan(A, 0, all);
+    auto A_row0 = submdspan(A, 0, full_extent);
     EXPECT_TRUE( A_row0.stride(0) == 1 );
 
     // This works only if A is layout_right.  We need this because we
@@ -429,7 +426,7 @@ namespace {
   //   using real_t = double;
   //   using scalar_t = real_t;
   //   using layout_t = layout_left;
-  //   using extents_t = extents<dynamic_extent>;
+  //   using extents_t = extents<std::size_t, dynamic_extent>;
   //   using vector_t = mdspan<scalar_t, extents_t, layout_t>;
 
   //   constexpr ptrdiff_t vectorSize(10);

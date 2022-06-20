@@ -1,16 +1,8 @@
+#include "gtest/gtest.h"
+
 #include <experimental/linalg>
 #include <experimental/mdspan>
-
-// FIXME I can't actually test the executor overloads, since my GCC
-// (9.1.0, via Homebrew) isn't set up correctly:
-//
-// .../gcc/9.1.0/include/c++/9.1.0/pstl/parallel_backend_tbb.h:19:10: fatal error: tbb/blocked_range.h: No such file or directory
-//   19 | #include <tbb/blocked_range.h>
-//      |          ^~~~~~~~~~~~~~~~~~~~~
-
-//#include <execution>
 #include <vector>
-#include "gtest/gtest.h"
 #include <iostream>
 
 namespace {
@@ -22,6 +14,7 @@ namespace {
   using std::experimental::linalg::implicit_unit_diagonal;
   using std::experimental::linalg::lower_triangle;
   using std::experimental::linalg::matrix_product;
+  using std::experimental::linalg::scaled;  
   using std::experimental::linalg::transposed;
   using std::experimental::linalg::upper_triangle;
   using std::cout;
@@ -81,7 +74,7 @@ namespace {
     using scalar_t = Scalar;
     using real_t = typename Magnitude<Scalar>::type;
 
-    using extents_t = extents<dynamic_extent, dynamic_extent>;
+    using extents_t = extents<std::size_t, dynamic_extent, dynamic_extent>;
     using matrix_t = mdspan<scalar_t, extents_t, layout_left>;
 
     constexpr std::size_t maxDim = 7;
@@ -191,7 +184,7 @@ namespace {
             for (std::size_t j = 0; j < C_numCols; ++j) {
               for (std::size_t i = 0; i < C_numRows; ++i) {
                 C(i,j) = scalar_t(0.0); // this works even for complex
-                for (extents<>::size_type k = 0; k < A_tt.extent(1); ++k) {
+                for (std::size_t k = 0; k < A_tt.extent(1); ++k) {
                   C(i,j) += A_tt(i,k) * B_tt(k,j);
                 }
               }

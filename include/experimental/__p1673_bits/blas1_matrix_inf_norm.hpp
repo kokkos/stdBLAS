@@ -79,19 +79,20 @@ struct is_custom_matrix_inf_norm_avail<
 
 template<
     class ElementType,
-    extents<>::size_type numRows,
-    extents<>::size_type numCols,
+    class SizeType,
+    ::std::size_t numRows,
+    ::std::size_t numCols,
     class Layout,
     class Accessor,
     class Scalar>
 Scalar matrix_inf_norm(
   std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A,
+  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A,
   Scalar init)
 {
   using std::abs;
   using std::max;
-  using size_type = typename extents<>::size_type;
+  using size_type = SizeType;
 
   // Handle special cases.
   auto result = init;
@@ -116,14 +117,15 @@ Scalar matrix_inf_norm(
 template<
   class ExecutionPolicy,
   class ElementType,
-  extents<>::size_type numRows,
-  extents<>::size_type numCols,
+  class SizeType,
+  ::std::size_t numRows,
+  ::std::size_t numCols,
   class Layout,
   class Accessor,
   class Scalar>
 Scalar matrix_inf_norm(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A,
+  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A,
   Scalar init)
 {
 
@@ -141,13 +143,14 @@ Scalar matrix_inf_norm(
 
 template<
     class ElementType,
-    extents<>::size_type numRows,
-    extents<>::size_type numCols,
+    class SizeType,
+    ::std::size_t numRows,
+    ::std::size_t numCols,
     class Layout,
     class Accessor,
     class Scalar>
 Scalar matrix_inf_norm(
-  std::experimental::mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A,
+  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A,
   Scalar init)
 {
   return matrix_inf_norm(std::experimental::linalg::impl::default_exec_t(), A, init);
@@ -161,23 +164,25 @@ namespace matrix_inf_norm_detail {
   // without exposing "using std::abs" in the outer namespace.
   template<
     class ElementType,
-    extents<>::size_type numRows,
-    extents<>::size_type numCols,
+    class SizeType,
+    ::std::size_t numRows,
+    ::std::size_t numCols,
     class Layout,
     class Accessor>
   auto matrix_inf_norm_return_type_deducer(
-    std::experimental::mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A) -> decltype(abs(A(0,0)));
+    std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A) -> decltype(abs(A(0,0)));
 
 } // namespace matrix_inf_norm_detail
 
 template<
   class ElementType,
-  extents<>::size_type numRows,
-  extents<>::size_type numCols,
+  class SizeType,
+  ::std::size_t numRows,
+  ::std::size_t numCols,
   class Layout,
   class Accessor>
 auto matrix_inf_norm(
-  std::experimental::mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A)
+  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A)
 -> decltype(matrix_inf_norm_detail::matrix_inf_norm_return_type_deducer(A))
 {
   using return_t = decltype(matrix_inf_norm_detail::matrix_inf_norm_return_type_deducer(A));
@@ -186,13 +191,14 @@ auto matrix_inf_norm(
 
 template<class ExecutionPolicy,
          class ElementType,
-         extents<>::size_type numRows,
-         extents<>::size_type numCols,
+	 class SizeType,
+         ::std::size_t numRows,
+         ::std::size_t numCols,
          class Layout,
          class Accessor>
 auto matrix_inf_norm(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A)
+  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A)
 -> decltype(matrix_inf_norm_detail::matrix_inf_norm_return_type_deducer(A))
 {
   using return_t = decltype(matrix_inf_norm_detail::matrix_inf_norm_return_type_deducer(A));

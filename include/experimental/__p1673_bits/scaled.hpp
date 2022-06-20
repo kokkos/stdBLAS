@@ -50,87 +50,78 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
-template<class Reference, class ScalingFactor>
-class scaled_scalar {
-private:
-  Reference value;
-  const ScalingFactor scaling_factor;
-
-  using result_type = decltype (value * scaling_factor);
-public:
-  scaled_scalar(Reference v, const ScalingFactor& s) :
-    value(v), scaling_factor(s) {}
-
-  operator result_type() const { return value * scaling_factor; }
-
-  // mfh 03 Sep 2019: This doesn't appear to be necessary.
-
-  // template<class T>
-  // decltype(auto) operator+ (T update) const {
-  //   return value * scaling_factor + update;
-  // }
-};
-
-template<class Accessor, class S>
+template<class ScalingFactor, class Accessor>
 class accessor_scaled {
 public:
-  using element_type  = typename Accessor::element_type;
+  using reference     =
+    scaled_scalar<ScalingFactor, typename Accessor::reference,
+      std::remove_cv_t<typename Accessor::element_type>>;
+  using element_type  = std::add_const_t<typename reference::value_type>;
   using pointer       = typename Accessor::pointer;
-  using reference     = scaled_scalar<typename Accessor::reference, S>;
-  using offset_policy = accessor_scaled<typename Accessor::offset_policy, S>;
+  using offset_policy =
+    accessor_scaled<ScalingFactor, typename Accessor::offset_policy>;
 
-  accessor_scaled() = default;
+  accessor_scaled(ScalingFactor scaling_factor, Accessor accessor) :
+    scaling_factor_(std::move(scaling_factor)), accessor_(accessor)
+  {}
 
-  accessor_scaled(Accessor a, S sval) :
-    acc_(a), scale_factor_(sval) {}
-
-  reference access(pointer p, extents<>::size_type i) const noexcept {
-    return reference(acc_.access(p,i), scale_factor_);
+  MDSPAN_TEMPLATE_REQUIRES(
+    class OtherElementType,
+    /* requires */ (std::is_convertible_v<
+      typename default_accessor<OtherElementType>::element_type(*)[],
+      typename Accessor::element_type(*)[]
+    >)
+  )
+  accessor_scaled(ScalingFactor scaling_factor,
+		  default_accessor<OtherElementType> accessor) :
+    scaling_factor_(std::move(scaling_factor)), accessor_(accessor)
+  {}
+  
+  reference access(pointer p, ::std::size_t i) const noexcept {
+    return reference(scaling_factor_, accessor_.access(p, i));
   }
 
   typename offset_policy::pointer
-  offset(pointer p, extents<>::size_type i) const noexcept {
-    return acc_.offset(p,i);
+  offset(pointer p, ::std::size_t i) const noexcept {
+    return accessor_.offset(p, i);
   }
 
-  element_type* decay(pointer p) const noexcept {
-    return acc_.decay(p);
-  }
-
-  // NOT IN PROPOSAL
-  //
-  // This isn't marked noexcept because that would impose a constraint
-  // on Accessor's copy constructor.
   Accessor nested_accessor() const {
-    return acc_;
+    return accessor_;
   }
 
-  // NOT IN PROPOSAL
-  //
-  // This isn't marked noexcept because that would impose a constraint
-  // on S's copy constructor.
-  S scale_factor() const {
-    return scale_factor_;
+  ScalingFactor scaling_factor() const {
+    return scaling_factor_;
   }
 
 private:
-  Accessor acc_;
-  S scale_factor_;
+  ScalingFactor scaling_factor_;
+  Accessor accessor_;
 };
 
-template<class ElementType,
+namespace impl {
+
+template<class ScalingFactor,
+         class Accessor>
+using scaled_element_type =
+  std::add_const_t<typename accessor_scaled<ScalingFactor, Accessor>::element_type>;
+
+} // namespace impl
+
+template<class ScalingFactor,
+         class ElementType,
          class Extents,
          class Layout,
-         class Accessor,
-         class ScalingFactorType>
-mdspan<ElementType, Extents, Layout,
-             accessor_scaled<Accessor, ScalingFactorType>>
-scaled(ScalingFactorType scalingFactor,
-       const mdspan<ElementType, Extents, Layout, Accessor>& a)
+         class Accessor>
+mdspan<impl::scaled_element_type<ScalingFactor, Accessor>,
+       Extents,
+       Layout,
+       accessor_scaled<ScalingFactor, Accessor>>
+scaled(ScalingFactor scaling_factor,
+       mdspan<ElementType, Extents, Layout, Accessor> x)
 {
-  using accessor_t = accessor_scaled<Accessor, ScalingFactorType>;
-  return mdspan<ElementType, Extents, Layout, accessor_t> (
-    a.data(), a.mapping(), accessor_t (a.accessor(), scalingFactor));
+  using acc_type = accessor_scaled<ScalingFactor, Accessor>;
+  return {x.data(), x.mapping(), acc_type{scaling_factor, x.accessor()}};
 }
 
 } // end namespace linalg

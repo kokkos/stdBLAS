@@ -1,8 +1,8 @@
+#include "gtest/gtest.h"
+
 #include <experimental/linalg>
 #include <experimental/mdspan>
-
 #include <vector>
-#include "gtest/gtest.h"
 #include <iostream>
 
 namespace {
@@ -101,9 +101,9 @@ namespace {
     using scalar_t = Scalar;
     using real_t = typename Magnitude<Scalar>::type;
 
-    using extents_t = extents<dynamic_extent, dynamic_extent>;
+    using extents_t = extents<std::size_t, dynamic_extent, dynamic_extent>;
     using matrix_t = mdspan<scalar_t, extents_t, layout_left>;
-    using vector_t = mdspan<scalar_t, extents<dynamic_extent>, layout_left>;
+    using vector_t = mdspan<scalar_t, extents<std::size_t, dynamic_extent>, layout_left>;
 
     constexpr std::size_t maxDim = 7;
     constexpr std::size_t storageSize(maxDim*maxDim + 3*maxDim);

@@ -1,11 +1,10 @@
+#include "gtest/gtest.h"
+
 #include <experimental/linalg>
 #include <experimental/mdspan>
-
-//#include <execution> // TODO (Hoemmen 2021/05/26) test these overloads
+#include <iostream>
 #include <limits>
 #include <vector>
-#include "gtest/gtest.h"
-#include <iostream>
 
 namespace {
   //using std::experimental::mdspan;
@@ -19,6 +18,7 @@ namespace {
   using basic_matrix_t = std::experimental::mdspan<
     ElementType,
     std::experimental::extents<
+      std::size_t,
       std::experimental::dynamic_extent,
       std::experimental::dynamic_extent>,
     Layout,

@@ -51,11 +51,8 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
-template<class EltType, class Extents, class Layout, class Accessor>
-mdspan<EltType, Extents, layout_transpose<Layout>,
-             accessor_conjugate<Accessor, EltType>>
-conjugate_transposed(
-  mdspan<EltType, Extents, Layout, Accessor> a)
+template<class ElementType, class Extents, class Layout, class Accessor>
+auto conjugate_transposed(mdspan<ElementType, Extents, Layout, Accessor> a)
 {
   return conjugated(transposed(a));
 }

@@ -51,32 +51,33 @@ namespace linalg {
 namespace {
 
 template<class ElementType,
-         extents<>::size_type ext0,
+	 class SizeType,
+         ::std::size_t ext0,
          class Layout,
          class Accessor,
          class Scalar>
 void linalg_scale_rank_1(
   const Scalar alpha,
-  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x)
+  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext0>, Layout, Accessor> x)
 {
-  for (extents<>::size_type i = 0; i < x.extent(0); ++i) {
+  for (SizeType i = 0; i < x.extent(0); ++i) {
     x(i) *= alpha;
   }
 }
 
 template<class ElementType,
-         extents<>::size_type numRows,
-         extents<>::size_type numCols,
+	 class SizeType,
+         ::std::size_t numRows,
+         ::std::size_t numCols,
          class Layout,
          class Accessor,
          class Scalar>
 void linalg_scale_rank_2(
   const Scalar alpha,
-  std::experimental::mdspan<ElementType, std::experimental::extents<numRows, numCols>, Layout, Accessor> A)
+  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A)
 {
-  using size_type = typename extents<>::size_type;
-  for (size_type j = 0; j < A.extent(1); ++j) {
-    for (size_type i = 0; i < A.extent(0); ++i) {
+  for (SizeType j = 0; j < A.extent(1); ++j) {
+    for (SizeType i = 0; i < A.extent(0); ++i) {
       A(i,j) *= alpha;
     }
   }
@@ -103,13 +104,14 @@ struct is_custom_scale_avail<
 
 template<class Scalar,
          class ElementType,
-         extents<>::size_type ... ext,
+	 class SizeType,
+         ::std::size_t ... ext,
          class Layout,
          class Accessor>
 void scale(
   std::experimental::linalg::impl::inline_exec_t&& /* exec */,
   const Scalar alpha,
-  std::experimental::mdspan<ElementType, std::experimental::extents<ext ...>, Layout, Accessor> x)
+  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext ...>, Layout, Accessor> x)
 {
   static_assert(x.rank() <= 2);
 
@@ -124,13 +126,14 @@ void scale(
 template<class ExecutionPolicy,
          class Scalar,
          class ElementType,
-         extents<>::size_type ... ext,
+	 class SizeType,
+         ::std::size_t ... ext,
          class Layout,
          class Accessor>
 void scale(
   ExecutionPolicy&& exec,
   const Scalar alpha,
-  std::experimental::mdspan<ElementType, std::experimental::extents<ext ...>, Layout, Accessor> x)
+  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext ...>, Layout, Accessor> x)
 {
   // Call custom overload if available else call std implementation
 
@@ -147,11 +150,12 @@ void scale(
 
 template<class Scalar,
          class ElementType,
-         extents<>::size_type ... ext,
+	 class SizeType,
+         ::std::size_t ... ext,
          class Layout,
          class Accessor>
 void scale(const Scalar alpha,
-           std::experimental::mdspan<ElementType, std::experimental::extents<ext ...>, Layout, Accessor> x)
+           std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext ...>, Layout, Accessor> x)
 {
   scale(std::experimental::linalg::impl::default_exec_t(), alpha, x);
 }

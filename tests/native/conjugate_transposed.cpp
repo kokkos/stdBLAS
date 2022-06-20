@@ -1,8 +1,9 @@
+#include "gtest/gtest.h"
+
 #include <experimental/linalg>
 #include <experimental/mdspan>
 #include <complex>
 #include <vector>
-#include "gtest/gtest.h"
 
 namespace {
   using std::experimental::dynamic_extent;
@@ -16,10 +17,10 @@ namespace {
     using real_t = double;
     using scalar_t = std::complex<real_t>;
     using matrix_dynamic_t =
-      mdspan<scalar_t, extents<dynamic_extent, dynamic_extent>>;
+      mdspan<scalar_t, extents<std::size_t, dynamic_extent, dynamic_extent>>;
     constexpr std::size_t dim = 5;
     using matrix_static_t =
-      mdspan<scalar_t, extents<dim, dim>>;
+      mdspan<scalar_t, extents<std::size_t, dim, dim>>;
 
     constexpr std::size_t storageSize = std::size_t(dim*dim);
     std::vector<scalar_t> A_storage (storageSize);
@@ -55,11 +56,11 @@ namespace {
         EXPECT_EQ( A(i,j), val );
         EXPECT_EQ( B(i,j), -val );
 
-        EXPECT_EQ( A_h(j,i), conj(val) );
-        EXPECT_EQ( B_h(j,i), -conj(val) );
+        EXPECT_EQ( scalar_t(A_h(j,i)), conj(val) );
+        EXPECT_EQ( scalar_t(B_h(j,i)), -conj(val) );
 
-        EXPECT_EQ( A_h(j,i), conj(A(i,j)) );
-        EXPECT_EQ( B_h(j,i), conj(B(i,j)) );
+        EXPECT_EQ( scalar_t(A_h(j,i)), conj(A(i,j)) );
+        EXPECT_EQ( scalar_t(B_h(j,i)), conj(B(i,j)) );
       }
     }
   }

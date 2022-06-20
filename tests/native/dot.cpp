@@ -1,16 +1,8 @@
+#include "gtest/gtest.h"
+
 #include <experimental/linalg>
 #include <experimental/mdspan>
-
-// FIXME I can't actually test the executor overloads, since my GCC
-// (9.1.0, via Homebrew) isn't set up correctly:
-//
-// .../gcc/9.1.0/include/c++/9.1.0/pstl/parallel_backend_tbb.h:19:10: fatal error: tbb/blocked_range.h: No such file or directory
-//   19 | #include <tbb/blocked_range.h>
-//      |          ^~~~~~~~~~~~~~~~~~~~~
-
-//#include <execution>
 #include <vector>
-#include "gtest/gtest.h"
 
 // FIXME (mfh 2022/06/17) Temporarily disable calling the BLAS,
 // to get PR testing workflow running with mdspan tag.
@@ -39,7 +31,7 @@ namespace {
   TEST(BLAS1_dot, mdspan_double)
   {
     using scalar_t = double;
-    using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
+    using vector_t = mdspan<scalar_t, extents<std::size_t, dynamic_extent>>;
 
     constexpr std::size_t vectorSize(5);
     constexpr std::size_t storageSize = std::size_t(2) * vectorSize;
@@ -96,7 +88,7 @@ namespace {
   {
     using real_t = double;
     using scalar_t = std::complex<real_t>;
-    using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
+    using vector_t = mdspan<scalar_t, extents<std::size_t, dynamic_extent>>;
 
     constexpr std::size_t vectorSize(5);
     constexpr std::size_t storageSize = std::size_t(2) * vectorSize;
@@ -147,7 +139,7 @@ namespace {
   {
     using real_t = double;
     using scalar_t = std::complex<real_t>;
-    using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
+    using vector_t = mdspan<scalar_t, extents<std::size_t, dynamic_extent>>;
 
     constexpr std::size_t vectorSize(5);
     constexpr std::size_t storageSize = std::size_t(2) * vectorSize;

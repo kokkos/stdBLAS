@@ -21,6 +21,7 @@ set(LINALG_CXX_STANDARD DETECT CACHE STRING "Override the default CXX_STANDARD t
 set_property(CACHE LINALG_CXX_STANDARD PROPERTY STRINGS DETECT 14 17 20 23)
 
 option(LINALG_ENABLE_CONCEPTS "Try to enable concepts support by giving extra flags." On)
+option(LINALG_ENABLE_ATOMIC_REF "Try to enable atomic_ref support" OFF)
 
 ################################################################################
 
@@ -92,6 +93,11 @@ if(LINALG_ENABLE_CONCEPTS)
   endif()
 endif()
 
+if(LINALG_ENABLE_ATOMIC_REF)
+  # check_linker_flag requires CMake 3.18.
+  set(LINK_OPTIONS "${LINK_OPTIONS} -latomic")
+endif()
+
 ################################################################################
 
 find_package(mdspan QUIET)
@@ -101,7 +107,7 @@ if (NOT mdspan_FOUND)
   FetchContent_Declare(
     mdspan
     GIT_REPOSITORY https://github.com/kokkos/mdspan.git
-    GIT_TAG        mdspan-0.3.0
+    GIT_TAG        stable
   )
   FetchContent_GetProperties(mdspan)
   if(NOT mdspan_POPULATED)

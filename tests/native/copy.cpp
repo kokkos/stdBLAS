@@ -1,17 +1,9 @@
+#include "gtest/gtest.h"
+
 #include <experimental/linalg>
 #include <experimental/mdspan>
-
-// FIXME I can't actually test the executor overloads, since my GCC
-// (9.1.0, via Homebrew) isn't set up correctly:
-//
-// .../gcc/9.1.0/include/c++/9.1.0/pstl/parallel_backend_tbb.h:19:10: fatal error: tbb/blocked_range.h: No such file or directory
-//   19 | #include <tbb/blocked_range.h>
-//      |          ^~~~~~~~~~~~~~~~~~~~~
-
 #include <complex>
-//#include <execution>
 #include <vector>
-#include "gtest/gtest.h"
 
 namespace {
   using std::experimental::dynamic_extent;
@@ -46,7 +38,7 @@ namespace {
   TEST(BLAS1_copy_vector, mdspan_double)
   {
     using scalar_t = double;
-    using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
+    using vector_t = mdspan<scalar_t, extents<std::size_t, dynamic_extent>>;
 
     constexpr std::size_t vectorSize(5);
     constexpr std::size_t storageSize = std::size_t(2) * vectorSize;
@@ -74,7 +66,7 @@ namespace {
   {
     using real_t = double;
     using scalar_t = std::complex<real_t>;
-    using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
+    using vector_t = mdspan<scalar_t, extents<std::size_t, dynamic_extent>>;
 
     constexpr std::size_t vectorSize(5);
     constexpr std::size_t storageSize = std::size_t(2) * vectorSize;
@@ -136,7 +128,7 @@ makeMatrixValues(const std::size_t i, const std::size_t j, const std::size_t num
 TEST(BLAS1_copy_matrix, mdspan_double)
 {
   using scalar_t = double;
-  using matrix_t = mdspan<scalar_t, extents<dynamic_extent, dynamic_extent>>;
+  using matrix_t = mdspan<scalar_t, extents<std::size_t, dynamic_extent, dynamic_extent>>;
 
   constexpr std::size_t numRows(5);
   constexpr std::size_t numCols(4);
@@ -169,7 +161,7 @@ TEST(BLAS1_copy_matrix, mdspan_complex_double)
 {
   using real_t = double;
   using scalar_t = std::complex<real_t>;
-  using matrix_t = mdspan<scalar_t, extents<dynamic_extent, dynamic_extent>>;
+  using matrix_t = mdspan<scalar_t, extents<std::size_t, dynamic_extent, dynamic_extent>>;
 
   constexpr std::size_t numRows(5);
   constexpr std::size_t numCols(4);

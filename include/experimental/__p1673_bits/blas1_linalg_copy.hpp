@@ -51,39 +51,43 @@ namespace linalg {
 namespace {
 
 template<class ElementType_x,
-         extents<>::size_type ext_x,
+	 class SizeType_x,
+         ::std::size_t ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         extents<>::size_type ext_y,
+	 class SizeType_y,
+         ::std::size_t ext_y,
          class Layout_y,
          class Accessor_y>
 void copy_rank_1(
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y)
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
 {
   static_assert(x.static_extent(0) == dynamic_extent ||
                 y.static_extent(0) == dynamic_extent ||
                 x.static_extent(0) == y.static_extent(0));
-
-  for (extents<>::size_type i = 0; i < y.extent(0); ++i) {
+  using size_type = std::common_type_t<SizeType_x, SizeType_y>;
+  for (size_type i = 0; i < y.extent(0); ++i) {
     y(i) = x(i);
   }
 }
 
 template<class ElementType_x,
-         extents<>::size_type numRows_x,
-         extents<>::size_type numCols_x,
+	 class SizeType_x,
+         ::std::size_t numRows_x,
+         ::std::size_t numCols_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         extents<>::size_type numRows_y,
-         extents<>::size_type numCols_y,
+	 class SizeType_y,
+         ::std::size_t numRows_y,
+         ::std::size_t numCols_y,
          class Layout_y,
          class Accessor_y>
 void copy_rank_2(
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<numRows_x, numCols_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<numRows_y, numCols_y>, Layout_y, Accessor_y> y)
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, numRows_x, numCols_x>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, numRows_y, numCols_y>, Layout_y, Accessor_y> y)
 {
   static_assert(x.static_extent(0) == dynamic_extent ||
                 y.static_extent(0) == dynamic_extent ||
@@ -91,9 +95,7 @@ void copy_rank_2(
   static_assert(x.static_extent(1) == dynamic_extent ||
                 y.static_extent(1) == dynamic_extent ||
                 x.static_extent(1) == y.static_extent(1));
-
-  using size_type = typename extents<>::size_type;
-
+  using size_type = std::common_type_t<SizeType_x, SizeType_y>;
   for (size_type j = 0; j < y.extent(1); ++j) {
     for (size_type i = 0; i < y.extent(0); ++i) {
       y(i,j) = x(i,j);
@@ -126,22 +128,22 @@ struct is_custom_copy_avail<
 
 MDSPAN_TEMPLATE_REQUIRES(
          class ElementType_x,
-         extents<>::size_type ... ext_x,
+	 class SizeType_x,
+         ::std::size_t ... ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         extents<>::size_type ... ext_y,
+	 class SizeType_y,
+         ::std::size_t ... ext_y,
          class Layout_y,
          class Accessor_y,
-         /* requires */ (sizeof...(ext_x) == sizeof...(ext_y))
+         /* requires */ (sizeof...(ext_x) == sizeof...(ext_y) && sizeof...(ext_x) <= 2)
 )
 void copy(
   std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y)
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y)
 {
-  static_assert (x.rank() <= 2);
-
   if constexpr (x.rank() == 1) {
     copy_rank_1(x, y);
   }
@@ -153,19 +155,21 @@ void copy(
 MDSPAN_TEMPLATE_REQUIRES(
          class ExecutionPolicy,
          class ElementType_x,
-         extents<>::size_type ... ext_x,
+	 class SizeType_x,
+         ::std::size_t ... ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         extents<>::size_type ... ext_y,
+	 class SizeType_y,
+         ::std::size_t ... ext_y,
          class Layout_y,
          class Accessor_y,
          /* requires */ (sizeof...(ext_x) == sizeof...(ext_y))
 )
 void copy(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y)
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y)
 {
 
   constexpr bool use_custom = is_custom_copy_avail<
@@ -183,18 +187,20 @@ void copy(
 
 MDSPAN_TEMPLATE_REQUIRES(
          class ElementType_x,
-         extents<>::size_type ... ext_x,
+	 class SizeType_x,
+         ::std::size_t ... ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         extents<>::size_type ... ext_y,
+	 class SizeType_y,
+         ::std::size_t ... ext_y,
          class Layout_y,
          class Accessor_y,
          /* requires */ (sizeof...(ext_x) == sizeof...(ext_y))
 )
 void copy(
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y)
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y)
 {
   copy(std::experimental::linalg::impl::default_exec_t(), x, y);
 }
