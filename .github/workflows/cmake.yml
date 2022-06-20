@@ -24,7 +24,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: mdspan-install
-        key: mdspan-${{ steps.get-sha.outputs.sha }}
+        key: mdspan-0.3.0-${{ steps.get-sha.outputs.sha }}
  
     - name: Create Build Environment
       if: steps.cache-mdspan.outputs.cache-hit != 'true'
