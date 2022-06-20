@@ -267,7 +267,7 @@ namespace {
     using scalar_t = real_t;
     //using layout_t = layout_stride; // doesn't compile; why?
     using layout_t = layout_right;
-    using extents_t = extents<dynamic_extent, dynamic_extent>;
+    using extents_t = extents<std::size_t, dynamic_extent, dynamic_extent>;
     using matrix_t = mdspan<scalar_t, extents_t, layout_t>;
 
     constexpr ptrdiff_t dim(5);
@@ -426,7 +426,7 @@ namespace {
   //   using real_t = double;
   //   using scalar_t = real_t;
   //   using layout_t = layout_left;
-  //   using extents_t = extents<dynamic_extent>;
+  //   using extents_t = extents<std::size_t, dynamic_extent>;
   //   using vector_t = mdspan<scalar_t, extents_t, layout_t>;
 
   //   constexpr ptrdiff_t vectorSize(10);

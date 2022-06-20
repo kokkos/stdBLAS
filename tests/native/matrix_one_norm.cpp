@@ -18,6 +18,7 @@ namespace {
   using basic_matrix_t = std::experimental::mdspan<
     ElementType,
     std::experimental::extents<
+      std::size_t,
       std::experimental::dynamic_extent,
       std::experimental::dynamic_extent>,
     Layout,

@@ -74,7 +74,7 @@ namespace {
     using scalar_t = Scalar;
     using real_t = typename Magnitude<Scalar>::type;
 
-    using extents_t = extents<dynamic_extent, dynamic_extent>;
+    using extents_t = extents<std::size_t, dynamic_extent, dynamic_extent>;
     using matrix_t = mdspan<scalar_t, extents_t, layout_left>;
 
     constexpr std::size_t maxDim = 7;
@@ -184,7 +184,7 @@ namespace {
             for (std::size_t j = 0; j < C_numCols; ++j) {
               for (std::size_t i = 0; i < C_numRows; ++i) {
                 C(i,j) = scalar_t(0.0); // this works even for complex
-                for (extents<>::size_type k = 0; k < A_tt.extent(1); ++k) {
+                for (std::size_t k = 0; k < A_tt.extent(1); ++k) {
                   C(i,j) += A_tt(i,k) * B_tt(k,j);
                 }
               }

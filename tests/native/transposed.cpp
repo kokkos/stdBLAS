@@ -17,8 +17,8 @@ namespace {
     using std::experimental::linalg::impl::transpose_extents_t;
     using std::experimental::linalg::impl::transpose_extents;
 
-    using extents_type = extents<ext0, ext1>;
-    using expected_transpose_extents_type = extents<ext1, ext0>;
+    using extents_type = extents<std::size_t, ext0, ext1>;
+    using expected_transpose_extents_type = extents<std::size_t, ext1, ext0>;
     using transpose_extents_type = transpose_extents_t<extents_type>;
     static_assert(std::is_same_v<expected_transpose_extents_type, transpose_extents_type>);
 
@@ -72,7 +72,7 @@ namespace {
   {
     using std::experimental::linalg::layout_transpose;
     using std::experimental::layout_left;
-    using extents_type = extents<ext0, ext1>;
+    using extents_type = extents<std::size_t, ext0, ext1>;
     using mapping_type = typename layout_transpose<layout_left>::mapping<extents_type>;
   }
 
@@ -91,10 +91,10 @@ namespace {
     using real_t = double;
     using scalar_t = double;
     using matrix_dynamic_t =
-      mdspan<scalar_t, extents<dynamic_extent, dynamic_extent>>;
+      mdspan<scalar_t, extents<std::size_t, dynamic_extent, dynamic_extent>>;
     constexpr std::size_t dim = 5;
     using matrix_static_t =
-      mdspan<scalar_t, extents<dim, dim>>;
+      mdspan<scalar_t, extents<std::size_t, dim, dim>>;
 
     constexpr std::size_t storageSize = std::size_t(dim*dim);
     std::vector<scalar_t> A_storage (storageSize);

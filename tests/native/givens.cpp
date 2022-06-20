@@ -156,7 +156,7 @@ namespace {
   {
     using real_t = double;
     using scalar_t = real_t;
-    using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
+    using vector_t = mdspan<scalar_t, extents<std::size_t, dynamic_extent>>;
 
     constexpr std::size_t vectorSize(5);
     constexpr std::size_t storageSize = std::size_t(2) * vectorSize;
@@ -212,7 +212,7 @@ namespace {
   {
     using real_t = double;
     using scalar_t = std::complex<real_t>;
-    using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
+    using vector_t = mdspan<scalar_t, extents<std::size_t, dynamic_extent>>;
 
     constexpr std::size_t vectorSize(5);
     constexpr std::size_t storageSize = std::size_t(2) * vectorSize;

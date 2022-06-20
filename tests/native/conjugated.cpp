@@ -6,6 +6,7 @@
 #include <vector>
 
 namespace {
+  using std::experimental::dextents;
   using std::experimental::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::mdspan;
@@ -60,7 +61,7 @@ namespace {
   {
     using real_t = double;
     using scalar_t = std::complex<real_t>;
-    using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
+    using vector_t = mdspan<scalar_t, dextents<std::size_t, 1>>;
 
     constexpr std::size_t vectorSize (5);
     constexpr std::size_t storageSize = std::size_t (2) * vectorSize;

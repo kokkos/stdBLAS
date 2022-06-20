@@ -17,10 +17,10 @@ namespace {
     using real_t = double;
     using scalar_t = std::complex<real_t>;
     using matrix_dynamic_t =
-      mdspan<scalar_t, extents<dynamic_extent, dynamic_extent>>;
+      mdspan<scalar_t, extents<std::size_t, dynamic_extent, dynamic_extent>>;
     constexpr std::size_t dim = 5;
     using matrix_static_t =
-      mdspan<scalar_t, extents<dim, dim>>;
+      mdspan<scalar_t, extents<std::size_t, dim, dim>>;
 
     constexpr std::size_t storageSize = std::size_t(dim*dim);
     std::vector<scalar_t> A_storage (storageSize);

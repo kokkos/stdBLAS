@@ -32,7 +32,7 @@ namespace {
 
     using mag_t = double;
     using scalar_t = double;
-    using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
+    using vector_t = mdspan<scalar_t, extents<std::size_t, dynamic_extent>>;
 
     constexpr std::size_t vectorSize(0);
     std::vector<scalar_t> storage(vectorSize);
@@ -62,7 +62,7 @@ namespace {
     using real_t = double;
     using mag_t = real_t;
     using scalar_t = std::complex<real_t>;
-    using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
+    using vector_t = mdspan<scalar_t, extents<std::size_t, dynamic_extent>>;
 
     constexpr std::size_t vectorSize(1);
     std::vector<scalar_t> storage(vectorSize);
@@ -92,7 +92,7 @@ namespace {
     using std::sqrt;
     using mag_t = double;
     using scalar_t = double;
-    using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
+    using vector_t = mdspan<scalar_t, extents<std::size_t, dynamic_extent>>;
 
     constexpr std::size_t vectorSize(5);
     constexpr mag_t tol =
@@ -137,7 +137,7 @@ namespace {
     using real_t = double;
     using mag_t = real_t;
     using scalar_t = std::complex<real_t>;
-    using vector_t = mdspan<scalar_t, extents<dynamic_extent>>;
+    using vector_t = mdspan<scalar_t, extents<std::size_t, dynamic_extent>>;
 
     constexpr std::size_t vectorSize(5);
     // Complex numbers use more arithmetic than their real analogs.

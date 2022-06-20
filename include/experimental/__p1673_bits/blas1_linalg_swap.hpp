@@ -53,23 +53,25 @@ namespace linalg {
 namespace {
 
 template<class ElementType_x,
-         extents<>::size_type ext_x,
+	 class SizeType_x,
+         ::std::size_t ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         extents<>::size_type ext_y,
+	 class SizeType_y,
+         ::std::size_t ext_y,
          class Layout_y,
          class Accessor_y>
 void swap_rank_1(
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y, Accessor_y> y)
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
 {
   static_assert(x.static_extent(0) == dynamic_extent ||
                 y.static_extent(0) == dynamic_extent ||
                 x.static_extent(0) == y.static_extent(0));
 
   using std::swap;
-  using size_type = typename extents<>::size_type;
+  using size_type = std::common_type_t<SizeType_x, SizeType_y>;
 
   for (size_type i = 0; i < y.extent(0); ++i) {
     swap(x(i), y(i));
@@ -77,18 +79,20 @@ void swap_rank_1(
 }
 
 template<class ElementType_x,
-         extents<>::size_type numRows_x,
-         extents<>::size_type numCols_x,
+	 class SizeType_x,
+         ::std::size_t numRows_x,
+         ::std::size_t numCols_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         extents<>::size_type numRows_y,
-         extents<>::size_type numCols_y,
+	 class SizeType_y,
+         ::std::size_t numRows_y,
+         ::std::size_t numCols_y,
          class Layout_y,
          class Accessor_y>
 void swap_rank_2(
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<numRows_x, numCols_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<numRows_y, numCols_y>, Layout_y, Accessor_y> y)
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, numRows_x, numCols_x>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, numRows_y, numCols_y>, Layout_y, Accessor_y> y)
 {
   static_assert(x.static_extent(0) == dynamic_extent ||
                 y.static_extent(0) == dynamic_extent ||
@@ -98,7 +102,7 @@ void swap_rank_2(
                 x.static_extent(1) == y.static_extent(1));
 
   using std::swap;
-  using size_type = typename extents<>::size_type;
+  using size_type = ::std::common_type_t<SizeType_x, SizeType_y>;
 
   for (size_type j = 0; j < y.extent(1); ++j) {
     for (size_type i = 0; i < y.extent(0); ++i) {
@@ -129,19 +133,21 @@ struct is_custom_vector_swap_elements_avail<
 
 MDSPAN_TEMPLATE_REQUIRES(
          class ElementType_x,
-         extents<>::size_type ... ext_x,
+	 class SizeType_x,
+         ::std::size_t ... ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         extents<>::size_type ... ext_y,
+	 class SizeType_y,
+         ::std::size_t ... ext_y,
          class Layout_y,
          class Accessor_y,
          /* requires */ (sizeof...(ext_x) == sizeof...(ext_y))
 )
 void swap_elements(
   std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y)
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y)
 {
   static_assert(x.rank() <= 2);
 
@@ -156,19 +162,21 @@ void swap_elements(
 MDSPAN_TEMPLATE_REQUIRES(
          class ExecutionPolicy,
          class ElementType_x,
-         extents<>::size_type ... ext_x,
+	 class SizeType_x,
+         ::std::size_t ... ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         extents<>::size_type ... ext_y,
+	 class SizeType_y,
+         ::std::size_t ... ext_y,
          class Layout_y,
          class Accessor_y,
          /* requires */ (sizeof...(ext_x) == sizeof...(ext_y))
 )
 void swap_elements(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y)
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y)
 {
   constexpr bool use_custom = is_custom_vector_swap_elements_avail<
     decltype(execpolicy_mapper(exec)), decltype(x), decltype(y)
@@ -185,18 +193,20 @@ void swap_elements(
 
 MDSPAN_TEMPLATE_REQUIRES(
          class ElementType_x,
-         extents<>::size_type ... ext_x,
+	 class SizeType_x,
+         ::std::size_t ... ext_x,
          class Layout_x,
          class Accessor_x,
          class ElementType_y,
-         extents<>::size_type ... ext_y,
+	 class SizeType_y,
+         ::std::size_t ... ext_y,
          class Layout_y,
          class Accessor_y,
          /* requires */ (sizeof...(ext_x) == sizeof...(ext_y))
 )
 void swap_elements(
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x ...>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y ...>, Layout_y, Accessor_y> y)
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y)
 {
   swap_elements(std::experimental::linalg::impl::default_exec_t(), x, y);
 }

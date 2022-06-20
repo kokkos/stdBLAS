@@ -53,7 +53,7 @@ namespace {
     static_assert(computed_val == expected_val);
 
     double x_element = d;
-    mdspan<double, extents<1>> x(&x_element);
+    mdspan<double, extents<std::size_t, 1>> x(&x_element);
     EXPECT_EQ(x[0], d);
     auto x_scaled = scaled(1 << 20, x);
     EXPECT_EQ(x_scaled[0], (1 << 20) * d);
@@ -69,7 +69,7 @@ namespace {
     using scaling_factor_type = float;
 
     using vector_t =
-      mdspan<vector_element_type, extents<dynamic_extent>>;
+      mdspan<vector_element_type, extents<std::size_t, dynamic_extent>>;
 
     constexpr std::size_t vectorSize (5);
     constexpr std::size_t storageSize = std::size_t (2) * vectorSize;
@@ -138,7 +138,7 @@ namespace {
     using scaling_factor_type = std::complex<double>;
 
     using vector_t =
-      mdspan<vector_element_type, extents<dynamic_extent>>;
+      mdspan<vector_element_type, extents<std::size_t, dynamic_extent>>;
 
     constexpr std::size_t vectorSize(5);
     constexpr std::size_t storageSize = vectorSize;

@@ -61,7 +61,7 @@ struct is_custom_idx_abs_max_avail<
     //FRizzi: maybe should use is_convertible?
     std::is_same<
       decltype(idx_abs_max(std::declval<Exec>(), std::declval<v_t>())),
-      extents<>::size_type
+      typename v_t::extents_type::size_type
       >::value
     && !linalg::impl::is_inline_exec_v<Exec>
     >
@@ -69,24 +69,22 @@ struct is_custom_idx_abs_max_avail<
   : std::true_type{};
 
 template<class ElementType,
-         extents<>::size_type ext0,
+         class SizeType, ::std::size_t ext0,
          class Layout,
          class Accessor>
-extents<>::size_type idx_abs_max_default_impl(
-  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
+SizeType idx_abs_max_default_impl(
+  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext0>, Layout, Accessor> v)
 {
   using std::abs;
-  using size_type = typename extents<>::size_type;
   using magnitude_type = decltype(abs(v(0)));
 
-  // if vector is empty, always return according to our proposal
   if (v.extent(0) == 0) {
-    return std::numeric_limits<typename extents<>::size_type>::max();
+    return std::numeric_limits<SizeType>::max();
   }
 
-  size_type maxInd = 0;
+  SizeType maxInd = 0;
   magnitude_type maxVal = abs(v(0));
-  for (size_type i = 1; i < v.extent(0); ++i) {
+  for (SizeType i = 1; i < v.extent(0); ++i) {
     if (maxVal < abs(v(i))) {
       maxVal = abs(v(i));
       maxInd = i;
@@ -98,29 +96,27 @@ extents<>::size_type idx_abs_max_default_impl(
 } // end anonymous namespace
 
 template<class ElementType,
-         extents<>::size_type ext0,
+         class SizeType, ::std::size_t ext0,
          class Layout,
          class Accessor>
-extents<>::size_type idx_abs_max(
+SizeType idx_abs_max(
   std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
+  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext0>, Layout, Accessor> v)
 {
   return idx_abs_max_default_impl(v);
 }
 
 template<class ExecutionPolicy,
          class ElementType,
-         extents<>::size_type ext0,
+         class SizeType, ::std::size_t ext0,
          class Layout,
          class Accessor>
-typename extents<>::size_type idx_abs_max(
+SizeType idx_abs_max(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
+  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext0>, Layout, Accessor> v)
 {
-
-  // if vector is empty, always return according to our proposal
   if (v.extent(0) == 0) {
-    return std::numeric_limits<typename extents<>::size_type>::max();
+    return std::numeric_limits<SizeType>::max();
   }
 
   constexpr bool use_custom = is_custom_idx_abs_max_avail<
@@ -136,11 +132,11 @@ typename extents<>::size_type idx_abs_max(
 }
 
 template<class ElementType,
-         extents<>::size_type ext0,
+         class SizeType, ::std::size_t ext0,
          class Layout,
          class Accessor>
-extents<>::size_type idx_abs_max(
-  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v)
+SizeType idx_abs_max(
+  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext0>, Layout, Accessor> v)
 {
   return idx_abs_max(std::experimental::linalg::impl::default_exec_t(), v);
 }

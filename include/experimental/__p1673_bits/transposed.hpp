@@ -60,7 +60,7 @@ namespace impl {
   )
   struct transpose_extents_t_impl
   {
-    using type = extents<Extents::static_extent(1), Extents::static_extent(0)>;
+    using type = extents<typename Extents::size_type, Extents::static_extent(1), Extents::static_extent(0)>;
   };
 
   template<class Extents>

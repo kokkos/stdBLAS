@@ -26,9 +26,9 @@ int main(int argc, char* argv[]) {
 
     // Create and initialize mdspan
     // Would look simple with CTAD, GCC 11.1 works but some others are buggy
-    mdspan<double, extents<dynamic_extent,dynamic_extent>> A(A_vec.data(),N,M);
-    mdspan<double, extents<dynamic_extent>> x(x_vec.data(),M);
-    mdspan<double, extents<dynamic_extent>> y(y_vec.data(),N);
+    mdspan<double, extents<std::size_t, dynamic_extent,dynamic_extent>> A(A_vec.data(),N,M);
+    mdspan<double, extents<std::size_t, dynamic_extent>> x(x_vec.data(),M);
+    mdspan<double, extents<std::size_t, dynamic_extent>> y(y_vec.data(),N);
     for(int i=0; i<A.extent(0); i++)
       for(int j=0; j<A.extent(1); j++)
         A(i,j) = 100.0*i+j;

@@ -29,7 +29,7 @@ namespace {
   TEST(BLAS3_symm, left_lower_tri)
   {
     /* C = A * B, where A is symmetric mxm */
-    using extents_t = extents<dynamic_extent, dynamic_extent>;
+    using extents_t = extents<std::size_t, dynamic_extent, dynamic_extent>;
     using cmatrix_t = mdspan<complex<double>, extents_t, layout_left>;
     using dmatrix_t = mdspan<double, extents_t, layout_left>;
     constexpr double snan = std::numeric_limits<double>::signaling_NaN();
@@ -85,7 +85,7 @@ namespace {
   TEST(BLAS3_symm, left_upper_tri)
   {
     /* C = A * B, where A is symmetric mxm */
-    using extents_t = extents<dynamic_extent, dynamic_extent>;
+    using extents_t = extents<std::size_t, dynamic_extent, dynamic_extent>;
     using cmatrix_t = mdspan<complex<double>, extents_t, layout_left>;
     using dmatrix_t = mdspan<double, extents_t, layout_left>;
     constexpr double snan = std::numeric_limits<double>::signaling_NaN();
@@ -141,7 +141,7 @@ namespace {
   TEST(BLAS3_symm, right_lower_tri)
   {
     /* C = B * A, where A is symmetric mxm */
-    using extents_t = extents<dynamic_extent, dynamic_extent>;
+    using extents_t = extents<std::size_t, dynamic_extent, dynamic_extent>;
     using cmatrix_t = mdspan<complex<double>, extents_t, layout_left>;
     using dmatrix_t = mdspan<double, extents_t, layout_left>;
     constexpr double snan = std::numeric_limits<double>::signaling_NaN();
@@ -194,10 +194,10 @@ namespace {
     }
   }
 
-    TEST(BLAS3_symm, right_upper_tri)
+  TEST(BLAS3_symm, right_upper_tri)
   {
     /* C = B * A, where A is symmetric mxm */
-    using extents_t = extents<dynamic_extent, dynamic_extent>;
+    using extents_t = extents<std::size_t, dynamic_extent, dynamic_extent>;
     using cmatrix_t = mdspan<complex<double>, extents_t, layout_left>;
     using dmatrix_t = mdspan<double, extents_t, layout_left>;
     constexpr double snan = std::numeric_limits<double>::signaling_NaN();

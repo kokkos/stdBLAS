@@ -126,25 +126,23 @@ struct is_custom_herm_mat_rank_k_update_avail<
 
 template<class ScaleFactorType,
 	 class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class ElementType_C,
-         extents<>::size_type numRows_C,
-         extents<>::size_type numCols_C,
+         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C,
          class Triangle>
 void symmetric_matrix_rank_k_update(
   std::experimental::linalg::impl::inline_exec_t&& /*exec*/,
   ScaleFactorType alpha,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
-  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle /* t */)
 {
   constexpr bool lower_tri = std::is_same_v<Triangle, lower_triangle_t>;
-  using size_type = typename extents<>::size_type;
+  using size_type = ::std::common_type_t<SizeType_A, SizeType_C>;
 
   for (size_type j = 0; j < C.extent(1); ++j) {
     const size_type i_lower = lower_tri ? j : size_type(0);
@@ -160,21 +158,19 @@ void symmetric_matrix_rank_k_update(
 template<class ScaleFactorType,
 	 class ExecutionPolicy,
          class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class ElementType_C,
-         extents<>::size_type numRows_C,
-         extents<>::size_type numCols_C,
+         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C,
          class Triangle>
 void symmetric_matrix_rank_k_update(
   ExecutionPolicy&& exec,
   ScaleFactorType alpha,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
-  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle t)
 {
 
@@ -191,20 +187,18 @@ void symmetric_matrix_rank_k_update(
 
 template<class ScaleFactorType,
 	 class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class ElementType_C,
-         extents<>::size_type numRows_C,
-         extents<>::size_type numCols_C,
+         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C,
          class Triangle>
 void symmetric_matrix_rank_k_update(
   ScaleFactorType alpha,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
-  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle t )
 {
   symmetric_matrix_rank_k_update(std::experimental::linalg::impl::default_exec_t(), alpha, A, C, t);
@@ -214,24 +208,22 @@ void symmetric_matrix_rank_k_update(
 // Rank-k update of a symmetric matrix without scaling factor
 
 template<class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class ElementType_C,
-         extents<>::size_type numRows_C,
-         extents<>::size_type numCols_C,
+         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C,
          class Triangle>
 void symmetric_matrix_rank_k_update(
   std::experimental::linalg::impl::inline_exec_t&& /*exec*/,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
-  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle /* t */)
 {
   constexpr bool lower_tri = std::is_same_v<Triangle, lower_triangle_t>;
-  using size_type = typename extents<>::size_type;
+  using size_type = ::std::common_type_t<SizeType_A, SizeType_C>;
 
   for (size_type j = 0; j < C.extent(1); ++j) {
     const size_type i_lower = lower_tri ? j : size_type(0);
@@ -246,20 +238,18 @@ void symmetric_matrix_rank_k_update(
 
 template<class ExecutionPolicy,
          class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class ElementType_C,
-         extents<>::size_type numRows_C,
-         extents<>::size_type numCols_C,
+         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C,
          class Triangle>
 void symmetric_matrix_rank_k_update(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
-  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle t)
 {
 
@@ -275,19 +265,17 @@ void symmetric_matrix_rank_k_update(
 }
 
 template<class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class ElementType_C,
-         extents<>::size_type numRows_C,
-         extents<>::size_type numCols_C,
+         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C,
          class Triangle>
 void symmetric_matrix_rank_k_update(
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
-  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle t )
 {
   symmetric_matrix_rank_k_update(std::experimental::linalg::impl::default_exec_t(), A, C, t);
@@ -298,25 +286,23 @@ void symmetric_matrix_rank_k_update(
 
 template<class ScaleFactorType,
 	 class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class ElementType_C,
-         extents<>::size_type numRows_C,
-         extents<>::size_type numCols_C,
+         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C,
          class Triangle>
 void hermitian_matrix_rank_k_update(
   std::experimental::linalg::impl::inline_exec_t&& /*exec*/,
   ScaleFactorType alpha,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
-  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle /* t */)
 {
   constexpr bool lower_tri = std::is_same_v<Triangle, lower_triangle_t>;
-  using size_type = typename extents<>::size_type;
+  using size_type = ::std::common_type_t<SizeType_A, SizeType_C>;
 
   for (size_type j = 0; j < C.extent(1); ++j) {
     const size_type i_lower = lower_tri ? j : size_type(0);
@@ -332,21 +318,19 @@ void hermitian_matrix_rank_k_update(
 template<class ScaleFactorType,
 	 class ExecutionPolicy,
          class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class ElementType_C,
-         extents<>::size_type numRows_C,
-         extents<>::size_type numCols_C,
+         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C,
          class Triangle>
 void hermitian_matrix_rank_k_update(
   ExecutionPolicy&& exec,
   ScaleFactorType alpha,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
-  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle t)
 {
   constexpr bool use_custom = is_custom_herm_mat_rank_k_update_avail<
@@ -362,20 +346,18 @@ void hermitian_matrix_rank_k_update(
 
 template<class ScaleFactorType,
 	 class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class ElementType_C,
-         extents<>::size_type numRows_C,
-         extents<>::size_type numCols_C,
+         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C,
          class Triangle>
 void hermitian_matrix_rank_k_update(
   ScaleFactorType alpha,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
-  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle t )
 {
   hermitian_matrix_rank_k_update(std::experimental::linalg::impl::default_exec_t(), alpha, A, C, t);
@@ -384,24 +366,22 @@ void hermitian_matrix_rank_k_update(
 // Rank-k update of a Hermitian matrix without scaling factor alpha
 
 template<class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class ElementType_C,
-         extents<>::size_type numRows_C,
-         extents<>::size_type numCols_C,
+         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C,
          class Triangle>
 void hermitian_matrix_rank_k_update(
   std::experimental::linalg::impl::inline_exec_t&& /*exec*/,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
-  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle /* t */)
 {
   constexpr bool lower_tri = std::is_same_v<Triangle, lower_triangle_t>;
-  using size_type = typename extents<>::size_type;
+  using size_type = ::std::common_type_t<SizeType_A, SizeType_C>;
 
   for (size_type j = 0; j < C.extent(1); ++j) {
     const size_type i_lower = lower_tri ? j : size_type(0);
@@ -416,20 +396,18 @@ void hermitian_matrix_rank_k_update(
 
 template<class ExecutionPolicy,
          class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class ElementType_C,
-         extents<>::size_type numRows_C,
-         extents<>::size_type numCols_C,
+         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C,
          class Triangle>
 void hermitian_matrix_rank_k_update(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
-  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle t)
 {
   constexpr bool use_custom = is_custom_herm_mat_rank_k_update_avail<
@@ -444,19 +422,17 @@ void hermitian_matrix_rank_k_update(
 }
 
 template<class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class ElementType_C,
-         extents<>::size_type numRows_C,
-         extents<>::size_type numCols_C,
+         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C,
          class Triangle>
 void hermitian_matrix_rank_k_update(
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
-  std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle t )
 {
   hermitian_matrix_rank_k_update(std::experimental::linalg::impl::default_exec_t(), A, C, t);

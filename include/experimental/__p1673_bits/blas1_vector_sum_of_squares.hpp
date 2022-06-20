@@ -83,13 +83,14 @@ struct is_custom_vector_sum_of_squares_avail<
 } // end anonymous namespace
 
 template<class ElementType,
-         extents<>::size_type ext0,
+	 class SizeType,
+         ::std::size_t ext0,
          class Layout,
          class Accessor,
          class Scalar>
 sum_of_squares_result<Scalar> vector_sum_of_squares(
   std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> x,
+  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext0>, Layout, Accessor> x,
   sum_of_squares_result<Scalar> init)
 {
   using std::abs;
@@ -103,7 +104,7 @@ sum_of_squares_result<Scalar> vector_sum_of_squares(
 
   Scalar scale = init.scaling_factor;
   Scalar ssq = init.scaled_sum_of_squares;
-  for (extents<>::size_type i = 0; i < x.extent(0); ++i) {
+  for (SizeType i = 0; i < x.extent(0); ++i) {
     if (abs(x(i)) != 0.0) {
       const auto absxi = abs(x(i));
       const auto quotient = scale / absxi;
@@ -125,13 +126,14 @@ sum_of_squares_result<Scalar> vector_sum_of_squares(
 
 template<class ExecutionPolicy,
          class ElementType,
-         extents<>::size_type ext0,
+	 class SizeType,
+         ::std::size_t ext0,
          class Layout,
          class Accessor,
          class Scalar>
 sum_of_squares_result<Scalar> vector_sum_of_squares(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v,
+  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext0>, Layout, Accessor> v,
   sum_of_squares_result<Scalar> init)
 {
 
@@ -149,12 +151,13 @@ sum_of_squares_result<Scalar> vector_sum_of_squares(
 }
 
 template<class ElementType,
-         extents<>::size_type ext0,
+	 class SizeType,
+         ::std::size_t ext0,
          class Layout,
          class Accessor,
          class Scalar>
 sum_of_squares_result<Scalar> vector_sum_of_squares(
-  std::experimental::mdspan<ElementType, std::experimental::extents<ext0>, Layout, Accessor> v,
+  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext0>, Layout, Accessor> v,
   sum_of_squares_result<Scalar> init)
 {
   return vector_sum_of_squares(std::experimental::linalg::impl::default_exec_t(), v, init);

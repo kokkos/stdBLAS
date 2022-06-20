@@ -54,7 +54,7 @@ namespace linalg {
 
 namespace __layout_blas_general_impl {
 
-template <class BaseLayout, extents<>::size_type StaticLDA>
+template <class BaseLayout, ::std::size_t StaticLDA>
 class __layout_blas_impl {
 private:
 
@@ -67,7 +67,7 @@ public: // but not really
 private:
   using __extents_type = decltype(std::declval<BaseLayout const&>().extents());
 
-  template <class, extents<>::size_type>
+  template <class, ::std::size_t>
   friend class __layout_blas_impl;
 
 public:
@@ -88,7 +88,7 @@ public:
 
   MDSPAN_FUNCTION_REQUIRES(
     (MDSPAN_INLINE_FUNCTION constexpr),
-    __layout_blas_impl, (__extents_type const& exts, extents<>::size_type lda), noexcept,
+    __layout_blas_impl, (__extents_type const& exts, ::std::size_t lda), noexcept,
     /* requires */ (!__lda_t::is_static)
   ) : _base_layout(exts),
       __lda(lda)
@@ -97,7 +97,7 @@ public:
   // TODO noexcept specification
   // TODO throw if rhs is dynamic LDA and doesn't match static lhs
   MDSPAN_TEMPLATE_REQUIRES(
-    class OtherExtents, extents<>::size_type OtherLDA, /* requires */ (
+    class OtherExtents, ::std::size_t OtherLDA, /* requires */ (
       _MDSPAN_TRAIT(is_convertible, OtherExtents, __extents_type)
       && (
         !__layout_blas_impl<OtherExtents, OtherLDA>::__lda_t::is_static
@@ -116,7 +116,7 @@ public:
   // TODO noexcept specification
   // TODO throw if rhs is dynamic LDA and doesn't match static lhs
   MDSPAN_TEMPLATE_REQUIRES(
-    class OtherExtents, extents<>::size_type OtherLDA,
+    class OtherExtents, ::std::size_t OtherLDA,
     /* requires */ (
       _MDSPAN_TRAIT(is_convertible, OtherExtents, __extents_type)
       && (
@@ -136,7 +136,7 @@ public:
 
   template <class... Integral>
   MDSPAN_FORCE_INLINE_FUNCTION
-  constexpr extents<>::size_type operator()(Integral... idxs) const noexcept {
+  constexpr ::std::size_t operator()(Integral... idxs) const noexcept {
     return __lda.value * _base_layout(idxs...);
   }
 

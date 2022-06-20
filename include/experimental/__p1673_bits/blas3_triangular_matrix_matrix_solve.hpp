@@ -51,30 +51,27 @@ namespace linalg {
 namespace {
 
 template<class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class DiagonalStorage,
          class ElementType_B,
-         extents<>::size_type numRows_B,
-         extents<>::size_type numCols_B,
+         class SizeType_B, ::std::size_t numRows_B, ::std::size_t numCols_B,
          class Layout_B,
          class Accessor_B,
          class ElementType_X,
-         extents<>::size_type numRows_X,
-         extents<>::size_type numCols_X,
+         class SizeType_X, ::std::size_t numRows_X, ::std::size_t numCols_X,
          class Layout_X,
          class Accessor_X>
 void trsm_upper_triangular_left_side(
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
-  std::experimental::mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   constexpr bool explicit_diagonal =
     std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
-  using size_type = typename extents<>::size_type;
+  using size_type = ::std::common_type_t<SizeType_A, SizeType_B, SizeType_X>;
 
   const size_type A_num_rows = A.extent(0);
   const size_type B_num_cols = B.extent(1);
@@ -104,30 +101,27 @@ void trsm_upper_triangular_left_side(
 }
 
 template<class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class DiagonalStorage,
          class ElementType_B,
-         extents<>::size_type numRows_B,
-         extents<>::size_type numCols_B,
+         class SizeType_B, ::std::size_t numRows_B, ::std::size_t numCols_B,
          class Layout_B,
          class Accessor_B,
          class ElementType_X,
-         extents<>::size_type numRows_X,
-         extents<>::size_type numCols_X,
+         class SizeType_X, ::std::size_t numRows_X, ::std::size_t numCols_X,
          class Layout_X,
          class Accessor_X>
 void trsm_lower_triangular_left_side(
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
-  std::experimental::mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   constexpr bool explicit_diagonal =
     std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
-  using size_type = typename extents<>::size_type;
+  using size_type = ::std::common_type_t<SizeType_A, SizeType_B, SizeType_X>;
 
   const size_type A_num_rows = A.extent(0);
   const size_type B_num_cols = B.extent(1);
@@ -152,30 +146,27 @@ void trsm_lower_triangular_left_side(
 }
 
 template<class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class DiagonalStorage,
          class ElementType_B,
-         extents<>::size_type numRows_B,
-         extents<>::size_type numCols_B,
+         class SizeType_B, ::std::size_t numRows_B, ::std::size_t numCols_B,
          class Layout_B,
          class Accessor_B,
          class ElementType_X,
-         extents<>::size_type numRows_X,
-         extents<>::size_type numCols_X,
+         class SizeType_X, ::std::size_t numRows_X, ::std::size_t numCols_X,
          class Layout_X,
          class Accessor_X>
 void trsm_upper_triangular_right_side(
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
-  std::experimental::mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   constexpr bool explicit_diagonal =
     std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
-  using size_type = typename extents<>::size_type;
+  using size_type = ::std::common_type_t<SizeType_A, SizeType_B, SizeType_X>;
 
   const size_type B_num_rows = B.extent(0);
   const size_type A_num_cols = A.extent(1);
@@ -198,30 +189,27 @@ void trsm_upper_triangular_right_side(
 }
 
 template<class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class DiagonalStorage,
          class ElementType_B,
-         extents<>::size_type numRows_B,
-         extents<>::size_type numCols_B,
+         class SizeType_B, ::std::size_t numRows_B, ::std::size_t numCols_B,
          class Layout_B,
          class Accessor_B,
          class ElementType_X,
-         extents<>::size_type numRows_X,
-         extents<>::size_type numCols_X,
+         class SizeType_X, ::std::size_t numRows_X, ::std::size_t numCols_X,
          class Layout_X,
          class Accessor_X>
 void trsm_lower_triangular_right_side(
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
-  std::experimental::mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   constexpr bool explicit_diagonal =
     std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
-  using size_type = typename extents<>::size_type;
+  using size_type = ::std::common_type_t<SizeType_A, SizeType_B, SizeType_X>;
 
   const size_type B_num_rows = B.extent(0);
   const size_type A_num_rows = A.extent(0);
@@ -319,29 +307,26 @@ struct is_custom_tri_matrix_matrix_solve_avail<
 // triangular_matrix_matrix_left_solve
 
 template<class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class Triangle,
          class DiagonalStorage,
          class ElementType_B,
-         extents<>::size_type numRows_B,
-         extents<>::size_type numCols_B,
+         class SizeType_B, ::std::size_t numRows_B, ::std::size_t numCols_B,
          class Layout_B,
          class Accessor_B,
          class ElementType_X,
-         extents<>::size_type numRows_X,
-         extents<>::size_type numCols_X,
+         class SizeType_X, ::std::size_t numRows_X, ::std::size_t numCols_X,
          class Layout_X,
          class Accessor_X>
 void triangular_matrix_matrix_left_solve(
   std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle /*t*/,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
-  std::experimental::mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   if (std::is_same_v<Triangle, lower_triangle_t>) {
     trsm_lower_triangular_left_side (A, d, B, X);
@@ -353,29 +338,26 @@ void triangular_matrix_matrix_left_solve(
 
 template<class ExecutionPolicy,
          class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class Triangle,
          class DiagonalStorage,
          class ElementType_B,
-         extents<>::size_type numRows_B,
-         extents<>::size_type numCols_B,
+         class SizeType_B, ::std::size_t numRows_B, ::std::size_t numCols_B,
          class Layout_B,
          class Accessor_B,
          class ElementType_X,
-         extents<>::size_type numRows_X,
-         extents<>::size_type numCols_X,
+         class SizeType_X, ::std::size_t numRows_X, ::std::size_t numCols_X,
          class Layout_X,
          class Accessor_X>
 void triangular_matrix_matrix_left_solve(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
-  std::experimental::mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   constexpr bool use_custom = is_custom_tri_matrix_matrix_left_solve_avail<
     decltype(execpolicy_mapper(exec)), decltype(A), Triangle, DiagonalStorage, decltype(B), decltype(X)>::value;
@@ -388,28 +370,25 @@ void triangular_matrix_matrix_left_solve(
 }
 
 template<class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class Triangle,
          class DiagonalStorage,
          class ElementType_B,
-         extents<>::size_type numRows_B,
-         extents<>::size_type numCols_B,
+         class SizeType_B, ::std::size_t numRows_B, ::std::size_t numCols_B,
          class Layout_B,
          class Accessor_B,
          class ElementType_X,
-         extents<>::size_type numRows_X,
-         extents<>::size_type numCols_X,
+         class SizeType_X, ::std::size_t numRows_X, ::std::size_t numCols_X,
          class Layout_X,
          class Accessor_X>
 void triangular_matrix_matrix_left_solve(
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
-  std::experimental::mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   triangular_matrix_matrix_left_solve(std::experimental::linalg::impl::default_exec_t(), A, t, d, B, X);
 }
@@ -417,29 +396,26 @@ void triangular_matrix_matrix_left_solve(
 // triangular_matrix_matrix_right_solve
 
 template<class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class Triangle,
          class DiagonalStorage,
          class ElementType_B,
-         extents<>::size_type numRows_B,
-         extents<>::size_type numCols_B,
+         class SizeType_B, ::std::size_t numRows_B, ::std::size_t numCols_B,
          class Layout_B,
          class Accessor_B,
          class ElementType_X,
-         extents<>::size_type numRows_X,
-         extents<>::size_type numCols_X,
+         class SizeType_X, ::std::size_t numRows_X, ::std::size_t numCols_X,
          class Layout_X,
          class Accessor_X>
 void triangular_matrix_matrix_right_solve(
   std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle /*t*/,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
-  std::experimental::mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   if (std::is_same_v<Triangle, lower_triangle_t>) {
     trsm_lower_triangular_right_side (A, d, B, X);
@@ -451,29 +427,26 @@ void triangular_matrix_matrix_right_solve(
 
 template<class ExecutionPolicy,
          class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class Triangle,
          class DiagonalStorage,
          class ElementType_B,
-         extents<>::size_type numRows_B,
-         extents<>::size_type numCols_B,
+         class SizeType_B, ::std::size_t numRows_B, ::std::size_t numCols_B,
          class Layout_B,
          class Accessor_B,
          class ElementType_X,
-         extents<>::size_type numRows_X,
-         extents<>::size_type numCols_X,
+         class SizeType_X, ::std::size_t numRows_X, ::std::size_t numCols_X,
          class Layout_X,
          class Accessor_X>
 void triangular_matrix_matrix_right_solve(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
-  std::experimental::mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   constexpr bool use_custom = is_custom_tri_matrix_matrix_right_solve_avail<
     decltype(execpolicy_mapper(exec)), decltype(A), Triangle, DiagonalStorage, decltype(B), decltype(X)>::value;
@@ -486,28 +459,25 @@ void triangular_matrix_matrix_right_solve(
 }
 
 template<class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class Triangle,
          class DiagonalStorage,
          class ElementType_B,
-         extents<>::size_type numRows_B,
-         extents<>::size_type numCols_B,
+         class SizeType_B, ::std::size_t numRows_B, ::std::size_t numCols_B,
          class Layout_B,
          class Accessor_B,
          class ElementType_X,
-         extents<>::size_type numRows_X,
-         extents<>::size_type numCols_X,
+         class SizeType_X, ::std::size_t numRows_X, ::std::size_t numCols_X,
          class Layout_X,
          class Accessor_X>
 void triangular_matrix_matrix_right_solve(
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
-  std::experimental::mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   triangular_matrix_matrix_right_solve(std::experimental::linalg::impl::default_exec_t(), A, t, d, B, X);
 }
@@ -515,31 +485,28 @@ void triangular_matrix_matrix_right_solve(
 // triangular_matrix_matrix_solve
 
 template<class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class Triangle,
          class DiagonalStorage,
          class Side,
          class ElementType_B,
-         extents<>::size_type numRows_B,
-         extents<>::size_type numCols_B,
+         class SizeType_B, ::std::size_t numRows_B, ::std::size_t numCols_B,
          class Layout_B,
          class Accessor_B,
          class ElementType_X,
-         extents<>::size_type numRows_X,
-         extents<>::size_type numCols_X,
+         class SizeType_X, ::std::size_t numRows_X, ::std::size_t numCols_X,
          class Layout_X,
          class Accessor_X>
 void triangular_matrix_matrix_solve(
   std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle /*t*/,
   DiagonalStorage d,
   Side /*s*/,
-  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
-  std::experimental::mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   if (std::is_same_v<Side, left_side_t>) {
     triangular_matrix_matrix_left_solve (A, d, B, X);
@@ -551,31 +518,28 @@ void triangular_matrix_matrix_solve(
 
 template<class ExecutionPolicy,
          class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class Triangle,
          class DiagonalStorage,
          class Side,
          class ElementType_B,
-         extents<>::size_type numRows_B,
-         extents<>::size_type numCols_B,
+         class SizeType_B, ::std::size_t numRows_B, ::std::size_t numCols_B,
          class Layout_B,
          class Accessor_B,
          class ElementType_X,
-         extents<>::size_type numRows_X,
-         extents<>::size_type numCols_X,
+         class SizeType_X, ::std::size_t numRows_X, ::std::size_t numCols_X,
          class Layout_X,
          class Accessor_X>
 void triangular_matrix_matrix_solve(
   ExecutionPolicy&& exec ,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
   Side s,
-  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
-  std::experimental::mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   constexpr bool use_custom = is_custom_tri_matrix_matrix_solve_avail<
     decltype(execpolicy_mapper(exec)), decltype(A), Triangle, DiagonalStorage, Side, decltype(B), decltype(X)>::value;
@@ -588,30 +552,27 @@ void triangular_matrix_matrix_solve(
 }
 
 template<class ElementType_A,
-         extents<>::size_type numRows_A,
-         extents<>::size_type numCols_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
          class Layout_A,
          class Accessor_A,
          class Triangle,
          class DiagonalStorage,
          class Side,
          class ElementType_B,
-         extents<>::size_type numRows_B,
-         extents<>::size_type numCols_B,
+         class SizeType_B, ::std::size_t numRows_B, ::std::size_t numCols_B,
          class Layout_B,
          class Accessor_B,
          class ElementType_X,
-         extents<>::size_type numRows_X,
-         extents<>::size_type numCols_X,
+         class SizeType_X, ::std::size_t numRows_X, ::std::size_t numCols_X,
          class Layout_X,
          class Accessor_X>
 void triangular_matrix_matrix_solve(
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
   Side s,
-  std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
-  std::experimental::mdspan<ElementType_X, std::experimental::extents<numRows_X, numCols_X>, Layout_X, Accessor_X> X)
+  std::experimental::mdspan<ElementType_B, std::experimental::extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, numRows_X, numCols_X>, Layout_X, Accessor_X> X)
 {
   triangular_matrix_matrix_solve(std::experimental::linalg::impl::default_exec_t(), A, t, d, s, B, X);
 }

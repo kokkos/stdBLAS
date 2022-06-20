@@ -77,12 +77,12 @@ public:
     scaling_factor_(std::move(scaling_factor)), accessor_(accessor)
   {}
   
-  reference access(pointer p, extents<>::size_type i) const noexcept {
+  reference access(pointer p, ::std::size_t i) const noexcept {
     return reference(scaling_factor_, accessor_.access(p, i));
   }
 
   typename offset_policy::pointer
-  offset(pointer p, extents<>::size_type i) const noexcept {
+  offset(pointer p, ::std::size_t i) const noexcept {
     return accessor_.offset(p, i);
   }
 
