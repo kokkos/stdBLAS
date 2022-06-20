@@ -52,6 +52,9 @@ namespace linalg {
 
 namespace {
 
+// FIXME (mfh 2022/06/17) Temporarily disable calling the BLAS,
+// to get PR testing workflow running with mdspan tag.
+#if 0
 #ifdef LINALG_ENABLE_BLAS
 
 // NOTE: I'm only exposing these extern declarations in a header file
@@ -364,6 +367,7 @@ constexpr bool extractConj ()
 }
 
 #endif // LINALG_ENABLE_BLAS
+#endif // 0
 
 template <class Exec, class A_t, class B_t, class C_t, class = void>
 struct is_custom_matrix_product_avail : std::false_type {};
@@ -677,6 +681,9 @@ void matrix_product(
   std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
+// FIXME (mfh 2022/06/17) Temporarily disable calling the BLAS,
+// to get PR testing workflow running with mdspan tag.
+#if 0
 #ifdef LINALG_ENABLE_BLAS
   using in_matrix_1_t = typename std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A, Accessor_A>;
   using in_matrix_2_t = typename std::experimental::mdspan<ElementType_B, std::experimental::extents<numRows_B, numCols_B>, Layout_B, Accessor_B>;
@@ -720,6 +727,7 @@ void matrix_product(
   }
   else
 #endif // LINALG_ENABLE_BLAS
+#endif // 0
   {
     using size_type = typename extents<>::size_type;
     for(size_type i = 0; i < C.extent(0); ++i) {

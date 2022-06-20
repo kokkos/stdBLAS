@@ -2,6 +2,14 @@
 
 #include <iostream>
 
+#if (! defined(__GNUC__)) || (__GNUC__ > 9)
+#  define MDSPAN_EXAMPLES_USE_EXECUTION_POLICIES 1
+#endif
+
+#ifdef MDSPAN_EXAMPLES_USE_EXECUTION_POLICIES
+#  include <execution>
+#endif
+
 // Make mdspan less verbose
 using std::experimental::mdspan;
 using std::experimental::extents;
@@ -33,11 +41,15 @@ int main(int argc, char* argv[]) {
     std::experimental::linalg::matrix_vector_product(A, x, y);
 
     // y = 0.5 * y + 2 * A * x
+#ifdef MDSPAN_EXAMPLES_USE_EXECUTION_POLICIES
     std::experimental::linalg::matrix_vector_product(std::execution::par,
        std::experimental::linalg::scaled(2.0, A), x,
        std::experimental::linalg::scaled(0.5, y), y);
-
+#else
+    std::experimental::linalg::matrix_vector_product(
+       std::experimental::linalg::scaled(2.0, A), x,
+       std::experimental::linalg::scaled(0.5, y), y);
+#endif
     for(int i=0; i<y.extent(0); i+=5) std::cout << i << " " << y(i) << std::endl;
   }
 }
-
