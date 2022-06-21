@@ -16,39 +16,24 @@ jobs:
         - compiler_driver: g++
           compiler_prefix: /usr/bin
     steps:
-    - id: get-sha
-      run: echo ::set-output name=sha::$( curl https://api.github.com/repos/kokkos/mdspan/git/ref/heads/stable | jq .object.sha | tr -d '"' )
- 
-    - name: Determine whether mdspan needs to be rebuilt
-      id: cache-mdspan
-      uses: actions/cache@v2
-      with:
-        path: mdspan-install
-        key: mdspan-stable-${{ steps.get-sha.outputs.sha }}
- 
     - name: Create Build Environment
-      if: steps.cache-mdspan.outputs.cache-hit != 'true'
       run: cmake -E make_directory mdspan-build
       
     - name: Check Out
-      if: steps.cache-mdspan.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         repository: kokkos/mdspan
         path: mdspan-src
       
     - name: Configure CMake
-      if: steps.cache-mdspan.outputs.cache-hit != 'true'
       working-directory: mdspan-build
       run: cmake $GITHUB_WORKSPACE/mdspan-src -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/mdspan-install
       
     - name: Build
-      if: steps.cache-mdspan.outputs.cache-hit != 'true'
       working-directory: mdspan-build
       run: make
       
     - name: Install
-      if: steps.cache-mdspan.outputs.cache-hit != 'true'
       working-directory: mdspan-build
       run: make install
       
