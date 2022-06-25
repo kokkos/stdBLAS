@@ -1,8 +1,10 @@
 //  Copyright (c) 2022 Hartmut Kaiser
 
-#include <complex>
 #include <experimental/linalg>
 #include <experimental/mdspan>
+
+#include <complex>
+#include <cstddef>
 
 #include "gtest/gtest.h"
 #include "gtest_fixtures.hpp"
@@ -29,7 +31,7 @@ void hpx_blas1_scale_test_impl(ExPolicy policy, x_t x, FactorT factor)
 
     // compute gold
     std::vector<value_type> gold(extent);
-    using mdspan_t = mdspan<value_type, extents<dynamic_extent>>;
+    using mdspan_t = mdspan<value_type, extents<::std::size_t, dynamic_extent>>;
     mdspan_t x_gold(gold.data(), extent);
     for (std::size_t i = 0; i < x.extent(0); ++i)
     {

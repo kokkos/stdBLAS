@@ -252,7 +252,8 @@ namespace impl {
     template<class OriginalExtents>
     static auto mapping(const typename layout_stride::template mapping<OriginalExtents>& orig_map) {
       using original_mapping_type = typename layout_stride::template mapping<OriginalExtents>;
-      using extents_type = transpose_extents_t<typename original_mapping_type::extents_type>;
+      // MSVC fails for transpose_extents_t<typename original_mapping_type::extents_type>
+      using extents_type = transpose_extents_t<typename layout_stride::template mapping<OriginalExtents>::extents_type>;
       using return_mapping_type = typename layout_type::template mapping<extents_type>;
       // NOTE (mfh 2022/07/04) Commented-out code relates
       // to the build error reported in my comment here:

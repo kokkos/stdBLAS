@@ -123,7 +123,7 @@ option(LINALG_ENABLE_BLAS
   "Assume that we are linking with a BLAS library."
   ${BLAS_FOUND})
 
-find_package(KokkosKernels)
+find_package(KokkosKernels QUIET)
 option(LINALG_ENABLE_KOKKOS
   "Enable Kokkos-based implementation. Default: autodetect Kokkos installation."
   ${KokkosKernels_FOUND})

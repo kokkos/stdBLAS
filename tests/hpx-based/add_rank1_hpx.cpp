@@ -1,6 +1,8 @@
 //  Copyright (c) 2022 Hartmut Kaiser
 
 #include <complex>
+#include <cstddef>
+
 #include <experimental/linalg>
 #include <experimental/mdspan>
 
@@ -35,7 +37,7 @@ void hpx_blas1_add_test_impl(ExPolicy policy, x_t x, y_t y, z_t z)
     // compute gold
     std::vector<value_type> gold(extent);
     using mdspan_t = std::experimental::mdspan<value_type,
-        std::experimental::extents<dynamic_extent>>;
+        std::experimental::extents<::std::size_t, dynamic_extent>>;
     mdspan_t z_gold(gold.data(), extent);
     add_gold_solution(x, y, z_gold);
 

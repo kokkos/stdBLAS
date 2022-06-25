@@ -8,25 +8,28 @@
 #include <experimental/linalg>
 #include <experimental/mdspan>
 
+#include <cstddef>
+#include <type_traits>
+
 #include "signal_hpx_impl_called.hpp"
 
 namespace HPXKernelsSTD {
 
 namespace {
 
-template <class ExPolicy, class Scalar, class ElementType,
-    std::experimental::extents<>::size_type ext0, class Layout, class Accessor>
+template <class ExPolicy, class Scalar, class ElementType, class SizeType,
+    ::std::size_t ext0, class Layout, class Accessor>
 void linalg_scale_rank_1(ExPolicy&& policy, const Scalar alpha,
-    std::experimental::mdspan<ElementType, std::experimental::extents<ext0>,
-        Layout, Accessor>
+    std::experimental::mdspan<ElementType,
+        std::experimental::extents<SizeType, ext0>, Layout, Accessor>
         x)
 {
 #if defined(HPX_HAVE_DATAPAR)
     using mdspan_t = std::experimental::mdspan<ElementType,
-        std::experimental::extents<ext0>, Layout, Accessor>;
+        std::experimental::extents<SizeType, ext0>, Layout, Accessor>;
 
     constexpr bool allow_explicit_vectorization =
-        mdspan_t::is_always_contiguous() &&
+        std::is_arithmetic_v<ElementType> && mdspan_t::is_always_contiguous() &&
         (hpx::is_vectorpack_execution_policy_v<ExPolicy> ||
             hpx::is_unsequenced_execution_policy_v<ExPolicy>);
 
@@ -41,48 +44,47 @@ void linalg_scale_rank_1(ExPolicy&& policy, const Scalar alpha,
         else
         {
             // fall back to the underlying base policy
-            hpx::experimental::for_loop(policy.base_policy(),
-                std::experimental::extents<>::size_type(0), x.extent(0),
-                [&](auto i) { x(i) *= alpha; });
+            hpx::experimental::for_loop(policy.base_policy(), SizeType(0),
+                x.extent(0), [&](auto i) { x(i) *= alpha; });
         }
+    }
+    else if constexpr (hpx::is_vectorpack_execution_policy_v<ExPolicy>)
+    {
+        hpx::experimental::for_loop(policy.base_policy(), SizeType(0),
+            x.extent(0), [&](auto i) { x(i) *= alpha; });
     }
     else
 #endif
     {
-        hpx::experimental::for_loop(policy,
-            std::experimental::extents<>::size_type(0), x.extent(0),
-            [&](auto i) { x(i) *= alpha; });
+        hpx::experimental::for_loop(
+            policy, SizeType(0), x.extent(0), [&](auto i) { x(i) *= alpha; });
     }
 }
 
-template <class ExPolicy, class Scalar, class ElementType,
-    std::experimental::extents<>::size_type numRows,
-    std::experimental::extents<>::size_type numCols, class Layout,
-    class Accessor>
+template <class ExPolicy, class Scalar, class ElementType, class SizeType,
+    ::std::size_t numRows, ::std::size_t numCols, class Layout, class Accessor>
 void linalg_scale_rank_2(ExPolicy&& policy, const Scalar alpha,
     std::experimental::mdspan<ElementType,
-        std::experimental::extents<numRows, numCols>, Layout, Accessor>
+        std::experimental::extents<SizeType, numRows, numCols>, Layout,
+        Accessor>
         A)
 {
-    using size_type = typename std::experimental::extents<>::size_type;
-    hpx::experimental::for_loop(policy,
-        std::experimental::extents<>::size_type(0), A.extent(1), [&](auto j) {
-            for (size_type i = 0; i < A.extent(0); ++i)
-            {
-                A(i, j) *= alpha;
-            }
-        });
+    hpx::experimental::for_loop(policy, SizeType(0), A.extent(1), [&](auto j) {
+        for (SizeType i = 0; i < A.extent(0); ++i)
+        {
+            A(i, j) *= alpha;
+        }
+    });
 }
 
 }    // namespace
 
 MDSPAN_TEMPLATE_REQUIRES(class ExPolicy, class Scalar, class ElementType,
-    std::experimental::extents<>::size_type... ext, class Layout,
-    class Accessor,
+    class SizeType, ::std::size_t... ext, class Layout, class Accessor,
     /* requires */ (sizeof...(ext) <= 2))
 void scale(hpx_exec<ExPolicy>&& policy, const Scalar alpha,
-    std::experimental::mdspan<ElementType, std::experimental::extents<ext...>,
-        Layout, Accessor>
+    std::experimental::mdspan<ElementType,
+        std::experimental::extents<SizeType, ext...>, Layout, Accessor>
         x)
 {
     Impl::signal_hpx_impl_called("scale");
@@ -97,4 +99,5 @@ void scale(hpx_exec<ExPolicy>&& policy, const Scalar alpha,
 }
 
 }    // namespace HPXKernelsSTD
+
 #endif

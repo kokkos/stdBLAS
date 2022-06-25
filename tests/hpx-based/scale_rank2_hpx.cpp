@@ -33,8 +33,8 @@ void hpx_blas_scale_test_impl(ExPolicy policy, A_t A, FactorT factor)
 
     // compute gold
     std::vector<value_type> gold(extent0 * extent1);
-    using mdspan_t =
-        mdspan<value_type, extents<dynamic_extent, dynamic_extent>>;
+    using mdspan_t = mdspan<value_type,
+        extents<::std::size_t, dynamic_extent, dynamic_extent>>;
     mdspan_t A_gold(gold.data(), extent0, extent1);
     for (std::size_t i = 0; i < extent0; ++i)
     {
@@ -91,6 +91,7 @@ TEST_F(blas2_signed_float_fixture, hpx_scale)
         hpx::execution::par, A_e0e1, static_cast<value_type>(2));
     hpx_blas_scale_test_impl(
         hpx::execution::par_unseq, A_e0e1, static_cast<value_type>(2));
+    // FIXME: not yet implemented
     //#if defined(HPX_HAVE_DATAPAR)
     //  hpx_blas_scale_test_impl(hpx::execution::simd, A_e0e1, static_cast<value_type>(2));
     //  hpx_blas_scale_test_impl(hpx::execution::par_simd, A_e0e1, static_cast<value_type>(2));
@@ -105,6 +106,7 @@ TEST_F(blas2_signed_double_fixture, hpx_scale)
         hpx::execution::par, A_e0e1, static_cast<value_type>(2));
     hpx_blas_scale_test_impl(
         hpx::execution::par_unseq, A_e0e1, static_cast<value_type>(2));
+    // FIXME: not yet implemented
     //#if defined(HPX_HAVE_DATAPAR)
     //  hpx_blas_scale_test_impl(hpx::execution::simd, A_e0e1, static_cast<value_type>(2));
     //  hpx_blas_scale_test_impl(hpx::execution::par_simd, A_e0e1, static_cast<value_type>(2));
@@ -121,6 +123,7 @@ TEST_F(blas2_signed_complex_double_fixture, hpx_scale_complex_factor)
         hpx_blas_scale_test_impl(HPXKernelsSTD::hpx_exec<>(), A_e0e1, factor);
         hpx_blas_scale_test_impl(hpx::execution::par, A_e0e1, factor);
         hpx_blas_scale_test_impl(hpx::execution::par_unseq, A_e0e1, factor);
+        // FIXME: not yet implemented
         //#if defined(HPX_HAVE_DATAPAR)
         //    hpx_blas_scale_test_impl(hpx::execution::simd, A_e0e1, factor);
         //    hpx_blas_scale_test_impl(hpx::execution::par_simd, A_e0e1, factor);
@@ -137,6 +140,7 @@ TEST_F(blas2_signed_complex_double_fixture, hpx_scale_double_factor)
         hpx_blas_scale_test_impl(HPXKernelsSTD::hpx_exec<>(), A_e0e1, 2.);
         hpx_blas_scale_test_impl(hpx::execution::par, A_e0e1, 2.);
         hpx_blas_scale_test_impl(hpx::execution::par_unseq, A_e0e1, 2.);
+        // FIXME: not yet implemented
         //#if defined(HPX_HAVE_DATAPAR)
         //    hpx_blas_scale_test_impl(hpx::execution::simd, A_e0e1, 2.);
         //    hpx_blas_scale_test_impl(hpx::execution::par_simd, A_e0e1, 2.);

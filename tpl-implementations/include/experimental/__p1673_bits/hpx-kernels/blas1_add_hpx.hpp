@@ -49,28 +49,29 @@
 #include <experimental/linalg>
 #include <experimental/mdspan>
 
+#include <cstddef>
+#include <type_traits>
+
 #include "signal_hpx_impl_called.hpp"
 
 namespace HPXKernelsSTD {
 
 namespace {
 
-template <class ExPolicy, class ElementType_x,
-    std::experimental::extents<>::size_type ext_x, class Layout_x,
-    class Accessor_x, class ElementType_y,
-    std::experimental::extents<>::size_type ext_y, class Layout_y,
-    class Accessor_y, class ElementType_z,
-    std::experimental::extents<>::size_type ext_z, class Layout_z,
+template <class ExPolicy, class ElementType_x, class SizeType_x,
+    ::std::size_t ext_x, class Layout_x, class Accessor_x, class ElementType_y,
+    class SizeType_y, ::std::size_t ext_y, class Layout_y, class Accessor_y,
+    class ElementType_z, class SizeType_z, ::std::size_t ext_z, class Layout_z,
     class Accessor_z>
 void add_rank_1(ExPolicy&& policy,
-    std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x>,
-        Layout_x, Accessor_x>
+    std::experimental::mdspan<ElementType_x,
+        std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x>
         x,
-    std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y>,
-        Layout_y, Accessor_y>
+    std::experimental::mdspan<ElementType_y,
+        std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y>
         y,
-    std::experimental::mdspan<ElementType_z, std::experimental::extents<ext_z>,
-        Layout_z, Accessor_z>
+    std::experimental::mdspan<ElementType_z,
+        std::experimental::extents<SizeType_z, ext_z>, Layout_z, Accessor_z>
         z)
 {
     static_assert(x.static_extent(0) == std::experimental::dynamic_extent ||
@@ -85,13 +86,16 @@ void add_rank_1(ExPolicy&& policy,
 
 #if defined(HPX_HAVE_DATAPAR)
     using mdspan_x_t = std::experimental::mdspan<ElementType_x,
-        std::experimental::extents<ext_x>, Layout_x, Accessor_x>;
+        std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x>;
     using mdspan_y_t = std::experimental::mdspan<ElementType_y,
-        std::experimental::extents<ext_y>, Layout_y, Accessor_y>;
+        std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y>;
     using mdspan_z_t = std::experimental::mdspan<ElementType_z,
-        std::experimental::extents<ext_z>, Layout_z, Accessor_z>;
+        std::experimental::extents<SizeType_z, ext_z>, Layout_z, Accessor_z>;
 
     constexpr bool allow_explicit_vectorization =
+        std::is_arithmetic_v<ElementType_x> &&
+        std::is_arithmetic_v<ElementType_y> &&
+        std::is_arithmetic_v<ElementType_z> &&
         mdspan_x_t::is_always_contiguous() &&
         mdspan_y_t::is_always_contiguous() &&
         mdspan_z_t::is_always_contiguous() &&
@@ -111,39 +115,43 @@ void add_rank_1(ExPolicy&& policy,
         else
         {
             // fall back to the underlying base policy
-            hpx::experimental::for_loop(policy.base_policy(),
-                std::experimental::extents<>::size_type(0), x.extent(0),
-                [&](auto i) { z(i) = x(i) + y(i); });
+            hpx::experimental::for_loop(policy.base_policy(), SizeType_z(0),
+                x.extent(0), [&](auto i) { z(i) = x(i) + y(i); });
         }
+    }
+    else
+        if constexpr (hpx::is_vectorpack_execution_policy_v<ExPolicy>)
+    {
+        hpx::experimental::for_loop(policy.base_policy(), SizeType_z(0),
+            z.extent(0), [&](auto i) { z(i) = x(i) + y(i); });
     }
     else
 #endif
     {
-        hpx::experimental::for_loop(policy,
-            std::experimental::extents<>::size_type(0), z.extent(0),
+        hpx::experimental::for_loop(policy, SizeType_z(0), z.extent(0),
             [&](auto i) { z(i) = x(i) + y(i); });
     }
 }
 
-template <class ExPolicy, class ElementType_x,
-    std::experimental::extents<>::size_type numRows_x,
-    std::experimental::extents<>::size_type numCols_x, class Layout_x,
-    class Accessor_x, class ElementType_y,
-    std::experimental::extents<>::size_type numRows_y,
-    std::experimental::extents<>::size_type numCols_y, class Layout_y,
-    class Accessor_y, class ElementType_z,
-    std::experimental::extents<>::size_type numRows_z,
-    std::experimental::extents<>::size_type numCols_z, class Layout_z,
+template <class ExPolicy, class ElementType_x, class SizeType_x,
+    ::std::size_t numRows_x, ::std::size_t numCols_x, class Layout_x,
+    class Accessor_x, class ElementType_y, class SizeType_y,
+    ::std::size_t numRows_y, ::std::size_t numCols_y, class Layout_y,
+    class Accessor_y, class ElementType_z, class SizeType_z,
+    ::std::size_t numRows_z, ::std::size_t numCols_z, class Layout_z,
     class Accessor_z>
 void add_rank_2(ExPolicy&& policy,
     std::experimental::mdspan<ElementType_x,
-        std::experimental::extents<numRows_x, numCols_x>, Layout_x, Accessor_x>
+        std::experimental::extents<SizeType_x, numRows_x, numCols_x>, Layout_x,
+        Accessor_x>
         x,
     std::experimental::mdspan<ElementType_y,
-        std::experimental::extents<numRows_y, numCols_y>, Layout_y, Accessor_y>
+        std::experimental::extents<SizeType_y, numRows_y, numCols_y>, Layout_y,
+        Accessor_y>
         y,
     std::experimental::mdspan<ElementType_z,
-        std::experimental::extents<numRows_z, numCols_z>, Layout_z, Accessor_z>
+        std::experimental::extents<SizeType_z, numRows_z, numCols_z>, Layout_z,
+        Accessor_z>
         z)
 {
     static_assert(x.static_extent(0) == std::experimental::dynamic_extent ||
@@ -166,37 +174,34 @@ void add_rank_2(ExPolicy&& policy,
         y.static_extent(1) == std::experimental::dynamic_extent ||
         x.static_extent(1) == y.static_extent(1));
 
-    using size_type = typename std::experimental::extents<>::size_type;
-
-    hpx::experimental::for_loop(policy, size_type(0), x.extent(0), [&](auto j) {
-        for (size_type i = 0; i < x.extent(0); ++i)
-        {
-            z(i, j) = x(i, j) + y(i, j);
-        }
-    });
+    hpx::experimental::for_loop(
+        policy, SizeType_z(0), z.extent(1), [&](auto j) {
+            for (SizeType_z i = 0; i < z.extent(0); ++i)
+            {
+                z(i, j) = x(i, j) + y(i, j);
+            }
+        });
 }
 
 }    // end anonymous namespace
 
-MDSPAN_TEMPLATE_REQUIRES(class ExPolicy, class ElementType_x,
-    std::experimental::extents<>::size_type... ext_x, class Layout_x,
-    class Accessor_x, class ElementType_y,
-    std::experimental::extents<>::size_type... ext_y, class Layout_y,
-    class Accessor_y, class ElementType_z,
-    std::experimental::extents<>::size_type... ext_z, class Layout_z,
-    class Accessor_z,
+MDSPAN_TEMPLATE_REQUIRES(class ExPolicy, class ElementType_x, class SizeType_x,
+    ::std::size_t... ext_x, class Layout_x, class Accessor_x,
+    class ElementType_y, class SizeType_y, ::std::size_t... ext_y,
+    class Layout_y, class Accessor_y, class ElementType_z, class SizeType_z,
+    ::std::size_t... ext_z, class Layout_z, class Accessor_z,
     /* requires */
     (sizeof...(ext_x) == sizeof...(ext_y) &&
         sizeof...(ext_x) == sizeof...(ext_z) && sizeof...(ext_z) <= 2))
 void add(hpx_exec<ExPolicy>&& policy,
     std::experimental::mdspan<ElementType_x,
-        std::experimental::extents<ext_x...>, Layout_x, Accessor_x>
+        std::experimental::extents<SizeType_x, ext_x...>, Layout_x, Accessor_x>
         x,
     std::experimental::mdspan<ElementType_y,
-        std::experimental::extents<ext_y...>, Layout_y, Accessor_y>
+        std::experimental::extents<SizeType_y, ext_y...>, Layout_y, Accessor_y>
         y,
     std::experimental::mdspan<ElementType_z,
-        std::experimental::extents<ext_z...>, Layout_z, Accessor_z>
+        std::experimental::extents<SizeType_z, ext_z...>, Layout_z, Accessor_z>
         z)
 {
     if constexpr (z.rank() == 1)
@@ -208,6 +213,7 @@ void add(hpx_exec<ExPolicy>&& policy,
         add_rank_2(policy.policy_, x, y, z);
     }
 }
+
 }    // namespace HPXKernelsSTD
 
 #endif    //LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_HPXKERNELS_ADD_HPP_
