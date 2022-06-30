@@ -64,7 +64,7 @@ auto mdspan_to_view(std::experimental::mdspan<
 		      Accessor
 		    > a)
 {
-  auto kokkos_p = to_kokkos_pointer(a.data());
+  auto kokkos_p = to_kokkos_pointer(a.data_handle());
   return Kokkos::View<decltype(kokkos_p)>(kokkos_p, a.extent(0));
 }
 
@@ -81,7 +81,7 @@ auto mdspan_to_view(std::experimental::mdspan<
 		      Accessor
 		    > a)
 {
-  auto kokkos_p = to_kokkos_pointer(a.data());
+  auto kokkos_p = to_kokkos_pointer(a.data_handle());
   using view_type = Kokkos::View<
     decltype(kokkos_p)*, typename LayoutMapper<Layout>::type
     >;
@@ -135,7 +135,7 @@ auto mdspan_to_view(std::experimental::mdspan<
 		    Accessor
 		    > a)
 {
-  auto kokkos_p = to_kokkos_pointer(a.data());
+  auto kokkos_p = to_kokkos_pointer(a.data_handle());
   using view_type = Kokkos::View<
     decltype(kokkos_p)*, typename LayoutMapper<NestedLayout>::type
     >;

@@ -116,7 +116,7 @@ void triangular_matrix_vector_solve(kokkos_exec<ExecSpace> &&exec,
   Kokkos::View<std::add_pointer_t<std::add_pointer_t<x_scalar_type>>,
     typename x_view_type::array_layout,
     typename x_view_type::device_type,
-    typename x_view_type::memory_traits> X_view(x_view.data(), x_view.extent(0), 1);
+    typename x_view_type::memory_traits> X_view(x_view.data_handle(), x_view.extent(0), 1);
 
   trimatmatsolve_impl::trsm(std::experimental::linalg::left_side, t, d, A_view, X_view);
 }

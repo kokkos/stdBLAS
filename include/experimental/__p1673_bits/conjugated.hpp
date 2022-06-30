@@ -69,7 +69,7 @@ namespace impl {
     using reference = typename Accessor::reference;
     using element_type =
       std::add_const_t<typename Accessor::element_type>;
-    using pointer = typename Accessor::pointer;
+    using data_handle_type = typename Accessor::data_handle_type;
     using offset_policy = typename Accessor::offset_policy;
   };
 
@@ -85,7 +85,7 @@ namespace impl {
 			 accessor_value_type>;
     using element_type =
       std::add_const_t<typename reference::value_type>;
-    using pointer = typename Accessor::pointer;
+    using data_handle_type = typename Accessor::data_handle_type;
     using offset_policy =
       accessor_conjugate<typename Accessor::offset_policy>;
   };
@@ -99,10 +99,10 @@ private:
   using aliases = impl::accessor_conjugate_aliases<Accessor>;
 
 public:
-  using reference     = typename aliases::reference;
-  using element_type  = typename aliases::element_type;
-  using pointer       = typename aliases::pointer;
-  using offset_policy = typename aliases::offset_policy;
+  using reference        = typename aliases::reference;
+  using element_type     = typename aliases::element_type;
+  using data_handle_type = typename aliases::data_handle_type;
+  using offset_policy    = typename aliases::offset_policy;
 
   accessor_conjugate(Accessor accessor) : accessor_(accessor) {}
 
@@ -115,13 +115,13 @@ public:
   )
   accessor_conjugate(default_accessor<OtherElementType> accessor) : accessor_(accessor) {}
 
-  reference access(pointer p, ::std::size_t i) const
+  reference access(data_handle_type p, ::std::size_t i) const
     noexcept(noexcept(reference(accessor_.access(p, i))))
   {
     return reference(accessor_.access(p, i));
   }
 
-  typename offset_policy::pointer offset(pointer p, ::std::size_t i) const
+  typename offset_policy::data_handle_type offset(data_handle_type p, ::std::size_t i) const
     noexcept(noexcept(accessor_.offset(p, i)))
   {
     return accessor_.offset(p, i);
@@ -135,13 +135,13 @@ auto conjugated(mdspan<ElementType, Extents, Layout, Accessor> a)
 {
   if constexpr (std::is_arithmetic_v<std::remove_cv_t<ElementType>>) {
     return mdspan<ElementType, Extents, Layout, Accessor>
-      (a.data(), a.mapping(), a.accessor());
+      (a.data_handle(), a.mapping(), a.accessor());
   } else {
     using return_element_type =
       typename accessor_conjugate<Accessor>::element_type;
     using return_accessor_type = accessor_conjugate<Accessor>;
     return mdspan<return_element_type, Extents, Layout, return_accessor_type>
-      (a.data(), a.mapping(), return_accessor_type(a.accessor()));
+      (a.data_handle(), a.mapping(), return_accessor_type(a.accessor()));
   }
 }
 
@@ -153,7 +153,7 @@ auto conjugated(
   using return_element_type = typename NestedAccessor::element_type;
   using return_accessor_type = NestedAccessor;
   return mdspan<return_element_type, Extents, Layout, return_accessor_type>
-    (a.data(), a.mapping(), a.nested_accessor());
+    (a.data_handle(), a.mapping(), a.nested_accessor());
 }
 
 } // end namespace linalg
