@@ -219,7 +219,7 @@ void trsm_lower_triangular_right_side(
     for (size_type j = 0; j < A_num_cols; ++j) {
       using sum_type = decltype (B(i,j) - A(0,0) * X(0,0));
       sum_type t (B(i,j));
-      for (size_type k = j + 1; k < A_num_rows; ++j) {
+      for (size_type k = j + 1; k < A_num_rows; ++k) {
         t = t - X(i,k) * A(k,j);
       }
       if constexpr (explicit_diagonal) {
