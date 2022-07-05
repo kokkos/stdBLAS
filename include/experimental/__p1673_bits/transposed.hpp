@@ -254,9 +254,13 @@ namespace impl {
       using original_mapping_type = typename layout_stride::template mapping<OriginalExtents>;
       using extents_type = transpose_extents_t<typename original_mapping_type::extents_type>;
       using return_mapping_type = typename layout_type::template mapping<extents_type>;
+      // NOTE (mfh 2022/07/04) Commented-out code relates
+      // to the build error reported in my comment here:
+      //
+      // https://github.com/kokkos/stdBLAS/issues/242
       return return_mapping_type{
 	transpose_extents(orig_map.extents()),
-	std::array<typename extents_type::size_type, orig_map.rank()>{
+	std::array<typename extents_type::size_type, OriginalExtents::rank() /* orig_map.rank() */ >{
 	  orig_map.stride(1),
 	  orig_map.stride(0)}};
     }
