@@ -108,7 +108,7 @@ template<class ElementType_x,
          class Accessor_z>
 void add_rank_2(
   std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, numRows_x, numCols_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, numCols_y>, Layout_y, Accessor_y> y,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, numRows_y, numCols_y>, Layout_y, Accessor_y> y,
   std::experimental::mdspan<ElementType_z, std::experimental::extents<SizeType_z, numRows_z, numCols_z>, Layout_z, Accessor_z> z)
 {
   static_assert(x.static_extent(0) == dynamic_extent ||

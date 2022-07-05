@@ -2,6 +2,7 @@
 
 #include <experimental/linalg>
 #include <experimental/mdspan>
+#include <array>
 #include <vector>
 
 namespace {
@@ -10,7 +11,7 @@ namespace {
   using std::experimental::mdspan;
   using std::experimental::linalg::add;
 
-  TEST(BLAS1_add, mdspan_double)
+  TEST(BLAS1_add, vector_double)
   {
     using scalar_t = double;
     using vector_t = mdspan<scalar_t, extents<std::size_t, dynamic_extent>>;
@@ -42,7 +43,7 @@ namespace {
     }
   }
 
-  TEST(BLAS1_add, mdspan_complex_double)
+  TEST(BLAS1_add, vector_complex_double)
   {
     using real_t = double;
     using scalar_t = std::complex<real_t>;
@@ -72,6 +73,43 @@ namespace {
       EXPECT_EQ( x(k), x_k );
       EXPECT_EQ( y(k), y_k );
       EXPECT_EQ( z(k), x_k + y_k ); // check the output
+    }
+  }
+
+  TEST(BLAS1_add, matrix_double)
+  {
+    using scalar_t = double;
+    constexpr std::size_t numRows(5);
+    constexpr std::size_t numCols(6);
+    constexpr std::size_t matrixSize = numRows * numCols;
+    std::array<scalar_t, matrixSize> A_storage;
+    std::array<scalar_t, matrixSize> B_storage;
+    std::array<scalar_t, matrixSize> C_storage;
+
+    using matrix_t = mdspan<scalar_t, extents<std::size_t, numRows, numCols>>;
+    matrix_t A(A_storage.data());
+    matrix_t B(B_storage.data());
+    matrix_t C(C_storage.data());
+
+    for (std::size_t c = 0; c < numCols; ++c) {
+      for (std::size_t r = 0; r < numRows; ++r) {
+	const scalar_t A_rc = scalar_t(c) + scalar_t(numCols) * scalar_t(r);
+	const scalar_t B_rc = scalar_t(2.0) * A_rc;
+	A(r,c) = A_rc;
+	B(r,c) = B_rc;
+	C(r,c) = scalar_t{};
+      }
+    }
+    add(A, B, C);
+    for (std::size_t c = 0; c < numCols; ++c) {
+      for (std::size_t r = 0; r < numRows; ++r) {
+	const scalar_t A_rc = scalar_t(c) + scalar_t(numCols) * scalar_t(r);
+	const scalar_t B_rc = scalar_t(2.0) * A_rc;
+	// Make sure the function didn't modify the input.
+	EXPECT_EQ( A(r,c), A_rc );
+	EXPECT_EQ( B(r,c), B_rc );
+	EXPECT_EQ( C(r,c), A_rc + B_rc ); // check the output
+      }
     }
   }
 }
