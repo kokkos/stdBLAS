@@ -52,6 +52,7 @@
 #include <cstddef>
 #include <type_traits>
 
+#include "exec_policy_wrapper_hpx.hpp"
 #include "signal_hpx_impl_called.hpp"
 
 namespace HPXKernelsSTD {
@@ -85,45 +86,46 @@ void add_rank_1(ExPolicy&& policy,
         x.static_extent(0) == y.static_extent(0));
 
 #if defined(HPX_HAVE_DATAPAR)
-    using mdspan_x_t = std::experimental::mdspan<ElementType_x,
-        std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x>;
-    using mdspan_y_t = std::experimental::mdspan<ElementType_y,
-        std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y>;
-    using mdspan_z_t = std::experimental::mdspan<ElementType_z,
-        std::experimental::extents<SizeType_z, ext_z>, Layout_z, Accessor_z>;
-
-    constexpr bool allow_explicit_vectorization =
-        std::is_arithmetic_v<ElementType_x> &&
-        std::is_arithmetic_v<ElementType_y> &&
-        std::is_arithmetic_v<ElementType_z> &&
-        mdspan_x_t::is_always_contiguous() &&
-        mdspan_y_t::is_always_contiguous() &&
-        mdspan_z_t::is_always_contiguous() &&
-        (hpx::is_vectorpack_execution_policy_v<ExPolicy> ||
-            hpx::is_unsequenced_execution_policy_v<ExPolicy>);
-
-    if constexpr (allow_explicit_vectorization)
+    if constexpr (supports_vectorization_v<ExPolicy>)
     {
-        // vectorize only if the arrays are contiguous and not strided
-        if (x.is_contiguous() && x.stride(0) == 1 && y.is_contiguous() &&
-            y.stride(0) == 1 && z.is_contiguous() && z.stride(0) == 1)
+        using mdspan_x_t = std::experimental::mdspan<ElementType_x,
+            std::experimental::extents<SizeType_x, ext_x>, Layout_x,
+            Accessor_x>;
+        using mdspan_y_t = std::experimental::mdspan<ElementType_y,
+            std::experimental::extents<SizeType_y, ext_y>, Layout_y,
+            Accessor_y>;
+        using mdspan_z_t = std::experimental::mdspan<ElementType_z,
+            std::experimental::extents<SizeType_z, ext_z>, Layout_z,
+            Accessor_z>;
+
+        if constexpr (allow_vectorization_v<mdspan_x_t> &&
+            allow_vectorization_v<mdspan_y_t> &&
+            allow_vectorization_v<mdspan_z_t>)
         {
-            auto zip = hpx::util::make_zip_iterator(x.data(), y.data());
-            hpx::transform(policy, zip, zip + x.extent(0), z.data(),
-                [&](auto v) { return hpx::get<0>(v) + hpx::get<1>(v); });
+            // vectorize only if the arrays are contiguous and not strided
+            if (x.is_contiguous() && x.stride(0) == 1 && y.is_contiguous() &&
+                y.stride(0) == 1 && z.is_contiguous() && z.stride(0) == 1)
+            {
+                auto zip = hpx::util::make_zip_iterator(x.data(), y.data());
+                hpx::transform(policy, zip, zip + x.extent(0), z.data(),
+                    [&](auto v) { return hpx::get<0>(v) + hpx::get<1>(v); });
+            }
+            else
+            {
+                // fall back to the underlying base policy
+                hpx::experimental::for_loop(
+                    hpx::execution::experimental::to_non_simd(policy),
+                    SizeType_z(0), x.extent(0),
+                    [&](auto i) { z(i) = x(i) + y(i); });
+            }
         }
         else
         {
-            // fall back to the underlying base policy
-            hpx::experimental::for_loop(policy.base_policy(), SizeType_z(0),
-                x.extent(0), [&](auto i) { z(i) = x(i) + y(i); });
+            hpx::experimental::for_loop(
+                hpx::execution::experimental::to_non_simd(policy),
+                SizeType_z(0), z.extent(0),
+                [&](auto i) { z(i) = x(i) + y(i); });
         }
-    }
-    else
-        if constexpr (hpx::is_vectorpack_execution_policy_v<ExPolicy>)
-    {
-        hpx::experimental::for_loop(policy.base_policy(), SizeType_z(0),
-            z.extent(0), [&](auto i) { z(i) = x(i) + y(i); });
     }
     else
 #endif

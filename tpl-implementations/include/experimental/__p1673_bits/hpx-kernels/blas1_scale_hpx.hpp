@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <type_traits>
 
+#include "exec_policy_wrapper_hpx.hpp"
 #include "signal_hpx_impl_called.hpp"
 
 namespace HPXKernelsSTD {
@@ -25,33 +26,33 @@ void linalg_scale_rank_1(ExPolicy&& policy, const Scalar alpha,
         x)
 {
 #if defined(HPX_HAVE_DATAPAR)
-    using mdspan_t = std::experimental::mdspan<ElementType,
-        std::experimental::extents<SizeType, ext0>, Layout, Accessor>;
-
-    constexpr bool allow_explicit_vectorization =
-        std::is_arithmetic_v<ElementType> && mdspan_t::is_always_contiguous() &&
-        (hpx::is_vectorpack_execution_policy_v<ExPolicy> ||
-            hpx::is_unsequenced_execution_policy_v<ExPolicy>);
-
-    if constexpr (allow_explicit_vectorization)
+    if constexpr (supports_vectorization_v<ExPolicy>)
     {
-        // vectorize only if the array is contiguous and not strided
-        if (x.is_contiguous() && x.stride(0) == 1)
+        using mdspan_t = std::experimental::mdspan<ElementType,
+            std::experimental::extents<SizeType, ext0>, Layout, Accessor>;
+
+        if constexpr (allow_vectorization_v<mdspan_t>)
         {
-            hpx::for_each(policy, x.data(), x.data() + x.extent(0),
-                [&](auto& v) { v *= alpha; });
+            // vectorize only if the array is contiguous and not strided
+            if (x.is_contiguous() && x.stride(0) == 1)
+            {
+                hpx::for_each(policy, x.data(), x.data() + x.extent(0),
+                    [&](auto& v) { v *= alpha; });
+            }
+            else
+            {
+                // fall back to the underlying base policy
+                hpx::experimental::for_loop(
+                    hpx::execution::experimental::to_non_simd(policy),
+                    SizeType(0), x.extent(0), [&](auto i) { x(i) *= alpha; });
+            }
         }
         else
         {
-            // fall back to the underlying base policy
-            hpx::experimental::for_loop(policy.base_policy(), SizeType(0),
+            hpx::experimental::for_loop(
+                hpx::execution::experimental::to_non_simd(policy), SizeType(0),
                 x.extent(0), [&](auto i) { x(i) *= alpha; });
         }
-    }
-    else if constexpr (hpx::is_vectorpack_execution_policy_v<ExPolicy>)
-    {
-        hpx::experimental::for_loop(policy.base_policy(), SizeType(0),
-            x.extent(0), [&](auto i) { x(i) *= alpha; });
     }
     else
 #endif

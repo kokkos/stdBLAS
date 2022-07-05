@@ -6,6 +6,7 @@
 #include <experimental/linalg>
 #include <experimental/mdspan>
 
+#include <cstddef>
 #include <iostream>
 
 int main(int argc, char* argv[])
@@ -20,7 +21,7 @@ int main(int argc, char* argv[])
         // Requires CTAD working, GCC 11.1 works but some others are buggy
         // std::experimental::mdspan a(a_ptr,N);
         std::experimental::mdspan<double,
-            std::experimental::extents<std::experimental::dynamic_extent>>
+            std::experimental::extents<std::size_t, std::experimental::dynamic_extent>>
             a(a_ptr, N);
         for (std::size_t i = 0; i < a.extent(0); i++)
             a(i) = double(i);

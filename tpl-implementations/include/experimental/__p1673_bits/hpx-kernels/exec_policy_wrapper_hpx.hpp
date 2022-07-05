@@ -8,6 +8,7 @@
 #ifdef LINALG_ENABLE_HPX_DEFAULT
 #include <execution>
 #endif
+#include <type_traits>
 #include <utility>
 
 namespace HPXKernelsSTD {
@@ -24,6 +25,28 @@ auto execpolicy_mapper(hpx_exec<ExPolicy> policy)
 {
     return policy;
 }
+
+template <typename MdSpan, typename Enable = void>
+struct allow_vectorization : std::false_type
+{};
+
+#if defined(HPX_WITH_DATAPAR)
+template <typename MdSpan>
+struct allow_vectorization<MdSpan,
+    std::enable_if_t<std::is_arithmetic_v<typename MdSpan::element_type>>>
+  : std::true_type
+{};
+#endif
+
+template <typename MdSpan>
+inline constexpr bool allow_vectorization_v =
+    allow_vectorization<MdSpan>::value;
+
+template <typename ExPolicy>
+inline constexpr bool supports_vectorization_v =
+    hpx::is_vectorpack_execution_policy_v<ExPolicy> ||
+    hpx::is_unsequenced_execution_policy_v<ExPolicy>;
+
 }    // namespace HPXKernelsSTD
 
 // Remap standard execution policies to HPX

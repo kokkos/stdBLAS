@@ -46,8 +46,8 @@ int main(int argc, char* argv[])
     value_type* y_ptr = y_data.data();
     value_type* z_ptr = z_data.data();
 
-    using dyn_1d_ext_type =
-        std::experimental::extents<std::experimental::dynamic_extent>;
+    using dyn_1d_ext_type = std::experimental::extents<std::size_t,
+        std::experimental::dynamic_extent>;
     using mdspan_type = std::experimental::mdspan<value_type, dyn_1d_ext_type>;
     mdspan_type x(x_ptr, N);
     mdspan_type y(y_ptr, N);

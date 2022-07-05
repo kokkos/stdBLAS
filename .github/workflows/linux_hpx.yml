@@ -26,7 +26,7 @@ jobs:
     - name: Build
       shell: bash
       run: |
-          make install
+          make
     - name: Test
       shell: bash
       run: |

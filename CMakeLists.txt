@@ -155,7 +155,7 @@ if(LINALG_ENABLE_KOKKOS)
 endif()
 
 if(LINALG_ENABLE_HPX)
-  find_package(HPX 1.8 REQUIRED)
+  find_package(HPX 1.8.1 REQUIRED)
   target_link_libraries(linalg INTERFACE HPX::hpx)
   target_include_directories(linalg INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tpl-implementations/include>
