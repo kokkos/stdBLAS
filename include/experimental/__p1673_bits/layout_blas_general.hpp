@@ -61,7 +61,7 @@ private:
   _MDSPAN_NO_UNIQUE_ADDRESS BaseLayout _base_layout;
 
 public: // but not really
-  using __lda_t = __maybe_static_extent<StaticLDA>;
+  using __lda_t = detail::__maybe_static_extent<StaticLDA>;
   _MDSPAN_NO_UNIQUE_ADDRESS __lda_t __lda = { };
 
 private:
