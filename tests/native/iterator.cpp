@@ -31,9 +31,9 @@ namespace {
       std::random_access_iterator_tag,   // iterator_category
       ElementType,
       typename mdspan<ElementType, Extents, Layout,
-        Accessor>::difference_type,
+        Accessor>::index_type,
       typename mdspan<ElementType, Extents, Layout,
-	Accessor>::pointer,
+	Accessor>::data_handle_type,
       typename mdspan<ElementType, Extents, Layout,
         Accessor>::reference>
   {
@@ -43,9 +43,9 @@ namespace {
       ElementType, extents_t, Layout, Accessor>;
     using iterator = MdspanRandomAccessIterator<
       ElementType, extents_t, Layout, Accessor>;
-    using difference_type = typename mdspan_t::difference_type;
+    using difference_type = std::make_signed_t<typename mdspan_t::index_type>;
     using reference = typename mdspan_t::reference;
-    using pointer = typename mdspan_t::pointer;
+    using pointer = typename mdspan_t::data_handle_type;
 
     // Needed for LegacyForwardIterator
     MdspanRandomAccessIterator() = default;
@@ -95,12 +95,12 @@ namespace {
 
     friend constexpr bool operator==(iterator lhs, iterator rhs) {
       return lhs.current_index_ == rhs.current_index_ &&
-        lhs.x_.data() == rhs.x_.data();
+        lhs.x_.data_handle() == rhs.x_.data_handle();
     }
 
     friend constexpr bool operator!=(iterator lhs, iterator rhs) {
       return lhs.current_index_ != rhs.current_index_ ||
-        lhs.x_.data() != rhs.x_.data();
+        lhs.x_.data_handle() != rhs.x_.data_handle();
     }
 
     bool operator<(iterator other) const {
@@ -113,7 +113,7 @@ namespace {
 
     pointer operator->() const {
       return x_.accessor().
-        offset(x_.data(), x_.mapping()(current_index_));
+        offset(x_.data_handle(), x_.mapping()(current_index_));
     }
 
   private:
@@ -138,10 +138,10 @@ namespace {
            class Accessor>
   ElementType*
   // typename mdspan<
-  //   ElementType, Extents, layout_right, Accessor>::pointer
+  //   ElementType, Extents, layout_right, Accessor>::data_handle_type
   begin(mdspan<ElementType, Extents, layout_right, Accessor> x)
   {
-    return x.data();
+    return x.data_handle();
   }
 
   template<class ElementType,
@@ -160,10 +160,10 @@ namespace {
            class Extents,
            class Accessor>
   typename mdspan<
-    ElementType, Extents, layout_right, Accessor>::pointer
+    ElementType, Extents, layout_right, Accessor>::data_handle_type
   end(mdspan<ElementType, Extents, layout_right, Accessor> x)
   {
-    return x.data() + x.extent(0);
+    return x.data_handle() + x.extent(0);
   }
 
   template<class SpanType>
@@ -177,7 +177,7 @@ namespace {
     using mdspan_type = mdspan<
       element_type, extents_type, layout_type, accessor_type>;
     static_assert(mdspan_type::rank() == 1);
-    using pointer = typename mdspan_type::pointer;
+    using pointer = typename mdspan_type::data_handle_type;
 
     mdspan_type x; // (nullptr, extents_type(0)); // FIXME (mfh 2020/06/18) doesn't build with VS 2019
     using iterator = decltype(begin(x));
@@ -193,13 +193,13 @@ namespace {
       element_type>);
     static_assert(std::is_same_v<
       typename std::iterator_traits<iterator>::difference_type,
-      typename mdspan_type::difference_type>);
+      std::make_signed_t<typename mdspan_type::index_type>>);
     static_assert(std::is_same_v<
       typename std::iterator_traits<iterator>::reference,
       typename mdspan_type::reference>);
     static_assert(std::is_same_v<
       typename std::iterator_traits<iterator>::pointer,
-      typename mdspan_type::pointer>);
+      typename mdspan_type::data_handle_type>);
 
     using reference = typename mdspan_type::reference;
 
@@ -292,7 +292,7 @@ namespace {
     auto A_col0 = submdspan(A, full_extent, 0);
     EXPECT_TRUE( A_col0.stride(0) != 1 );
     // This works only if A is layout_right
-    static_assert(! decltype(A_col0)::is_always_contiguous());
+    static_assert(! decltype(A_col0)::is_always_exhaustive());
     const bool col0_test =
       testMdspanIterator_LegacyIterator_StaticConcept<decltype(A_col0)>();
     EXPECT_TRUE( col0_test );
@@ -316,7 +316,7 @@ namespace {
           ASSERT_TRUE( *it == expected_val );
 
           // NOTE: pointer is a valid iterator if the mdspan is
-          // contiguous, so it.operator->() won't compile.
+          // exhaustive, so it.operator->() won't compile.
           if constexpr (! std::is_pointer_v<decltype(it)>) {
             ASSERT_TRUE( *(it.operator->()) == expected_val );
           }
@@ -335,7 +335,7 @@ namespace {
           ASSERT_TRUE( *it == expected_val );
 
           // NOTE: pointer is a valid iterator if the mdspan is
-          // contiguous, so it.operator->() won't compile.
+          // exhaustive, so it.operator->() won't compile.
           if constexpr (! std::is_pointer_v<decltype(it)>) {
             ASSERT_TRUE( *(it.operator->()) == expected_val );
           }
@@ -363,7 +363,7 @@ namespace {
 
     // This works only if A is layout_right.  We need this because we
     // want to test LegacyContiguousIterator below.
-    static_assert(decltype(A_row0)::is_always_contiguous());
+    static_assert(decltype(A_row0)::is_always_exhaustive());
 
     const bool row0_test =
       testMdspanIterator_LegacyIterator_StaticConcept<decltype(A_row0)>();
@@ -388,7 +388,7 @@ namespace {
           ASSERT_TRUE( *it == expected_val );
 
           // NOTE: pointer is a valid iterator if the mdspan is
-          // contiguous, so it.operator->() won't compile.  Thus, we
+          // exhaustive, so it.operator->() won't compile.  Thus, we
           // don't test that here.
 
           // *(a + k) is equivalent to *(std::addressof(*a) + k)
@@ -409,7 +409,7 @@ namespace {
           ASSERT_TRUE( *it == expected_val );
 
           // NOTE: pointer is a valid iterator if the mdspan is
-          // contiguous, so it.operator->() won't compile.  Thus, we
+          // exhaustive, so it.operator->() won't compile.  Thus, we
           // don't test that here.
         }
         ASSERT_TRUE( it == the_end );
@@ -421,7 +421,7 @@ namespace {
     ASSERT_TRUE( ok_row );
   }
 
-  // TEST(mdspan_iterators, contiguous)
+  // TEST(mdspan_iterators, exhaustive)
   // {
   //   using real_t = double;
   //   using scalar_t = real_t;

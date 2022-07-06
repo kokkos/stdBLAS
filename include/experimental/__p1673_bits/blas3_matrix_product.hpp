@@ -714,9 +714,9 @@ void matrix_product(
     const int LDB = B_trans ? B.stride(0) : B.stride(1);
     const int LDC = C.stride(1) == 0 ? 1 : int(C.stride(1));
     BlasGemm<element_type>::gemm(&TRANSA, &TRANSB, M, N, K,
-                                 alpha, A.data(), LDA,
-                                 B.data(), LDB,
-                                 beta, C.data(), LDC);
+                                 alpha, A.data_handle(), LDA,
+                                 B.data_handle(), LDB,
+                                 beta, C.data_handle(), LDC);
   }
   else
 #endif // LINALG_ENABLE_BLAS

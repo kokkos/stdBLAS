@@ -5,7 +5,7 @@
 template<class MDSpanType, class KViewType>
 void expect_shallow_copy(MDSpanType mdsp, KViewType kv)
 {
-  EXPECT_EQ( (void *) mdsp.data(), (void *) kv.data() );
+  EXPECT_EQ( (void *) mdsp.data_handle(), (void *) kv.data() );
 }
 
 template<class MDSpanValueType, class KViewValueType = MDSpanValueType>

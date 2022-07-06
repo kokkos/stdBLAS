@@ -80,9 +80,7 @@ void add_rank_1(
                 y.static_extent(0) == dynamic_extent ||
                 x.static_extent(0) == y.static_extent(0));
 
-  using size_type = std::common_type_t<
-    std::common_type_t<SizeType_x, SizeType_y>,
-    SizeType_z>;
+  using size_type = std::common_type_t<SizeType_x, SizeType_y, SizeType_z>;
   for (size_type i = 0; i < z.extent(0); ++i) {
     z(i) = x(i) + y(i);
   }
@@ -108,7 +106,7 @@ template<class ElementType_x,
          class Accessor_z>
 void add_rank_2(
   std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, numRows_x, numCols_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, numCols_y>, Layout_y, Accessor_y> y,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, numRows_y, numCols_y>, Layout_y, Accessor_y> y,
   std::experimental::mdspan<ElementType_z, std::experimental::extents<SizeType_z, numRows_z, numCols_z>, Layout_z, Accessor_z> z)
 {
   static_assert(x.static_extent(0) == dynamic_extent ||
@@ -131,9 +129,7 @@ void add_rank_2(
                 y.static_extent(1) == dynamic_extent ||
                 x.static_extent(1) == y.static_extent(1));
 
-  using size_type = std::common_type_t<
-    std::common_type_t<SizeType_x, SizeType_y>,
-    SizeType_z>;
+  using size_type = std::common_type_t<SizeType_x, SizeType_y, SizeType_z>;
   for (size_type j = 0; j < x.extent(1); ++j) {
     for (size_type i = 0; i < x.extent(0); ++i) {
       z(i,j) = x(i,j) + y(i,j);

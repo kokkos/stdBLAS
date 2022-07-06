@@ -56,8 +56,8 @@ public:
   using reference     =
     scaled_scalar<ScalingFactor, typename Accessor::reference,
       std::remove_cv_t<typename Accessor::element_type>>;
-  using element_type  = std::add_const_t<typename reference::value_type>;
-  using pointer       = typename Accessor::pointer;
+  using element_type = std::add_const_t<typename reference::value_type>;
+  using data_handle_type = typename Accessor::data_handle_type;
   using offset_policy =
     accessor_scaled<ScalingFactor, typename Accessor::offset_policy>;
 
@@ -76,13 +76,13 @@ public:
 		  default_accessor<OtherElementType> accessor) :
     scaling_factor_(std::move(scaling_factor)), accessor_(accessor)
   {}
-  
-  reference access(pointer p, ::std::size_t i) const noexcept {
+
+  reference access(data_handle_type p, ::std::size_t i) const noexcept {
     return reference(scaling_factor_, accessor_.access(p, i));
   }
 
-  typename offset_policy::pointer
-  offset(pointer p, ::std::size_t i) const noexcept {
+  typename offset_policy::data_handle_type
+  offset(data_handle_type p, ::std::size_t i) const noexcept {
     return accessor_.offset(p, i);
   }
 
@@ -121,7 +121,7 @@ scaled(ScalingFactor scaling_factor,
        mdspan<ElementType, Extents, Layout, Accessor> x)
 {
   using acc_type = accessor_scaled<ScalingFactor, Accessor>;
-  return {x.data(), x.mapping(), acc_type{scaling_factor, x.accessor()}};
+  return {x.data_handle(), x.mapping(), acc_type{scaling_factor, x.accessor()}};
 }
 
 } // end namespace linalg

@@ -396,7 +396,9 @@ void givens_rotation_apply(
                 y.static_extent(0) == dynamic_extent ||
                 x.static_extent(0) == y.static_extent(0));
 
-  for (::std::size_t i = 0; i < x.extent(0); ++i) {
+  using index_type = ::std::common_type_t<SizeType1, SizeType2>;
+  const auto x_extent_0 = static_cast<index_type>(x.extent(0));
+  for (index_type i = 0; i < x_extent_0; ++i) {
     const auto dtemp = c * x(i) + s * y(i);
     y(i) = c * y(i) - s * x(i);
     x(i) = dtemp;
@@ -491,7 +493,9 @@ void givens_rotation_apply(
                 x.static_extent(0) == y.static_extent(0));
 
   using std::conj;
-  for (::std::size_t i = 0; i < x.extent(0); ++i) {
+  using index_type = ::std::common_type_t<SizeType1, SizeType2>;
+  const auto x_extent_0 = static_cast<index_type>(x.extent(0));
+  for (index_type i = 0; i < x_extent_0; ++i) {
     const auto dtemp = c * x(i) + s * y(i);
     y(i) = c * y(i) - conj(s) * x(i);
     x(i) = dtemp;

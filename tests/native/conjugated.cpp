@@ -33,14 +33,14 @@ namespace {
     static_assert(std::is_same_v<expected_nc_ref, typename aj_nc_type::reference>);
     using expected_nc_elt = std::add_const_t<std::conditional_t<is_arith, value_type, typename conjugated_scalar<value_type&, value_type>::value_type>>;
     static_assert(std::is_same_v<expected_nc_elt, typename aj_nc_type::element_type>);
-    static_assert(std::is_same_v<typename aj_nc_type::pointer, value_type*>);
+    static_assert(std::is_same_v<typename aj_nc_type::data_handle_type, value_type*>);
 
     using aj_c_type = accessor_conjugate<c_def_acc_type>;
     using expected_c_ref = std::conditional_t<is_arith, const value_type&, conjugated_scalar<const value_type&, value_type>>;
     static_assert(std::is_same_v<expected_c_ref, typename aj_c_type::reference>);
     using expected_c_elt = std::add_const_t<std::conditional_t<is_arith, const value_type, typename conjugated_scalar<const value_type&, value_type>::value_type>>;
     static_assert(std::is_same_v<expected_c_elt, typename aj_c_type::element_type>);
-    static_assert(std::is_same_v<typename aj_c_type::pointer, const value_type*>);
+    static_assert(std::is_same_v<typename aj_c_type::data_handle_type, const value_type*>);
 
     aj_nc_type acc_conj_nc(nc_acc);
     aj_c_type acc_conj_c0(c_acc);

@@ -117,6 +117,13 @@ namespace {
     }
 
     auto A_t = transposed (A);
+    using std::experimental::layout_left;
+    using std::experimental::layout_right;
+    static_assert(std::is_same_v<decltype(A)::layout_type, layout_right>);
+    static_assert(std::is_same_v<decltype(A_t)::layout_type, layout_left>);
+    EXPECT_EQ(A_t.extent(0), A.extent(1));
+    EXPECT_EQ(A_t.extent(1), A.extent(0));
+
     auto B_t = transposed (B);
 
     for (std::size_t i = 0; i < dim; ++i) {
@@ -135,6 +142,34 @@ namespace {
 
         EXPECT_EQ( A_t(j,i), A(i,j) );
         EXPECT_EQ( B_t(j,i), B(i,j) );
+      }
+    }
+
+    using std::experimental::submdspan;
+    constexpr std::size_t subdim = 4;
+    const std::pair<std::size_t, std::size_t> sub(0, subdim);
+    auto A_sub = submdspan(A, sub, sub);
+    using std::experimental::layout_stride;
+    static_assert(std::is_same_v<decltype(A_sub)::layout_type, layout_stride>);
+    ASSERT_EQ( A_sub.rank(), std::size_t(2) );
+    ASSERT_EQ( A_sub.extent(0), subdim );
+    ASSERT_EQ( A_sub.extent(1), subdim );
+
+    auto A_sub_trans = transposed(A_sub);
+    ASSERT_EQ( A_sub_trans.rank(), std::size_t(2) );
+    ASSERT_EQ( A_sub_trans.extent(0), subdim );
+    ASSERT_EQ( A_sub_trans.extent(1), subdim );
+
+    for (std::size_t i = 0; i < subdim; ++i) {
+      for (std::size_t j = 0; j < subdim; ++j) {
+        const scalar_t i_val = scalar_t(i) + 1.0;
+        // If we generalize this test so scalar_t can be complex, then
+        // we'll need the intermediate ptrdiff_t -> real_t conversion.
+        const scalar_t j_val = scalar_t(real_t(dim)) * (scalar_t(j) + 1.0);
+        const scalar_t val = i_val + j_val;
+
+        EXPECT_EQ( A_sub_trans(i,j), A_sub(j,i) );
+        EXPECT_EQ( A_sub_trans(i,j), A(j,i) );
       }
     }
   }

@@ -28,8 +28,7 @@
 // PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL SANDIA CORPORATION OR THE
 // CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
 // EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
-OR
+// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
 // PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
 // LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
@@ -255,9 +254,13 @@ namespace impl {
       using original_mapping_type = typename layout_stride::template mapping<OriginalExtents>;
       using extents_type = transpose_extents_t<typename original_mapping_type::extents_type>;
       using return_mapping_type = typename layout_type::template mapping<extents_type>;
+      // NOTE (mfh 2022/07/04) Commented-out code relates
+      // to the build error reported in my comment here:
+      //
+      // https://github.com/kokkos/stdBLAS/issues/242
       return return_mapping_type{
 	transpose_extents(orig_map.extents()),
-	std::array<typename extents_type::size_type, orig_map.rank()>{
+	std::array<typename extents_type::size_type, OriginalExtents::rank() /* orig_map.rank() */ >{
 	  orig_map.stride(1),
 	  orig_map.stride(0)}};
     }
@@ -320,7 +323,7 @@ auto transposed(mdspan<ElementType, Extents, Layout, Accessor> a)
 
   auto mapping = impl::transposed_layout<Layout>::mapping(a.mapping());
   auto accessor = impl::transposed_element_accessor<ElementType, Accessor>::accessor(a.accessor());
-  return mdspan<element_type, typename decltype(mapping)::extents_type, layout_type, accessor_type>{a.data(), mapping, accessor};
+  return mdspan<element_type, typename decltype(mapping)::extents_type, layout_type, accessor_type>{a.data_handle(), mapping, accessor};
 }
 
 } // end namespace linalg
