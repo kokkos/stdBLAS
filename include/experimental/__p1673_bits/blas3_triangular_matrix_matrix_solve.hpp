@@ -182,13 +182,14 @@ void trsm_lower_triangular_right_side(
   constexpr bool explicit_diagonal =
     std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
   using size_type = ::std::common_type_t<SizeType_A, SizeType_B, SizeType_X>;
+  using signed_index_type = ::std::make_signed_t<size_type>;
 
   const size_type B_num_rows = B.extent(0);
   const size_type A_num_rows = A.extent(0);
-  const size_type A_num_cols = A.extent(1);
+  const signed_index_type A_num_cols = A.extent(1);
 
   for (size_type i = 0; i < B_num_rows; ++i) {
-    for (size_type j = 0; j < A_num_cols; ++j) {
+    for (signed_index_type j = A_num_cols - 1; j >= 0; --j) {
       using sum_type = decltype (B(i,j) - A(0,0) * X(0,0));
       sum_type t (B(i,j));
       for (size_type k = j + 1; k < A_num_rows; ++k) {
@@ -425,17 +426,17 @@ template<
 void triangular_matrix_matrix_solve(
   std::experimental::linalg::impl::inline_exec_t&& /* exec */,
   P1673_MATRIX_PARAMETER( A ),
-  Triangle /* t */,
+  Triangle t,
   DiagonalStorage d,
   Side /* s */,
   P1673_MATRIX_PARAMETER( B ),
   P1673_MATRIX_PARAMETER( X ))
 {
-  if (std::is_same_v<Side, left_side_t>) {
-    triangular_matrix_matrix_left_solve (A, d, B, X);
+  if constexpr (std::is_same_v<Side, left_side_t>) {
+    triangular_matrix_matrix_left_solve(A, t, d, B, X);
   }
   else {
-    triangular_matrix_matrix_right_solve (A, d, B, X);
+    triangular_matrix_matrix_right_solve(A, t, d, B, X);
   }
 }
 
