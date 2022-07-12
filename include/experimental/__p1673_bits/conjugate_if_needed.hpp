@@ -83,8 +83,9 @@ auto conj_if_needed_impl(const T& t, std::true_type)
     return conj(t);
   }
 }
-  
-auto conj_if_needed = [](const auto& t)
+
+// Inline static variables require C++17.
+constexpr inline auto conj_if_needed = [](const auto& t)
 {
   using T = std::remove_const_t<decltype(t)>;
   return conj_if_needed_impl(t, has_conj<T>{});
