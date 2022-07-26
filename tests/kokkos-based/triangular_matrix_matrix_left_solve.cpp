@@ -66,10 +66,10 @@ void triangular_matrix_matrix_left_solve_gold_solution(
 
   for (size_type k = 0; k < num_vectors; ++k) {
     for (size_type ii = 0; ii < A_ext; ++ii) {
-      const size_type i = lower_triangle ? A_ext - 1 - ii : ii;
+      const size_type i = lower_triangle ? ii : A_ext - 1 - ii;
       // A(i, j) has lower triangle in i <= j
-      const size_type j0 = lower_triangle ? i + 1 : 0;
-      const size_type j1 = lower_triangle ? A_ext : i;
+      const size_type j0 = lower_triangle ? 0 : i + 1;
+      const size_type j1 = lower_triangle ? i : A_ext;
       for (size_type j = j0; j < j1; ++j) {
         X(i, k) -= A(i, j) * X(j, k);
       }

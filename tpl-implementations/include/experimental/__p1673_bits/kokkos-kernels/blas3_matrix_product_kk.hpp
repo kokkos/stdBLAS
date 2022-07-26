@@ -261,12 +261,12 @@ void trmm_left(KokkosExecSpace &&exec, Triangle t, DiagonalStorage d,
   // because (i,j) indexing respects C updating order
   // and parallelism is restricted accordingly
   for (size_type ii = 0; ii < C_ext0; ++ii) {
-    const auto i = lower ? ii : C_ext0 - 1 - ii;
+    const auto i = lower ? C_ext0 - 1 - ii : ii;
     Kokkos::parallel_for(Kokkos::RangePolicy(exec, 0, C_ext1),
 		  KOKKOS_LAMBDA (const size_type j) {
         c_element_type t{};
-        const size_type k0 = lower ? (explicit_diag ? i : i + 1) : 0;
-        const size_type k1 = lower ? C_ext0 :(explicit_diag ? i + 1 : i);
+        const size_type k0 = lower ? 0 : (explicit_diag ? i : i + 1);
+        const size_type k1 = lower ? (explicit_diag ? i + 1 : i) : C_ext0;
         for (size_type k = k0; k < k1; ++k) {
           t += A_view(i, k) * B_view(k, j);
         }
@@ -300,13 +300,13 @@ void trmm_right(KokkosExecSpace &&exec, Triangle t, DiagonalStorage d,
   // because (i,j) indexing respects C updating order
   // and parallelism is restricted accordingly
   for (size_type jj = 0; jj < C_ext1; ++jj) {
-    const size_type j = lower ? C_ext1 - 1 - jj : jj;
+    const size_type j = lower ? jj : C_ext1 - 1 - jj;
     Kokkos::parallel_for(Kokkos::RangePolicy(exec, 0, C_ext0),
 		  KOKKOS_LAMBDA (const size_type i) {
         c_element_type t{};
         // Note: lower triangle of A(k, j) means k <= j
-        const auto k0 = lower ? 0 : (explicit_diag ? j : j + 1);
-        const auto k1 = lower ? (explicit_diag ? j + 1 : j) : C_ext1;
+        const auto k0 = lower ? (explicit_diag ? j : j + 1) : 0;
+        const auto k1 = lower ? C_ext1 : (explicit_diag ? j + 1 : j);
         for (size_type k = k0; k < k1; ++k) {
           t += B_view(i, k) * A_view(k, j);
         }

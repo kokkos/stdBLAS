@@ -63,9 +63,8 @@ void trsm(Side /*s*/, Triangle /*t*/, DiagonalStorage /*d*/, AViewType A, XViewT
 {
   const auto side = std::is_same_v<Side,
       std::experimental::linalg::left_side_t> ? "L" : "R";
-  // KK and stdBLAS use REVERSED triangle definitions
   const auto uplo = std::is_same_v<Triangle,
-      std::experimental::linalg::lower_triangle_t> ? "U" : "L";
+      std::experimental::linalg::lower_triangle_t> ? "L" : "U";
   const auto diag = std::is_same_v<DiagonalStorage,
       std::experimental::linalg::explicit_diagonal_t> ? "N" : "U";
 
