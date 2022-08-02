@@ -1,4 +1,4 @@
- /*
+/*
 //@HEADER
 // ************************************************************************
 //
@@ -6,8 +6,7 @@
 //              Copyright (2019) Sandia Corporation
 //
 // Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
-// the U.S. Government retains certain rights in this software.
-//
+// the U.S. Government retains certain rights in this software. //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
@@ -41,43 +40,33 @@
 //@HEADER
 */
 
-#pragma once
+#ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_MACROS_HPP_
+#define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_MACROS_HPP_
 
-#include "__p1673_bits/linalg_config.h"
-#include "__p1673_bits/macros.hpp"
-#include "__p1673_bits/linalg_execpolicy_mapper.hpp"
-#include "__p1673_bits/maybe_static_size.hpp"
-#include "__p1673_bits/layout_blas_general.hpp"
-#include "__p1673_bits/layout_tags.hpp"
-#include "__p1673_bits/layout_triangle.hpp"
-#include "__p1673_bits/packed_layout.hpp"
-#include "__p1673_bits/conjugate_if_needed.hpp"
-#include "__p1673_bits/proxy_reference.hpp"
-#include "__p1673_bits/scaled.hpp"
-#include "__p1673_bits/conjugated.hpp"
-#include "__p1673_bits/transposed.hpp"
-#include "__p1673_bits/conjugate_transposed.hpp"
-#include "__p1673_bits/blas1_givens.hpp"
-#include "__p1673_bits/blas1_linalg_swap.hpp"
-#include "__p1673_bits/blas1_matrix_frob_norm.hpp"
-#include "__p1673_bits/blas1_matrix_inf_norm.hpp"
-#include "__p1673_bits/blas1_matrix_one_norm.hpp"
-#include "__p1673_bits/blas1_scale.hpp"
-#include "__p1673_bits/blas1_linalg_copy.hpp"
-#include "__p1673_bits/blas1_linalg_add.hpp"
-#include "__p1673_bits/blas1_dot.hpp"
-#include "__p1673_bits/blas1_vector_norm2.hpp"
-#include "__p1673_bits/blas1_vector_abs_sum.hpp"
-#include "__p1673_bits/blas1_vector_idx_abs_max.hpp"
-#include "__p1673_bits/blas1_vector_sum_of_squares.hpp"
-#include "__p1673_bits/blas2_matrix_vector_product.hpp"
-#include "__p1673_bits/blas2_matrix_vector_solve.hpp"
-#include "__p1673_bits/blas2_matrix_rank_1_update.hpp"
-#include "__p1673_bits/blas2_matrix_rank_2_update.hpp"
-#include "__p1673_bits/blas3_matrix_product.hpp"
-#include "__p1673_bits/blas3_matrix_rank_k_update.hpp"
-#include "__p1673_bits/blas3_matrix_rank_2k_update.hpp"
-#include "__p1673_bits/blas3_triangular_matrix_matrix_solve.hpp"
-#ifdef LINALG_ENABLE_KOKKOS
-#include <experimental/linalg_kokkoskernels>
-#endif
+#define P1673_MATRIX_EXTENTS_TEMPLATE_PARAMETERS( MATRIX_NAME ) \
+  class SizeType_ ## MATRIX_NAME , \
+  ::std::size_t numRows_ ## MATRIX_NAME , \
+  ::std::size_t numCols_ ## MATRIX_NAME
+
+#define P1673_MATRIX_TEMPLATE_PARAMETERS( MATRIX_NAME ) \
+    class ElementType_ ## MATRIX_NAME , \
+    P1673_MATRIX_EXTENTS_TEMPLATE_PARAMETERS( MATRIX_NAME ) , \
+    class Layout_ ## MATRIX_NAME , \
+    class Accessor_ ## MATRIX_NAME
+
+#define P1673_MATRIX_EXTENTS_PARAMETER( MATRIX_NAME ) \
+  ::std::experimental::extents< \
+    SizeType_ ## MATRIX_NAME , \
+    numRows_ ## MATRIX_NAME , \
+    numCols_ ## MATRIX_NAME \
+  >
+
+#define P1673_MATRIX_PARAMETER( MATRIX_NAME ) \
+  ::std::experimental::mdspan< \
+    ElementType_ ## MATRIX_NAME , \
+    P1673_MATRIX_EXTENTS_PARAMETER( MATRIX_NAME ), \
+    Layout_ ## MATRIX_NAME , \
+    Accessor_ ## MATRIX_NAME \
+  > MATRIX_NAME
+
+#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_MACROS_HPP_
