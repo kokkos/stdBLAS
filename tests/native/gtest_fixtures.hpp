@@ -49,7 +49,7 @@
 #include <complex>
 #include <vector>
 
-  using std::experimental::dynamic_extent;
+  using std::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::mdspan;
   using dbl_vector_t = mdspan<double, extents<std::size_t, dynamic_extent>>;
@@ -64,16 +64,16 @@
         storage(10),
         v(storage.data(), 10)
       {
-        v(0) = 0.5;  
-        v(1) = 0.2;  
-        v(2) = 0.1;
-        v(3) = 0.4;
-        v(4) = 0.8;
-        v(5) = 0.7;
-        v(6) = 0.3;
-        v(7) = 0.5;
-        v(8) = 0.2;
-        v(9) = 0.9;
+        v[0] = 0.5;  
+        v[1] = 0.2;  
+        v[2] = 0.1;
+        v[3] = 0.4;
+        v[4] = 0.8;
+        v[5] = 0.7;
+        v[6] = 0.3;
+        v[7] = 0.5;
+        v[8] = 0.2;
+        v[9] = 0.9;
       }
     
       std::vector<double> storage;

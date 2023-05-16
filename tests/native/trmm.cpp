@@ -12,8 +12,8 @@ namespace {
   using std::experimental::linalg::matrix_product;
   using std::experimental::linalg::transposed;
   using std::experimental::linalg::upper_triangle;
-  using std::experimental::dextents;
-  using std::experimental::dynamic_extent;
+  using std::dextents;
+  using std::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::layout_left;
   using std::experimental::mdspan;

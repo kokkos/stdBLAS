@@ -7,7 +7,7 @@
 
 namespace {
   using std::experimental::mdspan;
-  using std::experimental::dynamic_extent;
+  using std::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::layout_left;
   using std::experimental::linalg::explicit_diagonal;

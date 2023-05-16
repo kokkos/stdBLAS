@@ -31,7 +31,7 @@ namespace {
     constexpr auto expected = std::numeric_limits<std::size_t>::max();
 
     std::array<double, 0> arr;
-    using extents_type = stdexp::extents<std::size_t, stdexp::dynamic_extent>;
+    using extents_type = stdexp::extents<std::size_t, std::dynamic_extent>;
     stdexp::mdspan<double, extents_type> a(arr.data(),0);
     EXPECT_EQ(expected, idx_abs_max(a));
 

@@ -8,7 +8,7 @@
 
 namespace {
   //using std::experimental::mdspan;
-  //using std::experimental::dynamic_extent;
+  //using std::dynamic_extent;
   //using std::experimental::extents;
   using std::experimental::linalg::matrix_one_norm;
   using std::cout;
@@ -19,8 +19,8 @@ namespace {
     ElementType,
     std::experimental::extents<
       std::size_t,
-      std::experimental::dynamic_extent,
-      std::experimental::dynamic_extent>,
+      std::dynamic_extent,
+      std::dynamic_extent>,
     Layout,
     std::experimental::default_accessor<ElementType>>;
 

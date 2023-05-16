@@ -13,7 +13,7 @@ void mdspan_to_view_test_impl()
 {
   using std::experimental::mdspan;
   using std::experimental::extents;
-  using std::experimental::dynamic_extent;
+  using std::dynamic_extent;
 
   // rank1, non-const
   {
@@ -96,7 +96,7 @@ void transposed_mdspan_to_view_test_impl()
 {
   using std::experimental::mdspan;
   using std::experimental::extents;
-  using std::experimental::dynamic_extent;
+  using std::dynamic_extent;
 
   using lr_t = std::experimental::layout_right;
   using ll_t = std::experimental::layout_left;

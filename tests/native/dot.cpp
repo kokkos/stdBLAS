@@ -22,7 +22,7 @@ double ddot_wrapper (const int N, const double* DX,
 #endif // 0
 
 namespace {
-  using std::experimental::dynamic_extent;
+  using std::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::mdspan;
   using std::experimental::linalg::dot;

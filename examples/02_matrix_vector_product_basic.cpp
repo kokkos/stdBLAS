@@ -13,7 +13,7 @@
 // Make mdspan less verbose
 using std::experimental::mdspan;
 using std::experimental::extents;
-using std::experimental::dynamic_extent;
+using std::dynamic_extent;
 
 int main(int argc, char* argv[]) {
   std::cout << "Matrix Vector Product Basic" << std::endl;

@@ -6,7 +6,7 @@
 #include <vector>
 
 namespace {
-  using std::experimental::dynamic_extent;
+  using std::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::mdspan;
   using std::experimental::linalg::givens_rotation_setup;

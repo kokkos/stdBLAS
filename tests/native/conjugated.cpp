@@ -6,8 +6,8 @@
 #include <vector>
 
 namespace {
-  using std::experimental::dextents;
-  using std::experimental::dynamic_extent;
+  using std::dextents;
+  using std::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::mdspan;
   using std::experimental::linalg::conjugated;

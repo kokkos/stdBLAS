@@ -10,8 +10,8 @@
 #include <vector>
 
 namespace {
-  using std::experimental::full_extent;
-  using std::experimental::dynamic_extent;
+  using std::full_extent;
+  using std::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::layout_left;
   using std::experimental::layout_right;

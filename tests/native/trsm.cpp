@@ -8,8 +8,8 @@
 namespace {
 
   using std::experimental::mdspan;
-  using std::experimental::dynamic_extent;
-  using std::experimental::dextents;
+  using std::dynamic_extent;
+  using std::dextents;
   using std::experimental::layout_right;
   using std::experimental::layout_left;
 
