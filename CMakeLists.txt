@@ -130,6 +130,15 @@ if(LINALG_ENABLE_KOKKOS)
   find_package(KokkosKernels REQUIRED)
 endif()
 
+find_package(TBB)
+option(LINALG_ENABLE_TBB
+  "Enable Threaded Building Blocks for tests. Default: autodetect TBB installation."
+  ${TBB_FOUND}
+)
+if(LINALG_ENABLE_TBB)
+  find_package(TBB REQUIRED)
+endif()
+
 ################################################################################
 
 CONFIGURE_FILE(include/experimental/__p1673_bits/linalg_config.h.in
@@ -150,6 +159,10 @@ if(LINALG_ENABLE_KOKKOS)
   target_include_directories(linalg INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tpl-implementations/include>
   )
+endif()
+
+if(LINALG_ENABLE_TBB)
+  target_link_libraries(linalg INTERFACE TBB::tbb)
 endif()
 
 target_include_directories(linalg INTERFACE

@@ -12,11 +12,12 @@ inline namespace __p1673_version_0 {
 namespace linalg {
 namespace impl {
 // the execution policy used for default serial inline implementations
-struct inline_exec_t {};
+using inline_exec_t = std::execution::sequenced_policy;
 
 // The execution policy used when no execution policy is provided
 // It must be remapped to some other execution policy, which the default mapper does
-struct default_exec_t {};
+using default_exec_t = std::execution::parallel_policy;
+auto default_exec() { return std::execution::par; };
 
 // helpers
 template<class T> struct is_inline_exec : std::false_type{};

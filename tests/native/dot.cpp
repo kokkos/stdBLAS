@@ -2,6 +2,7 @@
 
 #include <experimental/linalg>
 #include <experimental/mdspan>
+#include <execution>
 #include <vector>
 
 // FIXME (mfh 2022/06/17) Temporarily disable calling the BLAS,
@@ -74,14 +75,13 @@ namespace {
     const scalar_t conjDotResult = dotc(x, y, scalar_t{});
     EXPECT_EQ( conjDotResult, expectedDotResult );
 
-    // scalar_t dotResultPar {};
-    // See note above.
-    //std::experimental::dot (std::execution::par, x, y, dotResultPar);
-
-    // This is noncomforming, but I need some way to test the executor overloads.
-    //using fake_executor_t = int;
-    //dot (fake_executor_t (), x, y, dotResultPar);
-    //EXPECT_EQ( dotResultPar, expectedDotResult );
+#ifdef LINALG_ENABLE_TBB
+    const auto dotResultPar = dot (std::execution::par, x, y);
+#else
+    const auto dotResultPar = dot (std::execution::seq, x, y);
+#endif // LINALG_ENABLE_TBB
+    static_assert( std::is_same_v<std::remove_const_t<decltype(dotResultPar)>, scalar_t> );
+    EXPECT_EQ( dotResultPar, expectedDotResult );
   }
 
   TEST(BLAS1_dot, mdspan_complex_double_test1)
@@ -125,14 +125,13 @@ namespace {
     static_assert( std::is_same_v<std::remove_const_t<decltype(conjDotResultTwoArg)>, scalar_t> );
     EXPECT_EQ( conjDotResultTwoArg, expectedConjDotResult );
 
-    //scalar_t dotResultPar {};
-    // See note above.
-    //std::experimental::dot (std::execution::par, x, y, dotResultPar);
-
-    // This is noncomforming, but I need some way to test the executor overloads.
-    //using fake_executor_t = int;
-    //dot (fake_executor_t (), x, y, dotResultPar);
-    //EXPECT_EQ( dotResultPar, expectedDotResult );
+#ifdef LINALG_ENABLE_TBB
+    const auto dotResultPar = dot (std::execution::par, x, y);
+#else
+    const auto dotResultPar = dot (std::execution::seq, x, y);
+#endif // LINALG_ENABLE_TBB
+    static_assert( std::is_same_v<std::remove_const_t<decltype(dotResultPar)>, scalar_t> );
+    EXPECT_EQ( dotResultPar, expectedDotResult );
   }
 
   TEST(BLAS1_dot, mdspan_complex_double_test2)
@@ -152,16 +151,15 @@ namespace {
     scalar_t expectedConjDotResult{};
     for (std::size_t k = 0; k < vectorSize; ++k)
     {
-
       scalar_t x_k = {};
       scalar_t y_k = {};
       if (k % 2 == 0){
-	x_k = scalar_t(real_t(k) + 1.0, real_t(k) + 1.0);
-	y_k = scalar_t(real_t(k) + 2.0, real_t(k) + 2.0);
+        x_k = scalar_t(real_t(k) + 1.0, real_t(k) + 1.0);
+        y_k = scalar_t(real_t(k) + 2.0, real_t(k) + 2.0);
       }
       else{
-	x_k = scalar_t(real_t(k) - 1.0, real_t(k) + 1.0);
-	y_k = scalar_t(real_t(k) + 2.0, real_t(k) - 2.0);
+        x_k = scalar_t(real_t(k) - 1.0, real_t(k) + 1.0);
+        y_k = scalar_t(real_t(k) + 2.0, real_t(k) - 2.0);
       }
       x(k) = x_k;
       y(k) = y_k;
@@ -185,9 +183,13 @@ namespace {
     const auto conjDotResultTwoArg = dotc(x, y);
     static_assert( std::is_same_v<std::remove_const_t<decltype(conjDotResultTwoArg)>, scalar_t> );
     EXPECT_EQ( conjDotResultTwoArg, expectedConjDotResult );
+
+#ifdef LINALG_ENABLE_TBB
+    const auto dotResultPar = dot (std::execution::par, x, y);
+#else
+    const auto dotResultPar = dot (std::execution::seq, x, y);
+#endif // LINALG_ENABLE_TBB
+    static_assert( std::is_same_v<std::remove_const_t<decltype(dotResultPar)>, scalar_t> );
+    EXPECT_EQ( dotResultPar, expectedDotResult );
   }
 }
-
-// int main() {
-//   std::cout << "hello world" << std::endl;
-// }
