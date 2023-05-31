@@ -7,7 +7,7 @@ using std::experimental::mdspan;
 using std::experimental::extents;
 using std::dynamic_extent;
 using std::experimental::submdspan;
-using std::experimental::full_extent;
+using std::full_extent;
 
 int main(int argc, char* argv[]) {
   std::cout << "Matrix Vector Product MixedPrec" << std::endl;
