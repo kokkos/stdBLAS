@@ -109,7 +109,7 @@ Scalar dot(
   iota_view range{size_type{}, v1.extent(0)};
 
   Scalar sum = std::transform_reduce(exec, begin(range), end(range), init,
-    std::plus<scalar_type> {},
+    std::plus<void>{},
     [=](size_type i) { return v1[i] * v2[i]; });
 
   return sum;
