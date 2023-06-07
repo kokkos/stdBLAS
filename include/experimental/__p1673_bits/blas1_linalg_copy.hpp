@@ -69,7 +69,7 @@ void copy_rank_1(
                 x.static_extent(0) == y.static_extent(0));
   using size_type = std::common_type_t<SizeType_x, SizeType_y>;
   for (size_type i = 0; i < y.extent(0); ++i) {
-    y(i) = x(i);
+    y[i] = x[i];
   }
 }
 
@@ -98,7 +98,7 @@ void copy_rank_2(
   using size_type = std::common_type_t<SizeType_x, SizeType_y>;
   for (size_type j = 0; j < y.extent(1); ++j) {
     for (size_type i = 0; i < y.extent(0); ++i) {
-      y(i,j) = x(i,j);
+      y[i,j] = x[i,j];
     }
   }
 }

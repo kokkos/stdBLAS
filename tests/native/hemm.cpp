@@ -8,7 +8,7 @@
 
 namespace {
   using std::experimental::mdspan;
-  using std::experimental::dynamic_extent;
+  using std::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::layout_left;
   using std::experimental::linalg::explicit_diagonal;
@@ -46,28 +46,28 @@ namespace {
     cmatrix_t gs(gs_mem.data(), m, n);
 
     // Fill A
-    A(0,0) = -4.0;
-    A(1,0) = 4.0 + 4.4i;
-    A(1,1) = 3.5;
-    A(2,0) = 4.4 + 2.2i;
-    A(2,1) = -2.8 - 4.0i;
-    A(2,2) = -1.2;
+    A[0,0] = -4.0;
+    A[1,0] = 4.0 + 4.4i;
+    A[1,1] = 3.5;
+    A[2,0] = 4.4 + 2.2i;
+    A[2,1] = -2.8 - 4.0i;
+    A[2,2] = -1.2;
     
     // Fill B
-    B(0,0) = 1.3;
-    B(0,1) = 2.5;
-    B(1,0) = -4.6;
-    B(1,1) = -3.7;
-    B(2,0) = 3.1;
-    B(2,1) = -1.5;
+    B[0,0] = 1.3;
+    B[0,1] = 2.5;
+    B[1,0] = -4.6;
+    B[1,1] = -3.7;
+    B[2,0] = 3.1;
+    B[2,1] = -1.5;
 
     // Fill GS
-    gs(0,0) = -9.96 + 13.42i;
-    gs(0,1) = -31.4 + 19.58i;
-    gs(1,0) = -19.58 + 18.12i;
-    gs(1,1) = 1.25 + 5.0i;
-    gs(2,0) = 14.88 + 21.26i;
-    gs(2,1) = 23.16 + 20.3i;
+    gs[0,0] = -9.96 + 13.42i;
+    gs[0,1] = -31.4 + 19.58i;
+    gs[1,0] = -19.58 + 18.12i;
+    gs[1,1] = 1.25 + 5.0i;
+    gs[2,0] = 14.88 + 21.26i;
+    gs[2,1] = 23.16 + 20.3i;
 
     hermitian_matrix_left_product(A, lower_triangle, B, C);
 
@@ -75,7 +75,7 @@ namespace {
     constexpr double TOL = 1e-9;
     for (ptrdiff_t j = 0; j < n; ++j) {
       for (ptrdiff_t i = 0; i < m; ++i) {
-        EXPECT_COMPLEX_NEAR(gs(i,j), C(i,j), TOL) 
+        EXPECT_COMPLEX_NEAR((gs[i,j]), (C[i,j]), TOL) 
           << "Matrices differ at index (" 
           << i << "," << j << ")\n";
       }
@@ -102,28 +102,28 @@ namespace {
     cmatrix_t gs(gs_mem.data(), m, n);
 
     // Fill A
-    A(0,0) = -4.0;
-    A(0,1) = 4.0 - 4.4i;
-    A(1,1) = 3.5;
-    A(0,2) = 4.4 - 2.2i;
-    A(1,2) = -2.8 + 4.0i;
-    A(2,2) = -1.2;
+    A[0,0] = -4.0;
+    A[0,1] = 4.0 - 4.4i;
+    A[1,1] = 3.5;
+    A[0,2] = 4.4 - 2.2i;
+    A[1,2] = -2.8 + 4.0i;
+    A[2,2] = -1.2;
     
     // Fill B
-    B(0,0) = 1.3;
-    B(0,1) = 2.5;
-    B(1,0) = -4.6;
-    B(1,1) = -3.7;
-    B(2,0) = 3.1;
-    B(2,1) = -1.5;
+    B[0,0] = 1.3;
+    B[0,1] = 2.5;
+    B[1,0] = -4.6;
+    B[1,1] = -3.7;
+    B[2,0] = 3.1;
+    B[2,1] = -1.5;
 
     // Fill GS
-    gs(0,0) = -9.96 + 13.42i;
-    gs(0,1) = -31.4 + 19.58i;
-    gs(1,0) = -19.58 + 18.12i;
-    gs(1,1) = 1.25 + 5.0i;
-    gs(2,0) = 14.88 + 21.26i;
-    gs(2,1) = 23.16 + 20.3i;
+    gs[0,0] = -9.96 + 13.42i;
+    gs[0,1] = -31.4 + 19.58i;
+    gs[1,0] = -19.58 + 18.12i;
+    gs[1,1] = 1.25 + 5.0i;
+    gs[2,0] = 14.88 + 21.26i;
+    gs[2,1] = 23.16 + 20.3i;
 
     hermitian_matrix_left_product(A, upper_triangle, B, C);
 
@@ -131,7 +131,7 @@ namespace {
     constexpr double TOL = 1e-9;
     for (ptrdiff_t j = 0; j < n; ++j) {
       for (ptrdiff_t i = 0; i < m; ++i) {
-        EXPECT_COMPLEX_NEAR(gs(i,j), C(i,j), TOL) 
+        EXPECT_COMPLEX_NEAR((gs[i,j]), (C[i,j]), TOL) 
           << "Matrices differ at index (" 
           << i << "," << j << ")\n";
       }
@@ -158,28 +158,28 @@ namespace {
     cmatrix_t gs(gs_mem.data(), n, m);
 
     // Fill A
-    A(0,0) = -4.0;
-    A(1,0) = 4.0 + 4.4i;
-    A(1,1) = 3.5;
-    A(2,0) = 4.4 + 2.2i;
-    A(2,1) = -2.8 - 4.0i;
-    A(2,2) = -1.2;
+    A[0,0] = -4.0;
+    A[1,0] = 4.0 + 4.4i;
+    A[1,1] = 3.5;
+    A[2,0] = 4.4 + 2.2i;
+    A[2,1] = -2.8 - 4.0i;
+    A[2,2] = -1.2;
     
     // Fill B
-    B(0,0) = 1.3;
-    B(1,0) = 2.5;
-    B(0,1) = -4.6;
-    B(1,1) = -3.7;
-    B(0,2) = 3.1;
-    B(1,2) = -1.5;
+    B[0,0] = 1.3;
+    B[1,0] = 2.5;
+    B[0,1] = -4.6;
+    B[1,1] = -3.7;
+    B[0,2] = 3.1;
+    B[1,2] = -1.5;
 
     // Fill GS
-    gs(0,0) = -9.96 - 13.42i;
-    gs(1,0) = -31.4 - 19.58i;
-    gs(0,1) = -19.58 - 18.12i;
-    gs(1,1) = 1.25 - 5.0i;
-    gs(0,2) = 14.88 - 21.26i;
-    gs(1,2) = 23.16 - 20.3i;
+    gs[0,0] = -9.96 - 13.42i;
+    gs[1,0] = -31.4 - 19.58i;
+    gs[0,1] = -19.58 - 18.12i;
+    gs[1,1] = 1.25 - 5.0i;
+    gs[0,2] = 14.88 - 21.26i;
+    gs[1,2] = 23.16 - 20.3i;
 
     hermitian_matrix_right_product(A, lower_triangle, B, C);
 
@@ -187,7 +187,7 @@ namespace {
     constexpr double TOL = 1e-9;
     for (ptrdiff_t j = 0; j < m; ++j) {
       for (ptrdiff_t i = 0; i < n; ++i) {
-        EXPECT_COMPLEX_NEAR(gs(i,j), C(i,j), TOL) 
+        EXPECT_COMPLEX_NEAR((gs[i,j]), (C[i,j]), TOL) 
           << "Matrices differ at index (" 
           << i << "," << j << ")\n";
       }
@@ -214,28 +214,28 @@ namespace {
     cmatrix_t gs(gs_mem.data(), n, m);
 
     // Fill A
-    A(0,0) = -4.0;
-    A(0,1) = 4.0 - 4.4i;
-    A(1,1) = 3.5;
-    A(0,2) = 4.4 - 2.2i;
-    A(1,2) = -2.8 + 4.0i;
-    A(2,2) = -1.2;
+    A[0,0] = -4.0;
+    A[0,1] = 4.0 - 4.4i;
+    A[1,1] = 3.5;
+    A[0,2] = 4.4 - 2.2i;
+    A[1,2] = -2.8 + 4.0i;
+    A[2,2] = -1.2;
     
     // Fill B
-    B(0,0) = 1.3;
-    B(1,0) = 2.5;
-    B(0,1) = -4.6;
-    B(1,1) = -3.7;
-    B(0,2) = 3.1;
-    B(1,2) = -1.5;
+    B[0,0] = 1.3;
+    B[1,0] = 2.5;
+    B[0,1] = -4.6;
+    B[1,1] = -3.7;
+    B[0,2] = 3.1;
+    B[1,2] = -1.5;
 
     // Fill GS
-    gs(0,0) = -9.96 - 13.42i;
-    gs(1,0) = -31.4 - 19.58i;
-    gs(0,1) = -19.58 - 18.12i;
-    gs(1,1) = 1.25 - 5.0i;
-    gs(0,2) = 14.88 - 21.26i;
-    gs(1,2) = 23.16 - 20.3i;
+    gs[0,0] = -9.96 - 13.42i;
+    gs[1,0] = -31.4 - 19.58i;
+    gs[0,1] = -19.58 - 18.12i;
+    gs[1,1] = 1.25 - 5.0i;
+    gs[0,2] = 14.88 - 21.26i;
+    gs[1,2] = 23.16 - 20.3i;
 
     hermitian_matrix_right_product(A, upper_triangle, B, C);
 
@@ -243,7 +243,7 @@ namespace {
     constexpr double TOL = 1e-9;
     for (ptrdiff_t j = 0; j < m; ++j) {
       for (ptrdiff_t i = 0; i < n; ++i) {
-        EXPECT_COMPLEX_NEAR(gs(i,j), C(i,j), TOL) 
+        EXPECT_COMPLEX_NEAR((gs[i,j]), (C[i,j]), TOL) 
           << "Matrices differ at index (" 
           << i << "," << j << ")\n";
       }

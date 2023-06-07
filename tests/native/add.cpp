@@ -6,7 +6,7 @@
 #include <vector>
 
 namespace {
-  using std::experimental::dynamic_extent;
+  using std::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::mdspan;
   using std::experimental::linalg::add;
@@ -27,9 +27,9 @@ namespace {
     for (std::size_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k = scalar_t (k) + 1.0;
       const scalar_t y_k = scalar_t (k) + 2.0;
-      x(k) = x_k;
-      y(k) = y_k;
-      z(k) = 0.0;
+      x[k] = x_k;
+      y[k] = y_k;
+      z[k] = 0.0;
     }
 
     add(x, y, z);
@@ -37,9 +37,9 @@ namespace {
       const scalar_t x_k = scalar_t (k) + 1.0;
       const scalar_t y_k = scalar_t (k) + 2.0;
       // Make sure the function didn't modify the input.
-      EXPECT_EQ( x(k), x_k );
-      EXPECT_EQ( y(k), y_k );
-      EXPECT_EQ( z(k), x_k + y_k ); // check the output
+      EXPECT_EQ( x[k], x_k );
+      EXPECT_EQ( y[k], y_k );
+      EXPECT_EQ( z[k], x_k + y_k ); // check the output
     }
   }
 
@@ -60,9 +60,9 @@ namespace {
     for (std::size_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k(real_t(k) + 4.0, -real_t(k) - 1.0);
       const scalar_t y_k(real_t(k) + 5.0, -real_t(k) - 2.0);
-      x(k) = x_k;
-      y(k) = y_k;
-      z(k) = scalar_t(0.0, 0.0);
+      x[k] = x_k;
+      y[k] = y_k;
+      z[k] = scalar_t(0.0, 0.0);
     }
 
     add(x, y, z);
@@ -70,9 +70,9 @@ namespace {
       const scalar_t x_k(real_t(k) + 4.0, -real_t(k) - 1.0);
       const scalar_t y_k(real_t(k) + 5.0, -real_t(k) - 2.0);
       // Make sure the function didn't modify the input.
-      EXPECT_EQ( x(k), x_k );
-      EXPECT_EQ( y(k), y_k );
-      EXPECT_EQ( z(k), x_k + y_k ); // check the output
+      EXPECT_EQ( x[k], x_k );
+      EXPECT_EQ( y[k], y_k );
+      EXPECT_EQ( z[k], x_k + y_k ); // check the output
     }
   }
 
@@ -93,22 +93,24 @@ namespace {
 
     for (std::size_t c = 0; c < numCols; ++c) {
       for (std::size_t r = 0; r < numRows; ++r) {
-	const scalar_t A_rc = scalar_t(c) + scalar_t(numCols) * scalar_t(r);
-	const scalar_t B_rc = scalar_t(2.0) * A_rc;
-	A(r,c) = A_rc;
-	B(r,c) = B_rc;
-	C(r,c) = scalar_t{};
+        const scalar_t A_rc = scalar_t(c) + scalar_t(numCols) * scalar_t(r);
+        const scalar_t B_rc = scalar_t(2.0) * A_rc;
+        A[r,c] = A_rc;
+        B[r,c] = B_rc;
+        C[r,c] = scalar_t{};
       }
     }
     add(A, B, C);
     for (std::size_t c = 0; c < numCols; ++c) {
       for (std::size_t r = 0; r < numRows; ++r) {
-	const scalar_t A_rc = scalar_t(c) + scalar_t(numCols) * scalar_t(r);
-	const scalar_t B_rc = scalar_t(2.0) * A_rc;
-	// Make sure the function didn't modify the input.
-	EXPECT_EQ( A(r,c), A_rc );
-	EXPECT_EQ( B(r,c), B_rc );
-	EXPECT_EQ( C(r,c), A_rc + B_rc ); // check the output
+        const scalar_t A_rc = scalar_t(c) + scalar_t(numCols) * scalar_t(r);
+        const scalar_t B_rc = scalar_t(2.0) * A_rc;
+        // Make sure the function didn't modify the input.
+        // AMK 5.6.23 googletest gets confused by the [r,c] notation
+        // and gives an error message about having 3 params instead of 2
+        EXPECT_EQ( (A[r,c]), A_rc );
+        EXPECT_EQ( (B[r,c]), B_rc );
+        EXPECT_EQ( (C[r,c]), A_rc + B_rc ); // check the output
       }
     }
   }

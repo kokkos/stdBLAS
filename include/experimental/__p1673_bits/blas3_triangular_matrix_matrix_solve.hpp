@@ -77,17 +77,17 @@ void trsm_upper_triangular_left_side(
       // TODO this would be a great opportunity for an implementer to
       // add value, by accumulating in extended precision (or at least
       // in a type with the max precision of X and B).
-      using sum_type = decltype (B(i,k) - A(0,0) * X(0,0));
+      using sum_type = decltype (B[i,k] - A[0,0] * X[0,0]);
       //using sum_type = typename out_object_t::element_type;
-      sum_type t (B(i,k));
+      sum_type t (B[i,k]);
       for (size_type j = i + 1; j < A_num_rows; ++j) {
-        t = t - A(i,j) * X(j,k);
+        t = t - A[i,j] * X[j,k];
       }
       if constexpr (explicit_diagonal) {
-        X(i,k) = t / A(i,i);
+        X[i,k] = t / A[i,i];
       }
       else {
-        X(i,k) = t;
+        X[i,k] = t;
       }
     }
   }
@@ -117,15 +117,15 @@ void trsm_lower_triangular_left_side(
       // TODO this would be a great opportunity for an implementer to
       // add value, by accumulating in extended precision (or at least
       // in a type with the max precision of X and B).
-      ElementType_X t (B(i,k));
+      ElementType_X t (B[i,k]);
       for (size_type j = 0; j < i; ++j) {
-        t = t - A(i,j) * X(j,k);
+        t = t - A[i,j] * X[j,k];
       }
       if constexpr (explicit_diagonal) {
-        X(i,k) = t / A(i,i);
+        X[i,k] = t / A[i,i];
       }
       else {
-        X(i,k) = t;
+        X[i,k] = t;
       }
     }
   }
@@ -152,16 +152,16 @@ void trsm_upper_triangular_right_side(
 
   for (size_type i = 0; i < B_num_rows; ++i) {
     for (size_type j = 0; j < A_num_cols; ++j) {
-      using sum_type = decltype (B(i,j) - A(0,0) * X(0,0));
-      sum_type t (B(i,j));
+      using sum_type = decltype (B[i,j] - A[0,0] * X[0,0]);
+      sum_type t (B[i,j]);
       for (size_type k = 0; k < j; ++k) {
-        t = t - X(i,k) * A(k,j);
+        t = t - X[i,k] * A[k,j];
       }
       if constexpr (explicit_diagonal) {
-        X(i,j) = t / A(j,j);
+        X[i,j] = t / A[j,j];
       }
       else {
-        X(i,j) = t;
+        X[i,j] = t;
       }
     }
   }
@@ -190,16 +190,16 @@ void trsm_lower_triangular_right_side(
 
   for (size_type i = 0; i < B_num_rows; ++i) {
     for (signed_index_type j = A_num_cols - 1; j >= 0; --j) {
-      using sum_type = decltype (B(i,j) - A(0,0) * X(0,0));
-      sum_type t (B(i,j));
+      using sum_type = decltype (B[i,j] - A[0,0] * X[0,0]);
+      sum_type t (B[i,j]);
       for (size_type k = j + 1; k < A_num_rows; ++k) {
-        t = t - X(i,k) * A(k,j);
+        t = t - X[i,k] * A[k,j];
       }
       if constexpr (explicit_diagonal) {
-        X(i,j) = t / A(j,j);
+        X[i,j] = t / A[j,j];
       }
       else {
-        X(i,j) = t;
+        X[i,j] = t;
       }
     }
   }

@@ -100,14 +100,14 @@ Scalar matrix_inf_norm(
     return result;
   }
   else if(A.extent(0) == size_type(1) && A.extent(1) == size_type(1)) {
-    result += abs(A(0, 0));
+    result += abs(A[0, 0]);
     return result;
   }
 
   for (size_type i = 0; i < A.extent(0); ++i) {
     auto row_sum = init;
     for (size_type j = 0; j < A.extent(1); ++j) {
-      row_sum += abs(A(i,j));
+      row_sum += abs(A[i,j]);
     }
     result = max(row_sum, result);
   }
@@ -170,7 +170,7 @@ namespace matrix_inf_norm_detail {
     class Layout,
     class Accessor>
   auto matrix_inf_norm_return_type_deducer(
-    std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A) -> decltype(abs(A(0,0)));
+    std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A) -> decltype(abs(A[0,0]));
 
 } // namespace matrix_inf_norm_detail
 

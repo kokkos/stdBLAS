@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - compiler_driver: g++
+        - compiler_driver: g++-12
           compiler_prefix: /usr/bin
     steps:
     - name: Create Build Environment
@@ -27,7 +27,7 @@ jobs:
       
     - name: Configure CMake
       working-directory: mdspan-build
-      run: cmake $GITHUB_WORKSPACE/mdspan-src -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/mdspan-install
+      run: cmake $GITHUB_WORKSPACE/mdspan-src -DCMAKE_CXX_COMPILER=g++-12 -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/mdspan-install
       
     - name: Build
       working-directory: mdspan-build
@@ -65,7 +65,7 @@ jobs:
     - name: Configure CMake
       shell: bash
       working-directory: stdblas-build
-      run: cmake $GITHUB_WORKSPACE/stdblas-src -Dmdspan_DIR=$GITHUB_WORKSPACE/mdspan-install/lib/cmake/mdspan -DLINALG_ENABLE_TESTS=On -DLINALG_ENABLE_EXAMPLES=On -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/stdblas-install
+      run: cmake $GITHUB_WORKSPACE/stdblas-src -DCMAKE_CXX_COMPILER=g++-12 -Dmdspan_DIR=$GITHUB_WORKSPACE/mdspan-install/lib/cmake/mdspan -DLINALG_ENABLE_TESTS=On -DLINALG_ENABLE_EXAMPLES=On -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/stdblas-install
 
     - name: Upload workspace
       uses: actions/upload-artifact@v2
@@ -102,8 +102,6 @@ jobs:
         
   test-stdBLAS:
     runs-on: ubuntu-latest
-    container:
-      image: amklinv/mdspan-dependencies:latest
     needs: build-stdblas
     
     steps:

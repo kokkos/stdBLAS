@@ -43,6 +43,7 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_DOT_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_DOT_HPP_
 
+#include <ranges>
 #include <type_traits>
 
 namespace std {
@@ -90,7 +91,7 @@ template<class ElementType1,
          class Accessor2,
          class Scalar>
 Scalar dot(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
+  std::experimental::linalg::impl::inline_exec_t&& exec,
   std::experimental::mdspan<ElementType1, std::experimental::extents<SizeType1, ext1>, Layout1, Accessor1> v1,
   std::experimental::mdspan<ElementType2, std::experimental::extents<SizeType2, ext2>, Layout2, Accessor2> v2,
   Scalar init)
@@ -100,10 +101,18 @@ Scalar dot(
                 v1.static_extent(0) == v2.static_extent(0));
 
   using size_type = std::common_type_t<SizeType1, SizeType2>;
-  for (size_type k = 0; k < v1.extent(0); ++k) {
-    init += v1(k) * v2(k);
-  }
-  return init;
+  using scalar_type = std::common_type_t<ElementType1, ElementType2, Scalar>;
+  using std::ranges::iota_view;
+  using std::ranges::begin;
+  using std::ranges::end;
+
+  iota_view range{size_type{}, v1.extent(0)};
+
+  Scalar sum = std::transform_reduce(exec, begin(range), end(range), init,
+    std::plus<void>{},
+    [=](size_type i) { return v1[i] * v2[i]; });
+
+  return sum;
 }
 
 template<class ExecutionPolicy,
@@ -155,7 +164,7 @@ Scalar dot(std::experimental::mdspan<ElementType1, std::experimental::extents<Si
            std::experimental::mdspan<ElementType2, std::experimental::extents<SizeType2, ext2>, Layout2, Accessor2> v2,
            Scalar init)
 {
-  return dot(std::experimental::linalg::impl::default_exec_t(), v1, v2, init);
+  return dot(std::experimental::linalg::impl::default_exec(), v1, v2, init);
 }
 
 template<class ElementType1,
@@ -217,7 +226,7 @@ namespace dot_detail {
   auto dot_return_type_deducer(
     std::experimental::mdspan<ElementType1, std::experimental::extents<SizeType1, ext1>, Layout1, Accessor1> x,
     std::experimental::mdspan<ElementType2, std::experimental::extents<SizeType2, ext2>, Layout2, Accessor2> y)
-  -> decltype(x(0) * y(0));
+  -> decltype(x[0] * y[0]);
 } // namespace dot_detail
 
 

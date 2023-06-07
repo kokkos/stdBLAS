@@ -8,7 +8,7 @@
 
 namespace {
   //using std::experimental::mdspan;
-  //using std::experimental::dynamic_extent;
+  //using std::dynamic_extent;
   //using std::experimental::extents;
   using std::experimental::linalg::matrix_one_norm;
   using std::cout;
@@ -19,8 +19,8 @@ namespace {
     ElementType,
     std::experimental::extents<
       std::size_t,
-      std::experimental::dynamic_extent,
-      std::experimental::dynamic_extent>,
+      std::dynamic_extent,
+      std::dynamic_extent>,
     Layout,
     std::experimental::default_accessor<ElementType>>;
 
@@ -54,7 +54,7 @@ namespace {
       for (std::size_t i = 0; i < A_numRows; ++i) {
         const auto A_ij = (ElementType(i)+startVal) +
           (ElementType(j)+startVal) * ElementType(A_numRows);
-        A(i,j) = A_ij;
+        A[i,j] = A_ij;
         curColOneNorm += abs(A_ij);
       }
       maxColNorm = std::max(maxColNorm, curColOneNorm);

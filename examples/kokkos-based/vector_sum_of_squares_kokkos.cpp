@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
     Kokkos::View<value_type*> x_view("x",N);
     value_type* x_ptr = x_view.data();
 
-    using dyn_1d_ext_type = std::experimental::extents<std::experimental::dynamic_extent>;
+    using dyn_1d_ext_type = std::experimental::extents<std::dynamic_extent>;
     using mdspan_type  = std::experimental::mdspan<value_type, dyn_1d_ext_type>;
     mdspan_type x(x_ptr,N);
     for(std::size_t i=0; i<x.extent(0); i++){

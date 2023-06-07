@@ -87,7 +87,7 @@ Scalar vector_abs_sum(
   const SizeType numElt = v.extent(0);
   for (SizeType i = 0; i < numElt; ++i) {
     using std::abs;
-    init += abs(v(i));
+    init += abs(v[i]);
   }
   return init;
 }
@@ -140,7 +140,7 @@ namespace vector_abs_detail {
     class Accessor>
   auto vector_abs_return_type_deducer(
     std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext0>, Layout, Accessor> x)
-  -> decltype(abs(x(0)));
+  -> decltype(abs(x[0]));
 } // namespace vector_abs_detail
 
 

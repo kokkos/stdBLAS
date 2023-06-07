@@ -87,7 +87,7 @@ TEST_F(blas2_signed_float_fixture, kokkos_matrix_frob_norm_trivial_empty)
 {
   std::vector<value_type> v;
 
-  constexpr auto de = std::experimental::dynamic_extent;
+  constexpr auto de = std::dynamic_extent;
   using s_t = std::experimental::mdspan<value_type, std::experimental::extents<de, de>>;
   s_t M(v.data(), 0, 0);
   namespace stdla = std::experimental::linalg;
@@ -109,7 +109,7 @@ TEST_F(blas2_signed_float_fixture, kokkos_matrix_frob_norm_trivial_one_element)
   constexpr value_type myvalue = static_cast<value_type>(-1.5);
   std::vector<value_type> v = {myvalue};
 
-  constexpr auto de = std::experimental::dynamic_extent;
+  constexpr auto de = std::dynamic_extent;
   using s_t = std::experimental::mdspan<value_type, std::experimental::extents<de, de>>;
   s_t M(v.data(), 1, 1);
   namespace stdla = std::experimental::linalg;
@@ -143,7 +143,7 @@ TEST_F(blas2_signed_double_fixture, kokkos_matrix_frob_norm_trivial_empty)
 {
   std::vector<value_type> v;
 
-  constexpr auto de = std::experimental::dynamic_extent;
+  constexpr auto de = std::dynamic_extent;
   using s_t = std::experimental::mdspan<value_type, std::experimental::extents<de, de>>;
   s_t M(v.data(), 0, 0);
   namespace stdla = std::experimental::linalg;
@@ -165,7 +165,7 @@ TEST_F(blas2_signed_double_fixture, kokkos_matrix_frob_norm_trivial_one_element)
   constexpr value_type myvalue = static_cast<value_type>(-1.5);
   std::vector<value_type> v = {myvalue};
 
-  constexpr auto de = std::experimental::dynamic_extent;
+  constexpr auto de = std::dynamic_extent;
   using s_t = std::experimental::mdspan<value_type, std::experimental::extents<de, de>>;
   s_t M(v.data(), 1, 1);
   namespace stdla = std::experimental::linalg;
@@ -202,7 +202,7 @@ TEST_F(blas2_signed_complex_double_fixture, kokkos_matrix_frob_norm_trivial_empt
   using stdc_t = value_type;
   if constexpr (alignof(value_type) == alignof(kc_t)){
     std::vector<value_type> v;
-    constexpr auto de = std::experimental::dynamic_extent;
+    constexpr auto de = std::dynamic_extent;
     using s_t = std::experimental::mdspan<value_type, std::experimental::extents<de, de>>;
     s_t M(v.data(), 0, 0);
     namespace stdla = std::experimental::linalg;
@@ -229,7 +229,7 @@ TEST_F(blas2_signed_complex_double_fixture, kokkos_matrix_frob_norm_trivial_one_
     constexpr value_type myvalue{-1.5, 2.2};
     std::vector<value_type> v = {myvalue};
 
-    constexpr auto de = std::experimental::dynamic_extent;
+    constexpr auto de = std::dynamic_extent;
     using s_t = std::experimental::mdspan<value_type, std::experimental::extents<de, de>>;
     s_t M(v.data(), 1, 1);
     namespace stdla = std::experimental::linalg;

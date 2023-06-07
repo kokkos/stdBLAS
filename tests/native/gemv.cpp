@@ -7,7 +7,7 @@
 
 namespace {
   using std::experimental::mdspan;
-  using std::experimental::dynamic_extent;
+  using std::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::layout_left;
   using std::experimental::linalg::matrix_vector_product;
@@ -28,7 +28,7 @@ namespace {
       const std::size_t A_numCols = A.extent(1);
       for (std::size_t j = 0; j < A_numCols; ++j) {
         for (std::size_t i = 0; i < A_numRows; ++i) {
-          A(i,j) = int((i+startVal) + (j+startVal) * A_numRows);
+          A[i,j] = int((i+startVal) + (j+startVal) * A_numRows);
         }
       }
     }
@@ -42,7 +42,7 @@ namespace {
       const std::size_t A_numCols = A.extent(1);
       for (std::size_t j = 0; j < A_numCols; ++j) {
         for (std::size_t i = 0; i < A_numRows; ++i) {
-          A(i,j) = (double(i)+startVal) +
+          A[i,j] = (double(i)+startVal) +
             (double(j)+startVal) * double(A_numRows);
         }
       }
@@ -65,7 +65,7 @@ namespace {
     {
       const std::size_t numRows = x.extent(0);
       for (std::size_t i = 0; i < numRows; ++i) {
-        x(i) = int(i+startVal);
+        x[i] = int(i+startVal);
       }
     }
   };
@@ -76,7 +76,7 @@ namespace {
     {
       const std::size_t numRows = x.extent(0);
       for (std::size_t i = 0; i < numRows; ++i) {
-        x(i) = double(i+startVal);
+        x[i] = double(i+startVal);
       }
     }
   };
@@ -125,27 +125,27 @@ namespace {
 
         // Initialize vector to zero
         for (std::size_t i = 0; i < numRows; i++) {
-          gs(i) = scalar_t(0.0); // this works even for complex
+          gs[i] = scalar_t(0.0); // this works even for complex
         }
 
         // Perform matvec
         for (std::size_t j = 0; j < numCols; ++j) {
           for (std::size_t i = 0; i < numRows; ++i) {
-            gs(i) += A(i,j) * x(j);
+            gs[i] += A[i,j] * x[j];
           }
         }
 
         // Fill result vector with flag values to make sure that we
         // computed everything.
         for (std::size_t j = 0; j < numRows; ++j) {
-          y(j) = std::numeric_limits<scalar_t>::min();
+          y[j] = std::numeric_limits<scalar_t>::min();
         }
 
         cout << " Test y = A(" << numRows << " x " << numCols
              << ") * x = y\n";
         matrix_vector_product(A, x, y);
         for (std::size_t i = 0; i < numRows; ++i) {
-          EXPECT_DOUBLE_EQ(y(i), gs(i)) << "Vectors differ at index " << i;
+          EXPECT_DOUBLE_EQ(y[i], gs[i]) << "Vectors differ at index " << i;
         }
       } // numCols
     } // numRows

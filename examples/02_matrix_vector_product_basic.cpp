@@ -13,7 +13,7 @@
 // Make mdspan less verbose
 using std::experimental::mdspan;
 using std::experimental::extents;
-using std::experimental::dynamic_extent;
+using std::dynamic_extent;
 
 int main(int argc, char* argv[]) {
   std::cout << "Matrix Vector Product Basic" << std::endl;
@@ -31,11 +31,11 @@ int main(int argc, char* argv[]) {
     mdspan<double, extents<std::size_t, dynamic_extent>> y(y_vec.data(),N);
     for(int i=0; i<A.extent(0); i++)
       for(int j=0; j<A.extent(1); j++)
-        A(i,j) = 100.0*i+j;
+        A[i,j] = 100.0*i+j;
     for(int i=0; i<x.extent(0); i++)
-      x(i) = 1. * i;
+      x[i] = 1. * i;
     for(int i=0; i<y.extent(0); i++)
-      y(i) = -1. * i;
+      y[i] = -1. * i;
 
     // y = A * x
     std::experimental::linalg::matrix_vector_product(A, x, y);
@@ -50,6 +50,6 @@ int main(int argc, char* argv[]) {
        std::experimental::linalg::scaled(2.0, A), x,
        std::experimental::linalg::scaled(0.5, y), y);
 #endif
-    for(int i=0; i<y.extent(0); i+=5) std::cout << i << " " << y(i) << std::endl;
+    for(int i=0; i<y.extent(0); i+=5) std::cout << i << " " << y[i] << std::endl;
   }
 }

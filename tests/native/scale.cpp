@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace {
-  using std::experimental::dynamic_extent;
+  using std::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::mdspan;
   using std::experimental::linalg::scale;
@@ -24,25 +24,25 @@ namespace {
     {
       for (std::size_t k = 0; k < vectorSize; ++k) {
         const scalar_t x_k = scalar_t (k) + 1.0;
-        x(k) = x_k;
+        x[k] = x_k;
       }
       const scalar_t scaleFactor = 5.0;
       scale(scaleFactor, x);
       for (std::size_t k = 0; k < vectorSize; ++k) {
         const scalar_t x_k = scalar_t (k) + 1.0;
-        EXPECT_EQ( x(k), scaleFactor * x_k );
+        EXPECT_EQ( x[k], scaleFactor * x_k );
       }
     }
     {
       for (std::size_t k = 0; k < vectorSize; ++k) {
         const scalar_t x_k = scalar_t (k) + 1.0;
-        x(k) = x_k;
+        x[k] = x_k;
       }
       const float scaleFactor = 5.0;
       scale(scaleFactor, x);
       for (std::size_t k = 0; k < vectorSize; ++k) {
         const scalar_t x_k = scalar_t (k) + 1.0;
-        EXPECT_EQ( x(k), scaleFactor * x_k );
+        EXPECT_EQ( x[k], scaleFactor * x_k );
       }
     }
   }
@@ -62,25 +62,25 @@ namespace {
     {
       for (std::size_t k = 0; k < vectorSize; ++k) {
         const scalar_t x_k(real_t(k) + 4.0, -real_t(k) - 1.0);
-        x(k) = x_k;
+        x[k] = x_k;
       }
       const real_t scaleFactor = 5.0;
       scale(scaleFactor, x);
       for (std::size_t k = 0; k < vectorSize; ++k) {
         const scalar_t x_k(real_t(k) + 4.0, -real_t(k) - 1.0);
-        EXPECT_EQ( x(k), scaleFactor * x_k );
+        EXPECT_EQ( x[k], scaleFactor * x_k );
       }
     }
     {
       for (std::size_t k = 0; k < vectorSize; ++k) {
         const scalar_t x_k(real_t(k) + 4.0, -real_t(k) - 1.0);
-        x(k) = x_k;
+        x[k] = x_k;
       }
       const scalar_t scaleFactor (5.0, -1.0);
       scale(scaleFactor, x);
       for (std::size_t k = 0; k < vectorSize; ++k) {
         const scalar_t x_k(real_t(k) + 4.0, -real_t(k) - 1.0);
-        EXPECT_EQ( x(k), scaleFactor * x_k );
+        EXPECT_EQ( x[k], scaleFactor * x_k );
       }
     }
   }

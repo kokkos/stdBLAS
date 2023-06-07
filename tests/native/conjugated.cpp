@@ -6,8 +6,8 @@
 #include <vector>
 
 namespace {
-  using std::experimental::dextents;
-  using std::experimental::dynamic_extent;
+  using std::dextents;
+  using std::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::mdspan;
   using std::experimental::linalg::conjugated;
@@ -73,8 +73,8 @@ namespace {
     for (std::size_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k(real_t(k) + 1.0, real_t(k) + 1.0);
       const scalar_t y_k(real_t(k) + 2.0, real_t(k) + 2.0);
-      x(k) = x_k;
-      y(k) = y_k;
+      x[k] = x_k;
+      y[k] = y_k;
     }
 
     // Make sure that accessor_conjugate compiles
@@ -88,15 +88,15 @@ namespace {
     auto y_conj = conjugated(y);
     for (std::size_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k(real_t(k) + 1.0, real_t(k) + 1.0);
-      EXPECT_EQ( x(k), x_k );
+      EXPECT_EQ( x[k], x_k );
 
       // Make sure that conjugated doesn't modify the entries of
       // the original thing.
       const scalar_t y_k (real_t(k) + 2.0, real_t(k) + 2.0);
-      EXPECT_EQ( y(k), y_k );
+      EXPECT_EQ( y[k], y_k );
 
       const scalar_t y_k_conj (real_t(k) + 2.0, -real_t(k) - 2.0);
-      EXPECT_EQ( scalar_t(y_conj(k)), y_k_conj );
+      EXPECT_EQ( scalar_t(y_conj[k]), y_k_conj );
     }
   }
 }

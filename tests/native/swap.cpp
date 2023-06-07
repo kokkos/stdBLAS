@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace {
-  using std::experimental::dynamic_extent;
+  using std::dynamic_extent;
   using std::experimental::extents;
   using std::experimental::mdspan;
   using std::experimental::linalg::swap_elements;
@@ -25,16 +25,16 @@ namespace {
     for (std::size_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k = scalar_t (k) + 1.0;
       const scalar_t y_k = scalar_t (k) + 2.0;
-      x(k) = x_k;
-      y(k) = y_k;
+      x[k] = x_k;
+      y[k] = y_k;
     }
 
     swap_elements(x, y);
     for (std::size_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k = scalar_t (k) + 1.0;
       const scalar_t y_k = scalar_t (k) + 2.0;
-      EXPECT_EQ( x(k), y_k );
-      EXPECT_EQ( y(k), x_k );
+      EXPECT_EQ( x[k], y_k );
+      EXPECT_EQ( y[k], x_k );
     }
   }
 
@@ -54,16 +54,16 @@ namespace {
     for (std::size_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k(real_t(k) + 4.0, -real_t(k) - 1.0);
       const scalar_t y_k(real_t(k) + 5.0, -real_t(k) - 2.0);
-      x(k) = x_k;
-      y(k) = y_k;
+      x[k] = x_k;
+      y[k] = y_k;
     }
 
     swap_elements(x, y);
     for (std::size_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k(real_t(k) + 4.0, -real_t(k) - 1.0);
       const scalar_t y_k(real_t(k) + 5.0, -real_t(k) - 2.0);
-      EXPECT_EQ( x(k), y_k );
-      EXPECT_EQ( y(k), x_k );
+      EXPECT_EQ( x[k], y_k );
+      EXPECT_EQ( y[k], x_k );
     }
   }
 }

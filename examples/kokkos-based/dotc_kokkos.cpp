@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
     value_type* a_ptr = a_view.data();
     value_type* b_ptr = b_view.data();
 
-    using dyn_1d_ext_type = std::experimental::extents<std::experimental::dynamic_extent>;
+    using dyn_1d_ext_type = std::experimental::extents<std::dynamic_extent>;
     using mdspan_type  = std::experimental::mdspan<value_type, dyn_1d_ext_type>;
     mdspan_type a(a_ptr,N);
     mdspan_type b(b_ptr,N);

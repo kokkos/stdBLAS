@@ -61,7 +61,7 @@ void linalg_scale_rank_1(
   std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext0>, Layout, Accessor> x)
 {
   for (SizeType i = 0; i < x.extent(0); ++i) {
-    x(i) *= alpha;
+    x[i] *= alpha;
   }
 }
 
@@ -78,7 +78,7 @@ void linalg_scale_rank_2(
 {
   for (SizeType j = 0; j < A.extent(1); ++j) {
     for (SizeType i = 0; i < A.extent(0); ++i) {
-      A(i,j) *= alpha;
+      A[i,j] *= alpha;
     }
   }
 }

@@ -53,7 +53,7 @@
 // is a header since this is limited to tests
 using std::experimental::mdspan;
 using std::experimental::extents;
-using std::experimental::dynamic_extent;
+using std::dynamic_extent;
 
 //
 // helper class for generating random numbers
