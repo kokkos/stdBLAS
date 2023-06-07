@@ -105,8 +105,8 @@ sum_of_squares_result<Scalar> vector_sum_of_squares(
   Scalar scale = init.scaling_factor;
   Scalar ssq = init.scaled_sum_of_squares;
   for (SizeType i = 0; i < x.extent(0); ++i) {
-    if (abs(x(i)) != 0.0) {
-      const auto absxi = abs(x(i));
+    if (abs(x[i]) != 0.0) {
+      const auto absxi = abs(x[i]);
       const auto quotient = scale / absxi;
       if (scale < absxi) {
           ssq = Scalar(1.0) + ssq * quotient * quotient;

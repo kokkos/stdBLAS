@@ -50,7 +50,7 @@ namespace {
       for (std::size_t j = 0; j < A_numCols; ++j) {
         const auto A_ij = (ElementType(i)+startVal) +
           (ElementType(j)+startVal) * ElementType(A_numRows);
-        A(i,j) = A_ij;
+        A[i,j] = A_ij;
         curRowOneNorm += abs(A_ij);
       }
       maxRowNorm = std::max(maxRowNorm, curRowOneNorm);

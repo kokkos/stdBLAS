@@ -276,9 +276,9 @@ void matrix_vector_product(
       std::common_type_t<SizeType_A, SizeType_x>,
       SizeType_y>>;
   for (size_type i = 0; i < A.extent(0); ++i) {
-    y(i) = ElementType_y{};
+    y[i] = ElementType_y{};
     for (size_type j = 0; j < A.extent(1); ++j) {
-      y(i) += A(i,j) * x(j);
+      y[i] += A[i,j] * x[j];
     }
   }
 }
@@ -395,9 +395,9 @@ void matrix_vector_product(
       SizeType_y>,
     SizeType_z>;
   for (size_type i = 0; i < A.extent(0); ++i) {
-    z(i) = y(i);
+    z[i] = y[i];
     for (size_type j = 0; j < A.extent(1); ++j) {
-      z(i) += A(i,j) * x(j);
+      z[i] += A[i,j] * x[j];
     }
   }
 }
@@ -509,24 +509,24 @@ void symmetric_matrix_vector_product(
     SizeType_y>;
 
   for (size_type i = 0; i < A.extent(0); ++i) {
-    y(i) = ElementType_y{};
+    y[i] = ElementType_y{};
   }
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (size_type j = 0; j < A.extent(1); ++j) {
       for (size_type i = j; i < A.extent(0); ++i) {
-        const auto A_ij = A(i,j);
-        y(i) += A_ij * x(j);
-        y(j) += A_ij * x(i);
+        const auto A_ij = A[i,j];
+        y[i] += A_ij * x[j];
+        y[j] += A_ij * x[i];
       }
     }
   }
   else {
     for (size_type j = 0; j < A.extent(1); ++j) {
       for (size_type i = 0; i <= j; ++i) {
-        const auto A_ij = A(i,j);
-        y(i) += A_ij * x(j);
-        y(j) += A_ij * x(i);
+        const auto A_ij = A[i,j];
+        y[i] += A_ij * x[j];
+        y[j] += A_ij * x[i];
       }
     }
   }
@@ -630,24 +630,24 @@ void symmetric_matrix_vector_product(
     typename Extents_z::size_type>;
 
   for (size_type i = 0; i < A.extent(0); ++i) {
-    z(i) = y(i);
+    z[i] = y[i];
   }
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (size_type j = 0; j < A.extent(1); ++j) {
       for (size_type i = j; i < A.extent(0); ++i) {
         const auto A_ij = A(i,j);
-        z(i) += A_ij * x(j);
-        z(j) += A_ij * x(i);
+        z[i] += A_ij * x[j];
+        z[j] += A_ij * x[i];
       }
     }
   }
   else {
     for (size_type j = 0; j < A.extent(1); ++j) {
       for (size_type i = 0; i <= j; ++i) {
-        const auto A_ij = A(i,j);
-        z(i) += A_ij * x(j);
-        z(j) += A_ij * x(i);
+        const auto A_ij = A[i,j];
+        z[i] += A_ij * x[j];
+        z[j] += A_ij * x[i];
       }
     }
   }
@@ -758,24 +758,24 @@ void hermitian_matrix_vector_product(
     SizeType_y>;
 
   for (size_type i = 0; i < A.extent(0); ++i) {
-    y(i) = ElementType_y{};
+    y[i] = ElementType_y{};
   }
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (size_type j = 0; j < A.extent(1); ++j) {
       for (size_type i = j; i < A.extent(0); ++i) {
-        const auto A_ij = A(i,j);
-        y(i) += A_ij * x(j);
-        y(j) += impl::conj_if_needed(A_ij) * x(i);
+        const auto A_ij = A[i,j];
+        y[i] += A_ij * x[j];
+        y[j] += impl::conj_if_needed(A_ij) * x[i];
       }
     }
   }
   else {
     for (size_type j = 0; j < A.extent(1); ++j) {
       for (size_type i = 0; i <= j; ++i) {
-        const auto A_ij = A(i,j);
-        y(i) += A_ij * x(j);
-        y(j) += impl::conj_if_needed(A_ij) * x(i);
+        const auto A_ij = A[i,j];
+        y[i] += A_ij * x[j];
+        y[j] += impl::conj_if_needed(A_ij) * x[i];
       }
     }
   }
@@ -886,24 +886,24 @@ void hermitian_matrix_vector_product(
     typename Extents_z::size_type /* SizeType_z */ >;
 
   for (size_type i = 0; i < A.extent(0); ++i) {
-    z(i) = y(i);
+    z[i] = y[i];
   }
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (size_type j = 0; j < A.extent(1); ++j) {
       for (size_type i = j; i < A.extent(0); ++i) {
-        const auto A_ij = A(i,j);
-        z(i) += A_ij * x(j);
-        z(j) += impl::conj_if_needed(A_ij) * x(i);
+        const auto A_ij = A[i,j];
+        z[i] += A_ij * x[j];
+        z[j] += impl::conj_if_needed(A_ij) * x[i];
       }
     }
   }
   else {
     for (size_type j = 0; j < A.extent(1); ++j) {
       for (size_type i = 0; i <= j; ++i) {
-        const auto A_ij = A(i,j);
-        z(i) += A_ij * x(j);
-        z(j) += impl::conj_if_needed(A_ij) * x(i);
+        const auto A_ij = A[i,j];
+        z[i] += A_ij * x[j];
+        z[j] += impl::conj_if_needed(A_ij) * x[i];
       }
     }
   }
@@ -1016,7 +1016,7 @@ void triangular_matrix_vector_product(
     SizeType_y>;
 
   for (size_type i = 0; i < A.extent(0); ++i) {
-    y(i) = ElementType_y{};
+    y[i] = ElementType_y{};
   }
   constexpr bool explicitDiagonal =
     std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
@@ -1025,10 +1025,10 @@ void triangular_matrix_vector_product(
     for (size_type j = 0; j < A.extent(1); ++j) {
       const size_type i_lower = explicitDiagonal ? j : j + size_type(1);
       for (size_type i = i_lower; i < A.extent(0); ++i) {
-        y(i) += A(i,j) * x(j);
+        y[i] += A[i,j] * x[j];
       }
       if constexpr (! explicitDiagonal) {
-        y(j) += /* 1 times */ x(j);
+        y[j] += /* 1 times */ x[j];
       }
     }
   }
@@ -1036,10 +1036,10 @@ void triangular_matrix_vector_product(
     for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
       const ptrdiff_t i_upper = explicitDiagonal ? j : j - 1;
       for (ptrdiff_t i = 0; i <= i_upper; ++i) {
-        y(i) += A(i,j) * x(j);
+        y[i] += A[i,j] * x[j];
       }
       if constexpr (! explicitDiagonal) {
-        y(j) += /* 1 times */ x(j);
+        y[j] += /* 1 times */ x[j];
       }
     }
   }
@@ -1162,7 +1162,7 @@ void triangular_matrix_vector_product(
     typename Extents_z::size_type /* SizeType_z */ >;
 
   for (size_type i = 0; i < A.extent(0); ++i) {
-    z(i) = y(i);
+    z[i] = y[i];
   }
   constexpr bool explicitDiagonal =
     std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
@@ -1171,10 +1171,10 @@ void triangular_matrix_vector_product(
     for (size_type j = 0; j < A.extent(1); ++j) {
       const size_type i_lower = explicitDiagonal ? j : j + size_type(1);
       for (size_type i = i_lower; i < A.extent(0); ++i) {
-        z(i) += A(i,j) * x(j);
+        z[i] += A[i,j] * x[j];
       }
       if constexpr (! explicitDiagonal) {
-        z(j) += /* 1 times */ x(j);
+        z[j] += /* 1 times */ x[j];
       }
     }
   }
@@ -1182,10 +1182,10 @@ void triangular_matrix_vector_product(
     for (size_type j = 0; j < A.extent(1); ++j) {
       const ptrdiff_t i_upper = explicitDiagonal ? j : j - size_type(1);
       for (size_type i = 0; i <= i_upper; ++i) {
-        z(i) += A(i,j) * x(j);
+        z[i] += A[i,j] * x[j];
       }
       if constexpr (! explicitDiagonal) {
-        z(j) += /* 1 times */ x(j);
+        z[j] += /* 1 times */ x[j];
       }
     }
   }

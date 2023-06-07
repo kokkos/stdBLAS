@@ -108,7 +108,7 @@ namespace {
     }
 
     reference operator*() const {
-      return x_(current_index_);
+      return x_[current_index_];
     }
 
     pointer operator->() const {
@@ -247,14 +247,14 @@ namespace {
 
     const ptrdiff_t dim = x.extent(0);
     for (ptrdiff_t k = 0; k < dim; ++k) {
-      x(k) = value_type(real_t<value_type>(k+1));
+      x[k] = value_type(real_t<value_type>(k+1));
     }
     std::rotate(begin(x), begin(x) + 1, end(x));
     std::sort(begin(x), end(x));
 
     for (ptrdiff_t k = 0; k < dim; ++k) {
       const ptrdiff_t km1 = (k + dim) % dim;
-      if (x(km1) != value_type(real_t<value_type>(k+1))) {
+      if (x[km1] != value_type(real_t<value_type>(k+1))) {
         return false;
       }
     }
@@ -280,7 +280,7 @@ namespace {
 
     for (ptrdiff_t i = 0; i < dim; ++i) {
       for (ptrdiff_t j = 0; j < dim; ++j) {
-        A(i,j) = scalar_t(real_t(j+1)) +
+        A[i,j] = scalar_t(real_t(j+1)) +
           scalar_t(real_t(A.stride(0)*(i+1)));
       }
     }
@@ -309,8 +309,8 @@ namespace {
         ptrdiff_t k = 0;
         auto it = the_beg;
         for ( ; it != the_end; ++it, ++k) { // test prefix ++
-          ASSERT_TRUE( *it == A_col0(k) );
-          ASSERT_TRUE( *it == A(k,0) );
+          ASSERT_TRUE( *it == A_col0[k] );
+          ASSERT_TRUE( *it == (A[k,0]) );
           const auto expected_val = scalar_t(real_t(1)) +
             scalar_t(real_t(A.stride(0)*(k+1)));
           ASSERT_TRUE( *it == expected_val );
@@ -328,8 +328,8 @@ namespace {
         ptrdiff_t k = 0;
         auto it = the_beg;
         for ( ; it != the_end; ++k, it++) { // test postfix ++
-          ASSERT_TRUE( *it == A_col0(k) );
-          ASSERT_TRUE( *it == A(k,0) );
+          ASSERT_TRUE( *it == A_col0[k] );
+          ASSERT_TRUE( *it == (A[k,0]) );
           const auto expected_val = scalar_t(real_t(1)) +
             scalar_t(real_t(A.stride(0)*(k+1)));
           ASSERT_TRUE( *it == expected_val );
@@ -349,7 +349,7 @@ namespace {
 
     for (ptrdiff_t i = 0; i < dim; ++i) {
       for (ptrdiff_t j = 0; j < dim; ++j) {
-        A(i,j) = scalar_t(real_t(j+1)) +
+        A[i,j] = scalar_t(real_t(j+1)) +
           scalar_t(real_t(A.stride(0)*(i+1)));
       }
     }
@@ -381,8 +381,8 @@ namespace {
         ptrdiff_t k = 0;
         auto it = the_beg;
         for ( ; it != the_end; ++it, ++k) { // test prefix ++
-          ASSERT_TRUE( *it == A_row0(k) );
-          ASSERT_TRUE( *it == A(0,k) );
+          ASSERT_TRUE( *it == A_row0[k] );
+          ASSERT_TRUE( *it == (A[0,k]) );
           const auto expected_val = scalar_t(real_t(k+1)) +
             scalar_t(real_t(A.stride(0)));
           ASSERT_TRUE( *it == expected_val );
@@ -402,8 +402,8 @@ namespace {
         ptrdiff_t k = 0;
         auto it = the_beg;
         for ( ; it != the_end; ++k, it++) { // test postfix ++
-          ASSERT_TRUE( *it == A_row0(k) );
-          ASSERT_TRUE( *it == A(0,k) );
+          ASSERT_TRUE( *it == A_row0[k] );
+          ASSERT_TRUE( *it == (A[0,k]) );
           const auto expected_val = scalar_t(real_t(k+1)) +
             scalar_t(real_t(A.stride(0)));
           ASSERT_TRUE( *it == expected_val );

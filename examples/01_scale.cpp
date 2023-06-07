@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
     // With CTAD working we could do, GCC 11.1 works but some others are buggy
     // mdspan x(x_vec.data(), N);
     mdspan<double, extents<std::size_t, dynamic_extent>> x(x_vec.data(),N);
-    for(int i=0; i<x.extent(0); i++) x(i) = i;
+    for(int i=0; i<x.extent(0); i++) x[i] = i;
 
     // Call linalg::scale x = 2.0*x;
     std::experimental::linalg::scale(2.0, x);
@@ -36,6 +36,6 @@ int main(int argc, char* argv[]) {
     std::experimental::linalg::scale(2.0, x);
 #endif
 
-    for(int i=0; i<x.extent(0); i+=5) std::cout << i << " " << x(i) << std::endl;
+    for(int i=0; i<x.extent(0); i+=5) std::cout << i << " " << x[i] << std::endl;
   }
 }

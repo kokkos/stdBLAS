@@ -76,17 +76,17 @@ SizeType idx_abs_max_default_impl(
   std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext0>, Layout, Accessor> v)
 {
   using std::abs;
-  using magnitude_type = decltype(abs(v(0)));
+  using magnitude_type = decltype(abs(v[0]));
 
   if (v.extent(0) == 0) {
     return std::numeric_limits<SizeType>::max();
   }
 
   SizeType maxInd = 0;
-  magnitude_type maxVal = abs(v(0));
+  magnitude_type maxVal = abs(v[0]);
   for (SizeType i = 1; i < v.extent(0); ++i) {
-    if (maxVal < abs(v(i))) {
-      maxVal = abs(v(i));
+    if (maxVal < abs(v[i])) {
+      maxVal = abs(v[i]);
       maxInd = i;
     }
   }

@@ -88,16 +88,16 @@
         storage(10),
         v(storage.data(), 10)
       {
-        v(0) =  0.5;  
-        v(1) =  0.2;  
-        v(2) =  0.1;
-        v(3) =  0.4;
-        v(4) = -0.8;
-        v(5) = -0.7;
-        v(6) = -0.3;
-        v(7) =  0.5;
-        v(8) =  0.2;
-        v(9) = -0.9;
+        v[0] =  0.5;  
+        v[1] =  0.2;  
+        v[2] =  0.1;
+        v[3] =  0.4;
+        v[4] = -0.8;
+        v[5] = -0.7;
+        v[6] = -0.3;
+        v[7] =  0.5;
+        v[8] =  0.2;
+        v[9] = -0.9;
       }
     
       std::vector<double> storage;
@@ -113,11 +113,11 @@
         storage(5),
         v(storage.data(), 5)
       {
-        v(0) = std::complex<double>( 0.5,  0.2);
-        v(1) = std::complex<double>( 0.1,  0.4);
-        v(2) = std::complex<double>(-0.8, -0.7);
-        v(3) = std::complex<double>(-0.3,  0.5);
-        v(4) = std::complex<double>( 0.2, -0.9);
+        v[0] = std::complex<double>( 0.5,  0.2);
+        v[1] = std::complex<double>( 0.1,  0.4);
+        v[2] = std::complex<double>(-0.8, -0.7);
+        v[3] = std::complex<double>(-0.3,  0.5);
+        v[4] = std::complex<double>( 0.2, -0.9);
       }
     
       std::vector<std::complex<double>> storage;

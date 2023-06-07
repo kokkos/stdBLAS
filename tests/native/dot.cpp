@@ -45,8 +45,8 @@ namespace {
     for (std::size_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k = scalar_t(k) + 1.0;
       const scalar_t y_k = scalar_t(k) + 2.0;
-      x(k) = x_k;
-      y(k) = y_k;
+      x[k] = x_k;
+      y[k] = y_k;
       expectedDotResult += x_k * y_k;
     }
 
@@ -102,8 +102,8 @@ namespace {
     for (std::size_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k(real_t(k) + 1.0, real_t(k) + 1.0);
       const scalar_t y_k(real_t(k) + 2.0, real_t(k) + 2.0);
-      x(k) = x_k;
-      y(k) = y_k;
+      x[k] = x_k;
+      y[k] = y_k;
       expectedDotResult += x_k * y_k;
       using std::conj;
       expectedConjDotResult += conj(x_k) * (y_k);
@@ -161,8 +161,8 @@ namespace {
         x_k = scalar_t(real_t(k) - 1.0, real_t(k) + 1.0);
         y_k = scalar_t(real_t(k) + 2.0, real_t(k) - 2.0);
       }
-      x(k) = x_k;
-      y(k) = y_k;
+      x[k] = x_k;
+      y[k] = y_k;
       expectedDotResult += x_k * y_k;
       using std::conj;
       expectedConjDotResult += conj(x_k) * (y_k);

@@ -226,7 +226,7 @@ namespace dot_detail {
   auto dot_return_type_deducer(
     std::experimental::mdspan<ElementType1, std::experimental::extents<SizeType1, ext1>, Layout1, Accessor1> x,
     std::experimental::mdspan<ElementType2, std::experimental::extents<SizeType2, ext2>, Layout2, Accessor2> y)
-  -> decltype(x(0) * y(0));
+  -> decltype(x[0] * y[0]);
 } // namespace dot_detail
 
 

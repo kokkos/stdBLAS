@@ -81,8 +81,8 @@ namespace {
     for (std::size_t k = 0; k < vectorSize; ++k) {
       const vector_element_type x_k = vector_element_type(k) + 1.0;
       const vector_element_type y_k = vector_element_type(k) + 2.0;
-      x(k) = x_k;
-      y(k) = y_k;
+      x[k] = x_k;
+      y[k] = y_k;
     }
 
     const scaling_factor_type scalingFactor (-3.0);
@@ -99,19 +99,19 @@ namespace {
     auto y_scaled = scaled (scalingFactor, y);
     for (std::size_t k = 0; k < vectorSize; ++k) {
       const vector_element_type x_k = vector_element_type(k) + 1.0;
-      EXPECT_EQ( x(k), x_k );
+      EXPECT_EQ( x[k], x_k );
 
       // Make sure that scaled doesn't modify the entries of the
       // original thing.
       const vector_element_type y_k = vector_element_type(k) + 2.0;
-      EXPECT_EQ( y(k), y_k );
+      EXPECT_EQ( y[k], y_k );
 
       const vector_element_type y_k_scaled = scalingFactor * y_k;
-      EXPECT_EQ( y_scaled(k), y_k_scaled );
+      EXPECT_EQ( y_scaled[k], y_k_scaled );
 
       // Don't ever capture an expression template type by auto in
       // real code.  I'm just testing whether some operators work.
-      auto y_scaled_ref = y_scaled(k);
+      auto y_scaled_ref = y_scaled[k];
       using ref_t = decltype(y_scaled_ref);
       static_assert(! std::is_same_v<ref_t, vector_element_type>);
 
@@ -148,7 +148,7 @@ namespace {
 
     for (std::size_t k = 0; k < vectorSize; ++k) {
       const vector_element_type x_k = vector_element_type(k) + 1.0;
-      x(k) = x_k;
+      x[k] = x_k;
     }
 
     const scaling_factor_type scalingFactor (-3.0);

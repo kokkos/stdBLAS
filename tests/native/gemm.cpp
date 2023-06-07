@@ -33,7 +33,7 @@ namespace {
       const std::size_t A_numCols = A.extent(1);
       for (std::size_t j = 0; j < A_numCols; ++j) {
         for (std::size_t i = 0; i < A_numRows; ++i) {
-          A(i,j) = int((i+startVal) + (j+startVal) * A_numRows);
+          A[i,j] = int((i+startVal) + (j+startVal) * A_numRows);
         }
       }
     }
@@ -47,7 +47,7 @@ namespace {
       const std::size_t A_numCols = A.extent(1);
       for (std::size_t j = 0; j < A_numCols; ++j) {
         for (std::size_t i = 0; i < A_numRows; ++i) {
-          A(i,j) = (double(i)+startVal) +
+          A[i,j] = (double(i)+startVal) +
             (double(j)+startVal) * double(A_numRows);
         }
       }
@@ -109,20 +109,20 @@ namespace {
           fill_matrix(B, scalar_t(real_t(2)));
           for (std::size_t j = 0; j < A_numCols; ++j) {
             for (std::size_t i = 0; i < A_numRows; ++i) {
-              A_t(j,i) = A(i,j);
+              A_t[j,i] = A[i,j];
             }
           }
           for (std::size_t j = 0; j < B_numCols; ++j) {
             for (std::size_t i = 0; i < B_numRows; ++i) {
-              B_t(j,i) = B(i,j);
+              B_t[j,i] = B[i,j];
             }
           }
 
           for (std::size_t j = 0; j < C_numCols; ++j) {
             for (std::size_t i = 0; i < C_numRows; ++i) {
-              C(i,j) = scalar_t(0.0); // this works even for complex
+              C[i,j] = scalar_t(0.0); // this works even for complex
               for (std::size_t k = 0; k < A_numCols; ++k) {
-                C(i,j) += A(i,k) * B(k,j);
+                C[i,j] += A[i,k] * B[k,j];
               }
             }
           }
@@ -131,7 +131,7 @@ namespace {
           // computed everything.
           for (std::size_t j = 0; j < C_numCols; ++j) {
             for (std::size_t i = 0; i < C_numRows; ++i) {
-              C2(i,j) = std::numeric_limits<scalar_t>::min();
+              C2[i,j] = std::numeric_limits<scalar_t>::min();
             }
           }
 
@@ -142,7 +142,9 @@ namespace {
           matrix_product(A, B, C2);
           for (std::size_t j = 0; j < C_numCols; ++j) {
             for (std::size_t i = 0; i < C_numRows; ++i) {
-              EXPECT_DOUBLE_EQ(C2(i,j), C(i,j)) << "Matrices differ at index ("
+              // AMK 5.6.23 googletest gets confused by the [r,c] notation
+              // and gives an error message about having 3 params instead of 2
+              EXPECT_DOUBLE_EQ((C2[i,j]), (C[i,j])) << "Matrices differ at index ("
                   << i << "," << j << ")=\n";
             }
           }
@@ -151,7 +153,7 @@ namespace {
           // we computed everything.
           for (std::size_t j = 0; j < C_numCols; ++j) {
             for (std::size_t i = 0; i < C_numRows; ++i) {
-              C3(i,j) = std::numeric_limits<scalar_t>::min();
+              C3[i,j] = std::numeric_limits<scalar_t>::min();
             }
           }
 
@@ -165,7 +167,7 @@ namespace {
                          transposed(B_t), C3);
           for (std::size_t j = 0; j < C_numCols; ++j) {
             for (std::size_t i = 0; i < C_numRows; ++i) {
-              EXPECT_DOUBLE_EQ(C3(i,j), C(i,j)) << "Matrices differ at index ("
+              EXPECT_DOUBLE_EQ((C3[i,j]), (C[i,j])) << "Matrices differ at index ("
                   << i << "," << j << ")=\n";
             }
           }
@@ -183,9 +185,9 @@ namespace {
 
             for (std::size_t j = 0; j < C_numCols; ++j) {
               for (std::size_t i = 0; i < C_numRows; ++i) {
-                C(i,j) = scalar_t(0.0); // this works even for complex
+                C[i,j] = scalar_t(0.0); // this works even for complex
                 for (std::size_t k = 0; k < A_tt.extent(1); ++k) {
-                  C(i,j) += A_tt(i,k) * B_tt(k,j);
+                  C[i,j] += A_tt[i,k] * B_tt[k,j];
                 }
               }
             }
@@ -196,7 +198,7 @@ namespace {
 
           for (std::size_t j = 0; j < C_numCols; ++j) {
             for (std::size_t i = 0; i < C_numRows; ++i) {
-              EXPECT_DOUBLE_EQ(C3(i,j), C(i,j)) << "Matrices differ at index ("
+              EXPECT_DOUBLE_EQ((C3[i,j]), (C[i,j])) << "Matrices differ at index ("
                 << i << "," << j << ")=\n";
             }
           }
@@ -212,7 +214,7 @@ namespace {
 
           for (std::size_t j = 0; j < C_numCols; ++j) {
             for (std::size_t i = 0; i < C_numRows; ++i) {
-              EXPECT_DOUBLE_EQ(C3(i,j), scalar_t(2.0)*C(i,j))
+              EXPECT_DOUBLE_EQ((C3[i,j]), (scalar_t(2.0)*C[i,j]))
                 << "Matrices differ at index ("
                 << i << "," << j << ")=\n";
             }

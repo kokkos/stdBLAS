@@ -111,8 +111,8 @@ namespace {
         const scalar_t j_val = scalar_t(real_t(dim)) * (scalar_t(j) + 1.0);
         const scalar_t val = i_val + j_val;
 
-        A(i,j) = val;
-        B(i,j) = -val;
+        A[i,j] = val;
+        B[i,j] = -val;
       }
     }
 
@@ -134,14 +134,14 @@ namespace {
         const scalar_t j_val = scalar_t(real_t(dim)) * (scalar_t(j) + 1.0);
         const scalar_t val = i_val + j_val;
 
-        EXPECT_EQ( A(i,j), val );
-        EXPECT_EQ( B(i,j), -val );
+        EXPECT_EQ( (A[i,j]), val );
+        EXPECT_EQ( (B[i,j]), -val );
 
-        EXPECT_EQ( A_t(j,i), val );
-        EXPECT_EQ( B_t(j,i), -val );
+        EXPECT_EQ( (A_t[j,i]), val );
+        EXPECT_EQ( (B_t[j,i]), -val );
 
-        EXPECT_EQ( A_t(j,i), A(i,j) );
-        EXPECT_EQ( B_t(j,i), B(i,j) );
+        EXPECT_EQ( (A_t[j,i]), (A[i,j]) );
+        EXPECT_EQ( (B_t[j,i]), (B[i,j]) );
       }
     }
 
@@ -168,8 +168,8 @@ namespace {
         const scalar_t j_val = scalar_t(real_t(dim)) * (scalar_t(j) + 1.0);
         const scalar_t val = i_val + j_val;
 
-        EXPECT_EQ( A_sub_trans(i,j), A_sub(j,i) );
-        EXPECT_EQ( A_sub_trans(i,j), A(j,i) );
+        EXPECT_EQ( (A_sub_trans[i,j]), (A_sub[j,i]) );
+        EXPECT_EQ( (A_sub_trans[i,j]), (A[j,i]) );
       }
     }
   }

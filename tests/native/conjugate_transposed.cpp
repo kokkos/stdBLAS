@@ -37,8 +37,8 @@ namespace {
         const scalar_t j_val (j_val_re, j_val_re);
         const scalar_t val = i_val + real_t(dim) * j_val;
 
-        A(i,j) = val;
-        B(i,j) = -val;
+        A[i,j] = val;
+        B[i,j] = -val;
       }
     }
 
@@ -53,14 +53,16 @@ namespace {
         const scalar_t j_val (j_val_re, j_val_re);
         const scalar_t val = i_val + real_t(dim) * j_val;
 
-        EXPECT_EQ( A(i,j), val );
-        EXPECT_EQ( B(i,j), -val );
+        // AMK 5.6.23 googletest gets confused by the [r,c] notation
+        // and gives an error message about having 3 params instead of 2
+        EXPECT_EQ( (A[i,j]), val );
+        EXPECT_EQ( (B[i,j]), -val );
 
-        EXPECT_EQ( scalar_t(A_h(j,i)), conj(val) );
-        EXPECT_EQ( scalar_t(B_h(j,i)), -conj(val) );
+        EXPECT_EQ( scalar_t(A_h[j,i]), conj(val) );
+        EXPECT_EQ( scalar_t(B_h[j,i]), -conj(val) );
 
-        EXPECT_EQ( scalar_t(A_h(j,i)), conj(A(i,j)) );
-        EXPECT_EQ( scalar_t(B_h(j,i)), conj(B(i,j)) );
+        EXPECT_EQ( scalar_t(A_h[j,i]), conj(A[i,j]) );
+        EXPECT_EQ( scalar_t(B_h[j,i]), conj(B[i,j]) );
       }
     }
   }

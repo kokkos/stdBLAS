@@ -47,7 +47,7 @@ namespace {
     mdspan<const double, dextents<std::size_t, 2>, layout_right> in(in_storage, num_rows, num_cols);
     for(std::size_t i = 0; i < num_rows; ++i) {
       for(std::size_t j = 0; j < num_cols; ++j) {
-	out(i,j) = in(i,j);
+        out[i,j] = in[i,j];
       }
     }
   }
@@ -82,9 +82,9 @@ namespace {
 
     for(IndexType r = 0; r < IndexType(num_rows_B); ++r) {
       for(IndexType c = 0; c < IndexType(num_cols_A); ++c) {
-	// We chose the values in A and B so that triangular
-	// solve could compute them without rounding error.
-	EXPECT_EQ( X(r,c), B_times_inv_A(r,c) );
+        // We chose the values in A and B so that triangular
+        // solve could compute them without rounding error.
+        EXPECT_EQ( (X[r,c]), (B_times_inv_A[r,c]) );
       }
     }
   }

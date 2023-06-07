@@ -49,16 +49,16 @@ namespace {
 
     for (std::size_t k = 0; k < vectorSize; ++k) {
       const auto vals = makeVectorValues<scalar_t>(k);
-      x(k) = vals.first;
-      y(k) = vals.second;
+      x[k] = vals.first;
+      y[k] = vals.second;
     }
 
     copy(x, y);
     for (std::size_t k = 0; k < vectorSize; ++k) {
       const auto vals = makeVectorValues<scalar_t>(k);
       // Make sure the function didn't modify the input.
-      EXPECT_EQ( x(k), vals.first );
-      EXPECT_EQ( y(k), vals.first ); // check the output
+      EXPECT_EQ( x[k], vals.first );
+      EXPECT_EQ( y[k], vals.first ); // check the output
     }
   }
 
@@ -77,16 +77,16 @@ namespace {
 
     for (std::size_t k = 0; k < vectorSize; ++k) {
       const auto vals = makeVectorValues<scalar_t>(k);
-      x(k) = vals.first;
-      y(k) = vals.second;
+      x[k] = vals.first;
+      y[k] = vals.second;
     }
 
     copy(x, y);
     for (std::size_t k = 0; k < vectorSize; ++k) {
       const auto vals = makeVectorValues<scalar_t>(k);
       // Make sure the function didn't modify the input.
-      EXPECT_EQ( x(k), vals.first );
-      EXPECT_EQ( y(k), vals.first ); // check the output
+      EXPECT_EQ( x[k], vals.first );
+      EXPECT_EQ( y[k], vals.first ); // check the output
     }
   }
 }
@@ -141,8 +141,8 @@ TEST(BLAS1_copy_matrix, mdspan_double)
   for (std::size_t j = 0; j < numCols; ++j) {
     for (std::size_t i = 0; i < numRows; ++i) {
       const auto vals = makeMatrixValues<scalar_t>(i, j, numRows);
-      A(i,j) = vals.first;
-      B(i,j) = vals.second;
+      A[i,j] = vals.first;
+      B[i,j] = vals.second;
     }
   }
 
@@ -150,9 +150,11 @@ TEST(BLAS1_copy_matrix, mdspan_double)
   for (std::size_t j = 0; j < numCols; ++j) {
     for (std::size_t i = 0; i < numRows; ++i) {
       const auto vals = makeMatrixValues<scalar_t>(i, j, numRows);
+      // AMK 5.6.23 googletest gets confused by the [r,c] notation
+      // and gives an error message about having 3 params instead of 2
       // Make sure the function didn't modify the input.
-      EXPECT_EQ( A(i,j), vals.first );
-      EXPECT_EQ( B(i,j), vals.first ); // check the output
+      EXPECT_EQ( (A[i,j]), vals.first );
+      EXPECT_EQ( (B[i,j]), vals.first ); // check the output
     }
   }
 }
@@ -174,8 +176,8 @@ TEST(BLAS1_copy_matrix, mdspan_complex_double)
   for (std::size_t j = 0; j < numCols; ++j) {
     for (std::size_t i = 0; i < numRows; ++i) {
       const auto vals = makeMatrixValues<scalar_t>(i, j, numRows);
-      A(i,j) = vals.first;
-      B(i,j) = vals.second;
+      A[i,j] = vals.first;
+      B[i,j] = vals.second;
     }
   }
 
@@ -183,9 +185,11 @@ TEST(BLAS1_copy_matrix, mdspan_complex_double)
   for (std::size_t j = 0; j < numCols; ++j) {
     for (std::size_t i = 0; i < numRows; ++i) {
       const auto vals = makeMatrixValues<scalar_t>(i, j, numRows);
+      // AMK 5.6.23 googletest gets confused by the [r,c] notation
+      // and gives an error message about having 3 params instead of 2
       // Make sure the function didn't modify the input.
-      EXPECT_EQ( A(i,j), vals.first );
-      EXPECT_EQ( B(i,j), vals.first ); // check the output
+      EXPECT_EQ( (A[i,j]), vals.first );
+      EXPECT_EQ( (B[i,j]), vals.first ); // check the output
     }
   }
 }

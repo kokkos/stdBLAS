@@ -34,11 +34,11 @@ TEST(gemv, no_ambiguity)
     mdspan<double, extents<std::size_t, dynamic_extent>> y(y_vec.data(),N);
     for(int i=0; i<A.extent(0); i++)
       for(int j=0; j<A.extent(1); j++)
-        A(i,j) = 100.0*i+j;
+        A[i,j] = 100.0*i+j;
     for(int i=0; i<x.extent(0); i++)
-      x(i) = 1. * i;
+      x[i] = 1. * i;
     for(int i=0; i<y.extent(0); i++)
-      y(i) = -1. * i;
+      y[i] = -1. * i;
 
     matrix_vector_product(A, x, y);
     // The following is an ambiguous call unless the implementation

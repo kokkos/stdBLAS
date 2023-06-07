@@ -168,8 +168,8 @@ namespace {
     for (std::size_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k(real_t(k) + 4.0);
       const scalar_t y_k(real_t(k) + 5.0);
-      x(k) = x_k;
-      y(k) = y_k;
+      x[k] = x_k;
+      y[k] = y_k;
     }
 
     {
@@ -185,8 +185,8 @@ namespace {
         y_k = c * y_k - s * x_k;
         x_k = tmp;
 
-        EXPECT_EQ( x(k), x_k );
-        EXPECT_EQ( y(k), y_k );
+        EXPECT_EQ( x[k], x_k );
+        EXPECT_EQ( y[k], y_k );
       }
     }
     {
@@ -202,8 +202,8 @@ namespace {
         y_k = c * y_k - s * x_k;
         x_k = tmp;
 
-        EXPECT_EQ( x(k), x_k );
-        EXPECT_EQ( y(k), y_k );
+        EXPECT_EQ( x[k], x_k );
+        EXPECT_EQ( y[k], y_k );
       }
     }
   }
@@ -224,8 +224,8 @@ namespace {
     for (std::size_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k(real_t(k) + 4.0, -real_t(k) - 1.0);
       const scalar_t y_k(real_t(k) + 5.0, -real_t(k) - 2.0);
-      x(k) = x_k;
-      y(k) = y_k;
+      x[k] = x_k;
+      y[k] = y_k;
     }
 
     using std::conj;
@@ -243,8 +243,8 @@ namespace {
         y_k = c * y_k - conj(s) * x_k;
         x_k = tmp;
 
-        EXPECT_EQ( x(k), x_k );
-        EXPECT_EQ( y(k), y_k );
+        EXPECT_EQ( x[k], x_k );
+        EXPECT_EQ( y[k], y_k );
       }
     }
     {
@@ -260,8 +260,8 @@ namespace {
         y_k = c * y_k - conj(s) * x_k;
         x_k = tmp;
 
-        EXPECT_EQ( x(k), x_k );
-        EXPECT_EQ( y(k), y_k );
+        EXPECT_EQ( x[k], x_k );
+        EXPECT_EQ( y[k], y_k );
       }
     }
   }

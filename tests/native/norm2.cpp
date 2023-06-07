@@ -107,7 +107,7 @@ namespace {
     mag_t expectedNormResultSquared {};
     for (std::size_t k = vectorSize; k > 1; --k) {
       const scalar_t x_k = scalar_t(k);
-      x(k-1) = x_k;
+      x[k-1] = x_k;
       expectedNormResultSquared += x_k * x_k;
     }
 
@@ -152,7 +152,7 @@ namespace {
     mag_t expectedNormResultSquared {};
     for (std::size_t k = 0; k < vectorSize; ++k) {
       const scalar_t x_k(real_t(k) + 3.0, -real_t(k) - 1.0);
-      x(k) = x_k;
+      x[k] = x_k;
       expectedNormResultSquared += abs(x_k) * abs(x_k);
     }
 

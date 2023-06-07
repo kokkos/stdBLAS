@@ -74,7 +74,7 @@ void swap_rank_1(
   using size_type = std::common_type_t<SizeType_x, SizeType_y>;
 
   for (size_type i = 0; i < y.extent(0); ++i) {
-    swap(x(i), y(i));
+    swap(x[i], y[i]);
   }
 }
 
@@ -106,7 +106,7 @@ void swap_rank_2(
 
   for (size_type j = 0; j < y.extent(1); ++j) {
     for (size_type i = 0; i < y.extent(0); ++i) {
-      swap(x(i,j), y(i,j));
+      swap(x[i,j], y[i,j]);
     }
   }
 }
