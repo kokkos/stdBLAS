@@ -14,9 +14,9 @@
 
 namespace {
 
-using std::experimental::mdspan;
-using std::experimental::extents;
-using std::experimental::dynamic_extent;
+using MDSPAN_IMPL_STANDARD_NAMESPACE::dynamic_extent;
+using MDSPAN_IMPL_STANDARD_NAMESPACE::extents;
+using MDSPAN_IMPL_STANDARD_NAMESPACE::mdspan;
 using std::experimental::linalg::matrix_vector_product;
 using std::experimental::linalg::scaled;
 

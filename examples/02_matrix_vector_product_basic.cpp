@@ -11,9 +11,9 @@
 #endif
 
 // Make mdspan less verbose
-using std::experimental::mdspan;
-using std::experimental::extents;
-using std::experimental::dynamic_extent;
+using MDSPAN_IMPL_STANDARD_NAMESPACE::mdspan;
+using MDSPAN_IMPL_STANDARD_NAMESPACE::extents;
+using MDSPAN_IMPL_STANDARD_NAMESPACE::dynamic_extent;
 
 int main(int argc, char* argv[]) {
   std::cout << "Matrix Vector Product Basic" << std::endl;

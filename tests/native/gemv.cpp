@@ -6,10 +6,10 @@
 #include <iostream>
 
 namespace {
-  using std::experimental::mdspan;
-  using std::experimental::dynamic_extent;
-  using std::experimental::extents;
-  using std::experimental::layout_left;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::dynamic_extent;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::extents;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::mdspan;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::layout_left;
   using std::experimental::linalg::matrix_vector_product;
   using std::experimental::linalg::transposed;
   using std::cout;

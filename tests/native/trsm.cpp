@@ -7,11 +7,11 @@
 
 namespace {
 
-  using std::experimental::mdspan;
-  using std::experimental::dynamic_extent;
-  using std::experimental::dextents;
-  using std::experimental::layout_right;
-  using std::experimental::layout_left;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::mdspan;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::dynamic_extent;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::dextents;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::layout_right;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::layout_left;
 
   constexpr std::size_t num_rows_A = 3;
   constexpr std::size_t num_cols_A = 3;
