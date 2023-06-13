@@ -1,15 +1,9 @@
-#include "gtest/gtest.h"
+#include "./gtest_fixtures.hpp"
 
 #include <experimental/linalg>
-#include <experimental/mdspan>
-#include <vector>
 #include <iostream>
 
 namespace {
-  using std::experimental::mdspan;
-  using std::experimental::dynamic_extent;
-  using std::experimental::extents;
-  using std::experimental::layout_left;
   using std::experimental::linalg::matrix_vector_product;
   using std::experimental::linalg::transposed;
   using std::cout;

@@ -1,16 +1,9 @@
-#include "gtest/gtest.h"
+#include "./gtest_fixtures.hpp"
 
 #include <experimental/linalg>
-#include <experimental/mdspan>
-#include <complex>
 #include <iostream>
-#include <vector>
 
 namespace {
-  using std::experimental::mdspan;
-  using std::experimental::dynamic_extent;
-  using std::experimental::extents;
-  using std::experimental::layout_left;
   using std::experimental::linalg::explicit_diagonal;
   using std::experimental::linalg::implicit_unit_diagonal;
   using std::experimental::linalg::lower_triangle;
@@ -52,7 +45,7 @@ namespace {
     A(2,0) = 4.4 + 2.2i;
     A(2,1) = -2.8 - 4.0i;
     A(2,2) = -1.2;
-    
+
     // Fill B
     B(0,0) = 1.3;
     B(0,1) = 2.5;
@@ -75,8 +68,8 @@ namespace {
     constexpr double TOL = 1e-9;
     for (ptrdiff_t j = 0; j < n; ++j) {
       for (ptrdiff_t i = 0; i < m; ++i) {
-        EXPECT_COMPLEX_NEAR(gs(i,j), C(i,j), TOL) 
-          << "Matrices differ at index (" 
+        EXPECT_COMPLEX_NEAR(gs(i,j), C(i,j), TOL)
+          << "Matrices differ at index ("
           << i << "," << j << ")\n";
       }
     }
@@ -108,7 +101,7 @@ namespace {
     A(0,2) = 4.4 - 2.2i;
     A(1,2) = -2.8 + 4.0i;
     A(2,2) = -1.2;
-    
+
     // Fill B
     B(0,0) = 1.3;
     B(0,1) = 2.5;
@@ -131,8 +124,8 @@ namespace {
     constexpr double TOL = 1e-9;
     for (ptrdiff_t j = 0; j < n; ++j) {
       for (ptrdiff_t i = 0; i < m; ++i) {
-        EXPECT_COMPLEX_NEAR(gs(i,j), C(i,j), TOL) 
-          << "Matrices differ at index (" 
+        EXPECT_COMPLEX_NEAR(gs(i,j), C(i,j), TOL)
+          << "Matrices differ at index ("
           << i << "," << j << ")\n";
       }
     }
@@ -164,7 +157,7 @@ namespace {
     A(2,0) = 4.4 + 2.2i;
     A(2,1) = -2.8 - 4.0i;
     A(2,2) = -1.2;
-    
+
     // Fill B
     B(0,0) = 1.3;
     B(1,0) = 2.5;
@@ -187,8 +180,8 @@ namespace {
     constexpr double TOL = 1e-9;
     for (ptrdiff_t j = 0; j < m; ++j) {
       for (ptrdiff_t i = 0; i < n; ++i) {
-        EXPECT_COMPLEX_NEAR(gs(i,j), C(i,j), TOL) 
-          << "Matrices differ at index (" 
+        EXPECT_COMPLEX_NEAR(gs(i,j), C(i,j), TOL)
+          << "Matrices differ at index ("
           << i << "," << j << ")\n";
       }
     }
@@ -220,7 +213,7 @@ namespace {
     A(0,2) = 4.4 - 2.2i;
     A(1,2) = -2.8 + 4.0i;
     A(2,2) = -1.2;
-    
+
     // Fill B
     B(0,0) = 1.3;
     B(1,0) = 2.5;
@@ -243,8 +236,8 @@ namespace {
     constexpr double TOL = 1e-9;
     for (ptrdiff_t j = 0; j < m; ++j) {
       for (ptrdiff_t i = 0; i < n; ++i) {
-        EXPECT_COMPLEX_NEAR(gs(i,j), C(i,j), TOL) 
-          << "Matrices differ at index (" 
+        EXPECT_COMPLEX_NEAR(gs(i,j), C(i,j), TOL)
+          << "Matrices differ at index ("
           << i << "," << j << ")\n";
       }
     }

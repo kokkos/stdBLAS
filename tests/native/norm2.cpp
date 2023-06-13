@@ -1,9 +1,7 @@
-#include "gtest/gtest.h"
+#include "./gtest_fixtures.hpp"
 
 #include <experimental/linalg>
-#include <experimental/mdspan>
 #include <type_traits>
-#include <vector>
 
 // FIXME (mfh 2022/06/17) Temporarily disable calling the BLAS,
 // to get PR testing workflow running with mdspan tag.
@@ -21,9 +19,6 @@ double dnrm2_wrapper(const int N, const double* X, const int INCX)
 #endif // 0
 
 namespace {
-  using std::experimental::dynamic_extent;
-  using std::experimental::extents;
-  using std::experimental::mdspan;
   using std::experimental::linalg::vector_norm2;
 
   TEST(BLAS1_norm2, mdspan_zero)

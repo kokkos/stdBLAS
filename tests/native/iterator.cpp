@@ -1,24 +1,13 @@
-#include "gtest/gtest.h"
+#include "./gtest_fixtures.hpp"
 
 #include <experimental/linalg>
-#include <experimental/mdspan>
 #include <algorithm>
 #include <iterator>
 #include <limits>
 #include <type_traits>
 #include <typeinfo>
-#include <vector>
 
 namespace {
-  using std::experimental::full_extent;
-  using std::experimental::dynamic_extent;
-  using std::experimental::extents;
-  using std::experimental::layout_left;
-  using std::experimental::layout_right;
-  using std::experimental::layout_stride; // does compile
-  using std::experimental::mdspan;
-  using std::experimental::submdspan;
-
   MDSPAN_TEMPLATE_REQUIRES(
     class ElementType,
     class Extents,

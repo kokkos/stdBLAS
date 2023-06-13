@@ -1,9 +1,7 @@
-#include "gtest/gtest.h"
+#include "./gtest_fixtures.hpp"
 
 #include <experimental/linalg>
-#include <experimental/mdspan>
 #include <iostream>
-#include <vector>
 
 namespace {
   using std::experimental::linalg::explicit_diagonal;
@@ -12,11 +10,6 @@ namespace {
   using std::experimental::linalg::matrix_product;
   using std::experimental::linalg::transposed;
   using std::experimental::linalg::upper_triangle;
-  using std::experimental::dextents;
-  using std::experimental::dynamic_extent;
-  using std::experimental::extents;
-  using std::experimental::layout_left;
-  using std::experimental::mdspan;
   using std::cout;
   using std::endl;
 

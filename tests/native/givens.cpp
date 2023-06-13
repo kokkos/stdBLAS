@@ -1,14 +1,9 @@
-#include "gtest/gtest.h"
+#include "./gtest_fixtures.hpp"
 
 #include <experimental/linalg>
-#include <experimental/mdspan>
 #include <limits>
-#include <vector>
 
 namespace {
-  using std::experimental::dynamic_extent;
-  using std::experimental::extents;
-  using std::experimental::mdspan;
   using std::experimental::linalg::givens_rotation_setup;
   using std::experimental::linalg::givens_rotation_apply;
 

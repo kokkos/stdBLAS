@@ -1,14 +1,10 @@
-#include "gtest/gtest.h"
+#include "./gtest_fixtures.hpp"
 
 #include <experimental/linalg>
-#include <experimental/mdspan>
 #include <array>
 #include <vector>
 
 namespace {
-  using std::experimental::dynamic_extent;
-  using std::experimental::extents;
-  using std::experimental::mdspan;
   using std::experimental::linalg::add;
 
   TEST(BLAS1_add, vector_double)

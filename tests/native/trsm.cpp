@@ -1,18 +1,9 @@
-#include "gtest/gtest.h"
+#include "./gtest_fixtures.hpp"
 
 #include <experimental/linalg>
-#include <experimental/mdspan>
-#include <vector>
 #include <iostream>
 
 namespace {
-
-  using std::experimental::mdspan;
-  using std::experimental::dynamic_extent;
-  using std::experimental::dextents;
-  using std::experimental::layout_right;
-  using std::experimental::layout_left;
-
   constexpr std::size_t num_rows_A = 3;
   constexpr std::size_t num_cols_A = 3;
   constexpr double storage_A[] =
