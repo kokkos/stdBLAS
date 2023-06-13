@@ -102,8 +102,6 @@ jobs:
         
   test-stdBLAS:
     runs-on: ubuntu-latest
-    container:
-      image: amklinv/mdspan-dependencies:latest
     needs: build-stdblas
     
     steps:
