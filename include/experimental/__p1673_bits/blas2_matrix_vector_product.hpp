@@ -480,13 +480,19 @@ void matrix_vector_product(
   std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
   std::experimental::mdspan<ElementType_z, Extents_z /* std::experimental::extents<SizeType_z, ext_z> */ , Layout_z, Accessor_z> z)
 {
+  static size_t recursion_count = 0;
+  ++recursion_count;
+
+  assert(recursion_count == 1);
 
   constexpr bool use_custom = is_custom_mat_vec_product_with_update_avail<
     decltype(execpolicy_mapper(exec)), decltype(A), decltype(x), decltype(y), decltype(z)>::value;
 
   std::cerr << "use_custom: " << use_custom << std::endl;
   if constexpr(use_custom) {
-    matrix_vector_product(std::forward<ExecutionPolicy>(execpolicy_mapper(exec)), A, x, y, z);
+    static_assert(std::is_same_v<std::remove_cvref_t<ExecutionPolicy>, std::execution::parallel_policy>);
+
+    matrix_vector_product(execpolicy_mapper(exec), A, x, y, z);
   } else {
     matrix_vector_product(std::experimental::linalg::impl::inline_exec_t(), A, x, y, z);
   }
