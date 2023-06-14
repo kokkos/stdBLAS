@@ -1,6 +1,6 @@
 // For GCC 9 (< 10), <execution> unconditionally includes a TBB header file.
 // If GCC < 10 was not built with TBB support, this causes a build error.
-#if (! defined(__GNUC__)) || (__GNUC__ > 9)
+#ifdef LINALG_HAS_EXECUTION
 #include <execution>
 #endif
 
@@ -39,7 +39,12 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 template<class T>
-auto execpolicy_mapper(T) { return std::experimental::linalg::impl::inline_exec_t(); }
+auto execpolicy_mapper(const T& t) { 
+#ifdef LINALG_HAS_EXECUTION
+  if(is_execution_policy<T>()) return t;
+#endif
+  return std::experimental::linalg::impl::inline_exec_t(); 
+}
 }
 }
 }

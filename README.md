@@ -28,6 +28,8 @@ Other compilers, including MSVC 2019, have been tested in the past.
    - If you want to build examples, set LINALG_ENABLE_EXAMPLES=ON
    - If you have a BLAS installation, set LINALG_ENABLE_BLAS=ON.
      BLAS support is currently experimental.
+   - If you have a TBB installation, set LINALG_ENABLE_TBB=ON.
+     TBB support is currently experimental.
 4. Build and install as usual
 5. If you enabled tests, use "ctest" to run them
 

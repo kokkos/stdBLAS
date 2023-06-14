@@ -5,13 +5,6 @@
 #include <vector>
 #include <iostream>
 
-#if (! defined(__GNUC__)) || (__GNUC__ > 9)
-#  define MDSPAN_EXAMPLES_USE_EXECUTION_POLICIES 1
-#endif
-#ifdef MDSPAN_EXAMPLES_USE_EXECUTION_POLICIES
-#  include <execution>
-#endif
-
 namespace {
 
 using MDSPAN_IMPL_STANDARD_NAMESPACE::dynamic_extent;
@@ -49,7 +42,7 @@ TEST(gemv, no_ambiguity)
        scaled(2.0, A), x,
        scaled(0.5, y), y);
 
-#ifdef MDSPAN_EXAMPLES_USE_EXECUTION_POLICIES
+#ifdef LINALG_HAS_EXECUTION
     matrix_vector_product(std::execution::par,
        scaled(2.0, A), x,
        scaled(0.5, y), y);

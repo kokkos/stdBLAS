@@ -43,6 +43,30 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_MACROS_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_MACROS_HPP_
 
+#ifdef _MSVC_LANG
+#define _LINALG_CPLUSPLUS _MSVC_LANG
+#else
+#define _LINALG_CPLUSPLUS __cplusplus
+#endif
+
+#define LINALG_CXX_STD_14 201402L
+#define LINALG_CXX_STD_17 201703L
+#define LINALG_CXX_STD_20 202002L
+
+#define LINALG_HAS_CXX_14 (_LINALG_CPLUSPLUS >= LINALG_CXX_STD_14)
+#define LINALG_HAS_CXX_17 (_LINALG_CPLUSPLUS >= LINALG_CXX_STD_17)
+#define LINALG_HAS_CXX_20 (_LINALG_CPLUSPLUS >= LINALG_CXX_STD_20)
+
+static_assert(_LINALG_CPLUSPLUS >= LINALG_CXX_STD_17, "stdBLAS requires C++17 or later.");
+
+#if ! defined(__clang__) && ! defined(_MSC_VER) && defined(__GNUC__)
+#  if defined(LINALG_HAS_TBB)
+#    define LINALG_HAS_EXECUTION 1
+#  endif
+#else
+#  define LINALG_HAS_EXECUTION 1
+#endif
+
 #define P1673_MATRIX_EXTENTS_TEMPLATE_PARAMETERS( MATRIX_NAME ) \
   class SizeType_ ## MATRIX_NAME , \
   ::std::size_t numRows_ ## MATRIX_NAME , \
