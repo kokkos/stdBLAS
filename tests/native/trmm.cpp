@@ -1,3 +1,4 @@
+#define MDSPAN_USE_PAREN_OPERATOR 1
 #include "gtest/gtest.h"
 
 #include <experimental/linalg>

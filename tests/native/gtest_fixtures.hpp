@@ -43,6 +43,8 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_FIXTURES_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_FIXTURES_HPP_
 
+#define MDSPAN_USE_PAREN_OPERATOR 1
+
 #include "gtest/gtest.h"
 
 #include <experimental/mdspan>
