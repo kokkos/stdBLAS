@@ -51,7 +51,13 @@ TEST(gemv, no_ambiguity)
     matrix_vector_product(std::execution::par,
        scaled(2.0, A), x,
        scaled(0.5, y), y);
+
+    // std::cerr << "Calling fourth matrix_vector_product\n";    
+    // matrix_vector_product(std::execution::seq,
+    //    scaled(2.0, A), x,
+    //    scaled(0.5, y), y);
 #endif
+
   }
 }
 
