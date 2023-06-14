@@ -90,11 +90,12 @@ struct is_custom_mat_vec_product_with_update_avail<
 				     std::declval<Y_t>(),
 				     std::declval<Z_t>()))
       >
-      && linalg::impl::is_inline_exec_v<Exec>
+      && ! linalg::impl::is_inline_exec_v<Exec>
     >
   >
   : std::true_type{};
 
+/*
 template <class Exec, class A_t, class X_t, class Y_t, class Z_t>
 struct is_custom_mat_vec_product_with_update_avail<
   Exec, A_t, X_t, Y_t, Z_t,
@@ -112,7 +113,8 @@ struct is_custom_mat_vec_product_with_update_avail<
       >
   >
   : std::true_type{};
-  
+*/
+
 // Overwriting symmetric matrix-vector product
 template <class Exec, class A_t, class Triangle, class X_t, class Y_t, class = void>
 struct is_custom_sym_mat_vec_product_avail : std::false_type {};
@@ -340,6 +342,42 @@ void matrix_vector_product(
   }
   std::cerr << "exiting matrix_vector_product with par\n";
 }
+
+MDSPAN_TEMPLATE_REQUIRES(
+         class ElementType_A,
+         class SizeType_A, ::std::size_t numRows_A,
+         ::std::size_t numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class ElementType_x,
+         class SizeType_x, ::std::size_t ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         class SizeType_y, ::std::size_t ext_y,
+         class Layout_y,
+         class Accessor_y,
+         /* requires */ (Layout_A::template mapping<extents<SizeType_A, numRows_A, numCols_A> >::is_always_unique())
+)
+void matrix_vector_product(
+  const std::execution::parallel_policy& /* exec */,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
+{
+  std::cerr << "matrix_vector_product with par\n";
+  using size_type = std::common_type_t<
+    std::common_type_t<
+      std::common_type_t<SizeType_A, SizeType_x>,
+      SizeType_y>>;
+  for (size_type i = 0; i < A.extent(0); ++i) {
+    y(i) = ElementType_y{};
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      y(i) += A(i,j) * x(j);
+    }
+  }
+  std::cerr << "exiting matrix_vector_product with par\n";
+}
 #endif
 
 MDSPAN_TEMPLATE_REQUIRES(
@@ -373,8 +411,8 @@ void matrix_vector_product(
   if constexpr(use_custom) {
     static_assert(std::is_same_v<decltype(execpolicy_mapper(exec)), std::execution::parallel_policy>);
     
-    //matrix_vector_product(execpolicy_mapper(exec), A, x, y);
-    matrix_vector_product(std::execution::parallel_policy{}, A, x, y);    
+    matrix_vector_product(execpolicy_mapper(exec), A, x, y);
+    //matrix_vector_product(std::execution::parallel_policy{}, A, x, y);    
   } else {
     matrix_vector_product(std::experimental::linalg::impl::inline_exec_t(), A, x, y);
   }
