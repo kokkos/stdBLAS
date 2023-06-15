@@ -357,7 +357,7 @@ void matrix_vector_product(
 
   std::cerr << "use_custom: " << use_custom << std::endl;
   if constexpr(use_custom) {
-    static_asert(not std::is_same_v<
+    static_assert(not std::is_same_v<
       std::remove_cvref_t<decltype(execpolicy_mapper(exec))>,
       std::remove_cvref_t<ExecutionPolicy>>);
     matrix_vector_product(execpolicy_mapper(exec), A, x, y);
