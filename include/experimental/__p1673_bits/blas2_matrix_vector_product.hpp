@@ -90,7 +90,7 @@ struct is_custom_mat_vec_product_with_update_avail<
 				     std::declval<Y_t>(),
 				     std::declval<Z_t>()))
       >
-      && !linalg::impl::is_inline_exec_v<Exec>
+    && !linalg::impl::is_inline_exec_v<Exec>
     >
   >
   : std::true_type{};
