@@ -90,30 +90,10 @@ struct is_custom_mat_vec_product_with_update_avail<
 				     std::declval<Y_t>(),
 				     std::declval<Z_t>()))
       >
-      && ! linalg::impl::is_inline_exec_v<Exec>
+      && !linalg::impl::is_inline_exec_v<Exec>
     >
   >
   : std::true_type{};
-
-/*
-template <class Exec, class A_t, class X_t, class Y_t, class Z_t>
-struct is_custom_mat_vec_product_with_update_avail<
-  Exec, A_t, X_t, Y_t, Z_t,
-  std::enable_if_t<
-    std::is_void_v<
-      decltype(matrix_vector_product(std::declval<Exec>(),
-				     std::declval<A_t>(),
-				     std::declval<X_t>(),
-				     std::declval<Y_t>(),
-				     std::declval<Z_t>()))
-      >
-    && std::is_same_v<
-      std::remove_const_t<std::remove_reference_t<Exec>>,
-      std::execution::parallel_policy>
-      >
-  >
-  : std::true_type{};
-*/
 
 // Overwriting symmetric matrix-vector product
 template <class Exec, class A_t, class Triangle, class X_t, class Y_t, class = void>
