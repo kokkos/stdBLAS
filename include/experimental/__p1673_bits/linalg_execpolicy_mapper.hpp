@@ -39,12 +39,17 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 template<class T>
-auto execpolicy_mapper(const T& t) { 
-#ifdef LINALG_HAS_EXECUTION
-  if(is_execution_policy<T>()) return t;
-#endif
+auto execpolicy_mapper(const T) {
   return std::experimental::linalg::impl::inline_exec_t(); 
 }
+
+#ifdef LINALG_HAS_EXECUTION
+template<>
+auto execpolicy_mapper(const std::execution::parallel_policy) {
+  return std::execution::par;
+}
+#endif
+
 }
 }
 }
