@@ -4,6 +4,7 @@
 #include <execution>
 #endif
 
+#include <iostream>
 #include <type_traits>
 
 namespace std {
@@ -40,12 +41,14 @@ inline namespace __p1673_version_0 {
 namespace linalg {
 template<class T>
 auto execpolicy_mapper(const T) {
+  std::cerr << "execpolicy_mapper returning inline_exec_t\n";
   return std::experimental::linalg::impl::inline_exec_t(); 
 }
 
 #ifdef LINALG_HAS_EXECUTION
 template<>
 auto execpolicy_mapper(const std::execution::parallel_policy) {
+  std::cerr << "execpolicy_mapper returning par\n";
   return std::execution::par;
 }
 #endif

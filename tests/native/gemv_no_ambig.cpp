@@ -33,16 +33,19 @@ TEST(gemv, no_ambiguity)
     for(int i=0; i<y.extent(0); i++)
       y(i) = -1. * i;
 
+    std::cerr << "Calling first matrix_vector_product\n";
     matrix_vector_product(A, x, y);
     // The following is an ambiguous call unless the implementation
     // correctly constraints ExecutionPolicy (the spec would imply
     // std::is_execution_policy_v, though implementations might define
     // their own custom "execution policies" that cannot satisfy this).
+    std::cerr << "Calling second matrix_vector_product\n";
     matrix_vector_product(
        scaled(2.0, A), x,
        scaled(0.5, y), y);
 
 #ifdef LINALG_HAS_EXECUTION
+    std::cerr << "Calling third matrix_vector_product\n";
     matrix_vector_product(std::execution::par,
        scaled(2.0, A), x,
        scaled(0.5, y), y);

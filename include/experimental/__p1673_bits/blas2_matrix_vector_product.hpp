@@ -44,6 +44,7 @@
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS2_MATRIX_VECTOR_PRODUCT_HPP_
 
 #include <complex>
+#include <iostream>
 #include <type_traits>
 
 namespace std {
@@ -271,6 +272,7 @@ void matrix_vector_product(
   std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
   std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
 {
+  std::cerr << "matrix_vector_product with inline_exec_t\n";
   using size_type = std::common_type_t<
     std::common_type_t<
       std::common_type_t<SizeType_A, SizeType_x>,
@@ -281,7 +283,46 @@ void matrix_vector_product(
       y(i) += A(i,j) * x(j);
     }
   }
+  std::cerr << "exiting matrix_vector_product with inline_exec_t\n";
 }
+
+#ifdef LINALG_HAS_EXECUTION
+MDSPAN_TEMPLATE_REQUIRES(
+         class ElementType_A,
+         class SizeType_A, ::std::size_t numRows_A,
+         ::std::size_t numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class ElementType_x,
+         class SizeType_x, ::std::size_t ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         class SizeType_y, ::std::size_t ext_y,
+         class Layout_y,
+         class Accessor_y,
+         /* requires */ (Layout_A::template mapping<extents<SizeType_A, numRows_A, numCols_A> >::is_always_unique())
+)
+void matrix_vector_product(
+  std::execution::parallel_policy&& /* exec */,
+  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
+{
+  std::cerr << "matrix_vector_product with par\n";
+  using size_type = std::common_type_t<
+    std::common_type_t<
+      std::common_type_t<SizeType_A, SizeType_x>,
+      SizeType_y>>;
+  for (size_type i = 0; i < A.extent(0); ++i) {
+    y(i) = ElementType_y{};
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      y(i) += A(i,j) * x(j);
+    }
+  }
+  std::cerr << "exiting matrix_vector_product with par\n";
+}
+#endif
 
 MDSPAN_TEMPLATE_REQUIRES(
          class ExecutionPolicy,
@@ -310,6 +351,7 @@ void matrix_vector_product(
   constexpr bool use_custom = is_custom_mat_vec_product_avail<
     decltype(execpolicy_mapper(exec)), decltype(A), decltype(x), decltype(y)>::value;
 
+  std::cerr << "use_custom: " << use_custom << std::endl;
   if constexpr(use_custom) {
     matrix_vector_product(execpolicy_mapper(exec), A, x, y);
   } else {
@@ -335,7 +377,9 @@ void matrix_vector_product(
   std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
   std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
 {
+  std::cerr << "matrix_vector_product with default_exec_t\n";
   matrix_vector_product(std::experimental::linalg::impl::default_exec_t(), A, x, y);
+  std::cerr << "exiting matrix_vector_product with default_exec_t\n";
 }
 
 namespace impl {
@@ -389,6 +433,7 @@ void matrix_vector_product(
   std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
   std::experimental::mdspan<ElementType_z, std::experimental::extents<SizeType_z, ext_z>, Layout_z, Accessor_z> z)
 {
+  std::cerr << "matrix_vector_product with inline_exec_t\n";
   using size_type = std::common_type_t<
     std::common_type_t<
       std::common_type_t<typename Extents_A::size_type /* SizeType_A */, SizeType_x>,
@@ -400,6 +445,7 @@ void matrix_vector_product(
       z(i) += A(i,j) * x(j);
     }
   }
+  std::cerr << "exiting matrix_vector_product with inline_exec_t\n";
 }
 
 // FIXME (mfh 2022/06/19) Some work-around here for GCC 9 and/or macro insufficiencies.
@@ -438,11 +484,13 @@ void matrix_vector_product(
   constexpr bool use_custom = is_custom_mat_vec_product_with_update_avail<
     decltype(execpolicy_mapper(exec)), decltype(A), decltype(x), decltype(y), decltype(z)>::value;
 
+  std::cerr << "use_custom: " << use_custom << std::endl;
   if constexpr(use_custom) {
-    matrix_vector_product(execpolicy_mapper(exec), A, x, y, z);
+    matrix_vector_product(std::forward<ExecutionPolicy>(execpolicy_mapper(exec)), A, x, y, z);
   } else {
     matrix_vector_product(std::experimental::linalg::impl::inline_exec_t(), A, x, y, z);
   }
+  std::cerr << "exiting matrix_vector_product\n";
 }
 
 // FIXME (mfh 2022/06/19) Some work-around here for GCC 9 and/or macro insufficiencies.
@@ -474,7 +522,9 @@ void matrix_vector_product(
   std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
   std::experimental::mdspan<ElementType_z, std::experimental::extents<SizeType_z, ext_z>, Layout_z, Accessor_z> z)
 {
+  std::cerr << "matrix_vector_product with default_exec_t\n";
   matrix_vector_product(std::experimental::linalg::impl::default_exec_t(), A, x, y, z);
+  std::cerr << "exiting matrix_vector_product with default_exec_t\n";
 }
 
 
