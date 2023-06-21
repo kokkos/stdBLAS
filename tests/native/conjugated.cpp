@@ -1,3 +1,6 @@
+
+#define MDSPAN_USE_PAREN_OPERATOR 1
+
 #include "gtest/gtest.h"
 
 #include <experimental/linalg>
@@ -6,10 +9,10 @@
 #include <vector>
 
 namespace {
-  using std::experimental::dextents;
-  using std::experimental::dynamic_extent;
-  using std::experimental::extents;
-  using std::experimental::mdspan;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::dextents;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::dynamic_extent;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::extents;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::mdspan;
   using std::experimental::linalg::conjugated;
 
   template<class ValueType>

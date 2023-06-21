@@ -1,3 +1,5 @@
+#define MDSPAN_USE_PAREN_OPERATOR 1
+
 #include "gtest/gtest.h"
 
 #include <experimental/linalg>
@@ -5,18 +7,11 @@
 #include <vector>
 #include <iostream>
 
-#if (! defined(__GNUC__)) || (__GNUC__ > 9)
-#  define MDSPAN_EXAMPLES_USE_EXECUTION_POLICIES 1
-#endif
-#ifdef MDSPAN_EXAMPLES_USE_EXECUTION_POLICIES
-#  include <execution>
-#endif
-
 namespace {
 
-using std::experimental::mdspan;
-using std::experimental::extents;
-using std::experimental::dynamic_extent;
+using MDSPAN_IMPL_STANDARD_NAMESPACE::dynamic_extent;
+using MDSPAN_IMPL_STANDARD_NAMESPACE::extents;
+using MDSPAN_IMPL_STANDARD_NAMESPACE::mdspan;
 using std::experimental::linalg::matrix_vector_product;
 using std::experimental::linalg::scaled;
 
@@ -40,20 +35,29 @@ TEST(gemv, no_ambiguity)
     for(int i=0; i<y.extent(0); i++)
       y(i) = -1. * i;
 
+    std::cerr << "Calling first matrix_vector_product\n";
     matrix_vector_product(A, x, y);
     // The following is an ambiguous call unless the implementation
     // correctly constraints ExecutionPolicy (the spec would imply
     // std::is_execution_policy_v, though implementations might define
     // their own custom "execution policies" that cannot satisfy this).
+    std::cerr << "Calling second matrix_vector_product\n";
     matrix_vector_product(
        scaled(2.0, A), x,
        scaled(0.5, y), y);
 
-#ifdef MDSPAN_EXAMPLES_USE_EXECUTION_POLICIES
+#ifdef LINALG_HAS_EXECUTION
+    std::cerr << "Calling third matrix_vector_product\n";
     matrix_vector_product(std::execution::par,
        scaled(2.0, A), x,
        scaled(0.5, y), y);
+
+    // std::cerr << "Calling fourth matrix_vector_product\n";    
+    // matrix_vector_product(std::execution::seq,
+    //    scaled(2.0, A), x,
+    //    scaled(0.5, y), y);
 #endif
+
   }
 }
 

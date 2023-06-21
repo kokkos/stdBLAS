@@ -121,6 +121,14 @@ option(LINALG_ENABLE_BLAS
   "Assume that we are linking with a BLAS library."
   ${BLAS_FOUND})
 
+find_package(TBB)
+option(LINALG_ENABLE_TBB
+  "Enable TBB. Default: autodetect TBB installation."
+  ${TBB_FOUND})
+if(LINALG_ENABLE_TBB)
+  find_package(TBB REQUIRED)
+endif()
+
 find_package(KokkosKernels)
 option(LINALG_ENABLE_KOKKOS
   "Enable Kokkos-based implementation. Default: autodetect Kokkos installation."
@@ -143,6 +151,10 @@ add_library(linalg INTERFACE)
 add_library(std::linalg ALIAS linalg)
 
 target_link_libraries(linalg INTERFACE std::mdspan)
+
+if(LINALG_ENABLE_TBB)
+  target_link_libraries(linalg INTERFACE TBB::tbb)
+endif()
 
 if(LINALG_ENABLE_KOKKOS)
   target_link_libraries(linalg INTERFACE Kokkos::kokkos)

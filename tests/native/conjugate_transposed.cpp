@@ -1,3 +1,5 @@
+#define MDSPAN_USE_PAREN_OPERATOR 1
+
 #include "gtest/gtest.h"
 
 #include <experimental/linalg>
@@ -6,9 +8,9 @@
 #include <vector>
 
 namespace {
-  using std::experimental::dynamic_extent;
-  using std::experimental::extents;
-  using std::experimental::mdspan;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::dynamic_extent;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::extents;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::mdspan;
   using std::experimental::linalg::conjugate_transposed;
 
   TEST(conjugate_transposed, mdspan_complex_double)

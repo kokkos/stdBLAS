@@ -2,18 +2,10 @@
 
 #include <iostream>
 
-#if (! defined(__GNUC__)) || (__GNUC__ > 9)
-#  define MDSPAN_EXAMPLES_USE_EXECUTION_POLICIES 1
-#endif
-
-#ifdef MDSPAN_EXAMPLES_USE_EXECUTION_POLICIES
-#  include <execution>
-#endif
-
 // Make mdspan less verbose
-using std::experimental::mdspan;
-using std::experimental::extents;
-using std::experimental::dynamic_extent;
+using MDSPAN_IMPL_STANDARD_NAMESPACE::mdspan;
+using MDSPAN_IMPL_STANDARD_NAMESPACE::extents;
+using MDSPAN_IMPL_STANDARD_NAMESPACE::dynamic_extent;
 
 int main(int argc, char* argv[]) {
   std::cout << "Scale" << std::endl;
@@ -30,7 +22,7 @@ int main(int argc, char* argv[]) {
 
     // Call linalg::scale x = 2.0*x;
     std::experimental::linalg::scale(2.0, x);
-#ifdef MDSPAN_EXAMPLES_USE_EXECUTION_POLICIES
+#ifdef LINALG_HAS_EXECUTION
     std::experimental::linalg::scale(std::execution::par, 2.0, x);
 #else
     std::experimental::linalg::scale(2.0, x);

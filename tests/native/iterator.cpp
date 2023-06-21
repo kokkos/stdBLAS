@@ -1,3 +1,4 @@
+#define MDSPAN_USE_PAREN_OPERATOR 1
 #include "gtest/gtest.h"
 
 #include <experimental/linalg>
@@ -10,13 +11,13 @@
 #include <vector>
 
 namespace {
-  using std::experimental::full_extent;
-  using std::experimental::dynamic_extent;
-  using std::experimental::extents;
-  using std::experimental::layout_left;
-  using std::experimental::layout_right;
-  using std::experimental::layout_stride; // does compile
-  using std::experimental::mdspan;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::full_extent;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::dynamic_extent;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::extents;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::layout_left;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::layout_right;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::layout_stride; // does compile
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::mdspan;
   using std::experimental::submdspan;
 
   MDSPAN_TEMPLATE_REQUIRES(

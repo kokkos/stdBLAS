@@ -1,3 +1,4 @@
+#define MDSPAN_USE_PAREN_OPERATOR 1
 // To try using subscript operator comment in macro below
 // the header will by default also check for the feature macro, and enable it
 // defining the macro to 0 will overwrite the automatic setting

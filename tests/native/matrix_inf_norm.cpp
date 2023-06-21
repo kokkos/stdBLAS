@@ -1,3 +1,4 @@
+#define MDSPAN_USE_PAREN_OPERATOR 1
 #include "gtest/gtest.h"
 
 #include <experimental/linalg>
@@ -7,16 +8,19 @@
 #include <vector>
 
 namespace {
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::dynamic_extent;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::extents;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::mdspan;
   using std::experimental::linalg::matrix_inf_norm;
   using std::cout;
   using std::endl;
 
   template<class ElementType, class Layout>
-  using basic_matrix_t = std::experimental::mdspan<
+  using basic_matrix_t = mdspan<
     ElementType,
-    std::experimental::extents<std::size_t,
-      std::experimental::dynamic_extent,
-      std::experimental::dynamic_extent>,
+    extents<std::size_t,
+      dynamic_extent,
+      dynamic_extent>,
     Layout,
     std::experimental::default_accessor<ElementType>>;
 

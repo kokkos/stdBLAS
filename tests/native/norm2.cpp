@@ -1,3 +1,4 @@
+#define MDSPAN_USE_PAREN_OPERATOR 1
 #include "gtest/gtest.h"
 
 #include <experimental/linalg>
@@ -21,9 +22,9 @@ double dnrm2_wrapper(const int N, const double* X, const int INCX)
 #endif // 0
 
 namespace {
-  using std::experimental::dynamic_extent;
-  using std::experimental::extents;
-  using std::experimental::mdspan;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::dynamic_extent;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::extents;
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::mdspan;
   using std::experimental::linalg::vector_norm2;
 
   TEST(BLAS1_norm2, mdspan_zero)
