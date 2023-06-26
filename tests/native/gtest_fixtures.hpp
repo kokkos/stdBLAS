@@ -45,13 +45,32 @@
 
 #include "gtest/gtest.h"
 
+// Tests currently use parentheses (e.g., A(i,j))
+// for the array access operator,
+// instead of square brackets (e.g., A[i,j]).
+// This must be defined before including any mdspan headers.
+#define MDSPAN_USE_PAREN_OPERATOR 1
+
 #include <experimental/mdspan>
 #include <complex>
 #include <vector>
 
+  using std::experimental::default_accessor;
+  using std::dextents; // not in experimental namespace
+#if defined(__cpp_lib_span)
+#include <span>
+  using std::dynamic_extent;
+#else
   using std::experimental::dynamic_extent;
+#endif
   using std::experimental::extents;
+  using std::full_extent; // not in experimental namespace
+  using std::experimental::layout_left;
+  using std::experimental::layout_right;
+  using std::experimental::layout_stride;
   using std::experimental::mdspan;
+  using std::experimental::submdspan;
+
   using dbl_vector_t = mdspan<double, extents<std::size_t, dynamic_extent>>;
   using cpx_vector_t = mdspan<std::complex<double>, extents<std::size_t, dynamic_extent>>;
   constexpr ptrdiff_t NROWS(10);
@@ -64,8 +83,8 @@
         storage(10),
         v(storage.data(), 10)
       {
-        v(0) = 0.5;  
-        v(1) = 0.2;  
+        v(0) = 0.5;
+        v(1) = 0.2;
         v(2) = 0.1;
         v(3) = 0.4;
         v(4) = 0.8;
@@ -75,7 +94,7 @@
         v(8) = 0.2;
         v(9) = 0.9;
       }
-    
+
       std::vector<double> storage;
       dbl_vector_t v;
   }; // end class unsigned_double_vector
@@ -88,8 +107,8 @@
         storage(10),
         v(storage.data(), 10)
       {
-        v(0) =  0.5;  
-        v(1) =  0.2;  
+        v(0) =  0.5;
+        v(1) =  0.2;
         v(2) =  0.1;
         v(3) =  0.4;
         v(4) = -0.8;
@@ -99,7 +118,7 @@
         v(8) =  0.2;
         v(9) = -0.9;
       }
-    
+
       std::vector<double> storage;
       dbl_vector_t v;
   }; // end class signed_double_vector
@@ -119,7 +138,7 @@
         v(3) = std::complex<double>(-0.3,  0.5);
         v(4) = std::complex<double>( 0.2, -0.9);
       }
-    
+
       std::vector<std::complex<double>> storage;
       cpx_vector_t v;
   }; // end class signed_double_vector

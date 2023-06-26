@@ -1,21 +1,15 @@
-#include "gtest/gtest.h"
+#include "./gtest_fixtures.hpp"
 
 #include <experimental/linalg>
-#include <experimental/mdspan>
 #include <type_traits>
-#include <vector>
 
 namespace {
-  using std::experimental::dynamic_extent;
-  using std::experimental::extents;
-  using std::experimental::mdspan;
   using std::experimental::linalg::scaled;
 
   template<class ScalingFactor, class OriginalValueType>
   void test_accessor_scaled_element_constification()
   {
     using std::experimental::linalg::accessor_scaled;
-    using std::experimental::default_accessor;
     using std::experimental::linalg::scaled_scalar;
 
     using nc_def_acc_type = default_accessor<OriginalValueType>;

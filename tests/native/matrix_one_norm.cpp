@@ -1,28 +1,23 @@
-#include "gtest/gtest.h"
+#include "./gtest_fixtures.hpp"
 
 #include <experimental/linalg>
-#include <experimental/mdspan>
 #include <iostream>
 #include <limits>
-#include <vector>
 
 namespace {
-  //using std::experimental::mdspan;
-  //using std::experimental::dynamic_extent;
-  //using std::experimental::extents;
   using std::experimental::linalg::matrix_one_norm;
   using std::cout;
   using std::endl;
 
   template<class ElementType, class Layout>
-  using basic_matrix_t = std::experimental::mdspan<
+  using basic_matrix_t = mdspan<
     ElementType,
-    std::experimental::extents<
+    extents<
       std::size_t,
-      std::experimental::dynamic_extent,
-      std::experimental::dynamic_extent>,
+      dynamic_extent,
+      dynamic_extent>,
     Layout,
-    std::experimental::default_accessor<ElementType>>;
+    default_accessor<ElementType>>;
 
   template<class Scalar>
   struct Magnitude {
@@ -67,7 +62,6 @@ namespace {
   {
     using std::abs;
     using scalar_t = Scalar;
-    using std::experimental::layout_left;
     using matrix_t = basic_matrix_t<scalar_t, layout_left>;
 
     constexpr size_t maxNumRows = 7;

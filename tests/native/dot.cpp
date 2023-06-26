@@ -1,8 +1,6 @@
-#include "gtest/gtest.h"
+#include "./gtest_fixtures.hpp"
 
 #include <experimental/linalg>
-#include <experimental/mdspan>
-#include <vector>
 
 // FIXME (mfh 2022/06/17) Temporarily disable calling the BLAS,
 // to get PR testing workflow running with mdspan tag.
@@ -22,9 +20,6 @@ double ddot_wrapper (const int N, const double* DX,
 #endif // 0
 
 namespace {
-  using std::experimental::dynamic_extent;
-  using std::experimental::extents;
-  using std::experimental::mdspan;
   using std::experimental::linalg::dot;
   using std::experimental::linalg::dotc;
 

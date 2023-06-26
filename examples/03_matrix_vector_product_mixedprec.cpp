@@ -1,13 +1,23 @@
+// Examples currently use parentheses (e.g., A(i,j))
+// for the array access operator,
+// instead of square brackets (e.g., A[i,j]).
+// This must be defined before including any mdspan headers.
+#define MDSPAN_USE_PAREN_OPERATOR 1
+
 #include <experimental/linalg>
 
 #include <iostream>
 
-// Make mdspan less verbose
-using std::experimental::mdspan;
+#if defined(__cpp_lib_span)
+#include <span>
+  using std::dynamic_extent;
+#else
+  using std::experimental::dynamic_extent;
+#endif
 using std::experimental::extents;
-using std::experimental::dynamic_extent;
+using std::full_extent; // not in experimental namespace
+using std::experimental::mdspan;
 using std::experimental::submdspan;
-using std::experimental::full_extent;
 
 int main(int argc, char* argv[]) {
   std::cout << "Matrix Vector Product MixedPrec" << std::endl;
@@ -44,4 +54,3 @@ int main(int argc, char* argv[]) {
     for(int i=0; i<y.extent(0); i+=5) std::cout << i << " " << y(i,1) << std::endl;
   }
 }
-

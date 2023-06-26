@@ -1,8 +1,6 @@
-#include "gtest/gtest.h"
+#include "./gtest_fixtures.hpp"
 
 #include <experimental/linalg>
-#include <experimental/mdspan>
-#include <vector>
 #include <iostream>
 
 #if (! defined(__GNUC__)) || (__GNUC__ > 9)
@@ -14,9 +12,6 @@
 
 namespace {
 
-using std::experimental::mdspan;
-using std::experimental::extents;
-using std::experimental::dynamic_extent;
 using std::experimental::linalg::matrix_vector_product;
 using std::experimental::linalg::scaled;
 
