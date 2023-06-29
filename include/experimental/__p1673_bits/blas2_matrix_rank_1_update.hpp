@@ -165,16 +165,14 @@ void matrix_rank_1_update(
   std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A)
 {
-
   constexpr bool use_custom = is_custom_matrix_rank_1_update_avail<
-    decltype(execpolicy_mapper(exec)), decltype(x), decltype(y), decltype(A)
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(x), decltype(y), decltype(A)
     >::value;
 
-  if constexpr(use_custom){
-    matrix_rank_1_update(execpolicy_mapper(exec), x, y, A);
+  if constexpr (use_custom) {
+    matrix_rank_1_update(detail::map_execpolicy_with_check(exec), x, y, A);
   }
-  else
-  {
+  else {
     matrix_rank_1_update(std::experimental::linalg::impl::inline_exec_t(), x, y, A);
   }
 }
@@ -300,16 +298,14 @@ void symmetric_matrix_rank_1_update(
   std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t)
 {
-
   constexpr bool use_custom = is_custom_symmetric_matrix_rank_1_update_avail<
-    decltype(execpolicy_mapper(exec)), decltype(x), decltype(A), Triangle
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(x), decltype(A), Triangle
     >::value;
 
-  if constexpr(use_custom){
-    symmetric_matrix_rank_1_update(execpolicy_mapper(exec), x, A, t);
+  if constexpr (use_custom) {
+    symmetric_matrix_rank_1_update(detail::map_execpolicy_with_check(exec), x, A, t);
   }
-  else
-  {
+  else {
     symmetric_matrix_rank_1_update(std::experimental::linalg::impl::inline_exec_t(), x, A, t);
   }
 }
@@ -386,16 +382,14 @@ void hermitian_matrix_rank_1_update(
   std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t)
 {
-
   constexpr bool use_custom = is_custom_hermitian_matrix_rank_1_update_avail<
-    decltype(execpolicy_mapper(exec)), decltype(x), decltype(A), Triangle
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(x), decltype(A), Triangle
     >::value;
 
-  if constexpr(use_custom){
-    hermitian_matrix_rank_1_update(execpolicy_mapper(exec), x, A, t);
+  if constexpr (use_custom) {
+    hermitian_matrix_rank_1_update(detail::map_execpolicy_with_check(exec), x, A, t);
   }
-  else
-  {
+  else {
     hermitian_matrix_rank_1_update(std::experimental::linalg::impl::inline_exec_t(), x, A, t);
   }
 }

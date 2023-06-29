@@ -171,16 +171,14 @@ void copy(
   std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
   std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y)
 {
-
   constexpr bool use_custom = is_custom_copy_avail<
-    decltype(execpolicy_mapper(exec)), decltype(x), decltype(y)
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(x), decltype(y)
     >::value;
 
-  if constexpr(use_custom){
-    copy(execpolicy_mapper(exec), x, y);
+  if constexpr (use_custom) {
+    copy(detail::map_execpolicy_with_check(exec), x, y);
   }
-  else
-  {
+  else {
     copy(std::experimental::linalg::impl::inline_exec_t(), x, y);
   }
 }

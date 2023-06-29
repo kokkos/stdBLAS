@@ -128,15 +128,14 @@ Scalar matrix_inf_norm(
   std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A,
   Scalar init)
 {
-
   constexpr bool use_custom = is_custom_matrix_inf_norm_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), Scalar
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), Scalar
     >::value;
 
-  if constexpr(use_custom){
-    return matrix_inf_norm(execpolicy_mapper(exec), A, init);
+  if constexpr (use_custom) {
+    return matrix_inf_norm(detail::map_execpolicy_with_check(exec), A, init);
   }
-  else{
+  else {
     return matrix_inf_norm(std::experimental::linalg::impl::inline_exec_t(), A, init);
   }
 }
