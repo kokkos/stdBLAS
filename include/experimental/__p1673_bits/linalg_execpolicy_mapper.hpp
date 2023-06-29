@@ -17,6 +17,11 @@ struct inline_exec_t {};
 // It must be remapped to some other execution policy, which the default mapper does
 struct default_exec_t {};
 
+#ifdef LINALG_HAS_EXECUTION
+// Result of execpolicy_mapper(std::execution::par)
+struct parallel_exec_t {};
+#endif
+
 // helpers
 template<class T> struct is_inline_exec : std::false_type{};
 template<> struct is_inline_exec<inline_exec_t> : std::true_type{};
@@ -45,6 +50,13 @@ template<class T>
 auto execpolicy_mapper(T) {
   return std::experimental::linalg::impl::inline_exec_t();
 }
+
+#ifdef LINALG_HAS_EXECUTION
+// Result of execpolicy_mapper(std::execution::par)
+inline auto execpolicy_mapper(const std::execution::parallel_policy&) {
+  return std::experimental::linalg::impl::parallel_exec_t();
+}
+#endif
 
 namespace detail {
 
