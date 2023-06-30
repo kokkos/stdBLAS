@@ -319,10 +319,10 @@ void triangular_matrix_matrix_left_solve(
   P1673_MATRIX_PARAMETER( X ))
 {
   constexpr bool use_custom = is_custom_tri_matrix_matrix_left_solve_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), Triangle, DiagonalStorage, decltype(B), decltype(X)>::value;
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), Triangle, DiagonalStorage, decltype(B), decltype(X)>::value;
 
-  if constexpr(use_custom) {
-    triangular_matrix_matrix_left_solve(execpolicy_mapper(exec), A, t, d, B, X);
+  if constexpr (use_custom) {
+    triangular_matrix_matrix_left_solve(detail::map_execpolicy_with_check(exec), A, t, d, B, X);
   } else {
     triangular_matrix_matrix_left_solve(std::experimental::linalg::impl::inline_exec_t(), A, t, d, B, X);
   }
@@ -387,10 +387,11 @@ void triangular_matrix_matrix_right_solve(
   P1673_MATRIX_PARAMETER( X ))
 {
   constexpr bool use_custom = is_custom_tri_matrix_matrix_right_solve_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), Triangle, DiagonalStorage, decltype(B), decltype(X)>::value;
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A),
+    Triangle, DiagonalStorage, decltype(B), decltype(X)>::value;
 
-  if constexpr(use_custom) {
-    triangular_matrix_matrix_right_solve(execpolicy_mapper(exec), A, t, d, B, X);
+  if constexpr (use_custom) {
+    triangular_matrix_matrix_right_solve(detail::map_execpolicy_with_check(exec), A, t, d, B, X);
   } else {
     triangular_matrix_matrix_right_solve(std::experimental::linalg::impl::inline_exec_t(), A, t, d, B, X);
   }
@@ -459,10 +460,11 @@ void triangular_matrix_matrix_solve(
   P1673_MATRIX_PARAMETER( X ))
 {
   constexpr bool use_custom = is_custom_tri_matrix_matrix_solve_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), Triangle, DiagonalStorage, Side, decltype(B), decltype(X)>::value;
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), Triangle,
+    DiagonalStorage, Side, decltype(B), decltype(X)>::value;
 
-  if constexpr(use_custom) {
-    triangular_matrix_matrix_solve(execpolicy_mapper(exec), A, t, d, s, B, X);
+  if constexpr (use_custom) {
+    triangular_matrix_matrix_solve(detail::map_execpolicy_with_check(exec), A, t, d, s, B, X);
   } else {
     triangular_matrix_matrix_solve(std::experimental::linalg::impl::inline_exec_t(), A, t, d, s, B, X);
   }

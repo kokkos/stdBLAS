@@ -120,13 +120,13 @@ SizeType idx_abs_max(
   }
 
   constexpr bool use_custom = is_custom_idx_abs_max_avail<
-    decltype(execpolicy_mapper(exec)), decltype(v)
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(v)
     >::value;
 
-  if constexpr(use_custom){
-    return idx_abs_max(execpolicy_mapper(exec), v);
+  if constexpr (use_custom) {
+    return idx_abs_max(detail::map_execpolicy_with_check(exec), v);
   }
-  else{
+  else {
     return idx_abs_max(std::experimental::linalg::impl::inline_exec_t(), v);
   }
 }

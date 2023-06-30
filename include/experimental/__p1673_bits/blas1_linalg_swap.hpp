@@ -179,14 +179,13 @@ void swap_elements(
   std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y)
 {
   constexpr bool use_custom = is_custom_vector_swap_elements_avail<
-    decltype(execpolicy_mapper(exec)), decltype(x), decltype(y)
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(x), decltype(y)
     >::value;
 
-  if constexpr(use_custom){
-    return swap_elements(execpolicy_mapper(exec), x, y);
+  if constexpr (use_custom) {
+    return swap_elements(detail::map_execpolicy_with_check(exec), x, y);
   }
-  else
-  {
+  else {
     return swap_elements(std::experimental::linalg::impl::inline_exec_t(), x, y);
   }
 }

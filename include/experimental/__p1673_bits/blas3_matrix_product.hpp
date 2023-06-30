@@ -751,10 +751,10 @@ void matrix_product(
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   constexpr bool use_custom = is_custom_matrix_product_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), decltype(B), decltype(C)>::value;
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), decltype(B), decltype(C)>::value;
 
   if constexpr(use_custom) {
-    matrix_product(execpolicy_mapper(exec), A, B, C);
+    matrix_product(detail::map_execpolicy_with_check(exec), A, B, C);
   } else {
     matrix_product(std::experimental::linalg::impl::inline_exec_t(), A, B, C);
   }
@@ -843,10 +843,10 @@ void matrix_product(
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   constexpr bool use_custom = is_custom_matrix_product_with_update_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), decltype(B), decltype(E), decltype(C)>::value;
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), decltype(B), decltype(E), decltype(C)>::value;
 
   if constexpr(use_custom) {
-    matrix_product(execpolicy_mapper(exec), A, B, E, C);
+    matrix_product(detail::map_execpolicy_with_check(exec), A, B, E, C);
   } else {
     matrix_product(std::experimental::linalg::impl::inline_exec_t(), A, B, E, C);
   }
@@ -960,10 +960,10 @@ void triangular_matrix_left_product(
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   constexpr bool use_custom = is_custom_triang_mat_left_product_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), Triangle, DiagonalStorage, decltype(B), decltype(C)>::value;
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), Triangle, DiagonalStorage, decltype(B), decltype(C)>::value;
 
   if constexpr(use_custom) {
-    triangular_matrix_left_product(execpolicy_mapper(exec), A, t, d, B, C);
+    triangular_matrix_left_product(detail::map_execpolicy_with_check(exec), A, t, d, B, C);
   } else {
     triangular_matrix_left_product(std::experimental::linalg::impl::inline_exec_t(), A, t, d, B, C);
   }
@@ -1074,10 +1074,10 @@ void triangular_matrix_right_product(
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   constexpr bool use_custom = is_custom_triang_mat_right_product_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), Triangle, DiagonalStorage, decltype(B), decltype(C)>::value;
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), Triangle, DiagonalStorage, decltype(B), decltype(C)>::value;
 
   if constexpr(use_custom) {
-    triangular_matrix_right_product(execpolicy_mapper(exec), A, t, d, B, C);
+    triangular_matrix_right_product(detail::map_execpolicy_with_check(exec), A, t, d, B, C);
   } else {
     triangular_matrix_right_product(std::experimental::linalg::impl::inline_exec_t(), A, t, d, B, C);
   }
@@ -1176,10 +1176,10 @@ void triangular_matrix_left_product(
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   constexpr bool use_custom = is_custom_triang_mat_left_product_with_update_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), Triangle, DiagonalStorage, decltype(C)>::value;
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), Triangle, DiagonalStorage, decltype(C)>::value;
 
   if constexpr(use_custom) {
-    triangular_matrix_left_product(execpolicy_mapper(exec), A, t, d, C);
+    triangular_matrix_left_product(detail::map_execpolicy_with_check(exec), A, t, d, C);
   } else {
     triangular_matrix_left_product(std::experimental::linalg::impl::inline_exec_t(), A, t, d, C);
   }
@@ -1274,10 +1274,10 @@ void triangular_matrix_right_product(
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   constexpr bool use_custom = is_custom_triang_mat_right_product_with_update_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), Triangle, DiagonalStorage, decltype(C)>::value;
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), Triangle, DiagonalStorage, decltype(C)>::value;
 
   if constexpr(use_custom) {
-    triangular_matrix_right_product(execpolicy_mapper(exec), A, t, d, C);
+    triangular_matrix_right_product(detail::map_execpolicy_with_check(exec), A, t, d, C);
   } else {
     triangular_matrix_right_product(std::experimental::linalg::impl::inline_exec_t(), A, t, d, C);
   }
@@ -1373,10 +1373,10 @@ void symmetric_matrix_left_product(
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   constexpr bool use_custom = is_custom_sym_matrix_left_product_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), Triangle, decltype(B), decltype(C)>::value;
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), Triangle, decltype(B), decltype(C)>::value;
 
   if constexpr(use_custom) {
-    symmetric_matrix_left_product(execpolicy_mapper(exec), A, t, B, C);
+    symmetric_matrix_left_product(detail::map_execpolicy_with_check(exec), A, t, B, C);
   } else {
     symmetric_matrix_left_product(std::experimental::linalg::impl::inline_exec_t(), A, t, B, C);
   }
@@ -1475,10 +1475,10 @@ void symmetric_matrix_right_product(
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   constexpr bool use_custom = is_custom_sym_matrix_right_product_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), Triangle, decltype(B), decltype(C)>::value;
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), Triangle, decltype(B), decltype(C)>::value;
 
   if constexpr(use_custom) {
-    symmetric_matrix_right_product(execpolicy_mapper(exec), A, t, B, C);
+    symmetric_matrix_right_product(detail::map_execpolicy_with_check(exec), A, t, B, C);
   } else {
     symmetric_matrix_right_product(std::experimental::linalg::impl::inline_exec_t(), A, t, B, C);
   }
@@ -1564,10 +1564,10 @@ void symmetric_matrix_left_product(
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   constexpr bool use_custom = is_custom_sym_matrix_left_product_with_update_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), Triangle, decltype(B), decltype(E), decltype(C)>::value;
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), Triangle, decltype(B), decltype(E), decltype(C)>::value;
 
   if constexpr(use_custom) {
-    symmetric_matrix_left_product(execpolicy_mapper(exec), A, t, B, E, C);
+    symmetric_matrix_left_product(detail::map_execpolicy_with_check(exec), A, t, B, E, C);
   } else {
     symmetric_matrix_left_product(std::experimental::linalg::impl::inline_exec_t(), A, t, B, E, C);
   }
@@ -1658,10 +1658,10 @@ void symmetric_matrix_right_product(
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   constexpr bool use_custom = is_custom_sym_matrix_right_product_with_update_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), Triangle, decltype(B), decltype(E), decltype(C)>::value;
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), Triangle, decltype(B), decltype(E), decltype(C)>::value;
 
   if constexpr(use_custom) {
-    symmetric_matrix_right_product(execpolicy_mapper(exec), A, t, B, E, C);
+    symmetric_matrix_right_product(detail::map_execpolicy_with_check(exec), A, t, B, E, C);
   } else {
     symmetric_matrix_right_product(std::experimental::linalg::impl::inline_exec_t(), A, t, B, E, C);
   }
@@ -1765,10 +1765,10 @@ void hermitian_matrix_left_product(
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   constexpr bool use_custom = is_custom_herm_matrix_left_product_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), Triangle, decltype(B), decltype(C)>::value;
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), Triangle, decltype(B), decltype(C)>::value;
 
   if constexpr(use_custom) {
-    hermitian_matrix_left_product(execpolicy_mapper(exec), A, t, B, C);
+    hermitian_matrix_left_product(detail::map_execpolicy_with_check(exec), A, t, B, C);
   } else {
     hermitian_matrix_left_product(std::experimental::linalg::impl::inline_exec_t(), A, t, B, C);
   }
@@ -1866,10 +1866,10 @@ void hermitian_matrix_right_product(
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   constexpr bool use_custom = is_custom_herm_matrix_right_product_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), Triangle, decltype(B), decltype(C)>::value;
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), Triangle, decltype(B), decltype(C)>::value;
 
   if constexpr(use_custom) {
-    hermitian_matrix_right_product(execpolicy_mapper(exec), A, t, B, C);
+    hermitian_matrix_right_product(detail::map_execpolicy_with_check(exec), A, t, B, C);
   } else {
     hermitian_matrix_right_product(std::experimental::linalg::impl::inline_exec_t(), A, t, B, C);
   }
@@ -1955,10 +1955,10 @@ void hermitian_matrix_left_product(
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   constexpr bool use_custom = is_custom_herm_matrix_left_product_with_update_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), Triangle, decltype(B), decltype(E), decltype(C)>::value;
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), Triangle, decltype(B), decltype(E), decltype(C)>::value;
 
   if constexpr(use_custom) {
-    hermitian_matrix_left_product(execpolicy_mapper(exec), A, t, B, E, C);
+    hermitian_matrix_left_product(detail::map_execpolicy_with_check(exec), A, t, B, E, C);
   } else {
     hermitian_matrix_left_product(std::experimental::linalg::impl::inline_exec_t(), A, t, B, E, C);
   }
@@ -2049,10 +2049,10 @@ void hermitian_matrix_right_product(
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   constexpr bool use_custom = is_custom_herm_matrix_right_product_with_update_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), Triangle, decltype(B), decltype(E), decltype(C)>::value;
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), Triangle, decltype(B), decltype(E), decltype(C)>::value;
 
   if constexpr(use_custom) {
-    hermitian_matrix_right_product(execpolicy_mapper(exec), A, t, B, E, C);
+    hermitian_matrix_right_product(detail::map_execpolicy_with_check(exec), A, t, B, E, C);
   } else {
     hermitian_matrix_right_product(std::experimental::linalg::impl::inline_exec_t(), A, t, B, E, C);
   }

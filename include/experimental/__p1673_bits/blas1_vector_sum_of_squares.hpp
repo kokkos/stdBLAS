@@ -136,16 +136,14 @@ sum_of_squares_result<Scalar> vector_sum_of_squares(
   std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext0>, Layout, Accessor> v,
   sum_of_squares_result<Scalar> init)
 {
-
   constexpr bool use_custom = is_custom_vector_sum_of_squares_avail<
-    decltype(execpolicy_mapper(exec)), decltype(v), Scalar
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(v), Scalar
     >::value;
 
-  if constexpr(use_custom){
-    return vector_sum_of_squares(execpolicy_mapper(exec), v, init);
+  if constexpr (use_custom) {
+    return vector_sum_of_squares(detail::map_execpolicy_with_check(exec), v, init);
   }
-  else
-  {
+  else {
     return vector_sum_of_squares(std::experimental::linalg::impl::inline_exec_t(), v, init);
   }
 }

@@ -43,6 +43,12 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_SCALE_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_SCALE_HPP_
 
+#include <algorithm> // for __cpp_lib_ranges, if it exists
+#if defined(LINALG_HAS_EXECUTION) && defined(__cpp_lib_ranges)
+#  include <execution>
+#  include <ranges>
+#endif
+
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
@@ -123,6 +129,40 @@ void scale(
   }
 }
 
+#if defined(LINALG_HAS_EXECUTION) && defined(__cpp_lib_ranges)
+template<class Scalar,
+         class ElementType,
+	 class SizeType,
+         ::std::size_t ... ext,
+         class Layout,
+         class Accessor>
+void scale(
+  std::experimental::linalg::impl::parallel_exec_t&& /* exec */,
+  const Scalar alpha,
+  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext ...>, Layout, Accessor> x)
+{
+  static_assert(x.rank() <= 2);
+
+  if constexpr (x.rank() == 1) {
+    auto range = std::views::iota(SizeType(0), x.extent(0));
+    std::for_each(std::execution::par, range.begin(), range.end(), [=] (SizeType k) {
+      x[k] *= alpha;
+    });
+  }
+  else if constexpr (x.rank() == 2) {
+#if defined(__cpp_lib_ranges_cartesian_product)
+    auto range = std::views::cartesian_product(std::views::iota(SizeType(0), x.extent(0)), std::views::iota(SizeType(0), x.extent(1)));
+    std::for_each(std::execution::par, range.begin(), range.end(), [=] (auto&& inds) {
+      auto [i, j] = inds;
+      x[i, j] *= alpha;
+    });
+#else
+    linalg_scale_rank_2(alpha, x);
+#endif
+  }
+}
+#endif // LINALG_HAS_EXECUTION && __cpp_lib_ranges
+
 template<class ExecutionPolicy,
          class Scalar,
          class ElementType,
@@ -138,11 +178,11 @@ void scale(
   // Call custom overload if available else call std implementation
 
   constexpr bool use_custom = is_custom_scale_avail<
-    decltype(execpolicy_mapper(exec)), decltype(alpha), decltype(x)
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(alpha), decltype(x)
     >::value;
 
-  if constexpr(use_custom) {
-    scale(execpolicy_mapper(exec), alpha, x);
+  if constexpr (use_custom) {
+    scale(detail::map_execpolicy_with_check(exec), alpha, x);
   } else {
     scale(std::experimental::linalg::impl::inline_exec_t(), alpha, x);
   }
