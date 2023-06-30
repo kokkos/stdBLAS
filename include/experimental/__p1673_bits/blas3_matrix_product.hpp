@@ -51,8 +51,6 @@ namespace experimental {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
-namespace {
-
 // FIXME (mfh 2022/06/17) Temporarily disable calling the BLAS,
 // to get PR testing workflow running with mdspan tag.
 #if 0
@@ -650,8 +648,6 @@ struct is_custom_herm_matrix_right_product_with_update_avail<
     >
   >
   : std::true_type{};
-
-} // end anonymous namespace
 
 
 // Overwriting general matrix-matrix product
