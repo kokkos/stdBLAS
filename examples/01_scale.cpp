@@ -8,11 +8,7 @@
 
 #include <iostream>
 
-#if (! defined(__GNUC__)) || (__GNUC__ > 9)
-#  define MDSPAN_EXAMPLES_USE_EXECUTION_POLICIES 1
-#endif
-
-#ifdef MDSPAN_EXAMPLES_USE_EXECUTION_POLICIES
+#ifdef LINALG_HAS_EXECUTION
 #  include <execution>
 #endif
 
@@ -43,7 +39,7 @@ int main(int argc, char* argv[]) {
 
     // Call linalg::scale x = 2.0*x;
     std::experimental::linalg::scale(2.0, x);
-#ifdef MDSPAN_EXAMPLES_USE_EXECUTION_POLICIES
+#ifdef LINALG_HAS_EXECUTION
     std::experimental::linalg::scale(std::execution::par, 2.0, x);
 #else
     std::experimental::linalg::scale(2.0, x);

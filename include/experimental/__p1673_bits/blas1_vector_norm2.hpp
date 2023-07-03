@@ -111,11 +111,11 @@ Scalar vector_norm2(
   Scalar init)
 {
   constexpr bool use_custom = is_custom_vector_norm2_avail<
-    decltype(execpolicy_mapper(exec)), decltype(x), Scalar
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(x), Scalar
     >::value;
 
   if constexpr(use_custom){
-    return vector_norm2(execpolicy_mapper(exec), x, init);
+    return vector_norm2(detail::map_execpolicy_with_check(exec), x, init);
   }
   else
   {

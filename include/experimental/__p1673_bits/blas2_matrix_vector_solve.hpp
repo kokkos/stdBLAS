@@ -126,7 +126,7 @@ void trsv_upper_triangular_left_side(
   auto divide = [](const auto& x, const auto& y) { return x / y; };
   trsv_upper_triangular_left_side(A, d, B, X, divide);
 }
-  
+
 template<class ElementType_A,
          class SizeType_A, ::std::size_t numRows_A,
          ::std::size_t numCols_A,
@@ -225,7 +225,7 @@ struct is_custom_tri_mat_vec_solve_avail<
 } // end anonymous namespace
 
 // Special case: ExecutionPolicy = inline_exec_t
-  
+
 template<class ElementType_A,
          class SizeType_A, ::std::size_t numRows_A,
          ::std::size_t numCols_A,
@@ -318,7 +318,7 @@ void triangular_matrix_vector_solve(
   // that takes a generic divide operator.
   triangular_matrix_vector_solve(std::experimental::linalg::impl::inline_exec_t{}, A, t, d, b, x, divide);
 }
-  
+
 template<class ExecutionPolicy,
          class ElementType_A,
          class SizeType_A, ::std::size_t numRows_A,
@@ -344,14 +344,14 @@ void triangular_matrix_vector_solve(
   std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, ext_X>, Layout_X, Accessor_X> x)
 {
   constexpr bool use_custom = is_custom_tri_mat_vec_solve_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), decltype(t), decltype(d), decltype(b), decltype(x)
+    decltype(detail::map_execpolicy_with_check(exec)),
+    decltype(A), decltype(t), decltype(d), decltype(b), decltype(x)
     >::value;
 
-  if constexpr(use_custom){
-    triangular_matrix_vector_solve(execpolicy_mapper(exec), A, t, d, b, x);
+  if constexpr (use_custom) {
+    triangular_matrix_vector_solve(detail::map_execpolicy_with_check(exec), A, t, d, b, x);
   }
-  else
-  {
+  else {
     triangular_matrix_vector_solve(std::experimental::linalg::impl::inline_exec_t(),
 				   A, t, d, b, x);
   }
@@ -386,7 +386,7 @@ void triangular_matrix_vector_solve(
   triangular_matrix_vector_solve(std::experimental::linalg::impl::default_exec_t(),
 				 A, t, d, b, x, divide);
 }
-  
+
 template<class ElementType_A,
          class SizeType_A, ::std::size_t numRows_A,
          ::std::size_t numCols_A,
