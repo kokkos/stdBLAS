@@ -77,7 +77,8 @@ public:
     accessor_(other.nested_accessor())
   {}
 
-  reference access(data_handle_type p, ::std::size_t i) const noexcept {
+  reference access(data_handle_type p, ::std::size_t i) const
+    noexcept(noexcept(scaling_factor_* typename Accessor::element_type(accessor_.access(p, i)))) {
     return scaling_factor_ * typename Accessor::element_type(accessor_.access(p, i));
   }
 
