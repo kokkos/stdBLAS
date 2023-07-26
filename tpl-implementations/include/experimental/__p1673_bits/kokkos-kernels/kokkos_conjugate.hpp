@@ -43,15 +43,17 @@
 #ifndef LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_KOKKOSKERNELS_CONJUGATE_IF_NEEDED_HPP_
 #define LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_KOKKOSKERNELS_CONJUGATE_IF_NEEDED_HPP_
 
-#include "experimental/__p1673_bits/conjugate_if_needed.hpp"
+#include "experimental/__p1673_bits/conj_if_needed.hpp"
 
 namespace std {
 namespace experimental {
 namespace linalg {
 namespace impl{
 
-// add Kokkos::complex<T> to scalar types conjugated by conj_if_needed()
-template<class T> struct is_complex<Kokkos::complex<T>> : std::true_type{};
+// conj_if_needed doesn't use an is_complex trait.
+// Instead, it checks whether conj(x) (namespace-unqualified) is a valid expression,
+// calls that if so, else assumes that x represents a real number and returns x.
+// Thus, we don't actually need to do anything here.
 
 } // end namespace impl
 } // end namespace linalg
