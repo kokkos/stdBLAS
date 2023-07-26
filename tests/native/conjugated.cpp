@@ -10,7 +10,6 @@ namespace {
   {
     using std::experimental::linalg::conjugate_accessor;
     using std::experimental::default_accessor;
-    using std::experimental::linalg::conjugated_scalar;
     using value_type = std::remove_cv_t<ValueType>;
     constexpr bool is_arith = std::is_arithmetic_v<value_type>;
 

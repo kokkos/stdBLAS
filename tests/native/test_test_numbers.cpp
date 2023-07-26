@@ -96,126 +96,126 @@ namespace {
   }
 
   template<class R>
-  void test_imag_part_complex()
+  void test_imag_if_needed_complex()
   {
-    using std::experimental::linalg::impl::imag_part;
+    using std::experimental::linalg::impl::imag_if_needed;
     std::complex<R> z{R(3.0), R(4.0)};
-    auto z_imag = imag_part(z);
+    auto z_imag = imag_if_needed(z);
     EXPECT_EQ(z_imag, R(4.0));
     static_assert(std::is_same_v<decltype(z_imag), R>);
   }
   template<class T>
-  void test_imag_part_floating_point()
+  void test_imag_if_needed_floating_point()
   {
-    using std::experimental::linalg::impl::imag_part;
+    using std::experimental::linalg::impl::imag_if_needed;
     T x = 9.0;
-    auto x_imag = imag_part(x);
+    auto x_imag = imag_if_needed(x);
     EXPECT_EQ(x_imag, T(0.0));
     static_assert(std::is_same_v<decltype(x_imag), T>);
   }
   template<class T>
-  void test_imag_part_integral()
+  void test_imag_if_needed_integral()
   {
-    using std::experimental::linalg::impl::imag_part;
+    using std::experimental::linalg::impl::imag_if_needed;
     T x = 3;
-    auto x_imag = imag_part(x);
+    auto x_imag = imag_if_needed(x);
     EXPECT_EQ(x_imag, T(0));
     static_assert(std::is_same_v<decltype(x_imag), T>);
   }
 
-  TEST(test_numbers, imag_part)
+  TEST(test_numbers, imag_if_needed)
   {
-    test_imag_part_complex<float>();
-    test_imag_part_complex<double>();
-    test_imag_part_complex<long double>();
+    test_imag_if_needed_complex<float>();
+    test_imag_if_needed_complex<double>();
+    test_imag_if_needed_complex<long double>();
     
-    test_imag_part_floating_point<float>();
-    test_imag_part_floating_point<double>();
-    test_imag_part_floating_point<long double>();    
+    test_imag_if_needed_floating_point<float>();
+    test_imag_if_needed_floating_point<double>();
+    test_imag_if_needed_floating_point<long double>();
 
-    test_imag_part_integral<int8_t>();
-    test_imag_part_integral<uint8_t>();    
-    test_imag_part_integral<int16_t>();
-    test_imag_part_integral<uint16_t>();    
-    test_imag_part_integral<int32_t>();
-    test_imag_part_integral<uint32_t>();    
-    test_imag_part_integral<int64_t>();
-    test_imag_part_integral<uint64_t>();    
+    test_imag_if_needed_integral<int8_t>();
+    test_imag_if_needed_integral<uint8_t>();
+    test_imag_if_needed_integral<int16_t>();
+    test_imag_if_needed_integral<uint16_t>();
+    test_imag_if_needed_integral<int32_t>();
+    test_imag_if_needed_integral<uint32_t>();
+    test_imag_if_needed_integral<int64_t>();
+    test_imag_if_needed_integral<uint64_t>();
 
     {
-      using std::experimental::linalg::impl::imag_part;
+      using std::experimental::linalg::impl::imag_if_needed;
       FakeComplex z{3.0, 4.0};
-      auto z_imag = imag_part(z);
+      auto z_imag = imag_if_needed(z);
       EXPECT_EQ(z_imag, 4.0);
       static_assert(std::is_same_v<decltype(z_imag), decltype(z.imag)>);
     }
     {
-      using std::experimental::linalg::impl::imag_part;
+      using std::experimental::linalg::impl::imag_if_needed;
       FakeRealNumber x{3.0};
-      auto x_imag = imag_part(x);
+      auto x_imag = imag_if_needed(x);
       EXPECT_EQ(x_imag, FakeRealNumber{});
       static_assert(std::is_same_v<decltype(x_imag), FakeRealNumber>);
     }
   }
 
   template<class R>
-  void test_real_part_complex()
+  void test_real_if_needed_complex()
   {
-    using std::experimental::linalg::impl::real_part;
+    using std::experimental::linalg::impl::real_if_needed;
     std::complex<R> z{R(3.0), R(4.0)};
-    auto z_imag = real_part(z);
+    auto z_imag = real_if_needed(z);
     EXPECT_EQ(z_imag, R(3.0));
     static_assert(std::is_same_v<decltype(z_imag), R>);
   }
   template<class T>
-  void test_real_part_floating_point()
+  void test_real_if_needed_floating_point()
   {
-    using std::experimental::linalg::impl::real_part;
+    using std::experimental::linalg::impl::real_if_needed;
     T x = 9.0;
-    auto x_imag = real_part(x);
+    auto x_imag = real_if_needed(x);
     EXPECT_EQ(x_imag, T(9.0));
     static_assert(std::is_same_v<decltype(x_imag), T>);
   }
   template<class T>
-  void test_real_part_integral()
+  void test_real_if_needed_integral()
   {
-    using std::experimental::linalg::impl::real_part;
+    using std::experimental::linalg::impl::real_if_needed;
     T x = 3;
-    auto x_imag = real_part(x);
+    auto x_imag = real_if_needed(x);
     EXPECT_EQ(x_imag, T(3));
     static_assert(std::is_same_v<decltype(x_imag), T>);
   }
 
-  TEST(test_numbers, real_part)
+  TEST(test_numbers, real_if_needed)
   {
-    test_real_part_complex<float>();
-    test_real_part_complex<double>();
-    test_real_part_complex<long double>();
+    test_real_if_needed_complex<float>();
+    test_real_if_needed_complex<double>();
+    test_real_if_needed_complex<long double>();
 
-    test_real_part_floating_point<float>();
-    test_real_part_floating_point<double>();
-    test_real_part_floating_point<long double>();
+    test_real_if_needed_floating_point<float>();
+    test_real_if_needed_floating_point<double>();
+    test_real_if_needed_floating_point<long double>();
 
-    test_real_part_integral<int8_t>();
-    test_real_part_integral<uint8_t>();
-    test_real_part_integral<int16_t>();
-    test_real_part_integral<uint16_t>();
-    test_real_part_integral<int32_t>();
-    test_real_part_integral<uint32_t>();
-    test_real_part_integral<int64_t>();
-    test_real_part_integral<uint64_t>();
+    test_real_if_needed_integral<int8_t>();
+    test_real_if_needed_integral<uint8_t>();
+    test_real_if_needed_integral<int16_t>();
+    test_real_if_needed_integral<uint16_t>();
+    test_real_if_needed_integral<int32_t>();
+    test_real_if_needed_integral<uint32_t>();
+    test_real_if_needed_integral<int64_t>();
+    test_real_if_needed_integral<uint64_t>();
 
     {
-      using std::experimental::linalg::impl::real_part;
+      using std::experimental::linalg::impl::real_if_needed;
       FakeComplex z{ 3.0, 4.0 };
-      auto z_imag = real_part(z);
+      auto z_imag = real_if_needed(z);
       EXPECT_EQ(z_imag, 3.0);
       static_assert(std::is_same_v<decltype(z_imag), decltype(z.imag)>);
     }
     {
-      using std::experimental::linalg::impl::real_part;
+      using std::experimental::linalg::impl::real_if_needed;
       FakeRealNumber x{ 3.0 };
-      auto x_real = real_part(x);
+      auto x_real = real_if_needed(x);
       EXPECT_EQ(x_real, FakeRealNumber{ 3.0 });
       static_assert(std::is_same_v<decltype(x_real), FakeRealNumber>);
     }

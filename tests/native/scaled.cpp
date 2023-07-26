@@ -10,7 +10,6 @@ namespace {
   void test_scaled_accessor_element_constification()
   {
     using std::experimental::linalg::scaled_accessor;
-    using std::experimental::linalg::scaled_scalar;
 
     using nc_def_acc_type = default_accessor<OriginalValueType>;
     using c_def_acc_type =

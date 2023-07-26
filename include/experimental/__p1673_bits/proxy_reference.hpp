@@ -67,14 +67,6 @@ template<class U>
 static constexpr bool is_atomic_ref_not_arithmetic_v<std::atomic_ref<U>> = ! std::is_arithmetic_v<U>;
 #endif
 
-template<class T, class = void>
-struct has_imag : std::false_type {};
-
-// If I can find unqualified imag via overload resolution,
-// then assume that imag(t) returns the imaginary part of t.
-template<class T>
-struct has_imag<T, decltype(imag(std::declval<T>()), void())> : std::true_type {};
-
 template<class T>
 T imag_part_impl(const T& t, std::false_type)
 {
@@ -96,14 +88,6 @@ auto imag_part(const T& t)
 {
   return imag_part_impl(t, has_imag<T>{});
 }
-
-template<class T, class = void>
-struct has_real : std::false_type {};
-
-// If I can find unqualified real via overload resolution,
-// then assume that real(t) returns the real part of t.
-template<class T>
-struct has_real<T, decltype(real(std::declval<T>()), void())> : std::true_type {};
 
 template<class T>
 T real_part_impl(const T& t, std::false_type)
