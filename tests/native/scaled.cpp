@@ -90,7 +90,7 @@ namespace {
       scaled_accessor_t accessor0{scalingFactor, y.accessor()};
     }
 
-    auto y_scaled = scaled (scalingFactor, y);
+    auto y_scaled = scaled(scalingFactor, y);
     for (std::size_t k = 0; k < vectorSize; ++k) {
       const vector_element_type x_k = vector_element_type(k) + 1.0;
       EXPECT_EQ( x(k), x_k );
@@ -106,8 +106,6 @@ namespace {
       // Don't ever capture an expression template type by auto in
       // real code.  I'm just testing whether some operators work.
       auto y_scaled_ref = y_scaled(k);
-      using ref_t = decltype(y_scaled_ref);
-      static_assert(! std::is_same_v<ref_t, vector_element_type>);
 
       using type1 = decltype(y_scaled_ref + float(1.0));
       static_assert(std::is_same_v<type1, double>);

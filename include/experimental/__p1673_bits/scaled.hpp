@@ -53,32 +53,32 @@ namespace linalg {
 template<class ScalingFactor, class Accessor>
 class accessor_scaled {
 public:
-  using reference     =
-    scaled_scalar<ScalingFactor, typename Accessor::reference,
-      std::remove_cv_t<typename Accessor::element_type>>;
-  using element_type = std::add_const_t<typename reference::value_type>;
+  using element_type = decltype(std::declval<ScalingFactor>() * std::declval<typename Accessor::element_type>());
+  using reference = element_type;
   using data_handle_type = typename Accessor::data_handle_type;
   using offset_policy =
     accessor_scaled<ScalingFactor, typename Accessor::offset_policy>;
 
-  accessor_scaled(ScalingFactor scaling_factor, Accessor accessor) :
-    scaling_factor_(std::move(scaling_factor)), accessor_(accessor)
+  accessor_scaled(const ScalingFactor& scaling_factor, const Accessor& accessor) :
+    scaling_factor_(scaling_factor),
+    accessor_(accessor)
   {}
 
   MDSPAN_TEMPLATE_REQUIRES(
-    class OtherElementType,
-    /* requires */ (std::is_convertible_v<
-      typename default_accessor<OtherElementType>::element_type(*)[],
-      typename Accessor::element_type(*)[]
-    >)
+    class OtherScalingFactor,
+    class OtherNestedAccessor,
+    /* requires */ (
+      std::is_constructible_v<Accessor, const OtherNestedAccessor&> &&
+      std::is_constructible_v<ScalingFactor, OtherScalingFactor>
+    )
   )
-  accessor_scaled(ScalingFactor scaling_factor,
-		  default_accessor<OtherElementType> accessor) :
-    scaling_factor_(std::move(scaling_factor)), accessor_(accessor)
+  accessor_scaled(const accessor_scaled<OtherScalingFactor, OtherNestedAccessor>& other) :
+    scaling_factor_(other.scaling_factor()),
+    accessor_(other.nested_accessor())
   {}
 
   reference access(data_handle_type p, ::std::size_t i) const noexcept {
-    return reference(scaling_factor_, accessor_.access(p, i));
+    return scaling_factor_ * typename Accessor::element_type(accessor_.access(p, i));
   }
 
   typename offset_policy::data_handle_type
