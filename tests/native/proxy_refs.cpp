@@ -4,7 +4,7 @@
 #include "gtest/gtest.h"
 #include "./test_numbers.hpp"
 #include <experimental/linalg>
-#include "experimental/__p1673_bits/proxy_reference.hpp"
+#include "./proxy_reference.hpp"
 
 // Specialize test helper traits (P1673 does NOT need these)
 namespace test_helpers {

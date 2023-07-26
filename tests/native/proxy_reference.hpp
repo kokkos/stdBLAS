@@ -43,7 +43,7 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_PROXY_REFERENCE_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_PROXY_REFERENCE_HPP_
 
-#include "conj_if_needed.hpp"
+#include "experimental/__p1673_bits/conj_if_needed.hpp"
 #if defined(__cpp_lib_atomic_ref) && defined(LINALG_ENABLE_ATOMIC_REF)
 #  include <atomic>
 #endif
