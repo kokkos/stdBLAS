@@ -191,8 +191,8 @@ constexpr bool valid_input_blas_accessor()
 
   using def_acc_type = default_accessor<elt_type>;
   using conj_def_acc_type = accessor_conjugate<def_acc_type>;
-  using scal_def_acc_type = accessor_scaled<val_type, def_acc_type>;
-  using scal_conj_acc_type = accessor_scaled<val_type, conj_def_acc_type>;
+  using scal_def_acc_type = scaled_accessor<val_type, def_acc_type>;
+  using scal_conj_acc_type = scaled_accessor<val_type, conj_def_acc_type>;
   using conj_scal_acc_type = accessor_conjugate<scal_def_acc_type>;
 
   // The two matrices' accessor types need not be the same.
@@ -288,12 +288,12 @@ matrix_product_dispatch_to_blas()
 }
 
 template<class Accessor, class ValueType>
-static constexpr bool is_compatible_accessor_scaled_v = false;
+static constexpr bool is_compatible_scaled_accessor_v = false;
 
 template<class ScalingFactor, class NestedAccessor, class ValueType>
-static constexpr bool is_compatible_accessor_scaled_v<
-  accessor_scaled<ScalingFactor, NestedAccessor>, ValueType> =
-    std::is_same_v<typename accessor_scaled<ScalingFactor, NestedAccessor>::value_type, ValueType>;
+static constexpr bool is_compatible_scaled_accessor_v<
+  scaled_accessor<ScalingFactor, NestedAccessor>, ValueType> =
+    std::is_same_v<typename scaled_accessor<ScalingFactor, NestedAccessor>::value_type, ValueType>;
 
 template<class Accessor>
 static constexpr bool is_accessor_conjugate_v = false;
@@ -309,12 +309,12 @@ extractScalingFactor(in_matrix_t A,
   using acc_t = typename in_matrix_t::accessor_type;
   using val_t = typename in_matrix_t::value_type;
 
-  if constexpr (is_compatible_accessor_scaled_v<acc_t, val_t>) {
+  if constexpr (is_compatible_scaled_accessor_v<acc_t, val_t>) {
     return A.accessor.scale_factor();
   } else if constexpr (is_accessor_conjugate_v<acc_t>) {
     // conjugated(scaled(alpha, A)) means that both alpha and A are conjugated.
     using nested_acc_t = decltype(A.accessor().nested_accessor());
-    if constexpr (is_compatible_accessor_scaled_v<nested_acc_t>) {
+    if constexpr (is_compatible_scaled_accessor_v<nested_acc_t>) {
       return impl::conj_if_needed(extractScalingFactor(A.accessor.nested_accessor()));
     } else {
       return defaultValue;

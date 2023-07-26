@@ -14,7 +14,7 @@ T get_scaling_factor(Accessor /*a*/, T /*v*/) {
 }
 
 template<class Accessor, class S, class T>
-auto get_scaling_factor(std::experimental::linalg::accessor_scaled<Accessor,S> a,
+auto get_scaling_factor(std::experimental::linalg::scaled_accessor<Accessor,S> a,
       T /*v*/)
 {
   return T(a.scale_factor());

@@ -51,15 +51,15 @@ inline namespace __p1673_version_0 {
 namespace linalg {
 
 template<class ScalingFactor, class Accessor>
-class accessor_scaled {
+class scaled_accessor {
 public:
   using element_type = decltype(std::declval<ScalingFactor>() * std::declval<typename Accessor::element_type>());
   using reference = element_type;
   using data_handle_type = typename Accessor::data_handle_type;
   using offset_policy =
-    accessor_scaled<ScalingFactor, typename Accessor::offset_policy>;
+    scaled_accessor<ScalingFactor, typename Accessor::offset_policy>;
 
-  accessor_scaled(const ScalingFactor& scaling_factor, const Accessor& accessor) :
+  scaled_accessor(const ScalingFactor& scaling_factor, const Accessor& accessor) :
     scaling_factor_(scaling_factor),
     accessor_(accessor)
   {}
@@ -72,7 +72,7 @@ public:
       std::is_constructible_v<ScalingFactor, OtherScalingFactor>
     )
   )
-  accessor_scaled(const accessor_scaled<OtherScalingFactor, OtherNestedAccessor>& other) :
+  scaled_accessor(const scaled_accessor<OtherScalingFactor, OtherNestedAccessor>& other) :
     scaling_factor_(other.scaling_factor()),
     accessor_(other.nested_accessor())
   {}
@@ -104,7 +104,7 @@ namespace impl {
 template<class ScalingFactor,
          class Accessor>
 using scaled_element_type =
-  std::add_const_t<typename accessor_scaled<ScalingFactor, Accessor>::element_type>;
+  std::add_const_t<typename scaled_accessor<ScalingFactor, Accessor>::element_type>;
 
 } // namespace impl
 
@@ -116,11 +116,11 @@ template<class ScalingFactor,
 mdspan<impl::scaled_element_type<ScalingFactor, Accessor>,
        Extents,
        Layout,
-       accessor_scaled<ScalingFactor, Accessor>>
+       scaled_accessor<ScalingFactor, Accessor>>
 scaled(ScalingFactor scaling_factor,
        mdspan<ElementType, Extents, Layout, Accessor> x)
 {
-  using acc_type = accessor_scaled<ScalingFactor, Accessor>;
+  using acc_type = scaled_accessor<ScalingFactor, Accessor>;
   return {x.data_handle(), x.mapping(), acc_type{scaling_factor, x.accessor()}};
 }
 

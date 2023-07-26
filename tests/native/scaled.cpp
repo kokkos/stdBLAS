@@ -7,9 +7,9 @@ namespace {
   using std::experimental::linalg::scaled;
 
   template<class ScalingFactor, class OriginalValueType>
-  void test_accessor_scaled_element_constification()
+  void test_scaled_accessor_element_constification()
   {
-    using std::experimental::linalg::accessor_scaled;
+    using std::experimental::linalg::scaled_accessor;
     using std::experimental::linalg::scaled_scalar;
 
     using nc_def_acc_type = default_accessor<OriginalValueType>;
@@ -18,8 +18,8 @@ namespace {
     nc_def_acc_type nc_acc;
     c_def_acc_type c_acc;
 
-    using as_nc_type = accessor_scaled<ScalingFactor, nc_def_acc_type>;
-    using as_c_type = accessor_scaled<ScalingFactor, c_def_acc_type>;
+    using as_nc_type = scaled_accessor<ScalingFactor, nc_def_acc_type>;
+    using as_c_type = scaled_accessor<ScalingFactor, c_def_acc_type>;
     ScalingFactor scal{};
     as_nc_type acc_scal_nc(scal, nc_acc);
     as_c_type acc_scal_c0(scal, c_acc);
@@ -28,12 +28,12 @@ namespace {
     as_c_type acc_scal_c1(scal, nc_acc);
   }
 
-  TEST(accessor_scaled, element_constification)
+  TEST(scaled_accessor, element_constification)
   {
-    test_accessor_scaled_element_constification<double, double>();
-    test_accessor_scaled_element_constification<int, int>();
-    test_accessor_scaled_element_constification<std::complex<double>, std::complex<double>>();
-    test_accessor_scaled_element_constification<std::complex<float>, std::complex<float>>();
+    test_scaled_accessor_element_constification<double, double>();
+    test_scaled_accessor_element_constification<int, int>();
+    test_scaled_accessor_element_constification<std::complex<double>, std::complex<double>>();
+    test_scaled_accessor_element_constification<std::complex<float>, std::complex<float>>();
   }
 
   // scaled(1 << 20, scaled(1 << 20, x)) with x having value_type double
@@ -81,12 +81,12 @@ namespace {
 
     const scaling_factor_type scalingFactor (-3.0);
 
-    // Make sure that accessor_scaled compiles
+    // Make sure that scaled_accessor compiles
     {
       using accessor_t = vector_t::accessor_type;
-      using std::experimental::linalg::accessor_scaled;
+      using std::experimental::linalg::scaled_accessor;
       using scaled_accessor_t =
-        accessor_scaled<scaling_factor_type, accessor_t>;
+        scaled_accessor<scaling_factor_type, accessor_t>;
       scaled_accessor_t accessor0{scalingFactor, y.accessor()};
     }
 
