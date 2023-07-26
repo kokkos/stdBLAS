@@ -190,10 +190,10 @@ constexpr bool valid_input_blas_accessor()
   using acc_type = typename in_matrix_t::accessor_type;
 
   using def_acc_type = default_accessor<elt_type>;
-  using conj_def_acc_type = accessor_conjugate<def_acc_type>;
+  using conj_def_acc_type = conjugate_accessor<def_acc_type>;
   using scal_def_acc_type = scaled_accessor<val_type, def_acc_type>;
   using scal_conj_acc_type = scaled_accessor<val_type, conj_def_acc_type>;
-  using conj_scal_acc_type = accessor_conjugate<scal_def_acc_type>;
+  using conj_scal_acc_type = conjugate_accessor<scal_def_acc_type>;
 
   // The two matrices' accessor types need not be the same.
   // Input matrices may be scaled or transposed.
@@ -296,10 +296,10 @@ static constexpr bool is_compatible_scaled_accessor_v<
     std::is_same_v<typename scaled_accessor<ScalingFactor, NestedAccessor>::value_type, ValueType>;
 
 template<class Accessor>
-static constexpr bool is_accessor_conjugate_v = false;
+static constexpr bool is_conjugate_accessor_v = false;
 
 template<class NestedAccessor>
-static constexpr bool is_accessor_conjugate_v<accessor_conjugate<NestedAccessor>> = true;
+static constexpr bool is_conjugate_accessor_v<conjugate_accessor<NestedAccessor>> = true;
 
 template<class in_matrix_t>
 typename in_matrix_t::value_type
@@ -311,7 +311,7 @@ extractScalingFactor(in_matrix_t A,
 
   if constexpr (is_compatible_scaled_accessor_v<acc_t, val_t>) {
     return A.accessor.scale_factor();
-  } else if constexpr (is_accessor_conjugate_v<acc_t>) {
+  } else if constexpr (is_conjugate_accessor_v<acc_t>) {
     // conjugated(scaled(alpha, A)) means that both alpha and A are conjugated.
     using nested_acc_t = decltype(A.accessor().nested_accessor());
     if constexpr (is_compatible_scaled_accessor_v<nested_acc_t>) {
@@ -344,7 +344,7 @@ constexpr bool extractConjImpl(Accessor a)
   using elt_t = typename Accessor::element_type;
 
   using def_acc_t = default_accessor<elt_t>;
-  using conj_def_acc_t = accessor_conjugate<def_acc_t>;
+  using conj_def_acc_t = conjugate_accessor<def_acc_t>;
   if constexpr (std::is_same_v<Accessor, def_acc_t>) {
     return false;
   } else if constexpr (std::is_same_v<Accessor, conj_def_acc_t>) {

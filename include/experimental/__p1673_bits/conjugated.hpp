@@ -51,74 +51,34 @@ inline namespace __p1673_version_0 {
 namespace linalg {
 
 template<class Accessor>
-class accessor_conjugate;
-
-namespace impl {
-  template<
-    class Accessor,
-    bool is_arith =
-      std::is_arithmetic_v<
-        std::remove_cv_t<typename Accessor::element_type>
-    >
-  >
-  struct accessor_conjugate_aliases {};
-
-  template<class Accessor>
-  struct accessor_conjugate_aliases<Accessor, true>
-  {
-    using reference = typename Accessor::reference;
-    using element_type =
-      std::add_const_t<typename Accessor::element_type>;
-    using data_handle_type = typename Accessor::data_handle_type;
-    using offset_policy = typename Accessor::offset_policy;
-  };
-
-  template<class Accessor>
-  struct accessor_conjugate_aliases<Accessor, false>
-  {
-  private:
-    using accessor_value_type =
-      std::remove_cv_t<typename Accessor::element_type>;
-  public:
-     using reference =
-       conjugated_scalar<typename Accessor::reference,
-			 accessor_value_type>;
-    using element_type =
-      std::add_const_t<typename reference::value_type>;
-    using data_handle_type = typename Accessor::data_handle_type;
-    using offset_policy =
-      accessor_conjugate<typename Accessor::offset_policy>;
-  };
-
-} // namespace impl
-
-template<class Accessor>
-class accessor_conjugate {
+class conjugate_accessor {
 private:
   Accessor accessor_;
-  using aliases = impl::accessor_conjugate_aliases<Accessor>;
 
 public:
-  using reference        = typename aliases::reference;
-  using element_type     = typename aliases::element_type;
-  using data_handle_type = typename aliases::data_handle_type;
-  using offset_policy    = typename aliases::offset_policy;
+  using element_type = decltype(impl::conj_if_needed(std::declval<typename Accessor::element_type>()));
+  using reference = element_type;
+  using data_handle_type = typename Accessor::data_handle_type;
+  using offset_policy = conjugate_accessor<typename Accessor::offset_policy>;
 
-  accessor_conjugate(Accessor accessor) : accessor_(accessor) {}
+  conjugate_accessor(const Accessor& accessor) :
+    accessor_(accessor)
+  {}
 
   MDSPAN_TEMPLATE_REQUIRES(
-    class OtherElementType,
-    /* requires */ (std::is_convertible_v<
-      typename default_accessor<OtherElementType>::element_type(*)[],
-      typename Accessor::element_type(*)[]
-    >)
+    class OtherNestedAccessor,
+    /* requires */ (
+      std::is_constructible_v<Accessor, const OtherNestedAccessor&>
+    )
   )
-  accessor_conjugate(default_accessor<OtherElementType> accessor) : accessor_(accessor) {}
+  conjugate_accessor(const conjugate_accessor<OtherNestedAccessor>& other) :
+    accessor_(other.nested_accessor())
+  {}
 
   reference access(data_handle_type p, ::std::size_t i) const
-    noexcept(noexcept(reference(accessor_.access(p, i))))
+    noexcept(noexcept(impl::conj_if_needed(typename Accessor::element_type(accessor_.access(p, i)))))
   {
-    return reference(accessor_.access(p, i));
+    return impl::conj_if_needed(typename Accessor::element_type(accessor_.access(p, i)));
   }
 
   typename offset_policy::data_handle_type offset(data_handle_type p, ::std::size_t i) const
@@ -138,8 +98,8 @@ auto conjugated(mdspan<ElementType, Extents, Layout, Accessor> a)
       (a.data_handle(), a.mapping(), a.accessor());
   } else {
     using return_element_type =
-      typename accessor_conjugate<Accessor>::element_type;
-    using return_accessor_type = accessor_conjugate<Accessor>;
+      typename conjugate_accessor<Accessor>::element_type;
+    using return_accessor_type = conjugate_accessor<Accessor>;
     return mdspan<return_element_type, Extents, Layout, return_accessor_type>
       (a.data_handle(), a.mapping(), return_accessor_type(a.accessor()));
   }
@@ -148,7 +108,7 @@ auto conjugated(mdspan<ElementType, Extents, Layout, Accessor> a)
 // Conjugation is self-annihilating
 template<class ElementType, class Extents, class Layout, class NestedAccessor>
 auto conjugated(
-  mdspan<ElementType, Extents, Layout, accessor_conjugate<NestedAccessor>> a)
+  mdspan<ElementType, Extents, Layout, conjugate_accessor<NestedAccessor>> a)
 {
   using return_element_type = typename NestedAccessor::element_type;
   using return_accessor_type = NestedAccessor;

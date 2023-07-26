@@ -6,9 +6,9 @@ namespace {
   using std::experimental::linalg::conjugated;
 
   template<class ValueType>
-  void test_accessor_conjugate_element_constification()
+  void test_conjugate_accessor_element_constification()
   {
-    using std::experimental::linalg::accessor_conjugate;
+    using std::experimental::linalg::conjugate_accessor;
     using std::experimental::default_accessor;
     using std::experimental::linalg::conjugated_scalar;
     using value_type = std::remove_cv_t<ValueType>;
@@ -19,19 +19,17 @@ namespace {
     nc_def_acc_type nc_acc;
     c_def_acc_type c_acc;
 
-    using aj_nc_type = accessor_conjugate<nc_def_acc_type>;
-    using expected_nc_ref =
-      std::conditional_t<is_arith, value_type&,
-			 conjugated_scalar<value_type&, value_type>>;
+    using aj_nc_type = conjugate_accessor<nc_def_acc_type>;
+    using expected_nc_ref = value_type; // conjugate_accessor's reference type is its element_type
     static_assert(std::is_same_v<expected_nc_ref, typename aj_nc_type::reference>);
-    using expected_nc_elt = std::add_const_t<std::conditional_t<is_arith, value_type, typename conjugated_scalar<value_type&, value_type>::value_type>>;
+    using expected_nc_elt = value_type;
     static_assert(std::is_same_v<expected_nc_elt, typename aj_nc_type::element_type>);
     static_assert(std::is_same_v<typename aj_nc_type::data_handle_type, value_type*>);
 
-    using aj_c_type = accessor_conjugate<c_def_acc_type>;
-    using expected_c_ref = std::conditional_t<is_arith, const value_type&, conjugated_scalar<const value_type&, value_type>>;
+    using aj_c_type = conjugate_accessor<c_def_acc_type>;
+    using expected_c_ref = value_type; // conjugate_accessor's reference type is its element_type
     static_assert(std::is_same_v<expected_c_ref, typename aj_c_type::reference>);
-    using expected_c_elt = std::add_const_t<std::conditional_t<is_arith, const value_type, typename conjugated_scalar<const value_type&, value_type>::value_type>>;
+    using expected_c_elt = value_type;
     static_assert(std::is_same_v<expected_c_elt, typename aj_c_type::element_type>);
     static_assert(std::is_same_v<typename aj_c_type::data_handle_type, const value_type*>);
 
@@ -42,12 +40,12 @@ namespace {
     aj_c_type acc_conj_c1(nc_acc);
   }
 
-  TEST(accessor_conjugate, element_constification)
+  TEST(conjugate_accessor, element_constification)
   {
-    test_accessor_conjugate_element_constification<double>();
-    test_accessor_conjugate_element_constification<int>();
-    test_accessor_conjugate_element_constification<std::complex<double>>();
-    test_accessor_conjugate_element_constification<std::complex<float>>();
+    test_conjugate_accessor_element_constification<double>();
+    test_conjugate_accessor_element_constification<int>();
+    test_conjugate_accessor_element_constification<std::complex<double>>();
+    test_conjugate_accessor_element_constification<std::complex<float>>();
   }
 
   TEST(conjugated, mdspan_complex_double)
@@ -70,11 +68,11 @@ namespace {
       y(k) = y_k;
     }
 
-    // Make sure that accessor_conjugate compiles
+    // Make sure that conjugate_accessor compiles
     {
       using accessor_t = vector_t::accessor_type;
-      using std::experimental::linalg::accessor_conjugate;
-      using accessor_conj_t = accessor_conjugate<accessor_t>;
+      using std::experimental::linalg::conjugate_accessor;
+      using accessor_conj_t = conjugate_accessor<accessor_t>;
       accessor_conj_t acc{y.accessor()};
     }
 
