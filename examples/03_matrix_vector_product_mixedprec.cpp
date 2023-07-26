@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     for(int m=0; m<A.extent(0); m++)
       for(int i=0; i<A.extent(1); i++)
         for(int j=0; j<A.extent(2); j++)
-        A(m,i,j) = 1000.0 * m + 100.0 * i + j;
+        A(m,i,j) = static_cast<float>(1000.0 * m + 100.0 * i + j);
     for(int i=0; i<x.extent(0); i++)
       for(int m=0; m<x.extent(1); m++)
         x(i,m) = 33. * i + 0.33 * m;

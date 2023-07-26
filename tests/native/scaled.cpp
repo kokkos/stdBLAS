@@ -139,7 +139,7 @@ namespace {
     vector_t x(storage.data(), vectorSize);
 
     for (std::size_t k = 0; k < vectorSize; ++k) {
-      const vector_element_type x_k = vector_element_type(k) + 1.0;
+      const vector_element_type x_k = vector_element_type(static_cast<double>(k)) + 1.0;
       x(k) = x_k;
     }
 

@@ -1237,7 +1237,7 @@ namespace {
 
     test_FakeComplex_conjugated_scalar();
 
-    FakeRealNumber fn{4.2};
+    FakeRealNumber fn{4.2f};
     using std::experimental::linalg::conjugated_scalar;
     conjugated_scalar<FakeRealNumber&, FakeRealNumber> fncs(fn);
     EXPECT_EQ(fn, FakeRealNumber(fncs));
