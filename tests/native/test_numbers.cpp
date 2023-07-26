@@ -5,34 +5,6 @@
 #include "./test_numbers.hpp"
 #include <experimental/linalg>
 
-// Specialize test helper traits (P1673 does NOT need these)
-namespace test_helpers {
-
-template<class T>
-constexpr bool is_complex_v = false;
-
-template<>
-constexpr bool is_complex_v<std::complex<float>> = true;
-
-template<>
-constexpr bool is_complex_v<std::complex<double>> = true;
-
-template<>
-constexpr bool is_complex_v<std::complex<long double>> = true;
-
-template<>
-constexpr bool is_complex_v<FakeComplex> = true;
-
-template<class T>
-static constexpr bool is_atomic_ref_not_arithmetic_v = false;
-
-#if defined(__cpp_lib_atomic_ref) && defined(LINALG_ENABLE_ATOMIC_REF)
-template<class U>
-static constexpr bool is_atomic_ref_not_arithmetic_v<std::atomic_ref<U>> = ! std::is_arithmetic_v<U>;
-#endif
-
-} // namespace test_helpers
-
 ///////////////////////////////////////////////////////////
 // conj_if_needed tests
 ///////////////////////////////////////////////////////////
