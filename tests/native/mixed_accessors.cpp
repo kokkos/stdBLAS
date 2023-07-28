@@ -109,9 +109,10 @@ struct atomic_accessor {
 #endif // __cpp_lib_atomic_ref
 
 namespace {
+  using std::experimental::linalg::conjugated;
   using std::experimental::linalg::scaled;
 
-  TEST(mixed_accessors, mdspan_int)
+  TEST(mixed_accessors, mdspan_scaled_and_my_proxy)
   {
     using real_t = int;
     using scalar_t = int;
@@ -158,7 +159,7 @@ namespace {
   }
 
 #if defined(__cpp_lib_atomic_ref)
-  TEST(mixed_accessors, mdspan_atomic_double)
+  TEST(mixed_accessors, mdspan_scaled_and_atomic)
   {
     using real_t = float;
     using scalar_t = real_t;
@@ -208,4 +209,56 @@ namespace {
     }
   }
 #endif // __cpp_lib_atomic_ref
+
+  TEST(mixed_accessors, mdspan_scaled_and_conjugated)
+  {
+    using real_t = float;
+    using complex_t = std::complex<real_t>;
+    using extents_t = dextents<std::size_t, 1>;
+    using real_vector_t = mdspan<real_t, extents_t>;
+    using complex_vector_t = mdspan<complex_t, extents_t>;
+
+    constexpr std::size_t vector_size(5);
+    std::vector<real_t> real_storage(vector_size);
+    std::vector<complex_t> complex_storage(vector_size);
+
+    real_vector_t x(real_storage.data(), vector_size);
+    complex_vector_t y(complex_storage.data(), vector_size);
+
+    for (std::size_t k = 0; k < vector_size; ++k) {
+      const real_t x_k(real_t(k) + 5.0f);
+      const complex_t y_k(real_t(k) + 11.0f, real_t(k) + 13.0f);;
+      x(k) = x_k;
+      y(k) = y_k;
+    }
+
+    const real_t alpha = 2.0f;
+    auto x_scaled = scaled(alpha, x);
+    auto y_conj = conjugated(y);
+
+    for (std::size_t k = 0; k < vector_size; ++k) {
+      ASSERT_EQ(x_scaled(k), (2.0f * (real_t(k) + 5.0f)));
+      ASSERT_EQ(y_conj(k), (complex_t(real_t(k) + 11.0f, -real_t(k) - 13.0f)));
+
+      auto y_minus_x = y_conj(k) - x_scaled(k);
+      static_assert(std::is_same_v<decltype(y_minus_x), complex_t>);
+      const complex_t y_minus_x_expected(-real_t(k) + 1.0f, -real_t(k) - 13.0f);
+      EXPECT_EQ(y_minus_x, y_minus_x_expected);
+
+      auto x_minus_y = x_scaled(k) - y_conj(k);
+      static_assert(std::is_same_v<decltype(x_minus_y), complex_t>);
+      const complex_t x_minus_y_expected(real_t(k) - 1.0f, real_t(k) + 13.0f);
+      EXPECT_EQ(x_minus_y, x_minus_y_expected);
+
+      auto minus_y = -y_conj(k);
+      static_assert(std::is_same_v<decltype(minus_y), complex_t>);
+      const complex_t minus_y_expected(-real_t(k) - 11.0f, real_t(k) + 13.0f);
+      EXPECT_EQ(minus_y, minus_y_expected);
+
+      auto minus_x = -x_scaled(k);
+      static_assert(std::is_same_v<decltype(minus_x), real_t>);
+      const real_t minus_x_expected(-2.0f * real_t(k) - 10.0f);
+      EXPECT_EQ(minus_x, minus_x_expected);
+    }
+  }
 } // namespace (anonymous)
