@@ -252,7 +252,10 @@ namespace impl {
     template<class OriginalExtents>
     static auto mapping(const typename layout_stride::template mapping<OriginalExtents>& orig_map) {
       using original_mapping_type = typename layout_stride::template mapping<OriginalExtents>;
-      using extents_type = transpose_extents_t<typename original_mapping_type::extents_type>;
+      using original_extents_type = typename original_mapping_type::extents_type;
+      using extents_type = transpose_extents_t<original_extents_type>;
+      // Visual Studio 2022 emits a build error with the commented-out line below.
+      //using extents_type = transpose_extents_t<typename original_mapping_type::extents_type>;
       using return_mapping_type = typename layout_type::template mapping<extents_type>;
       // NOTE (mfh 2022/07/04) Commented-out code relates
       // to the build error reported in my comment here:

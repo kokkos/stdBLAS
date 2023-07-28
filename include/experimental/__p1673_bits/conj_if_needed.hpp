@@ -97,4 +97,4 @@ constexpr inline auto conj_if_needed = [](const auto& t)
 } // end namespace experimental
 } // end namespace std
 
-#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATE_TRANSPOSED_HPP_
+#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATE_IF_NEEDED_HPP_
