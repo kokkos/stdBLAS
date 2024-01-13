@@ -13,12 +13,12 @@ namespace {
 
   // Regression test for ambiguous overloads of
   // symmetric_matrix_rank_1_update (related to
-  // https://github.com/kokkos/stdBLAS/issues/261 ).
+  // https://github.com/kokkos/stdBLAS/issues/261).
   //
   // The reference implementation needs to implement all constraints
   // of symmetric_matrix_rank_1_update in order to disambiguate
   // overloads.
-  TEST(BLAS3_syrk, Issue261)
+  TEST(BLAS3_syr, AmbiguousOverloads)
   {
     constexpr auto map_A = layout_right::mapping{extents<std::size_t, 3, 3>{}};
     constexpr auto map_expected = map_A;
