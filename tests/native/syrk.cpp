@@ -30,12 +30,21 @@ namespace {
     // [1.0   1.0   2.0]
     // [      1.0   2.0]
     // [            2.0]
-    std::array<double, 6> WA{1.0, 1.0, 1.0, 2.0, 2.0, 2.0};
-    mdspan A{WA.data(), layout_left::mapping{extents<std::size_t,3,2>{}}};
+    //
+    // Fill in the "empty spots" with a large negative value.
+    // The algorithm should never see it, but if it does,
+    // then the results will be wrong in an obvious way.
+    const double flag = -10000.0;
+    std::array<double, 9> WA{1.0, flag, flag, 1.0, 1.0, flag, 2.0, 2.0, 2.0};
+    mdspan A{WA.data(), layout_left::mapping{extents<std::size_t,3,3>{}}};
 
-    // [7.0   7.0   7.0]
-    // [7.0   9.0   9.0]
-    // [7.0   9.0  10.0]
+    // [1.0   1.0   2.0]   [1.0            ]   [6.0  5.0  4.0]
+    // [      1.0   2.0] * [1.0   1.0      ] = [5.0  5.0  4.0]
+    // [            2.0]   [2.0   2.0   2.0]   [4.0  4.0  4.0]
+    //
+    // [6.0  5.0  4.0]   [1.0   2.0   3.0]   [7.0  7.0  7.0]
+    // [5.0  5.0  4.0] + [2.0   4.0   5.0] = [7.0  9.0  9.0]
+    // [4.0  4.0  4.0]   [3.0   5.0   6.0]   [7.0  9.0 10.0]
     std::array<double, 9> expected_storage{7.0, 7.0, 7.0, 7.0, 9.0, 9.0, 7.0, 9.0, 10.0};
     mdspan expected{expected_storage.data(), map_expected};
 
@@ -45,7 +54,7 @@ namespace {
       for (std::size_t col = 0; col < C.extent(1); ++col) {
         const auto expected_rc = expected(row, col);
         const auto C_rc = C(row, col);
-        EXPECT_EQ(expected_rc, C_rc);
+        EXPECT_EQ(expected_rc, C_rc) << "at (" << row << ", " << col << ")";
       }
     }
   }
