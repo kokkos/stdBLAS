@@ -208,7 +208,7 @@ void symmetric_matrix_rank_k_update(
     decltype(execpolicy_mapper(exec)), ScaleFactorType, decltype(A), decltype(C), Triangle
     >::value;
 
-  if constexpr(use_custom) {
+  if constexpr (use_custom) {
     symmetric_matrix_rank_k_update(execpolicy_mapper(exec), alpha, A, C, t);
   } else {
     symmetric_matrix_rank_k_update(std::experimental::linalg::impl::inline_exec_t(), alpha, A, C, t);
@@ -240,7 +240,6 @@ void symmetric_matrix_rank_k_update(
 {
   symmetric_matrix_rank_k_update(std::experimental::linalg::impl::default_exec_t(), alpha, A, C, t);
 }
-
 
 // Rank-k update of a symmetric matrix without scaling factor alpha
 
@@ -354,6 +353,7 @@ void symmetric_matrix_rank_k_update(
   symmetric_matrix_rank_k_update(std::experimental::linalg::impl::default_exec_t(), A, C, t);
 }
 
+// Rank-k update of a Hermitian matrix
 
 // Rank-k update of a Hermitian matrix with scaling factor alpha
 
