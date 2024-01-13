@@ -43,6 +43,8 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS3_MATRIX_RANK_K_UPDATE_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS3_MATRIX_RANK_K_UPDATE_HPP_
 
+#include <execution>
+
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
@@ -124,18 +126,24 @@ struct is_custom_herm_mat_rank_k_update_avail<
 
 // Rank-k update of a symmetric matrix with scaling factor alpha
 
-template<class ScaleFactorType,
-	 class ElementType_A,
-         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
-         class Layout_A,
-         class Accessor_A,
-         class ElementType_C,
-         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
-         class Layout_C,
-         class Accessor_C,
-         class Triangle>
+MDSPAN_TEMPLATE_REQUIRES(
+  class ScaleFactorType,
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+  class Layout_A,
+  class Accessor_A,
+  class ElementType_C,
+  class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+  class Layout_C,
+  class Accessor_C,
+  class Triangle,
+  /* requires */ (
+    std::is_same_v<Triangle, lower_triangle_t> ||
+    std::is_same_v<Triangle, upper_triangle_t>
+  )
+)
 void symmetric_matrix_rank_k_update(
-  std::experimental::linalg::impl::inline_exec_t&& /*exec*/,
+  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
   ScaleFactorType alpha,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
@@ -155,17 +163,25 @@ void symmetric_matrix_rank_k_update(
   }
 }
 
-template<class ScaleFactorType,
-	 class ExecutionPolicy,
-         class ElementType_A,
-         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
-         class Layout_A,
-         class Accessor_A,
-         class ElementType_C,
-         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
-         class Layout_C,
-         class Accessor_C,
-         class Triangle>
+MDSPAN_TEMPLATE_REQUIRES(
+  class ExecutionPolicy,
+  class ScaleFactorType,
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+  class Layout_A,
+  class Accessor_A,
+  class ElementType_C,
+  class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+  class Layout_C,
+  class Accessor_C,
+  class Triangle,
+  /* requires */ (
+    (std::is_execution_policy_v<ExecutionPolicy> ||
+     std::is_same_v<std::experimental::linalg::impl::default_exec_t, ExecutionPolicy>) &&
+    (std::is_same_v<Triangle, lower_triangle_t> ||
+     std::is_same_v<Triangle, upper_triangle_t>)
+  )
+)
 void symmetric_matrix_rank_k_update(
   ExecutionPolicy&& exec,
   ScaleFactorType alpha,
@@ -173,7 +189,6 @@ void symmetric_matrix_rank_k_update(
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle t)
 {
-
   constexpr bool use_custom = is_custom_sym_mat_rank_k_update_avail<
     decltype(execpolicy_mapper(exec)), ScaleFactorType, decltype(A), decltype(C), Triangle
     >::value;
@@ -185,21 +200,27 @@ void symmetric_matrix_rank_k_update(
   }
 }
 
-template<class ScaleFactorType,
-	 class ElementType_A,
-         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
-         class Layout_A,
-         class Accessor_A,
-         class ElementType_C,
-         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
-         class Layout_C,
-         class Accessor_C,
-         class Triangle>
+MDSPAN_TEMPLATE_REQUIRES(
+  class ScaleFactorType,
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+  class Layout_A,
+  class Accessor_A,
+  class ElementType_C,
+  class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+  class Layout_C,
+  class Accessor_C,
+  class Triangle,
+  /* requires */ (
+    std::is_same_v<Triangle, lower_triangle_t> ||
+    std::is_same_v<Triangle, upper_triangle_t>
+  )
+)
 void symmetric_matrix_rank_k_update(
   ScaleFactorType alpha,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
-  Triangle t )
+  Triangle t)
 {
   symmetric_matrix_rank_k_update(std::experimental::linalg::impl::default_exec_t(), alpha, A, C, t);
 }
@@ -207,15 +228,21 @@ void symmetric_matrix_rank_k_update(
 
 // Rank-k update of a symmetric matrix without scaling factor
 
-template<class ElementType_A,
-         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
-         class Layout_A,
-         class Accessor_A,
-         class ElementType_C,
-         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
-         class Layout_C,
-         class Accessor_C,
-         class Triangle>
+MDSPAN_TEMPLATE_REQUIRES(
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+  class Layout_A,
+  class Accessor_A,
+  class ElementType_C,
+  class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+  class Layout_C,
+  class Accessor_C,
+  class Triangle,
+  /* requires */ (
+    std::is_same_v<Triangle, lower_triangle_t> ||
+    std::is_same_v<Triangle, upper_triangle_t>
+  )
+)
 void symmetric_matrix_rank_k_update(
   std::experimental::linalg::impl::inline_exec_t&& /*exec*/,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
@@ -236,23 +263,30 @@ void symmetric_matrix_rank_k_update(
   }
 }
 
-template<class ExecutionPolicy,
-         class ElementType_A,
-         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
-         class Layout_A,
-         class Accessor_A,
-         class ElementType_C,
-         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
-         class Layout_C,
-         class Accessor_C,
-         class Triangle>
+MDSPAN_TEMPLATE_REQUIRES(
+  class ExecutionPolicy,
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+  class Layout_A,
+  class Accessor_A,
+  class ElementType_C,
+  class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+  class Layout_C,
+  class Accessor_C,
+  class Triangle,
+  /* requires */ (
+    (std::is_execution_policy_v<ExecutionPolicy> ||
+     std::is_same_v<std::experimental::linalg::impl::default_exec_t, ExecutionPolicy>) &&
+    (std::is_same_v<Triangle, lower_triangle_t> ||
+     std::is_same_v<Triangle, upper_triangle_t>)
+  )
+)
 void symmetric_matrix_rank_k_update(
   ExecutionPolicy&& exec,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle t)
 {
-
   constexpr bool use_custom = is_custom_sym_mat_rank_k_update_avail<
     decltype(execpolicy_mapper(exec)), void, decltype(A), decltype(C), Triangle
     >::value;
@@ -264,19 +298,25 @@ void symmetric_matrix_rank_k_update(
   }
 }
 
-template<class ElementType_A,
-         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
-         class Layout_A,
-         class Accessor_A,
-         class ElementType_C,
-         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
-         class Layout_C,
-         class Accessor_C,
-         class Triangle>
+MDSPAN_TEMPLATE_REQUIRES(
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+  class Layout_A,
+  class Accessor_A,
+  class ElementType_C,
+  class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+  class Layout_C,
+  class Accessor_C,
+  class Triangle,
+  /* requires */ (
+    std::is_same_v<Triangle, lower_triangle_t> ||
+    std::is_same_v<Triangle, upper_triangle_t>
+  )
+)
 void symmetric_matrix_rank_k_update(
   std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
-  Triangle t )
+  Triangle t)
 {
   symmetric_matrix_rank_k_update(std::experimental::linalg::impl::default_exec_t(), A, C, t);
 }
