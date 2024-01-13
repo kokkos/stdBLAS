@@ -4,7 +4,11 @@
 #include <type_traits>
 
 namespace {
+  using std::experimental::linalg::layout_transpose;
   using std::experimental::linalg::transposed;
+  using std::experimental::layout_left;
+  using std::experimental::layout_right;
+  using std::experimental::layout_stride;
 
   template<std::size_t ext0, std::size_t ext1>
   void test_transpose_extents()
@@ -65,8 +69,6 @@ namespace {
   template<std::size_t ext0, std::size_t ext1>
   void test_layout_transpose()
   {
-    using std::experimental::linalg::layout_transpose;
-    using std::experimental::layout_left;
     using extents_type = extents<std::size_t, ext0, ext1>;
     using mapping_type = typename layout_transpose<layout_left>::mapping<extents_type>;
   }
@@ -112,8 +114,6 @@ namespace {
     }
 
     auto A_t = transposed (A);
-    using std::experimental::layout_left;
-    using std::experimental::layout_right;
     static_assert(std::is_same_v<decltype(A)::layout_type, layout_right>);
     static_assert(std::is_same_v<decltype(A_t)::layout_type, layout_left>);
     EXPECT_EQ(A_t.extent(0), A.extent(1));
@@ -140,11 +140,9 @@ namespace {
       }
     }
 
-    using std::experimental::submdspan;
     constexpr std::size_t subdim = 4;
     const std::pair<std::size_t, std::size_t> sub(0, subdim);
     auto A_sub = submdspan(A, sub, sub);
-    using std::experimental::layout_stride;
     static_assert(std::is_same_v<decltype(A_sub)::layout_type, layout_stride>);
     ASSERT_EQ( A_sub.rank(), std::size_t(2) );
     ASSERT_EQ( A_sub.extent(0), subdim );
