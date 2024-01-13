@@ -58,6 +58,21 @@ namespace {
         EXPECT_EQ(expected_rc, C_rc) << "at (" << row << ", " << col << ")";
       }
     }
+
+    // Reset values, just in case some bug might have overwritten them.
+    WA = std::array<double, 9>{1.0, flag, flag, 1.0, 1.0, flag, 2.0, 2.0, 2.0};
+    WC = std::array<double, 9>{1.0, 2.0, 3.0, 2.0, 4.0, 5.0, 3.0, 5.0, 6.0};
+    expected_storage = std::array<double, 9>{7.0, 7.0, 7.0, 7.0, 9.0, 9.0, 7.0, 9.0, 10.0};
+
+    hermitian_matrix_rank_k_update(A, C, upper_triangle);
+
+    for (std::size_t row = 0; row < C.extent(0); ++row) {
+      for (std::size_t col = 0; col < C.extent(1); ++col) {
+        const auto expected_rc = expected(row, col);
+        const auto C_rc = C(row, col);
+        EXPECT_EQ(expected_rc, C_rc) << "at (" << row << ", " << col << ")";
+      }
+    }
   }
 
 } // end anonymous namespace

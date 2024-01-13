@@ -150,7 +150,7 @@ void symmetric_matrix_rank_k_update(
   Triangle /* t */)
 {
   constexpr bool lower_tri = std::is_same_v<Triangle, lower_triangle_t>;
-  using size_type = ::std::common_type_t<SizeType_A, SizeType_C>;
+  using size_type = std::common_type_t<SizeType_A, SizeType_C>;
 
   if constexpr (std::is_same_v<Triangle, upper_triangle_t>) {
     // [A_00  A_01  A_02]   [A_00            ]
@@ -367,14 +367,33 @@ void hermitian_matrix_rank_k_update(
   Triangle /* t */)
 {
   constexpr bool lower_tri = std::is_same_v<Triangle, lower_triangle_t>;
-  using size_type = ::std::common_type_t<SizeType_A, SizeType_C>;
+  using size_type = std::common_type_t<SizeType_A, SizeType_C>;
 
-  for (size_type j = 0; j < C.extent(1); ++j) {
-    const size_type i_lower = lower_tri ? j : size_type(0);
-    const size_type i_upper = lower_tri ? C.extent(0) : j+1;
-    for (size_type i = i_lower; i < i_upper; ++i) {
-      for (size_type k = 0; k < A.extent(1); ++k) {
-        C(i,j) += alpha * A(i,k) * impl::conj_if_needed(A(j,k));
+  if constexpr (std::is_same_v<Triangle, upper_triangle_t>) {
+    // [A_00  A_01  A_02]   [A_00            ]
+    // [      A_11  A_12] * [A_01  A_11      ]
+    // [            A_22]   [A_02  A_12  A_22]
+    for (size_type row = 0; row < C.extent(0); ++row) {
+      for (size_type col = 0; col < C.extent(1); ++col) {
+        const size_type lower = row < col ? col : row; // max
+        const size_type upper = A.extent(0);
+        for (size_type k = lower; k < upper; ++k) {
+          C(row, col) += alpha * A(row, k) * impl::conj_if_needed(A(col, k));
+        }
+      }
+    }
+  }
+  else {
+    // [A_00            ]   [A_00  A_10  A_20]
+    // [A_10  A_11      ] * [      A_11  A_21]
+    // [A_20  A_21  A_22]   [            A_22]
+    for (size_type row = 0; row < C.extent(0); ++row) {
+      for (size_type col = 0; col < C.extent(1); ++col) {
+        const size_type lower = 0;
+        const size_type upper = row < col ? row : col; // min
+        for (size_type k = lower; k < upper; ++k) {
+          C(row, col) += alpha * A(row, k) * impl::conj_if_needed(A(col, k));
+        }
       }
     }
   }
@@ -429,8 +448,10 @@ MDSPAN_TEMPLATE_REQUIRES(
   class Accessor_C,
   class Triangle,
   /* requires */ (
-    std::is_same_v<Triangle, lower_triangle_t> ||
-    std::is_same_v<Triangle, upper_triangle_t>
+    (! std::is_execution_policy_v<ScaleFactorType> &&
+     ! std::is_same_v<std::experimental::linalg::impl::default_exec_t, ScaleFactorType>) &&
+    (std::is_same_v<Triangle, lower_triangle_t> ||
+     std::is_same_v<Triangle, upper_triangle_t>)
   )
 )
 void hermitian_matrix_rank_k_update(
@@ -466,14 +487,33 @@ void hermitian_matrix_rank_k_update(
   Triangle /* t */)
 {
   constexpr bool lower_tri = std::is_same_v<Triangle, lower_triangle_t>;
-  using size_type = ::std::common_type_t<SizeType_A, SizeType_C>;
+  using size_type = std::common_type_t<SizeType_A, SizeType_C>;
 
-  for (size_type j = 0; j < C.extent(1); ++j) {
-    const size_type i_lower = lower_tri ? j : size_type(0);
-    const size_type i_upper = lower_tri ? C.extent(0) : j+1;
-    for (size_type i = i_lower; i < i_upper; ++i) {
-      for (size_type k = 0; k < A.extent(1); ++k) {
-        C(i,j) += A(i,k) * impl::conj_if_needed(A(j,k));
+  if constexpr (std::is_same_v<Triangle, upper_triangle_t>) {
+    // [A_00  A_01  A_02]   [A_00            ]
+    // [      A_11  A_12] * [A_01  A_11      ]
+    // [            A_22]   [A_02  A_12  A_22]
+    for (size_type row = 0; row < C.extent(0); ++row) {
+      for (size_type col = 0; col < C.extent(1); ++col) {
+        const size_type lower = row < col ? col : row; // max
+        const size_type upper = A.extent(0);
+        for (size_type k = lower; k < upper; ++k) {
+          C(row, col) += A(row, k) * impl::conj_if_needed(A(col, k));
+        }
+      }
+    }
+  }
+  else {
+    // [A_00            ]   [A_00  A_10  A_20]
+    // [A_10  A_11      ] * [      A_11  A_21]
+    // [A_20  A_21  A_22]   [            A_22]
+    for (size_type row = 0; row < C.extent(0); ++row) {
+      for (size_type col = 0; col < C.extent(1); ++col) {
+        const size_type lower = 0;
+        const size_type upper = row < col ? row : col; // min
+        for (size_type k = lower; k < upper; ++k) {
+          C(row, col) += A(row, k) * impl::conj_if_needed(A(col, k));
+        }
       }
     }
   }
