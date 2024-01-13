@@ -43,8 +43,6 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS3_MATRIX_RANK_K_UPDATE_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS3_MATRIX_RANK_K_UPDATE_HPP_
 
-#include <execution>
-
 namespace std {
 namespace experimental {
 inline namespace __p1673_version_0 {
@@ -194,8 +192,7 @@ MDSPAN_TEMPLATE_REQUIRES(
   class Accessor_C,
   class Triangle,
   /* requires */ (
-    (std::is_execution_policy_v<ExecutionPolicy> ||
-     std::is_same_v<std::experimental::linalg::impl::default_exec_t, ExecutionPolicy>) &&
+    impl::is_linalg_execution_policy_other_than_inline_v<ExecutionPolicy> &&
     (std::is_same_v<Triangle, lower_triangle_t> ||
      std::is_same_v<Triangle, upper_triangle_t>)
   )
@@ -230,8 +227,7 @@ MDSPAN_TEMPLATE_REQUIRES(
   class Accessor_C,
   class Triangle,
   /* requires */ (
-    (! std::is_execution_policy_v<ScaleFactorType> &&
-     ! std::is_same_v<std::experimental::linalg::impl::default_exec_t, ScaleFactorType>) &&
+    (! impl::is_linalg_execution_policy_other_than_inline_v<ScaleFactorType>) &&
     (std::is_same_v<Triangle, lower_triangle_t> ||
      std::is_same_v<Triangle, upper_triangle_t>)
   )
@@ -313,8 +309,7 @@ MDSPAN_TEMPLATE_REQUIRES(
   class Accessor_C,
   class Triangle,
   /* requires */ (
-    (std::is_execution_policy_v<ExecutionPolicy> ||
-     std::is_same_v<std::experimental::linalg::impl::default_exec_t, ExecutionPolicy>) &&
+    impl::is_linalg_execution_policy_other_than_inline_v<ExecutionPolicy> &&
     (std::is_same_v<Triangle, lower_triangle_t> ||
      std::is_same_v<Triangle, upper_triangle_t>)
   )
@@ -430,8 +425,7 @@ MDSPAN_TEMPLATE_REQUIRES(
   class Accessor_C,
   class Triangle,
   /* requires */ (
-    (std::is_execution_policy_v<ExecutionPolicy> ||
-     std::is_same_v<std::experimental::linalg::impl::default_exec_t, ExecutionPolicy>) &&
+    impl::is_linalg_execution_policy_other_than_inline_v<ExecutionPolicy> &&
     (std::is_same_v<Triangle, lower_triangle_t> ||
      std::is_same_v<Triangle, upper_triangle_t>)
   )
@@ -466,8 +460,7 @@ MDSPAN_TEMPLATE_REQUIRES(
   class Accessor_C,
   class Triangle,
   /* requires */ (
-    (! std::is_execution_policy_v<ScaleFactorType> &&
-     ! std::is_same_v<std::experimental::linalg::impl::default_exec_t, ScaleFactorType>) &&
+    (! impl::is_linalg_execution_policy_other_than_inline_v<ScaleFactorType>) &&
     (std::is_same_v<Triangle, lower_triangle_t> ||
      std::is_same_v<Triangle, upper_triangle_t>)
   )
@@ -548,8 +541,7 @@ MDSPAN_TEMPLATE_REQUIRES(
   class Accessor_C,
   class Triangle,
   /* requires */ (
-    (std::is_execution_policy_v<ExecutionPolicy> ||
-     std::is_same_v<std::experimental::linalg::impl::default_exec_t, ExecutionPolicy>) &&
+    impl::is_linalg_execution_policy_other_than_inline_v<ExecutionPolicy> &&
     (std::is_same_v<Triangle, lower_triangle_t> ||
      std::is_same_v<Triangle, upper_triangle_t>)
   )
