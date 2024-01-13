@@ -27,7 +27,7 @@ template<class T> inline constexpr bool is_inline_exec_v = is_inline_exec<T>::va
 // custom execution policies provided by this implementation.
 // Specialize this to be true for any new custom execution policy.
 template<class T>
-inline constexpr bool is_custom_linalg_execution_policy =
+inline constexpr bool is_custom_linalg_execution_policy_v =
   std::is_same_v<T, default_exec_t> || std::is_same_v<T, inline_exec_t>;
 
 // value is true if and only if T is _not_ inline_exec, and if T is
@@ -47,7 +47,7 @@ inline constexpr bool is_linalg_execution_policy_other_than_inline_v =
 #if (! defined(__GNUC__)) || (__GNUC__ > 9)
     std::is_execution_policy_v<T> ||
 #endif
-    is_custom_linalg_execution_policy<T>
+    is_custom_linalg_execution_policy_v<T>
   );
 
 } // namespace impl
