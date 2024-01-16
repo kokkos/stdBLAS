@@ -124,48 +124,79 @@ struct is_custom_herm_mat_rank_k_update_avail<
 
 // Rank-k update of a symmetric matrix with scaling factor alpha
 
-template<class ScaleFactorType,
-	 class ElementType_A,
-         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
-         class Layout_A,
-         class Accessor_A,
-         class ElementType_C,
-         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
-         class Layout_C,
-         class Accessor_C,
-         class Triangle>
+MDSPAN_TEMPLATE_REQUIRES(
+  class ScaleFactorType,
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+  class Layout_A,
+  class Accessor_A,
+  class ElementType_C,
+  class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+  class Layout_C,
+  class Accessor_C,
+  class Triangle,
+  /* requires */ (
+    std::is_same_v<Triangle, lower_triangle_t> ||
+    std::is_same_v<Triangle, upper_triangle_t>
+  )
+)
 void symmetric_matrix_rank_k_update(
-  std::experimental::linalg::impl::inline_exec_t&& /*exec*/,
+  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
   ScaleFactorType alpha,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle /* t */)
 {
-  constexpr bool lower_tri = std::is_same_v<Triangle, lower_triangle_t>;
-  using size_type = ::std::common_type_t<SizeType_A, SizeType_C>;
+  using size_type = std::common_type_t<SizeType_A, SizeType_C>;
 
-  for (size_type j = 0; j < C.extent(1); ++j) {
-    const size_type i_lower = lower_tri ? j : size_type(0);
-    const size_type i_upper = lower_tri ? C.extent(0) : j+1;
-    for (size_type i = i_lower; i < i_upper; ++i) {
-      for (size_type k = 0; k < A.extent(1); ++k) {
-        C(i,j) += alpha*A(i,k)*A(j,k);
+  if constexpr (std::is_same_v<Triangle, upper_triangle_t>) {
+    // [A_00  A_01  A_02]   [A_00            ]
+    // [      A_11  A_12] * [A_01  A_11      ]
+    // [            A_22]   [A_02  A_12  A_22]
+    for (size_type row = 0; row < C.extent(0); ++row) {
+      for (size_type col = 0; col < C.extent(1); ++col) {
+        const size_type lower = row < col ? col : row; // max
+        const size_type upper = A.extent(0);
+        for (size_type k = lower; k < upper; ++k) {
+          C(row, col) += alpha * A(row, k) * A(col, k);
+        }
+      }
+    }
+  }
+  else {
+    // [A_00            ]   [A_00  A_10  A_20]
+    // [A_10  A_11      ] * [      A_11  A_21]
+    // [A_20  A_21  A_22]   [            A_22]
+    for (size_type row = 0; row < C.extent(0); ++row) {
+      for (size_type col = 0; col < C.extent(1); ++col) {
+        const size_type lower = 0;
+        const size_type upper = row < col ? row : col; // min
+        for (size_type k = lower; k < upper; ++k) {
+          C(row, col) += alpha * A(row, k) * A(col, k);
+        }
       }
     }
   }
 }
 
-template<class ScaleFactorType,
-	 class ExecutionPolicy,
-         class ElementType_A,
-         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
-         class Layout_A,
-         class Accessor_A,
-         class ElementType_C,
-         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
-         class Layout_C,
-         class Accessor_C,
-         class Triangle>
+MDSPAN_TEMPLATE_REQUIRES(
+  class ExecutionPolicy,
+  class ScaleFactorType,
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+  class Layout_A,
+  class Accessor_A,
+  class ElementType_C,
+  class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+  class Layout_C,
+  class Accessor_C,
+  class Triangle,
+  /* requires */ (
+    impl::is_linalg_execution_policy_other_than_inline_v<ExecutionPolicy> &&
+    (std::is_same_v<Triangle, lower_triangle_t> ||
+     std::is_same_v<Triangle, upper_triangle_t>)
+  )
+)
 void symmetric_matrix_rank_k_update(
   ExecutionPolicy&& exec,
   ScaleFactorType alpha,
@@ -173,86 +204,121 @@ void symmetric_matrix_rank_k_update(
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle t)
 {
-
   constexpr bool use_custom = is_custom_sym_mat_rank_k_update_avail<
     decltype(execpolicy_mapper(exec)), ScaleFactorType, decltype(A), decltype(C), Triangle
     >::value;
 
-  if constexpr(use_custom) {
+  if constexpr (use_custom) {
     symmetric_matrix_rank_k_update(execpolicy_mapper(exec), alpha, A, C, t);
   } else {
     symmetric_matrix_rank_k_update(std::experimental::linalg::impl::inline_exec_t(), alpha, A, C, t);
   }
 }
 
-template<class ScaleFactorType,
-	 class ElementType_A,
-         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
-         class Layout_A,
-         class Accessor_A,
-         class ElementType_C,
-         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
-         class Layout_C,
-         class Accessor_C,
-         class Triangle>
+MDSPAN_TEMPLATE_REQUIRES(
+  class ScaleFactorType,
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+  class Layout_A,
+  class Accessor_A,
+  class ElementType_C,
+  class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+  class Layout_C,
+  class Accessor_C,
+  class Triangle,
+  /* requires */ (
+    (! impl::is_linalg_execution_policy_other_than_inline_v<ScaleFactorType>) &&
+    (std::is_same_v<Triangle, lower_triangle_t> ||
+     std::is_same_v<Triangle, upper_triangle_t>)
+  )
+)
 void symmetric_matrix_rank_k_update(
   ScaleFactorType alpha,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
-  Triangle t )
+  Triangle t)
 {
   symmetric_matrix_rank_k_update(std::experimental::linalg::impl::default_exec_t(), alpha, A, C, t);
 }
 
+// Rank-k update of a symmetric matrix without scaling factor alpha
 
-// Rank-k update of a symmetric matrix without scaling factor
-
-template<class ElementType_A,
-         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
-         class Layout_A,
-         class Accessor_A,
-         class ElementType_C,
-         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
-         class Layout_C,
-         class Accessor_C,
-         class Triangle>
+MDSPAN_TEMPLATE_REQUIRES(
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+  class Layout_A,
+  class Accessor_A,
+  class ElementType_C,
+  class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+  class Layout_C,
+  class Accessor_C,
+  class Triangle,
+  /* requires */ (
+    std::is_same_v<Triangle, lower_triangle_t> ||
+    std::is_same_v<Triangle, upper_triangle_t>
+  )
+)
 void symmetric_matrix_rank_k_update(
-  std::experimental::linalg::impl::inline_exec_t&& /*exec*/,
+  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle /* t */)
 {
-  constexpr bool lower_tri = std::is_same_v<Triangle, lower_triangle_t>;
-  using size_type = ::std::common_type_t<SizeType_A, SizeType_C>;
+  using size_type = std::common_type_t<SizeType_A, SizeType_C>;
 
-  for (size_type j = 0; j < C.extent(1); ++j) {
-    const size_type i_lower = lower_tri ? j : size_type(0);
-    const size_type i_upper = lower_tri ? C.extent(0) : j+1;
-    for (size_type i = i_lower; i < i_upper; ++i) {
-      for (size_type k = 0; k < A.extent(1); ++k) {
-        C(i,j) += A(i,k)*A(j,k);
+  if constexpr (std::is_same_v<Triangle, upper_triangle_t>) {
+    // [A_00  A_01  A_02]   [A_00            ]
+    // [      A_11  A_12] * [A_01  A_11      ]
+    // [            A_22]   [A_02  A_12  A_22]
+    for (size_type row = 0; row < C.extent(0); ++row) {
+      for (size_type col = 0; col < C.extent(1); ++col) {
+        const size_type lower = row < col ? col : row; // max
+        const size_type upper = A.extent(0);
+        for (size_type k = lower; k < upper; ++k) {
+          C(row, col) += A(row, k) * A(col, k);
+        }
+      }
+    }
+  }
+  else {
+    // [A_00            ]   [A_00  A_10  A_20]
+    // [A_10  A_11      ] * [      A_11  A_21]
+    // [A_20  A_21  A_22]   [            A_22]
+    for (size_type row = 0; row < C.extent(0); ++row) {
+      for (size_type col = 0; col < C.extent(1); ++col) {
+        const size_type lower = 0;
+        const size_type upper = row < col ? row : col; // min
+        for (size_type k = lower; k < upper; ++k) {
+          C(row, col) += A(row, k) * A(col, k);
+        }
       }
     }
   }
 }
 
-template<class ExecutionPolicy,
-         class ElementType_A,
-         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
-         class Layout_A,
-         class Accessor_A,
-         class ElementType_C,
-         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
-         class Layout_C,
-         class Accessor_C,
-         class Triangle>
+MDSPAN_TEMPLATE_REQUIRES(
+  class ExecutionPolicy,
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+  class Layout_A,
+  class Accessor_A,
+  class ElementType_C,
+  class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+  class Layout_C,
+  class Accessor_C,
+  class Triangle,
+  /* requires */ (
+    impl::is_linalg_execution_policy_other_than_inline_v<ExecutionPolicy> &&
+    (std::is_same_v<Triangle, lower_triangle_t> ||
+     std::is_same_v<Triangle, upper_triangle_t>)
+  )
+)
 void symmetric_matrix_rank_k_update(
   ExecutionPolicy&& exec,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle t)
 {
-
   constexpr bool use_custom = is_custom_sym_mat_rank_k_update_avail<
     decltype(execpolicy_mapper(exec)), void, decltype(A), decltype(C), Triangle
     >::value;
@@ -264,68 +330,106 @@ void symmetric_matrix_rank_k_update(
   }
 }
 
-template<class ElementType_A,
-         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
-         class Layout_A,
-         class Accessor_A,
-         class ElementType_C,
-         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
-         class Layout_C,
-         class Accessor_C,
-         class Triangle>
+MDSPAN_TEMPLATE_REQUIRES(
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+  class Layout_A,
+  class Accessor_A,
+  class ElementType_C,
+  class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+  class Layout_C,
+  class Accessor_C,
+  class Triangle,
+  /* requires */ (
+    std::is_same_v<Triangle, lower_triangle_t> ||
+    std::is_same_v<Triangle, upper_triangle_t>
+  )
+)
 void symmetric_matrix_rank_k_update(
   std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
-  Triangle t )
+  Triangle t)
 {
   symmetric_matrix_rank_k_update(std::experimental::linalg::impl::default_exec_t(), A, C, t);
 }
 
+// Rank-k update of a Hermitian matrix
 
 // Rank-k update of a Hermitian matrix with scaling factor alpha
 
-template<class ScaleFactorType,
-	 class ElementType_A,
-         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
-         class Layout_A,
-         class Accessor_A,
-         class ElementType_C,
-         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
-         class Layout_C,
-         class Accessor_C,
-         class Triangle>
+MDSPAN_TEMPLATE_REQUIRES(
+  class ScaleFactorType,
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+  class Layout_A,
+  class Accessor_A,
+  class ElementType_C,
+  class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+  class Layout_C,
+  class Accessor_C,
+  class Triangle,
+  /* requires */ (
+    std::is_same_v<Triangle, lower_triangle_t> ||
+    std::is_same_v<Triangle, upper_triangle_t>
+  )
+)
 void hermitian_matrix_rank_k_update(
-  std::experimental::linalg::impl::inline_exec_t&& /*exec*/,
+  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
   ScaleFactorType alpha,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle /* t */)
 {
-  constexpr bool lower_tri = std::is_same_v<Triangle, lower_triangle_t>;
-  using size_type = ::std::common_type_t<SizeType_A, SizeType_C>;
+  using size_type = std::common_type_t<SizeType_A, SizeType_C>;
 
-  for (size_type j = 0; j < C.extent(1); ++j) {
-    const size_type i_lower = lower_tri ? j : size_type(0);
-    const size_type i_upper = lower_tri ? C.extent(0) : j+1;
-    for (size_type i = i_lower; i < i_upper; ++i) {
-      for (size_type k = 0; k < A.extent(1); ++k) {
-        C(i,j) += alpha * A(i,k) * impl::conj_if_needed(A(j,k));
+  if constexpr (std::is_same_v<Triangle, upper_triangle_t>) {
+    // [A_00  A_01  A_02]   [A_00            ]
+    // [      A_11  A_12] * [A_01  A_11      ]
+    // [            A_22]   [A_02  A_12  A_22]
+    for (size_type row = 0; row < C.extent(0); ++row) {
+      for (size_type col = 0; col < C.extent(1); ++col) {
+        const size_type lower = row < col ? col : row; // max
+        const size_type upper = A.extent(0);
+        for (size_type k = lower; k < upper; ++k) {
+          C(row, col) += alpha * A(row, k) * impl::conj_if_needed(A(col, k));
+        }
+      }
+    }
+  }
+  else {
+    // [A_00            ]   [A_00  A_10  A_20]
+    // [A_10  A_11      ] * [      A_11  A_21]
+    // [A_20  A_21  A_22]   [            A_22]
+    for (size_type row = 0; row < C.extent(0); ++row) {
+      for (size_type col = 0; col < C.extent(1); ++col) {
+        const size_type lower = 0;
+        const size_type upper = row < col ? row : col; // min
+        for (size_type k = lower; k < upper; ++k) {
+          C(row, col) += alpha * A(row, k) * impl::conj_if_needed(A(col, k));
+        }
       }
     }
   }
 }
 
-template<class ScaleFactorType,
-	 class ExecutionPolicy,
-         class ElementType_A,
-         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
-         class Layout_A,
-         class Accessor_A,
-         class ElementType_C,
-         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
-         class Layout_C,
-         class Accessor_C,
-         class Triangle>
+MDSPAN_TEMPLATE_REQUIRES(
+  class ExecutionPolicy,
+  class ScaleFactorType,
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+  class Layout_A,
+  class Accessor_A,
+  class ElementType_C,
+  class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+  class Layout_C,
+  class Accessor_C,
+  class Triangle,
+  /* requires */ (
+    impl::is_linalg_execution_policy_other_than_inline_v<ExecutionPolicy> &&
+    (std::is_same_v<Triangle, lower_triangle_t> ||
+     std::is_same_v<Triangle, upper_triangle_t>)
+  )
+)
 void hermitian_matrix_rank_k_update(
   ExecutionPolicy&& exec,
   ScaleFactorType alpha,
@@ -344,66 +448,104 @@ void hermitian_matrix_rank_k_update(
   }
 }
 
-template<class ScaleFactorType,
-	 class ElementType_A,
-         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
-         class Layout_A,
-         class Accessor_A,
-         class ElementType_C,
-         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
-         class Layout_C,
-         class Accessor_C,
-         class Triangle>
+MDSPAN_TEMPLATE_REQUIRES(
+  class ScaleFactorType,
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+  class Layout_A,
+  class Accessor_A,
+  class ElementType_C,
+  class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+  class Layout_C,
+  class Accessor_C,
+  class Triangle,
+  /* requires */ (
+    (! impl::is_linalg_execution_policy_other_than_inline_v<ScaleFactorType>) &&
+    (std::is_same_v<Triangle, lower_triangle_t> ||
+     std::is_same_v<Triangle, upper_triangle_t>)
+  )
+)
 void hermitian_matrix_rank_k_update(
   ScaleFactorType alpha,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
-  Triangle t )
+  Triangle t)
 {
   hermitian_matrix_rank_k_update(std::experimental::linalg::impl::default_exec_t(), alpha, A, C, t);
 }
 
 // Rank-k update of a Hermitian matrix without scaling factor alpha
 
-template<class ElementType_A,
-         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
-         class Layout_A,
-         class Accessor_A,
-         class ElementType_C,
-         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
-         class Layout_C,
-         class Accessor_C,
-         class Triangle>
+MDSPAN_TEMPLATE_REQUIRES(
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+  class Layout_A,
+  class Accessor_A,
+  class ElementType_C,
+  class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+  class Layout_C,
+  class Accessor_C,
+  class Triangle,
+  /* requires */ (
+    std::is_same_v<Triangle, lower_triangle_t> ||
+    std::is_same_v<Triangle, upper_triangle_t>
+  )
+)
 void hermitian_matrix_rank_k_update(
-  std::experimental::linalg::impl::inline_exec_t&& /*exec*/,
+  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle /* t */)
 {
-  constexpr bool lower_tri = std::is_same_v<Triangle, lower_triangle_t>;
-  using size_type = ::std::common_type_t<SizeType_A, SizeType_C>;
+  using size_type = std::common_type_t<SizeType_A, SizeType_C>;
 
-  for (size_type j = 0; j < C.extent(1); ++j) {
-    const size_type i_lower = lower_tri ? j : size_type(0);
-    const size_type i_upper = lower_tri ? C.extent(0) : j+1;
-    for (size_type i = i_lower; i < i_upper; ++i) {
-      for (size_type k = 0; k < A.extent(1); ++k) {
-        C(i,j) += A(i,k) * impl::conj_if_needed(A(j,k));
+  if constexpr (std::is_same_v<Triangle, upper_triangle_t>) {
+    // [A_00  A_01  A_02]   [A_00            ]
+    // [      A_11  A_12] * [A_01  A_11      ]
+    // [            A_22]   [A_02  A_12  A_22]
+    for (size_type row = 0; row < C.extent(0); ++row) {
+      for (size_type col = 0; col < C.extent(1); ++col) {
+        const size_type lower = row < col ? col : row; // max
+        const size_type upper = A.extent(0);
+        for (size_type k = lower; k < upper; ++k) {
+          C(row, col) += A(row, k) * impl::conj_if_needed(A(col, k));
+        }
+      }
+    }
+  }
+  else {
+    // [A_00            ]   [A_00  A_10  A_20]
+    // [A_10  A_11      ] * [      A_11  A_21]
+    // [A_20  A_21  A_22]   [            A_22]
+    for (size_type row = 0; row < C.extent(0); ++row) {
+      for (size_type col = 0; col < C.extent(1); ++col) {
+        const size_type lower = 0;
+        const size_type upper = row < col ? row : col; // min
+        for (size_type k = lower; k < upper; ++k) {
+          C(row, col) += A(row, k) * impl::conj_if_needed(A(col, k));
+        }
       }
     }
   }
 }
 
-template<class ExecutionPolicy,
-         class ElementType_A,
-         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
-         class Layout_A,
-         class Accessor_A,
-         class ElementType_C,
-         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
-         class Layout_C,
-         class Accessor_C,
-         class Triangle>
+MDSPAN_TEMPLATE_REQUIRES(
+  class ExecutionPolicy,
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+  class Layout_A,
+  class Accessor_A,
+  class ElementType_C,
+  class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+  class Layout_C,
+  class Accessor_C,
+  class Triangle,
+  /* requires */ (
+    impl::is_linalg_execution_policy_other_than_inline_v<ExecutionPolicy> &&
+    (std::is_same_v<Triangle, lower_triangle_t> ||
+     std::is_same_v<Triangle, upper_triangle_t>)
+  )
+)
 void hermitian_matrix_rank_k_update(
   ExecutionPolicy&& exec,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
@@ -421,23 +563,28 @@ void hermitian_matrix_rank_k_update(
   }
 }
 
-template<class ElementType_A,
-         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
-         class Layout_A,
-         class Accessor_A,
-         class ElementType_C,
-         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
-         class Layout_C,
-         class Accessor_C,
-         class Triangle>
+MDSPAN_TEMPLATE_REQUIRES(
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+  class Layout_A,
+  class Accessor_A,
+  class ElementType_C,
+  class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+  class Layout_C,
+  class Accessor_C,
+  class Triangle,
+  /* requires */ (
+    std::is_same_v<Triangle, lower_triangle_t> ||
+    std::is_same_v<Triangle, upper_triangle_t>
+  )
+)
 void hermitian_matrix_rank_k_update(
   std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   std::experimental::mdspan<ElementType_C, std::experimental::extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
-  Triangle t )
+  Triangle t)
 {
   hermitian_matrix_rank_k_update(std::experimental::linalg::impl::default_exec_t(), A, C, t);
 }
-
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0

@@ -52,6 +52,8 @@
 #define MDSPAN_USE_PAREN_OPERATOR 1
 
 #include <experimental/mdspan>
+#include "experimental/__p2630_bits/submdspan.hpp"
+
 #include <complex>
 #include <vector>
 
@@ -69,7 +71,8 @@
   using std::experimental::layout_right;
   using std::experimental::layout_stride;
   using std::experimental::mdspan;
-  using std::experimental::submdspan;
+
+  using MDSPAN_IMPL_STANDARD_NAMESPACE :: submdspan;
 
   using dbl_vector_t = mdspan<double, extents<std::size_t, dynamic_extent>>;
   using cpx_vector_t = mdspan<std::complex<double>, extents<std::size_t, dynamic_extent>>;

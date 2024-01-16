@@ -4,8 +4,9 @@
 // This must be defined before including any mdspan headers.
 #define MDSPAN_USE_PAREN_OPERATOR 1
 
+#include <experimental/mdspan>
+#include "experimental/__p2630_bits/submdspan.hpp"
 #include <experimental/linalg>
-
 #include <iostream>
 
 #if defined(__cpp_lib_span)
@@ -17,7 +18,8 @@
 using std::experimental::extents;
 using std::full_extent; // not in experimental namespace
 using std::experimental::mdspan;
-using std::experimental::submdspan;
+
+using MDSPAN_IMPL_STANDARD_NAMESPACE :: submdspan;
 
 int main(int argc, char* argv[]) {
   std::cout << "Matrix Vector Product MixedPrec" << std::endl;
