@@ -16,7 +16,7 @@ namespace {
   // The reference implementation needs to implement all constraints
   // of symmetric_matrix_rank_k_update in order to disambiguate
   // overloads.
-  TEST(BLAS3_syrk, Issue261)
+  TEST(BLAS3_syrk, AmbiguousOverloads_Issue261)
   {
     constexpr auto map_C = layout_left::mapping{extents<std::size_t,3,3>{}};
     constexpr auto map_expected = map_C;
