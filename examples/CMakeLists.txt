@@ -1,7 +1,8 @@
 
 function(linalg_add_example EXENAME)
   add_executable(${EXENAME} ${EXENAME}.cpp)
-  target_link_libraries(${EXENAME} linalg)
+  target_link_libraries(${EXENAME} PRIVATE linalg)
+  set_target_properties(${EXENAME} PROPERTIES FOLDER "Examples")
 endfunction(linalg_add_example)
 
 linalg_add_example(01_scale)
@@ -10,4 +11,7 @@ linalg_add_example(03_matrix_vector_product_mixedprec)
 
 if(LINALG_ENABLE_KOKKOS)
   add_subdirectory(kokkos-based)
+endif()
+if(LINALG_ENABLE_HPX)
+  add_subdirectory(hpx-based)
 endif()

@@ -26,6 +26,8 @@ macro(linalg_add_test_kokkos TESTNAME FINDSTR)
     target_compile_definitions(${testExe} PRIVATE -DKOKKOS_STDBLAS_ENABLE_TESTS)
   endif()
 
+  set_target_properties(${testExe} PROPERTIES FOLDER "Tests/Kokkos")
+
   add_test(
     NAME ${testNameFinal}
     COMMAND ${CMAKE_COMMAND}

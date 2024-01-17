@@ -2,6 +2,7 @@
 
 #include <experimental/linalg>
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 #include <limits>
 #include <type_traits>
@@ -365,6 +366,7 @@ namespace {
 
       // Part of LegacyForwardIterator
       decltype(the_beg) default_constructed;
+      (void) default_constructed;
 
       {
         ptrdiff_t k = 0;

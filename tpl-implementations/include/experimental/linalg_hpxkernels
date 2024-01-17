@@ -1,0 +1,35 @@
+//  Copyright (c) 2022 Hartmut Kaiser
+
+#pragma once
+
+#include <experimental/mdspan>
+#include <hpx/execution.hpp>
+
+// blas1 (according to P1673)
+//#include "__p1673_bits/hpx-kernels/blas1_dot_hpx.hpp"
+#include "__p1673_bits/hpx-kernels/blas1_add_hpx.hpp"
+#include "__p1673_bits/hpx-kernels/blas1_scale_hpx.hpp"
+//#include "__p1673_bits/hpx-kernels/blas1_idx_abs_max_hpx.hpp"
+//#include "__p1673_bits/hpx-kernels/blas1_vector_norm2_hpx.hpp"
+//#include "__p1673_bits/hpx-kernels/blas1_vector_abs_sum_hpx.hpp"
+//#include "__p1673_bits/hpx-kernels/blas1_vector_sum_of_squares_hpx.hpp"
+//#include "__p1673_bits/hpx-kernels/blas1_matrix_frob_norm_hpx.hpp"
+//#include "__p1673_bits/hpx-kernels/blas1_matrix_inf_norm_hpx.hpp"
+//#include "__p1673_bits/hpx-kernels/blas1_matrix_one_norm_hpx.hpp"
+//#include "__p1673_bits/hpx-kernels/blas1_swap_elements_hpx.hpp"
+//#include "__p1673_bits/hpx-kernels/blas1_copy_hpx.hpp"
+
+// blas2 (according to P1673)
+//#include "__p1673_bits/hpx-kernels/blas2_matrix_rank_1_update.hpp"
+//#include "__p1673_bits/hpx-kernels/blas2_matrix_rank_2_update.hpp"
+//#include "__p1673_bits/hpx-kernels/blas2_gemv_hpx.hpp"
+//#include "__p1673_bits/hpx-kernels/blas2_symv_hpx.hpp"
+//#include "__p1673_bits/hpx-kernels/blas2_hemv_hpx.hpp"
+//#include "__p1673_bits/hpx-kernels/blas2_triangular_mat_vec_product.hpp"
+
+// blas3 (according to P1673)
+//#include "__p1673_bits/hpx-kernels/blas3_overwriting_gemm_hpx.hpp"
+//#include "__p1673_bits/hpx-kernels/blas3_matrix_rank_k_update.hpp"
+//#include "__p1673_bits/hpx-kernels/blas3_matrix_rank_2k_update.hpp"
+//#include "__p1673_bits/hpx-kernels/blas3_matrix_product_hpx.hpp"
+//#include "__p1673_bits/hpx-kernels/blas3_triangular_matrix_matrix_solve.hpp"
