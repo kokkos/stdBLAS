@@ -366,6 +366,23 @@ constexpr bool extractConj(in_matrix_t A)
 template <class Exec, class A_t, class B_t, class C_t, class = void>
 struct is_custom_matrix_product_avail : std::false_type {};
 
+template <class Exec, class A_t, class B_t, class C_t>
+struct is_custom_matrix_product_avail<
+  Exec, A_t, B_t, C_t,
+  std::enable_if_t<
+    std::is_void_v<
+      decltype(
+	       matrix_product
+	       (std::declval<Exec>(),
+		std::declval<A_t>(),
+		std::declval<B_t>(),
+		std::declval<C_t>()))
+      >
+    && !linalg::impl::is_inline_exec_v<Exec>
+    >
+  >
+  : std::true_type{};
+
 template <class Exec, class A_t, class B_t, class E_t, class C_t, class = void>
 struct is_custom_matrix_product_with_update_avail : std::false_type {};
 
@@ -2085,36 +2102,6 @@ void hermitian_matrix_right_product(
   hermitian_matrix_right_product(std::experimental::linalg::impl::default_exec_t(), A, t, B, E, C);
 }
 
-template <class Exec, class A_t, class B_t, class C_t>
-struct is_custom_matrix_product_avail<
-  Exec, A_t, B_t, C_t,
-  std::enable_if_t<
-    std::is_void_v<
-      decltype(
-	      matrix_product(
-          std::declval<Exec>(),
-          std::declval<A_t>(),
-		      std::declval<B_t>(),
-		      std::declval<C_t>()))
-      >
-    && !std::is_same_v< // see #218
-      decltype(
-        std::experimental::linalg::matrix_product(
-          std::declval<Exec>(),
-          std::declval<A_t>(),
-		      std::declval<B_t>(),
-		      std::declval<C_t>())),
-      decltype(
-        matrix_product(
-          std::declval<Exec>(),
-          std::declval<A_t>(),
-		      std::declval<B_t>(),
-		      std::declval<C_t>()))
-      >
-    && !linalg::impl::is_inline_exec_v<Exec>
-    >
-  >
-  : std::true_type{};
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
