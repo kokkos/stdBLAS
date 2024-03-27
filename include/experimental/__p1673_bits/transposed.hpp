@@ -259,7 +259,7 @@ namespace impl {
       // https://github.com/kokkos/stdBLAS/issues/242
       return return_mapping_type{
 	transpose_extents(orig_map.extents()),
-	std::array<typename extents_type::size_type, OriginalExtents::rank() /* orig_map.rank() */ >{
+	std::array<typename extents_type::index_type, OriginalExtents::rank() /* orig_map.rank() */ >{
 	  orig_map.stride(1),
 	  orig_map.stride(0)}};
     }

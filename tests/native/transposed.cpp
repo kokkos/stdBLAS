@@ -140,6 +140,67 @@ namespace {
     }
   }
 
+  TEST(transposed_layout, layout_right)
+  {
+    auto test_one = [] (auto in_exts, auto out_exts, std::vector<char>& fake_storage) {
+      layout_right::mapping in_map{in_exts};
+      layout_left::mapping out_map{out_exts};
+      test_transposed_layout(in_map, out_map, fake_storage);
+    };
+
+    std::vector<char> storage;
+    {
+      using in_extents_type = extents<int, 3, 4>;
+      using out_extents_type = extents<int, 4, 3>;
+      test_one(in_extents_type{}, out_extents_type{}, storage);
+    }
+    {
+      using in_extents_type = extents<int, 3, dynamic_extent>;
+      using out_extents_type = extents<int, dynamic_extent, 3>;
+      test_one(in_extents_type{4}, out_extents_type{4}, storage);
+    }
+    {
+      using in_extents_type = extents<int, dynamic_extent, dynamic_extent>;
+      using out_extents_type = extents<int, dynamic_extent, dynamic_extent>;
+      test_one(in_extents_type{3, 4}, out_extents_type{4, 3}, storage);
+    }
+  }
+
+  TEST(transposed_layout, layout_stride)
+  {
+    auto test_one = [] (auto in_exts, auto out_exts, std::vector<char>& fake_storage) {
+      using index_type = decltype(in_exts.extent(0));
+      const std::array<index_type, 2> in_strides{
+        static_cast<index_type>(2),
+        static_cast<index_type>((in_exts.extent(0) + 1) * 2)
+      };
+      const std::array<index_type, 2> out_strides{
+        in_strides[1],
+        in_strides[0]
+      };
+      layout_stride::mapping in_map{in_exts, in_strides};
+      layout_stride::mapping out_map{out_exts, out_strides};
+      test_transposed_layout(in_map, out_map, fake_storage);
+    };
+
+    std::vector<char> storage;
+    {
+      using in_extents_type = extents<int, 3, 4>;
+      using out_extents_type = extents<int, 4, 3>;
+      test_one(in_extents_type{}, out_extents_type{}, storage);
+    }
+    {
+      using in_extents_type = extents<int, 3, dynamic_extent>;
+      using out_extents_type = extents<int, dynamic_extent, 3>;
+      test_one(in_extents_type{4}, out_extents_type{4}, storage);
+    }
+    {
+      using in_extents_type = extents<int, dynamic_extent, dynamic_extent>;
+      using out_extents_type = extents<int, dynamic_extent, dynamic_extent>;
+      test_one(in_extents_type{3, 4}, out_extents_type{4, 3}, storage);
+    }
+  }
+
   TEST(transposed, mdspan_double)
   {
     using real_t = double;
