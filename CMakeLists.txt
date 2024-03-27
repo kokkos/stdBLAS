@@ -23,6 +23,8 @@ set_property(CACHE LINALG_CXX_STANDARD PROPERTY STRINGS DETECT 14 17 20 23)
 option(LINALG_ENABLE_CONCEPTS "Try to enable concepts support by giving extra flags." On)
 option(LINALG_ENABLE_ATOMIC_REF "Try to enable atomic_ref support" OFF)
 
+option(LINALG_FIX_TRANSPOSED_FOR_PADDED_LAYOUTS "Enable implementation of P3222 (Fix transposed for P2642 padded layouts).  OFF by default, though this will change if P3222 is voted into the C++ Standard Working Draft." OFF)
+
 ################################################################################
 
 # Decide on the standard to use
