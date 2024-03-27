@@ -99,7 +99,7 @@ template<class Layout>
 class layout_transpose {
 public:
   using nested_layout_type = Layout;
-  
+
   template<class Extents>
   struct mapping {
   private:
@@ -262,6 +262,27 @@ namespace impl {
 	std::array<typename extents_type::index_type, OriginalExtents::rank() /* orig_map.rank() */ >{
 	  orig_map.stride(1),
 	  orig_map.stride(0)}};
+    }
+  };
+
+  template<size_t PaddingValue>
+  struct transposed_layout<layout_left_padded<PaddingValue>> {
+    using layout_type = layout_right_padded<PaddingValue>;
+
+    template<class OriginalExtents>
+    static auto mapping(const typename layout_left_padded<PaddingValue>::template mapping<OriginalExtents>& orig_map) {
+      using input_mapping_type =
+        typename layout_left_padded<PaddingValue>::template mapping<OriginalExtents>;
+      using output_extents_type =
+        transpose_extents_t<typename input_mapping_type::extents_type>;
+      using output_mapping_type =
+        typename layout_type::template mapping<output_extents_type>;
+
+      const auto padding_value = orig_map.stride(1);
+      return output_mapping_type{
+	transpose_extents(orig_map.extents()),
+        padding_value
+      };
     }
   };
 
