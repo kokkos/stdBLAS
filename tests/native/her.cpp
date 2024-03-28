@@ -1,16 +1,9 @@
 #include "./gtest_fixtures.hpp"
 
-#include <experimental/linalg>
-#include <array>
-#include <complex>
-
 namespace {
-  using std::experimental::linalg::lower_triangle;
-  using std::experimental::linalg::hermitian_matrix_rank_1_update;
-  using std::experimental::linalg::upper_triangle;
-  using std::extents;
-  using std::layout_right;
-  using std::mdspan;
+  using LinearAlgebra::lower_triangle;
+  using LinearAlgebra::hermitian_matrix_rank_1_update;
+  using LinearAlgebra::upper_triangle;
 
   // Regression test for ambiguous overloads of
   // hermitian_matrix_rank_1_update (related to

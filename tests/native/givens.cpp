@@ -1,11 +1,9 @@
 #include "./gtest_fixtures.hpp"
-
-#include <experimental/linalg>
 #include <limits>
 
 namespace {
-  using std::experimental::linalg::givens_rotation_setup;
-  using std::experimental::linalg::givens_rotation_apply;
+  using LinearAlgebra::givens_rotation_setup;
+  using LinearAlgebra::givens_rotation_apply;
 
   TEST(givens_rotation_setup, complex_double)
   {

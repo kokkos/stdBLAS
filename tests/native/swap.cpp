@@ -1,9 +1,7 @@
 #include "./gtest_fixtures.hpp"
 
-#include <experimental/linalg>
-
 namespace {
-  using std::experimental::linalg::swap_elements;
+  using LinearAlgebra::swap_elements;
 
   TEST(BLAS1_swap, mdspan_double)
   {

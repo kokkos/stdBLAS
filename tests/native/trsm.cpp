@@ -1,6 +1,4 @@
 #include "./gtest_fixtures.hpp"
-
-#include <experimental/linalg>
 #include <iostream>
 
 namespace {
@@ -62,10 +60,10 @@ namespace {
     fill_from_layout_right_storage<IndexType, Layout>(B_nonconst, storage_B, num_rows_B, num_cols_B);
     mdspan<const double, dextents<IndexType, 2>, Layout> B = B_nonconst;
 
-    using ::std::experimental::linalg::explicit_diagonal;
-    using ::std::experimental::linalg::lower_triangle;
-    using ::std::experimental::linalg::right_side;
-    using ::std::experimental::linalg::triangular_matrix_matrix_solve;
+    using LinearAlgebra::explicit_diagonal;
+    using LinearAlgebra::lower_triangle;
+    using LinearAlgebra::right_side;
+    using LinearAlgebra::triangular_matrix_matrix_solve;
     triangular_matrix_matrix_solve(A, lower_triangle, explicit_diagonal, right_side, B, X);
 
     mdspan<const double, dextents<IndexType, 2>, layout_right>

@@ -1,20 +1,18 @@
 #include "./gtest_fixtures.hpp"
-
-#include <experimental/linalg>
 #include <type_traits>
 
 namespace {
-  using std::experimental::linalg::layout_transpose;
-  using std::experimental::linalg::transposed;
-  using std::experimental::layout_left;
-  using std::experimental::layout_right;
-  using std::experimental::layout_stride;
+  using LinearAlgebra::layout_transpose;
+  using LinearAlgebra::transposed;
+  using MdSpan::layout_left;
+  using MdSpan::layout_right;
+  using MdSpan::layout_stride;
 
   template<std::size_t ext0, std::size_t ext1>
   void test_transpose_extents()
   {
-    using std::experimental::linalg::impl::transpose_extents_t;
-    using std::experimental::linalg::impl::transpose_extents;
+    using LinearAlgebra::impl::transpose_extents_t;
+    using LinearAlgebra::impl::transpose_extents;
 
     using extents_type = extents<std::size_t, ext0, ext1>;
     using expected_transpose_extents_type = extents<std::size_t, ext1, ext0>;
@@ -88,8 +86,8 @@ namespace {
                               const ExpectedLayoutMapping& out_expected,
                               std::vector<char>& fake_storage)
   {
-    using std::experimental::linalg::impl::transpose_extents_t;
-    using std::experimental::linalg::impl::transpose_extents;
+    using LinearAlgebra::impl::transpose_extents_t;
+    using LinearAlgebra::impl::transpose_extents;
 
     ASSERT_EQ(in.extents().rank(), 2u);
     ASSERT_EQ(out_expected.extents().rank(), 2u);
