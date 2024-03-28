@@ -43,7 +43,7 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_SCALED_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_SCALED_HPP_
 
-#include <experimental/mdspan>
+#include <mdspan/mdspan.hpp>
 
 namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
 namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {

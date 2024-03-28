@@ -4,7 +4,7 @@
 // This must be defined before including any mdspan headers.
 #define MDSPAN_USE_PAREN_OPERATOR 1
 
-#include <experimental/mdspan>
+#include <mdspan/mdspan.hpp>
 #include "experimental/__p2630_bits/submdspan.hpp"
 #include <experimental/linalg>
 #include <iostream>

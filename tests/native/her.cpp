@@ -1,9 +1,5 @@
 #include "./gtest_fixtures.hpp"
 
-#include <experimental/linalg>
-#include <array>
-#include <complex>
-
 namespace {
   using LinearAlgebra::lower_triangle;
   using LinearAlgebra::hermitian_matrix_rank_1_update;

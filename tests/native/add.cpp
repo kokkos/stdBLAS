@@ -1,9 +1,5 @@
 #include "./gtest_fixtures.hpp"
 
-#include <experimental/linalg>
-#include <array>
-#include <vector>
-
 namespace {
   using LinearAlgebra::add;
 

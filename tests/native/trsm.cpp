@@ -1,6 +1,4 @@
 #include "./gtest_fixtures.hpp"
-
-#include <experimental/linalg>
 #include <iostream>
 
 namespace {

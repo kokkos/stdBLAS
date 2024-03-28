@@ -1,18 +1,6 @@
-// To try using subscript operator comment in macro below
-// the header will by default also check for the feature macro, and enable it
-// defining the macro to 0 will overwrite the automatic setting
-// x86-64 clang (experimental auto NSDMI) supports the operator, but you need
-// to explicitly comment in below macro
-//#define MDSPAN_USE_BRACKET_OPERATOR 1
-
-// To force enable operator() comment in the macro below
-// You can enable both at the same time. 
-//#define MDSPAN_USE_PAREN_OPERATOR 0
-
 #define P1673_CONJUGATED_SCALAR_ARITHMETIC_OPERATORS_REFERENCE_OVERLOADS 1
 
-#include "gtest/gtest.h"
-#include <experimental/linalg>
+#include "./gtest_fixtures.hpp"
 
 ///////////////////////////////////////////////////////////
 // Custom real number type for tests

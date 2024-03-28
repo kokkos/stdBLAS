@@ -1,9 +1,4 @@
-#include "gtest/gtest.h"
-#include "gtest_fixtures.hpp"
-
-#include <experimental/linalg>
-#include <experimental/mdspan>
-#include <vector>
+#include "./gtest_fixtures.hpp"
 
 namespace {
 

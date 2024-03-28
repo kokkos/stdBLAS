@@ -1,7 +1,5 @@
 #include "./gtest_fixtures.hpp"
 
-#include <experimental/linalg>
-
 // FIXME (mfh 2022/06/17) Temporarily disable calling the BLAS,
 // to get PR testing workflow running with mdspan tag.
 #if 0

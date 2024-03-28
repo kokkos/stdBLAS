@@ -53,6 +53,8 @@
 
 #include <mdspan/mdspan.hpp>
 #include "experimental/__p2630_bits/submdspan.hpp"
+#include <experimental/linalg>
+#include <array>
 #include <complex>
 #include <vector>
 
@@ -61,16 +63,6 @@ namespace KokkosEx = MDSPAN_IMPL_STANDARD_NAMESPACE :: MDSPAN_IMPL_PROPOSED_NAME
 
 namespace MdSpan = MDSPAN_IMPL_STANDARD_NAMESPACE;
 namespace MdSpanEx = MDSPAN_IMPL_STANDARD_NAMESPACE :: MDSPAN_IMPL_PROPOSED_NAMESPACE;
-
-namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
-namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
-inline namespace __p1673_version_0 {
-namespace linalg {
-}
-}
-}
-}
-
 namespace LinearAlgebra = MDSPAN_IMPL_STANDARD_NAMESPACE :: MDSPAN_IMPL_PROPOSED_NAMESPACE :: linalg;
 
 using MdSpan::default_accessor;

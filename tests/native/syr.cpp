@@ -1,8 +1,5 @@
 #include "./gtest_fixtures.hpp"
 
-#include <experimental/linalg>
-#include <array>
-
 namespace {
   using LinearAlgebra::lower_triangle;
   using LinearAlgebra::symmetric_matrix_rank_1_update;

@@ -1,6 +1,4 @@
 #include "./gtest_fixtures.hpp"
-
-#include <experimental/linalg>
 #include <type_traits>
 
 // FIXME (mfh 2022/06/17) Temporarily disable calling the BLAS,

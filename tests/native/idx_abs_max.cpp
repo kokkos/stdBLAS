@@ -1,7 +1,5 @@
 #include "./gtest_fixtures.hpp"
 
-#include <experimental/linalg>
-
 namespace {
 
   using LinearAlgebra::idx_abs_max;
