@@ -45,8 +45,8 @@
 
 #include <type_traits>
 
-namespace std {
-namespace experimental {
+namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
+namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
@@ -70,7 +70,7 @@ struct is_custom_dot_avail<
 	       ),
       Scalar
       >::value
-    && !linalg::impl::is_inline_exec_v<Exec>
+    && ! impl::is_inline_exec_v<Exec>
     >
   >
   : std::true_type {};
@@ -90,9 +90,9 @@ template<class ElementType1,
          class Accessor2,
          class Scalar>
 Scalar dot(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType1, std::experimental::extents<SizeType1, ext1>, Layout1, Accessor1> v1,
-  std::experimental::mdspan<ElementType2, std::experimental::extents<SizeType2, ext2>, Layout2, Accessor2> v2,
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType1, extents<SizeType1, ext1>, Layout1, Accessor1> v1,
+  mdspan<ElementType2, extents<SizeType2, ext2>, Layout2, Accessor2> v2,
   Scalar init)
 {
   static_assert(v1.static_extent(0) == dynamic_extent ||
@@ -120,8 +120,8 @@ template<class ExecutionPolicy,
          class Scalar>
 Scalar dot(
   ExecutionPolicy&& exec ,
-  std::experimental::mdspan<ElementType1, std::experimental::extents<SizeType1, ext1>, Layout1, Accessor1> v1,
-  std::experimental::mdspan<ElementType2, std::experimental::extents<SizeType2, ext2>, Layout2, Accessor2> v2,
+  mdspan<ElementType1, extents<SizeType1, ext1>, Layout1, Accessor1> v1,
+  mdspan<ElementType2, extents<SizeType2, ext2>, Layout2, Accessor2> v2,
   Scalar init)
 {
   static_assert(v1.static_extent(0) == dynamic_extent ||
@@ -132,11 +132,11 @@ Scalar dot(
     decltype(execpolicy_mapper(exec)), decltype(v1), decltype(v2), Scalar
     >::value;
 
-  if constexpr(use_custom){
+  if constexpr (use_custom) {
     return dot(execpolicy_mapper(exec), v1, v2, init);
   }
-  else{
-    return dot(std::experimental::linalg::impl::inline_exec_t(), v1, v2, init);
+  else {
+    return dot(impl::inline_exec_t{}, v1, v2, init);
   }
 }
 
@@ -151,11 +151,11 @@ template<class ElementType1,
          class Layout2,
          class Accessor2,
          class Scalar>
-Scalar dot(std::experimental::mdspan<ElementType1, std::experimental::extents<SizeType1, ext1>, Layout1, Accessor1> v1,
-           std::experimental::mdspan<ElementType2, std::experimental::extents<SizeType2, ext2>, Layout2, Accessor2> v2,
+Scalar dot(mdspan<ElementType1, extents<SizeType1, ext1>, Layout1, Accessor1> v1,
+           mdspan<ElementType2, extents<SizeType2, ext2>, Layout2, Accessor2> v2,
            Scalar init)
 {
-  return dot(std::experimental::linalg::impl::default_exec_t(), v1, v2, init);
+  return dot(impl::default_exec_t{}, v1, v2, init);
 }
 
 template<class ElementType1,
@@ -170,8 +170,8 @@ template<class ElementType1,
          class Accessor2,
          class Scalar>
 Scalar dotc(
-  std::experimental::mdspan<ElementType1, std::experimental::extents<SizeType1, ext1>, Layout1, Accessor1> v1,
-  std::experimental::mdspan<ElementType2, std::experimental::extents<SizeType2, ext2>, Layout2, Accessor2> v2,
+  mdspan<ElementType1, extents<SizeType1, ext1>, Layout1, Accessor1> v1,
+  mdspan<ElementType2, extents<SizeType2, ext2>, Layout2, Accessor2> v2,
   Scalar init)
 {
   return dot(conjugated(v1), v2, init);
@@ -191,8 +191,8 @@ template<class ExecutionPolicy,
          class Scalar>
 Scalar dotc(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType1, std::experimental::extents<SizeType1, ext1>, Layout1, Accessor1> v1,
-  std::experimental::mdspan<ElementType2, std::experimental::extents<SizeType2, ext2>, Layout2, Accessor2> v2,
+  mdspan<ElementType1, extents<SizeType1, ext1>, Layout1, Accessor1> v1,
+  mdspan<ElementType2, extents<SizeType2, ext2>, Layout2, Accessor2> v2,
   Scalar init)
 {
   return dot(exec, conjugated(v1), v2, init);
@@ -215,8 +215,8 @@ namespace dot_detail {
     class Layout2,
     class Accessor2>
   auto dot_return_type_deducer(
-    std::experimental::mdspan<ElementType1, std::experimental::extents<SizeType1, ext1>, Layout1, Accessor1> x,
-    std::experimental::mdspan<ElementType2, std::experimental::extents<SizeType2, ext2>, Layout2, Accessor2> y)
+    mdspan<ElementType1, extents<SizeType1, ext1>, Layout1, Accessor1> x,
+    mdspan<ElementType2, extents<SizeType2, ext2>, Layout2, Accessor2> y)
   -> decltype(x(0) * y(0));
 } // namespace dot_detail
 
@@ -232,8 +232,8 @@ template<class ElementType1,
          class Layout2,
          class Accessor2>
 auto dot(
-  std::experimental::mdspan<ElementType1, std::experimental::extents<SizeType1, ext1>, Layout1, Accessor1> v1,
-  std::experimental::mdspan<ElementType2, std::experimental::extents<SizeType2, ext2>, Layout2, Accessor2> v2)
+  mdspan<ElementType1, extents<SizeType1, ext1>, Layout1, Accessor1> v1,
+  mdspan<ElementType2, extents<SizeType2, ext2>, Layout2, Accessor2> v2)
 -> decltype(dot_detail::dot_return_type_deducer(v1, v2))
 {
   using return_t = decltype(dot_detail::dot_return_type_deducer(v1, v2));
@@ -253,8 +253,8 @@ template<class ExecutionPolicy,
          class Accessor2>
 auto dot(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType1, std::experimental::extents<SizeType1, ext1>, Layout1, Accessor1> v1,
-  std::experimental::mdspan<ElementType2, std::experimental::extents<SizeType2, ext2>, Layout2, Accessor2> v2)
+  mdspan<ElementType1, extents<SizeType1, ext1>, Layout1, Accessor1> v1,
+  mdspan<ElementType2, extents<SizeType2, ext2>, Layout2, Accessor2> v2)
 -> decltype(dot_detail::dot_return_type_deducer(v1, v2))
 {
   using return_t = decltype(dot_detail::dot_return_type_deducer(v1, v2));
@@ -272,8 +272,8 @@ template<class ElementType1,
          class Layout2,
          class Accessor2>
 auto dotc(
-  std::experimental::mdspan<ElementType1, std::experimental::extents<SizeType1, ext1>, Layout1, Accessor1> v1,
-  std::experimental::mdspan<ElementType2, std::experimental::extents<SizeType2, ext2>, Layout2, Accessor2> v2)
+  mdspan<ElementType1, extents<SizeType1, ext1>, Layout1, Accessor1> v1,
+  mdspan<ElementType2, extents<SizeType2, ext2>, Layout2, Accessor2> v2)
   -> decltype(dot_detail::dot_return_type_deducer(conjugated(v1), v2))
 {
   using return_t = decltype(dot_detail::dot_return_type_deducer(conjugated(v1), v2));
@@ -293,8 +293,8 @@ template<class ExecutionPolicy,
          class Accessor2>
 auto dotc(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType1, std::experimental::extents<SizeType1, ext1>, Layout1, Accessor1> v1,
-  std::experimental::mdspan<ElementType2, std::experimental::extents<SizeType2, ext2>, Layout2, Accessor2> v2)
+  mdspan<ElementType1, extents<SizeType1, ext1>, Layout1, Accessor1> v1,
+  mdspan<ElementType2, extents<SizeType2, ext2>, Layout2, Accessor2> v2)
  -> decltype(dot_detail::dot_return_type_deducer(conjugated(v1), v2))
 {
   using return_t = decltype(dot_detail::dot_return_type_deducer(conjugated(v1), v2));
@@ -303,7 +303,7 @@ auto dotc(
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
-} // end namespace experimental
-} // end namespace std
+} // end namespace MDSPAN_IMPL_PROPOSED_NAMESPACE
+} // end namespace MDSPAN_IMPL_STANDARD_NAMESPACE
 
 #endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_DOT_HPP_

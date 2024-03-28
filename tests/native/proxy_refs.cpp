@@ -224,7 +224,7 @@ auto imag(const FakeComplex& z) { return z.imag; }
 template<class Real>
 void test_real_conj_if_needed()
 {
-  using std::experimental::linalg::impl::conj_if_needed;
+  using LinearAlgebra::impl::conj_if_needed;
 
   Real z(2.0);
   const Real z_conj_expected(2.0);
@@ -237,7 +237,7 @@ void test_real_conj_if_needed()
 template<class Real>
 void test_complex_conj_if_needed()
 {
-  using std::experimental::linalg::impl::conj_if_needed;
+  using LinearAlgebra::impl::conj_if_needed;
   
   std::complex<Real> z(2.0, -3.0);
   const std::complex<Real> z_conj_expected(2.0, 3.0);
@@ -273,8 +273,8 @@ template<class Reference, class Value>
 void test_conjugated_scalar_from_reference(Reference zd, Value zd_orig)
 {
   using test_helpers::is_atomic_ref_not_arithmetic_v;
-  using std::experimental::linalg::impl::conj_if_needed;
-  using std::experimental::linalg::conjugated_scalar;  
+  using LinearAlgebra::impl::conj_if_needed;
+  using LinearAlgebra::conjugated_scalar;  
   using value_type = typename std::remove_cv_t<Value>;
 
 #ifdef P1673_CONJUGATED_SCALAR_ARITHMETIC_OPERATORS_REFERENCE_OVERLOADS
@@ -587,7 +587,7 @@ void test_complex_conjugated_scalar()
   {
     using value_type = std::complex<Real>;
     using inner_reference_type = value_type&;
-    using std::experimental::linalg::scaled_scalar;
+    using LinearAlgebra::scaled_scalar;
     using reference_type = scaled_scalar<Real, inner_reference_type, value_type>;
 
     const Real scalingFactor = 3.0;
@@ -653,8 +653,8 @@ void test_scaled_scalar_from_reference(
 {
   std::cerr << "test_scaled_scalar_from_reference" << std::endl;
 
-  using std::experimental::linalg::impl::conj_if_needed;  
-  using std::experimental::linalg::scaled_scalar;
+  using LinearAlgebra::impl::conj_if_needed;  
+  using LinearAlgebra::scaled_scalar;
   using value_type = typename std::remove_cv_t<Value>;
   constexpr bool is_atomic_ref_not_arithmetic =
     test_helpers::is_atomic_ref_not_arithmetic_v<Reference>;
@@ -941,7 +941,7 @@ void test_two_scaled_scalars_from_reference(
 	    << scalingFactorName << ", " << referenceName
 	    << ", " << valueName << ">" << std::endl;
 
-  using std::experimental::linalg::scaled_scalar;  
+  using LinearAlgebra::scaled_scalar;  
   using value_type = typename std::remove_cv_t<Value>;
   constexpr bool is_atomic_ref_not_arithmetic =
     test_helpers::is_atomic_ref_not_arithmetic_v<Reference>;
@@ -1097,7 +1097,7 @@ namespace {
   template<class R>
   void test_imag_part_complex()
   {
-    using std::experimental::linalg::impl::imag_part;
+    using LinearAlgebra::impl::imag_part;
     std::complex<R> z{R(3.0), R(4.0)};
     auto z_imag = imag_part(z);
     EXPECT_EQ(z_imag, R(4.0));
@@ -1106,7 +1106,7 @@ namespace {
   template<class T>
   void test_imag_part_floating_point()
   {
-    using std::experimental::linalg::impl::imag_part;
+    using LinearAlgebra::impl::imag_part;
     T x = 9.0;
     auto x_imag = imag_part(x);
     EXPECT_EQ(x_imag, T(0.0));
@@ -1115,7 +1115,7 @@ namespace {
   template<class T>
   void test_imag_part_integral()
   {
-    using std::experimental::linalg::impl::imag_part;
+    using LinearAlgebra::impl::imag_part;
     T x = 3;
     auto x_imag = imag_part(x);
     EXPECT_EQ(x_imag, T(0));
@@ -1142,14 +1142,14 @@ namespace {
     test_imag_part_integral<uint64_t>();    
 
     {
-      using std::experimental::linalg::impl::imag_part;
+      using LinearAlgebra::impl::imag_part;
       FakeComplex z{3.0, 4.0};
       auto z_imag = imag_part(z);
       EXPECT_EQ(z_imag, 4.0);
       static_assert(std::is_same_v<decltype(z_imag), decltype(z.imag)>);
     }
     {
-      using std::experimental::linalg::impl::imag_part;
+      using LinearAlgebra::impl::imag_part;
       FakeRealNumber x{3.0};
       auto x_imag = imag_part(x);
       EXPECT_EQ(x_imag, FakeRealNumber{});
@@ -1160,7 +1160,7 @@ namespace {
   template<class R>
   void test_real_part_complex()
   {
-    using std::experimental::linalg::impl::real_part;
+    using LinearAlgebra::impl::real_part;
     std::complex<R> z{R(3.0), R(4.0)};
     auto z_imag = real_part(z);
     EXPECT_EQ(z_imag, R(3.0));
@@ -1169,7 +1169,7 @@ namespace {
   template<class T>
   void test_real_part_floating_point()
   {
-    using std::experimental::linalg::impl::real_part;
+    using LinearAlgebra::impl::real_part;
     T x = 9.0;
     auto x_imag = real_part(x);
     EXPECT_EQ(x_imag, T(9.0));
@@ -1178,7 +1178,7 @@ namespace {
   template<class T>
   void test_real_part_integral()
   {
-    using std::experimental::linalg::impl::real_part;
+    using LinearAlgebra::impl::real_part;
     T x = 3;
     auto x_imag = real_part(x);
     EXPECT_EQ(x_imag, T(3));
@@ -1205,14 +1205,14 @@ namespace {
     test_real_part_integral<uint64_t>();    
 
     {
-      using std::experimental::linalg::impl::real_part;
+      using LinearAlgebra::impl::real_part;
       FakeComplex z{3.0, 4.0};
       auto z_imag = real_part(z);
       EXPECT_EQ(z_imag, 3.0);
       static_assert(std::is_same_v<decltype(z_imag), decltype(z.imag)>);
     }
     {
-      using std::experimental::linalg::impl::real_part;
+      using LinearAlgebra::impl::real_part;
       FakeRealNumber x{3.0};
       auto x_real = real_part(x);
       EXPECT_EQ(x_real, FakeRealNumber{3.0});
@@ -1238,7 +1238,7 @@ namespace {
     test_FakeComplex_conjugated_scalar();
 
     FakeRealNumber fn{4.2};
-    using std::experimental::linalg::conjugated_scalar;
+    using LinearAlgebra::conjugated_scalar;
     conjugated_scalar<FakeRealNumber&, FakeRealNumber> fncs(fn);
     EXPECT_EQ(fn, FakeRealNumber(fncs));
   }

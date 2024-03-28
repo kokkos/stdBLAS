@@ -4,7 +4,7 @@
 
 namespace {
 
-  using std::experimental::linalg::idx_abs_max;
+  using LinearAlgebra::idx_abs_max;
 
   TEST_F(unsigned_double_vector, idx_abs_max)
   {

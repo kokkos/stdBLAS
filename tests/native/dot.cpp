@@ -20,8 +20,8 @@ double ddot_wrapper (const int N, const double* DX,
 #endif // 0
 
 namespace {
-  using std::experimental::linalg::dot;
-  using std::experimental::linalg::dotc;
+  using LinearAlgebra::dot;
+  using LinearAlgebra::dotc;  
 
   TEST(BLAS1_dot, mdspan_double)
   {
@@ -69,9 +69,9 @@ namespace {
     const scalar_t conjDotResult = dotc(x, y, scalar_t{});
     EXPECT_EQ( conjDotResult, expectedDotResult );
 
-    // scalar_t dotResultPar {};
+    // scalar_t dotResultPar{};
     // See note above.
-    //std::experimental::dot (std::execution::par, x, y, dotResultPar);
+    // LinearAlgebra::dot(std::execution::par, x, y, dotResultPar);
 
     // This is noncomforming, but I need some way to test the executor overloads.
     //using fake_executor_t = int;

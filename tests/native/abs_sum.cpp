@@ -7,7 +7,7 @@
 
 namespace {
 
-  using std::experimental::linalg::vector_abs_sum;
+  using LinearAlgebra::vector_abs_sum;
 
   TEST_F(unsigned_double_vector, abs_sum)
   {

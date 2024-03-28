@@ -5,7 +5,7 @@
 #include <limits>
 
 namespace {
-  using std::experimental::linalg::matrix_one_norm;
+  using LinearAlgebra::matrix_one_norm;
   using std::cout;
   using std::endl;
 

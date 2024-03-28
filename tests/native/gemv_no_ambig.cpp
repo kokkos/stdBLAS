@@ -12,8 +12,8 @@
 
 namespace {
 
-using std::experimental::linalg::matrix_vector_product;
-using std::experimental::linalg::scaled;
+using LinearAlgebra::matrix_vector_product;
+using LinearAlgebra::scaled;
 
 TEST(gemv, no_ambiguity)
 {

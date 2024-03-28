@@ -3,7 +3,7 @@
 #include <experimental/linalg>
 
 namespace {
-  using std::experimental::linalg::conjugate_transposed;
+  using LinearAlgebra::conjugate_transposed;
 
   TEST(conjugate_transposed, mdspan_complex_double)
   {

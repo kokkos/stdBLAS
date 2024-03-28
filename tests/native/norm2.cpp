@@ -19,7 +19,7 @@ double dnrm2_wrapper(const int N, const double* X, const int INCX)
 #endif // 0
 
 namespace {
-  using std::experimental::linalg::vector_norm2;
+  using LinearAlgebra::vector_norm2;
 
   TEST(BLAS1_norm2, mdspan_zero)
   {

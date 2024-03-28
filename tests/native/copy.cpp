@@ -3,7 +3,7 @@
 #include <experimental/linalg>
 
 namespace {
-  using std::experimental::linalg::copy;
+  using LinearAlgebra::copy;
 
   template<class Real>
   struct MakeVectorValues {
