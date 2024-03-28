@@ -43,8 +43,8 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS2_MATRIX_RANK_2_UPDATE_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS2_MATRIX_RANK_2_UPDATE_HPP_
 
-namespace std {
-namespace experimental {
+namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
+namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
@@ -67,7 +67,7 @@ struct is_custom_symmetric_matrix_rank_2_update_avail<
 		)
 	       )
       >
-    && !linalg::impl::is_inline_exec_v<Exec>
+    && ! impl::is_inline_exec_v<Exec>
     >
   >
   : std::true_type{};
@@ -89,7 +89,7 @@ struct is_custom_hermitian_matrix_rank_2_update_avail<
 		)
 	       )
       >
-    && !linalg::impl::is_inline_exec_v<Exec>
+    && ! impl::is_inline_exec_v<Exec>
     >
   >
   : std::true_type{};
@@ -112,10 +112,10 @@ template<class ElementType_x,
          class Accessor_A,
          class Triangle>
 void symmetric_matrix_rank_2_update(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle /* t */)
 {
   using size_type = std::common_type_t<SizeType_x, SizeType_y, SizeType_A>;
@@ -147,22 +147,20 @@ template<class ExecutionPolicy,
          class Triangle>
 void symmetric_matrix_rank_2_update(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t)
 {
-
   constexpr bool use_custom = is_custom_symmetric_matrix_rank_2_update_avail<
     decltype(execpolicy_mapper(exec)), decltype(x), decltype(y), decltype(A), Triangle
     >::value;
 
-  if constexpr(use_custom){
+  if constexpr (use_custom) {
     symmetric_matrix_rank_2_update(execpolicy_mapper(exec), x, y, A, t);
   }
-  else
-  {
-    symmetric_matrix_rank_2_update(std::experimental::linalg::impl::inline_exec_t(), x, y, A, t);
+  else {
+    symmetric_matrix_rank_2_update(impl::inline_exec_t{}, x, y, A, t);
   }
 }
 
@@ -180,12 +178,12 @@ template<class ElementType_x,
          class Accessor_A,
          class Triangle>
 void symmetric_matrix_rank_2_update(
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t)
 {
-  symmetric_matrix_rank_2_update(std::experimental::linalg::impl::default_exec_t(), x, y, A, t);
+  symmetric_matrix_rank_2_update(impl::default_exec_t{}, x, y, A, t);
 }
 
 
@@ -205,10 +203,10 @@ template<class ElementType_x,
          class Accessor_A,
          class Triangle>
 void hermitian_matrix_rank_2_update(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle /* t */)
 {
   using size_type = std::common_type_t<SizeType_x, SizeType_y, SizeType_A>;
@@ -241,9 +239,9 @@ template<class ExecutionPolicy,
          class Triangle>
 void hermitian_matrix_rank_2_update(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t)
 {
 
@@ -251,12 +249,11 @@ void hermitian_matrix_rank_2_update(
     decltype(execpolicy_mapper(exec)), decltype(x), decltype(y), decltype(A), Triangle
     >::value;
 
-  if constexpr(use_custom){
+  if constexpr (use_custom) {
     hermitian_matrix_rank_2_update(execpolicy_mapper(exec), x, y, A, t);
   }
-  else
-  {
-    hermitian_matrix_rank_2_update(std::experimental::linalg::impl::inline_exec_t(), x, y, A, t);
+  else {
+    hermitian_matrix_rank_2_update(impl::inline_exec_t{}, x, y, A, t);
   }
 }
 
@@ -274,17 +271,17 @@ template<class ElementType_x,
          class Accessor_A,
          class Triangle>
 void hermitian_matrix_rank_2_update(
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t)
 {
-  hermitian_matrix_rank_2_update(std::experimental::linalg::impl::default_exec_t(), x, y, A, t);
+  hermitian_matrix_rank_2_update(impl::default_exec_t{}, x, y, A, t);
 }
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
-} // end namespace experimental
-} // end namespace std
+} // end namespace MDSPAN_IMPL_PROPOSED_NAMESPACE
+} // end namespace MDSPAN_IMPL_STANDARD_NAMESPACE
 
 #endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS2_MATRIX_RANK_2_UPDATE_HPP_

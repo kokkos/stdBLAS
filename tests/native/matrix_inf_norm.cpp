@@ -1,11 +1,9 @@
 #include "./gtest_fixtures.hpp"
-
-#include <experimental/linalg>
 #include <iostream>
 #include <limits>
 
 namespace {
-  using std::experimental::linalg::matrix_inf_norm;
+  using LinearAlgebra::matrix_inf_norm;
   using std::cout;
   using std::endl;
 

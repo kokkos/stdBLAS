@@ -1,16 +1,14 @@
 #include "./gtest_fixtures.hpp"
 
-#include <experimental/linalg>
-
 namespace {
-  using std::experimental::linalg::conjugated;
+  using LinearAlgebra::conjugated;
+  using LinearAlgebra::accessor_conjugate;
 
   template<class ValueType>
   void test_accessor_conjugate_element_constification()
   {
-    using std::experimental::linalg::accessor_conjugate;
-    using std::experimental::default_accessor;
-    using std::experimental::linalg::conjugated_scalar;
+    using LinearAlgebra::conjugated_scalar;
+    using MDSPAN_IMPL_STANDARD_NAMESPACE :: default_accessor;
     using value_type = std::remove_cv_t<ValueType>;
     constexpr bool is_arith = std::is_arithmetic_v<value_type>;
 
@@ -73,7 +71,6 @@ namespace {
     // Make sure that accessor_conjugate compiles
     {
       using accessor_t = vector_t::accessor_type;
-      using std::experimental::linalg::accessor_conjugate;
       using accessor_conj_t = accessor_conjugate<accessor_t>;
       accessor_conj_t acc{y.accessor()};
     }

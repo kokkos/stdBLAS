@@ -45,8 +45,8 @@
 
 #include <type_traits>
 
-namespace std {
-namespace experimental {
+namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
+namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
@@ -68,10 +68,10 @@ template<class ElementType_A,
          class Accessor_X,
          class BinaryDivideOp>
 void trsv_upper_triangular_left_side(
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_B, std::experimental::extents<SizeType_B, ext_B>, Layout_B, Accessor_B> B,
-  std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, ext_X>, Layout_X, Accessor_X> X,
+  mdspan<ElementType_B, extents<SizeType_B, ext_B>, Layout_B, Accessor_B> B,
+  mdspan<ElementType_X, extents<SizeType_X, ext_X>, Layout_X, Accessor_X> X,
   BinaryDivideOp divide)
 {
   constexpr bool explicit_diagonal =
@@ -118,10 +118,10 @@ template<class ElementType_A,
          class Layout_X,
          class Accessor_X>
 void trsv_upper_triangular_left_side(
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_B, std::experimental::extents<SizeType_B, ext_B>, Layout_B, Accessor_B> B,
-  std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, ext_X>, Layout_X, Accessor_X> X)
+  mdspan<ElementType_B, extents<SizeType_B, ext_B>, Layout_B, Accessor_B> B,
+  mdspan<ElementType_X, extents<SizeType_X, ext_X>, Layout_X, Accessor_X> X)
 {
   auto divide = [](const auto& x, const auto& y) { return x / y; };
   trsv_upper_triangular_left_side(A, d, B, X, divide);
@@ -143,10 +143,10 @@ template<class ElementType_A,
          class Accessor_X,
          class BinaryDivideOp>
 void trsv_lower_triangular_left_side(
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_B, std::experimental::extents<SizeType_B, ext_B>, Layout_B, Accessor_B> B,
-  std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, ext_X>, Layout_X, Accessor_X> X,
+  mdspan<ElementType_B, extents<SizeType_B, ext_B>, Layout_B, Accessor_B> B,
+  mdspan<ElementType_X, extents<SizeType_X, ext_X>, Layout_X, Accessor_X> X,
   BinaryDivideOp divide)
 {
   constexpr bool explicit_diagonal =
@@ -190,10 +190,10 @@ template<class ElementType_A,
          class Layout_X,
          class Accessor_X>
 void trsv_lower_triangular_left_side(
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_B, std::experimental::extents<SizeType_B, ext_B>, Layout_B, Accessor_B> B,
-  std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, ext_X>, Layout_X, Accessor_X> X)
+  mdspan<ElementType_B, extents<SizeType_B, ext_B>, Layout_B, Accessor_B> B,
+  mdspan<ElementType_X, extents<SizeType_X, ext_X>, Layout_X, Accessor_X> X)
 {
   auto divide = [](const auto& x, const auto& y) { return x / y; };
   trsv_lower_triangular_left_side(A, d, B, X, divide);
@@ -217,7 +217,7 @@ struct is_custom_tri_mat_vec_solve_avail<
 		)
 	       )
       >
-    && !linalg::impl::is_inline_exec_v<Exec>
+    && ! impl::is_inline_exec_v<Exec>
     >
   >
   : std::true_type{};
@@ -243,12 +243,12 @@ template<class ElementType_A,
          class Accessor_X,
          class BinaryDivideOp>
 void triangular_matrix_vector_solve(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_B, std::experimental::extents<SizeType_B, ext_B>, Layout_B, Accessor_B> b,
-  std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, ext_X>, Layout_X, Accessor_X> x,
+  mdspan<ElementType_B, extents<SizeType_B, ext_B>, Layout_B, Accessor_B> b,
+  mdspan<ElementType_X, extents<SizeType_X, ext_X>, Layout_X, Accessor_X> x,
   BinaryDivideOp divide)
 {
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
@@ -275,15 +275,15 @@ template<class ElementType_A,
          class Layout_X,
          class Accessor_X>
 void triangular_matrix_vector_solve(
-  std::experimental::linalg::impl::inline_exec_t&& exec,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  impl::inline_exec_t&& exec,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_B, std::experimental::extents<SizeType_B, ext_B>, Layout_B, Accessor_B> b,
-  std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, ext_X>, Layout_X, Accessor_X> x)
+  mdspan<ElementType_B, extents<SizeType_B, ext_B>, Layout_B, Accessor_B> b,
+  mdspan<ElementType_X, extents<SizeType_X, ext_X>, Layout_X, Accessor_X> x)
 {
   auto divide = [](const auto& x, const auto& y) { return x / y; };
-  triangular_matrix_vector_solve(std::forward<std::experimental::linalg::impl::inline_exec_t>(exec), A, t, d, b, x, divide);
+  triangular_matrix_vector_solve(std::forward<impl::inline_exec_t>(exec), A, t, d, b, x, divide);
 }
 
 // Overloads taking an ExecutionPolicy
@@ -307,16 +307,16 @@ template<class ExecutionPolicy,
          class BinaryDivideOp>
 void triangular_matrix_vector_solve(
   ExecutionPolicy&& /* exec */,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_B, std::experimental::extents<SizeType_B, ext_B>, Layout_B, Accessor_B> b,
-  std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, ext_X>, Layout_X, Accessor_X> x,
+  mdspan<ElementType_B, extents<SizeType_B, ext_B>, Layout_B, Accessor_B> b,
+  mdspan<ElementType_X, extents<SizeType_X, ext_X>, Layout_X, Accessor_X> x,
   BinaryDivideOp divide)
 {
   // FIXME (mfh 2022/06/13) We don't yet have a parallel version
   // that takes a generic divide operator.
-  triangular_matrix_vector_solve(std::experimental::linalg::impl::inline_exec_t{}, A, t, d, b, x, divide);
+  triangular_matrix_vector_solve(impl::inline_exec_t{}, A, t, d, b, x, divide);
 }
   
 template<class ExecutionPolicy,
@@ -337,22 +337,21 @@ template<class ExecutionPolicy,
          class Accessor_X>
 void triangular_matrix_vector_solve(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_B, std::experimental::extents<SizeType_B, ext_B>, Layout_B, Accessor_B> b,
-  std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, ext_X>, Layout_X, Accessor_X> x)
+  mdspan<ElementType_B, extents<SizeType_B, ext_B>, Layout_B, Accessor_B> b,
+  mdspan<ElementType_X, extents<SizeType_X, ext_X>, Layout_X, Accessor_X> x)
 {
   constexpr bool use_custom = is_custom_tri_mat_vec_solve_avail<
     decltype(execpolicy_mapper(exec)), decltype(A), decltype(t), decltype(d), decltype(b), decltype(x)
     >::value;
 
-  if constexpr(use_custom){
+  if constexpr (use_custom) {
     triangular_matrix_vector_solve(execpolicy_mapper(exec), A, t, d, b, x);
   }
-  else
-  {
-    triangular_matrix_vector_solve(std::experimental::linalg::impl::inline_exec_t(),
+  else {
+    triangular_matrix_vector_solve(impl::inline_exec_t{},
 				   A, t, d, b, x);
   }
 }
@@ -376,14 +375,14 @@ template<class ElementType_A,
          class Accessor_X,
          class BinaryDivideOp>
 void triangular_matrix_vector_solve(
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_B, std::experimental::extents<SizeType_B, ext_B>, Layout_B, Accessor_B> b,
-  std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, ext_X>, Layout_X, Accessor_X> x,
+  mdspan<ElementType_B, extents<SizeType_B, ext_B>, Layout_B, Accessor_B> b,
+  mdspan<ElementType_X, extents<SizeType_X, ext_X>, Layout_X, Accessor_X> x,
   BinaryDivideOp divide)
 {
-  triangular_matrix_vector_solve(std::experimental::linalg::impl::default_exec_t(),
+  triangular_matrix_vector_solve(impl::default_exec_t{},
 				 A, t, d, b, x, divide);
 }
   
@@ -403,19 +402,19 @@ template<class ElementType_A,
          class Layout_X,
          class Accessor_X>
 void triangular_matrix_vector_solve(
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_B, std::experimental::extents<SizeType_B, ext_B>, Layout_B, Accessor_B> b,
-  std::experimental::mdspan<ElementType_X, std::experimental::extents<SizeType_X, ext_X>, Layout_X, Accessor_X> x)
+  mdspan<ElementType_B, extents<SizeType_B, ext_B>, Layout_B, Accessor_B> b,
+  mdspan<ElementType_X, extents<SizeType_X, ext_X>, Layout_X, Accessor_X> x)
 {
-  triangular_matrix_vector_solve(std::experimental::linalg::impl::default_exec_t(),
+  triangular_matrix_vector_solve(impl::default_exec_t{},
 				 A, t, d, b, x);
 }
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
-} // end namespace experimental
-} // end namespace std
+} // end namespace MDSPAN_IMPL_PROPOSED_NAMESPACE
+} // end namespace MDSPAN_IMPL_STANDARD_NAMESPACE
 
 #endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS2_MATRIX_VECTOR_SOLVE_HPP_

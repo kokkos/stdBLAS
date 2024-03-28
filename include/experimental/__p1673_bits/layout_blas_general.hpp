@@ -47,8 +47,8 @@
 #include "maybe_static_size.hpp"
 #include "layout_tags.hpp"
 
-namespace std {
-namespace experimental {
+namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
+namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
@@ -97,8 +97,9 @@ public:
   // TODO noexcept specification
   // TODO throw if rhs is dynamic LDA and doesn't match static lhs
   MDSPAN_TEMPLATE_REQUIRES(
-    class OtherExtents, ::std::size_t OtherLDA, /* requires */ (
-      _MDSPAN_TRAIT(is_convertible, OtherExtents, __extents_type)
+    class OtherExtents, ::std::size_t OtherLDA,
+    /* requires */ (
+      _MDSPAN_TRAIT(std::is_convertible, OtherExtents, __extents_type)
       && (
         !__layout_blas_impl<OtherExtents, OtherLDA>::__lda_t::is_static
         || !__lda_t::is_static
@@ -118,7 +119,7 @@ public:
   MDSPAN_TEMPLATE_REQUIRES(
     class OtherExtents, ::std::size_t OtherLDA,
     /* requires */ (
-      _MDSPAN_TRAIT(is_convertible, OtherExtents, __extents_type)
+      _MDSPAN_TRAIT(std::is_convertible, OtherExtents, __extents_type)
       && (
         !__layout_blas_impl<OtherExtents, OtherLDA>::__lda_t::is_static
           || !__lda_t::is_static
@@ -201,8 +202,8 @@ class layout_blas_general<row_major_t> {
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
-} // end namespace experimental
-} // end namespace std
+} // end namespace MDSPAN_IMPL_PROPOSED_NAMESPACE
+} // end namespace MDSPAN_IMPL_STANDARD_NAMESPACE
 
 
 #endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_LAYOUT_BLAS_GENERAL_HPP_

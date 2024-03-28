@@ -4,8 +4,9 @@
 // This must be defined before including any mdspan headers.
 #define MDSPAN_USE_PAREN_OPERATOR 1
 
+#include <mdspan/mdspan.hpp>
+#include "experimental/__p2630_bits/submdspan.hpp"
 #include <experimental/linalg>
-
 #include <iostream>
 
 #if (! defined(__GNUC__)) || (__GNUC__ > 9)
@@ -16,13 +17,16 @@
 #  include <execution>
 #endif
 
-using std::experimental::mdspan;
-using std::experimental::extents;
+namespace MdSpan = MDSPAN_IMPL_STANDARD_NAMESPACE;
+namespace LinearAlgebra = MDSPAN_IMPL_STANDARD_NAMESPACE :: MDSPAN_IMPL_PROPOSED_NAMESPACE :: linalg;
+
+using MdSpan::mdspan;
+using MdSpan::extents;
 #if defined(__cpp_lib_span)
 #include <span>
   using std::dynamic_extent;
 #else
-  using std::experimental::dynamic_extent;
+  using MdSpan::dynamic_extent;
 #endif
 
 int main(int argc, char* argv[]) {
@@ -38,17 +42,21 @@ int main(int argc, char* argv[]) {
     // GCC 11.1 works but some other compilers are buggy.
     //
     // mdspan x(x_vec.data(), N);
-    mdspan<double, extents<std::size_t, dynamic_extent>> x(x_vec.data(),N);
-    for(int i=0; i<x.extent(0); i++) x(i) = i;
+    mdspan<double, extents<int, dynamic_extent>> x(x_vec.data(), N);
+    for (int i = 0; i < x.extent(0); ++i) {
+      x(i) = i;
+    }
 
     // Call linalg::scale x = 2.0*x;
-    std::experimental::linalg::scale(2.0, x);
+    LinearAlgebra::scale(2.0, x);
 #ifdef MDSPAN_EXAMPLES_USE_EXECUTION_POLICIES
-    std::experimental::linalg::scale(std::execution::par, 2.0, x);
+    LinearAlgebra::scale(std::execution::par, 2.0, x);
 #else
-    std::experimental::linalg::scale(2.0, x);
+    LinearAlgebra::scale(2.0, x);
 #endif
 
-    for(int i=0; i<x.extent(0); i+=5) std::cout << i << " " << x(i) << std::endl;
+    for (int i = 0; i < x.extent(0); i += 5) {
+      std::cout << i << " " << x(i) << std::endl;
+    }
   }
 }

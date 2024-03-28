@@ -46,8 +46,8 @@
 #include <complex>
 #include <type_traits>
 
-namespace std {
-namespace experimental {
+namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
+namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
@@ -69,7 +69,7 @@ struct is_custom_mat_vec_product_avail<
 		std::declval<X_t>(),
 		std::declval<Y_t>()))
       >
-    && !linalg::impl::is_inline_exec_v<Exec>
+    && ! impl::is_inline_exec_v<Exec>
     >
   >
   : std::true_type{};
@@ -89,7 +89,7 @@ struct is_custom_mat_vec_product_with_update_avail<
 				     std::declval<Y_t>(),
 				     std::declval<Z_t>()))
       >
-    && !linalg::impl::is_inline_exec_v<Exec>
+    && ! impl::is_inline_exec_v<Exec>
     >
   >
   : std::true_type{};
@@ -109,7 +109,7 @@ struct is_custom_sym_mat_vec_product_avail<
 					       std::declval<X_t>(),
 					       std::declval<Y_t>()))
       >
-    && !linalg::impl::is_inline_exec_v<Exec>
+    && ! impl::is_inline_exec_v<Exec>
     >
   >
   : std::true_type{};
@@ -130,7 +130,7 @@ struct is_custom_sym_mat_vec_product_with_update_avail<
 					       std::declval<Y_t>(),
 					       std::declval<Z_t>()))
       >
-    && !linalg::impl::is_inline_exec_v<Exec>
+    && ! impl::is_inline_exec_v<Exec>
     >
   >
   : std::true_type{};
@@ -150,7 +150,7 @@ struct is_custom_hermitian_mat_vec_product_avail<
 					       std::declval<X_t>(),
 					       std::declval<Y_t>()))
       >
-    && !linalg::impl::is_inline_exec_v<Exec>
+    && ! impl::is_inline_exec_v<Exec>
     >
   >
   : std::true_type{};
@@ -171,7 +171,7 @@ struct is_custom_hermitian_mat_vec_product_with_update_avail<
 					       std::declval<Y_t>(),
 					       std::declval<Z_t>()))
       >
-    && !linalg::impl::is_inline_exec_v<Exec>
+    && ! impl::is_inline_exec_v<Exec>
     >
   >
   : std::true_type{};
@@ -195,7 +195,7 @@ struct is_custom_tri_mat_vec_product_avail<
 		)
 	       )
       >
-    && !linalg::impl::is_inline_exec_v<Exec>
+    && ! impl::is_inline_exec_v<Exec>
     >
   >
   : std::true_type{};
@@ -220,7 +220,7 @@ struct is_custom_tri_mat_vec_product_with_update_avail<
 		)
 	       )
       >
-    && !linalg::impl::is_inline_exec_v<Exec>
+    && ! impl::is_inline_exec_v<Exec>
     >
   >
   : std::true_type{};
@@ -235,7 +235,7 @@ namespace impl {
   };
 
   template<class ElementType, class Extents, class Layout, class Accessor>
-  struct is_mdspan<::std::experimental::mdspan<ElementType, Extents, Layout, Accessor>> {
+  struct is_mdspan<mdspan<ElementType, Extents, Layout, Accessor>> {
     // FIXME (mfh 2022/06/19) not quite enough -- the template
     // parameters also need to meet mdspan's requirements -- but this
     // is enough to resolve ambiguity between the overwriting +
@@ -266,10 +266,10 @@ MDSPAN_TEMPLATE_REQUIRES(
          /* requires */ (Layout_A::template mapping<extents<SizeType_A, numRows_A, numCols_A> >::is_always_unique())
 )
 void matrix_vector_product(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
 {
   using size_type = std::common_type_t<
     std::common_type_t<
@@ -303,17 +303,18 @@ MDSPAN_TEMPLATE_REQUIRES(
 )
 void matrix_vector_product(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
 {
   constexpr bool use_custom = is_custom_mat_vec_product_avail<
     decltype(execpolicy_mapper(exec)), decltype(A), decltype(x), decltype(y)>::value;
 
-  if constexpr(use_custom) {
+  if constexpr (use_custom) {
     matrix_vector_product(execpolicy_mapper(exec), A, x, y);
-  } else {
-    matrix_vector_product(std::experimental::linalg::impl::inline_exec_t(), A, x, y);
+  }
+  else {
+    matrix_vector_product(impl::inline_exec_t{}, A, x, y);
   }
 }
 
@@ -331,11 +332,11 @@ template<class ElementType_A,
          class Layout_y,
          class Accessor_y>
 void matrix_vector_product(
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
 {
-  matrix_vector_product(std::experimental::linalg::impl::default_exec_t(), A, x, y);
+  matrix_vector_product(impl::default_exec_t{}, A, x, y);
 }
 
 namespace impl {
@@ -345,7 +346,7 @@ namespace impl {
   };
 
   template<class Layout, class SizeType, size_t ... Extents>
-  struct always_unique_mapping<Layout, ::std::experimental::extents<SizeType, Extents...>> {
+  struct always_unique_mapping<Layout, extents<SizeType, Extents...>> {
   private:
     using extents_type = extents<SizeType, Extents...>;
   public:
@@ -383,11 +384,11 @@ MDSPAN_TEMPLATE_REQUIRES(
          /* requires */ (impl::always_unique_mapping_v<Layout_A, Extents_A /* SizeType_A, numRows_A, numCols_A */> && Extents_A::rank() == 2)
 )
 void matrix_vector_product(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType_A, Extents_A /* std::experimental::extents<SizeType_A, numRows_A, numCols_A> */, Layout_A, Accessor_A> A,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_z, std::experimental::extents<SizeType_z, ext_z>, Layout_z, Accessor_z> z)
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType_A, Extents_A /* extents<SizeType_A, numRows_A, numCols_A> */, Layout_A, Accessor_A> A,
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_z, extents<SizeType_z, ext_z>, Layout_z, Accessor_z> z)
 {
   using size_type = std::common_type_t<
     std::common_type_t<
@@ -429,19 +430,20 @@ MDSPAN_TEMPLATE_REQUIRES(
 )
 void matrix_vector_product(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType_A, Extents_A /* std::experimental::extents<SizeType_A, numRows_A, numCols_A> */ , Layout_A, Accessor_A> A,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x> , Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_z, Extents_z /* std::experimental::extents<SizeType_z, ext_z> */ , Layout_z, Accessor_z> z)
+  mdspan<ElementType_A, Extents_A /* extents<SizeType_A, numRows_A, numCols_A> */ , Layout_A, Accessor_A> A,
+  mdspan<ElementType_x, extents<SizeType_x, ext_x> , Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_z, Extents_z /* extents<SizeType_z, ext_z> */ , Layout_z, Accessor_z> z)
 {
 
   constexpr bool use_custom = is_custom_mat_vec_product_with_update_avail<
     decltype(execpolicy_mapper(exec)), decltype(A), decltype(x), decltype(y), decltype(z)>::value;
 
-  if constexpr(use_custom) {
+  if constexpr (use_custom) {
     matrix_vector_product(execpolicy_mapper(exec), A, x, y, z);
-  } else {
-    matrix_vector_product(std::experimental::linalg::impl::inline_exec_t(), A, x, y, z);
+  }
+  else {
+    matrix_vector_product(impl::inline_exec_t{}, A, x, y, z);
   }
 }
 
@@ -469,12 +471,12 @@ MDSPAN_TEMPLATE_REQUIRES(
          /* requires */ (impl::always_unique_mapping_v<Layout_A, Extents_A /* extents<SizeType_A, numRows_A, numCols_A> */ > && Extents_A::rank() == 2)
 )
 void matrix_vector_product(
-  std::experimental::mdspan<ElementType_A, Extents_A /* std::experimental::extents<SizeType_A, numRows_A, numCols_A> */, Layout_A, Accessor_A> A,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_z, std::experimental::extents<SizeType_z, ext_z>, Layout_z, Accessor_z> z)
+  mdspan<ElementType_A, Extents_A /* extents<SizeType_A, numRows_A, numCols_A> */, Layout_A, Accessor_A> A,
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_z, extents<SizeType_z, ext_z>, Layout_z, Accessor_z> z)
 {
-  matrix_vector_product(std::experimental::linalg::impl::default_exec_t(), A, x, y, z);
+  matrix_vector_product(impl::default_exec_t{}, A, x, y, z);
 }
 
 
@@ -495,14 +497,14 @@ MDSPAN_TEMPLATE_REQUIRES(
          class SizeType_y, ::std::size_t ext_y,
          class Layout_y,
          class Accessor_y,
-         /* requires */ (Layout_A::template mapping<std::experimental::extents<SizeType_A, numRows_A, numCols_A>>::is_always_unique())
+         /* requires */ (Layout_A::template mapping<extents<SizeType_A, numRows_A, numCols_A>>::is_always_unique())
 )
 void symmetric_matrix_vector_product(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
 {
   using size_type = std::common_type_t<
       std::common_type_t<SizeType_A, SizeType_x>,
@@ -549,18 +551,19 @@ template<class ExecutionPolicy,
          class Accessor_y>
 void symmetric_matrix_vector_product(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
 {
   constexpr bool use_custom = is_custom_sym_mat_vec_product_avail<
     decltype(execpolicy_mapper(exec)), decltype(A), Triangle, decltype(x), decltype(y)>::value;
 
-  if constexpr(use_custom) {
+  if constexpr (use_custom) {
     symmetric_matrix_vector_product(execpolicy_mapper(exec), A, t, x, y);
-  } else {
-    symmetric_matrix_vector_product(std::experimental::linalg::impl::inline_exec_t(), A, t, x, y);
+  }
+  else {
+    symmetric_matrix_vector_product(impl::inline_exec_t{}, A, t, x, y);
   }
 }
 
@@ -579,15 +582,15 @@ MDSPAN_TEMPLATE_REQUIRES(
          class SizeType_y, ::std::size_t ext_y,
          class Layout_y,
          class Accessor_y,
-         /* requires */ (Layout_A::template mapping<std::experimental::extents<SizeType_A, numRows_A, numCols_A>>::is_always_unique())
+         /* requires */ (Layout_A::template mapping<extents<SizeType_A, numRows_A, numCols_A>>::is_always_unique())
 )
 void symmetric_matrix_vector_product(
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
 {
-  symmetric_matrix_vector_product(std::experimental::linalg::impl::default_exec_t(), A, t, x, y);
+  symmetric_matrix_vector_product(impl::default_exec_t{}, A, t, x, y);
 }
 
 
@@ -616,12 +619,12 @@ MDSPAN_TEMPLATE_REQUIRES(
          /* requires */ (impl::always_unique_mapping_v<Layout_A, Extents_A> && Extents_A::rank() == 2 && Extents_z::rank() == 1)
 )
 void symmetric_matrix_vector_product(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType_A, Extents_A, Layout_A, Accessor_A> A,
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType_A, Extents_A, Layout_A, Accessor_A> A,
   Triangle t,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_z, Extents_z, Layout_z, Accessor_z> z)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_z, Extents_z, Layout_z, Accessor_z> z)
 {
   using size_type = std::common_type_t<
     std::common_type_t<
@@ -674,19 +677,20 @@ template<class ExecutionPolicy,
          class Accessor_z>
 void symmetric_matrix_vector_product(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_z, std::experimental::extents<SizeType_z, ext_z>, Layout_z, Accessor_z> z)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_z, extents<SizeType_z, ext_z>, Layout_z, Accessor_z> z)
 {
   constexpr bool use_custom = is_custom_sym_mat_vec_product_with_update_avail<
     decltype(execpolicy_mapper(exec)), decltype(A), Triangle, decltype(x), decltype(y), decltype(z)>::value;
 
-  if constexpr(use_custom) {
+  if constexpr (use_custom) {
     symmetric_matrix_vector_product(execpolicy_mapper(exec), A, t, x, y, z);
-  } else {
-    symmetric_matrix_vector_product(std::experimental::linalg::impl::inline_exec_t(), A, t, x, y, z);
+  }
+  else {
+    symmetric_matrix_vector_product(impl::inline_exec_t{}, A, t, x, y, z);
   }
 }
 
@@ -716,13 +720,13 @@ MDSPAN_TEMPLATE_REQUIRES(
          /* requires */ (impl::always_unique_mapping_v<Layout_A, Extents_A /* extents<SizeType_A, numRows_A, numCols_A> */ > && Extents_A::rank() == 2 && Extents_z::rank() == 1)
 )
 void symmetric_matrix_vector_product(
-  std::experimental::mdspan<ElementType_A,  Extents_A /* std::experimental::extents<SizeType_A, numRows_A, numCols_A> */ , Layout_A, Accessor_A> A,
+  mdspan<ElementType_A,  Extents_A /* extents<SizeType_A, numRows_A, numCols_A> */ , Layout_A, Accessor_A> A,
   Triangle t,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_z, Extents_z /* std::experimental::extents<SizeType_z, ext_z> */ , Layout_z, Accessor_z> z)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_z, Extents_z /* extents<SizeType_z, ext_z> */ , Layout_z, Accessor_z> z)
 {
-  symmetric_matrix_vector_product(std::experimental::linalg::impl::default_exec_t(), A, t, x, y, z);
+  symmetric_matrix_vector_product(impl::default_exec_t{}, A, t, x, y, z);
 }
 
 
@@ -744,14 +748,14 @@ MDSPAN_TEMPLATE_REQUIRES(
          class SizeType_y, ::std::size_t ext_y,
          class Layout_y,
          class Accessor_y,
-         /* requires */ (Layout_A::template mapping<std::experimental::extents<SizeType_A, numRows_A, numCols_A>>::is_always_unique())
+         /* requires */ (Layout_A::template mapping<extents<SizeType_A, numRows_A, numCols_A>>::is_always_unique())
 )
 void hermitian_matrix_vector_product(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
 {
   using size_type = std::common_type_t<
       std::common_type_t<SizeType_A, SizeType_x>,
@@ -797,22 +801,23 @@ MDSPAN_TEMPLATE_REQUIRES(
          class SizeType_y, ::std::size_t ext_y,
          class Layout_y,
          class Accessor_y,
-         /* requires */ (Layout_A::template mapping<std::experimental::extents<SizeType_A, numRows_A, numCols_A>>::is_always_unique())
+         /* requires */ (Layout_A::template mapping<extents<SizeType_A, numRows_A, numCols_A>>::is_always_unique())
 )
 void hermitian_matrix_vector_product(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
 {
   constexpr bool use_custom = is_custom_hermitian_mat_vec_product_avail<
     decltype(execpolicy_mapper(exec)), decltype(A), Triangle, decltype(x), decltype(y)>::value;
 
-  if constexpr(use_custom) {
+  if constexpr (use_custom) {
     hermitian_matrix_vector_product(execpolicy_mapper(exec), A, t, x, y);
-  } else {
-    hermitian_matrix_vector_product(std::experimental::linalg::impl::inline_exec_t(), A, t, x, y);
+  }
+  else {
+    hermitian_matrix_vector_product(impl::inline_exec_t{}, A, t, x, y);
   }
 }
 
@@ -831,15 +836,15 @@ MDSPAN_TEMPLATE_REQUIRES(
          class SizeType_y, ::std::size_t ext_y,
          class Layout_y,
          class Accessor_y,
-         /* requires */ (Layout_A::template mapping<std::experimental::extents<SizeType_A, numRows_A, numCols_A>>::is_always_unique())
+         /* requires */ (Layout_A::template mapping<extents<SizeType_A, numRows_A, numCols_A>>::is_always_unique())
 )
 void hermitian_matrix_vector_product(
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
 {
-  hermitian_matrix_vector_product(std::experimental::linalg::impl::default_exec_t(), A, t, x, y);
+  hermitian_matrix_vector_product(impl::default_exec_t{}, A, t, x, y);
 }
 
 
@@ -872,12 +877,12 @@ MDSPAN_TEMPLATE_REQUIRES(
          /* requires */ (impl::always_unique_mapping_v<Layout_A, Extents_A /* extents<SizeType_A, numRows_A, numCols_A> */ > && Extents_A::rank() == 2 && Extents_z::rank() == 1)
 )
 void hermitian_matrix_vector_product(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType_A, Extents_A /* std::experimental::extents<SizeType_A, numRows_A, numCols_A> */ , Layout_A, Accessor_A> A,
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType_A, Extents_A /* extents<SizeType_A, numRows_A, numCols_A> */ , Layout_A, Accessor_A> A,
   Triangle t,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_z, Extents_z /* std::experimental::extents<SizeType_z, ext_z> */ , Layout_z, Accessor_z> z)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_z, Extents_z /* extents<SizeType_z, ext_z> */ , Layout_z, Accessor_z> z)
 {
   using size_type = std::common_type_t<
     std::common_type_t<
@@ -930,19 +935,20 @@ template<class ExecutionPolicy,
          class Accessor_z>
 void hermitian_matrix_vector_product(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_z, std::experimental::extents<SizeType_z, ext_z>, Layout_z, Accessor_z> z)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_z, extents<SizeType_z, ext_z>, Layout_z, Accessor_z> z)
 {
   constexpr bool use_custom = is_custom_hermitian_mat_vec_product_with_update_avail<
     decltype(execpolicy_mapper(exec)), decltype(A), Triangle, decltype(x), decltype(y), decltype(z)>::value;
 
-  if constexpr(use_custom) {
+  if constexpr (use_custom) {
     hermitian_matrix_vector_product(execpolicy_mapper(exec), A, t, x, y, z);
-  } else {
-    hermitian_matrix_vector_product(std::experimental::linalg::impl::inline_exec_t(), A, t, x, y, z);
+  }
+  else {
+    hermitian_matrix_vector_product(impl::inline_exec_t{}, A, t, x, y, z);
   }
 }
 
@@ -973,13 +979,13 @@ MDSPAN_TEMPLATE_REQUIRES(
          /* requires */ (impl::always_unique_mapping_v<Layout_A, Extents_A /* extents<SizeType_A, numRows_A, numCols_A> */ > && Extents_A::rank() == 2)
 )
 void hermitian_matrix_vector_product(
-  std::experimental::mdspan<ElementType_A, Extents_A /* std::experimental::extents<SizeType_A, numRows_A, numCols_A> */ , Layout_A, Accessor_A> A,
+  mdspan<ElementType_A, Extents_A /* extents<SizeType_A, numRows_A, numCols_A> */ , Layout_A, Accessor_A> A,
   Triangle t,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_z, Extents_z /* std::experimental::extents<SizeType_z, ext_z> */ , Layout_z, Accessor_z> z)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_z, Extents_z /* extents<SizeType_z, ext_z> */ , Layout_z, Accessor_z> z)
 {
-  hermitian_matrix_vector_product(std::experimental::linalg::impl::default_exec_t(), A, t, x, y, z);
+  hermitian_matrix_vector_product(impl::default_exec_t{}, A, t, x, y, z);
 }
 
 
@@ -1001,15 +1007,15 @@ MDSPAN_TEMPLATE_REQUIRES(
          class SizeType_y, ::std::size_t ext_y,
          class Layout_y,
          class Accessor_y,
-         /* requires */ (Layout_A::template mapping<std::experimental::extents<SizeType_A, numRows_A, numCols_A>>::is_always_unique())
+         /* requires */ (Layout_A::template mapping<extents<SizeType_A, numRows_A, numCols_A>>::is_always_unique())
 )
 void triangular_matrix_vector_product(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
 {
   using size_type = std::common_type_t<
       std::common_type_t<SizeType_A, SizeType_x>,
@@ -1063,11 +1069,11 @@ template<class ExecutionPolicy,
          class Accessor_y>
 void triangular_matrix_vector_product(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
 {
 
   constexpr bool use_custom = is_custom_tri_mat_vec_product_avail<
@@ -1075,12 +1081,11 @@ void triangular_matrix_vector_product(
     decltype(A), decltype(t), decltype(d), decltype(x), decltype(y)
     >::value;
 
-  if constexpr(use_custom){
+  if constexpr (use_custom) {
     triangular_matrix_vector_product(execpolicy_mapper(exec), A, t, d, x, y);
   }
-  else
-  {
-    triangular_matrix_vector_product(std::experimental::linalg::impl::inline_exec_t(),
+  else {
+    triangular_matrix_vector_product(impl::inline_exec_t{},
 				     A, t, d, x, y);
   }
 }
@@ -1101,16 +1106,16 @@ MDSPAN_TEMPLATE_REQUIRES(
          class SizeType_y, ::std::size_t ext_y,
          class Layout_y,
          class Accessor_y,
-         /* requires */ (Layout_A::template mapping<std::experimental::extents<SizeType_A, numRows_A, numCols_A>>::is_always_unique())
+         /* requires */ (Layout_A::template mapping<extents<SizeType_A, numRows_A, numCols_A>>::is_always_unique())
 )
 void triangular_matrix_vector_product(
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
 {
-  triangular_matrix_vector_product(std::experimental::linalg::impl::default_exec_t(), A, t, d, x, y);
+  triangular_matrix_vector_product(impl::default_exec_t{}, A, t, d, x, y);
 }
 
 
@@ -1145,13 +1150,13 @@ MDSPAN_TEMPLATE_REQUIRES(
          /* requires */ (impl::always_unique_mapping_v<Layout_A, Extents_A /* extents<SizeType_A, numRows_A, numCols_A> */ > && Extents_A::rank() == 2)
 )
 void triangular_matrix_vector_product(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType_A, Extents_A /* std::experimental::extents<SizeType_A, numRows_A, numCols_A> */ , Layout_A, Accessor_A> A,
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType_A, Extents_A /* extents<SizeType_A, numRows_A, numCols_A> */ , Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, Extents_y /* std::experimental::extents<SizeType_y, ext_y> */ , Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_z, Extents_z /* std::experimental::extents<SizeType_z, ext_z> */ , Layout_z, Accessor_z> z)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, Extents_y /* extents<SizeType_y, ext_y> */ , Layout_y, Accessor_y> y,
+  mdspan<ElementType_z, Extents_z /* extents<SizeType_z, ext_z> */ , Layout_z, Accessor_z> z)
 {
   using size_type = std::common_type_t<
     std::common_type_t<
@@ -1213,22 +1218,23 @@ template<class ExecutionPolicy,
          class Accessor_z>
 void triangular_matrix_vector_product(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType_A, std::experimental::extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_z, std::experimental::extents<SizeType_z, ext_z>, Layout_z, Accessor_z> z)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_z, extents<SizeType_z, ext_z>, Layout_z, Accessor_z> z)
 {
   constexpr bool use_custom = is_custom_tri_mat_vec_product_with_update_avail<
     decltype(execpolicy_mapper(exec)),
     decltype(A), decltype(t), decltype(d), decltype(x), decltype(y), decltype(z)
     >::value;
 
-  if constexpr(use_custom) {
+  if constexpr (use_custom) {
     triangular_matrix_vector_product(execpolicy_mapper(exec), A, t, d, x, y, z);
-  } else {
-    triangular_matrix_vector_product(std::experimental::linalg::impl::inline_exec_t(), A, t, d, x, y, z);
+  }
+  else {
+    triangular_matrix_vector_product(impl::inline_exec_t{}, A, t, d, x, y, z);
   }
 }
 
@@ -1261,19 +1267,19 @@ MDSPAN_TEMPLATE_REQUIRES(
          /* requires */ (impl::always_unique_mapping_v<Layout_A, Extents_A /* extents<SizeType_A, numRows_A, numCols_A> */ > && Extents_A::rank() == 2)
 )
 void triangular_matrix_vector_product(
-  std::experimental::mdspan<ElementType_A, Extents_A /* std::experimental::extents<SizeType_A, numRows_A, numCols_A> */ , Layout_A, Accessor_A> A,
+  mdspan<ElementType_A, Extents_A /* extents<SizeType_A, numRows_A, numCols_A> */ , Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, Extents_y /* std::experimental::extents<SizeType_y, ext_y> */ , Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_z, Extents_z /* std::experimental::extents<SizeType_z, ext_z> */ , Layout_z, Accessor_z> z)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, Extents_y /* extents<SizeType_y, ext_y> */ , Layout_y, Accessor_y> y,
+  mdspan<ElementType_z, Extents_z /* extents<SizeType_z, ext_z> */ , Layout_z, Accessor_z> z)
 {
-  triangular_matrix_vector_product(std::experimental::linalg::impl::default_exec_t(), A, t, d, x, y, z);
+  triangular_matrix_vector_product(impl::default_exec_t{}, A, t, d, x, y, z);
 }
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
-} // end namespace experimental
-} // end namespace std
+} // end namespace MDSPAN_IMPL_PROPOSED_NAMESPACE
+} // end namespace MDSPAN_IMPL_STANDARD_NAMESPACE
 
 #endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS2_MATRIX_VECTOR_PRODUCT_HPP_
