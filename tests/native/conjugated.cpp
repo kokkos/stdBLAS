@@ -103,8 +103,8 @@ namespace {
       mdspan<value_type, extents_type, layout_type, input_accessor_type> x_nc{x_storage.data()};
       auto x_nc_conj = conjugated(x_nc);
 
-      using expected_accessor_type = conjugated_accessor<default_accessor<value_type>>;
-      using expected_element_type = std::add_const_t<value_type>;
+      using expected_accessor_type = default_accessor<value_type>;
+      using expected_element_type = value_type;
       static_assert(std::is_same_v<decltype(x_nc_conj),
                     mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>>);
       EXPECT_EQ(x_nc_conj.mapping(), x_nc.mapping());
@@ -114,8 +114,8 @@ namespace {
       mdspan<const value_type, extents_type, layout_type, input_accessor_type> x_c{x_storage.data()};
       auto x_c_conj = conjugated(x_c);
 
-      using expected_accessor_type = conjugated_accessor<default_accessor<const value_type>>;
-      using expected_element_type = std::add_const_t<value_type>;
+      using expected_accessor_type = default_accessor<const value_type>;
+      using expected_element_type = const value_type;
       static_assert(std::is_same_v<decltype(x_c_conj),
                     mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>>);
       EXPECT_EQ(x_c_conj.mapping(), x_c.mapping());
@@ -136,8 +136,8 @@ namespace {
       mdspan<value_type, extents_type, layout_type, input_accessor_type> x_nc{x_storage.data()};
       auto x_nc_conj = conjugated(x_nc);
 
-      using expected_accessor_type = conjugated_accessor<nondefault_accessor<value_type>>;
-      using expected_element_type = std::add_const_t<value_type>;
+      using expected_accessor_type = nondefault_accessor<value_type>;
+      using expected_element_type = value_type;
       static_assert(std::is_same_v<decltype(x_nc_conj),
                     mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>>);
       EXPECT_EQ(x_nc_conj.mapping(), x_nc.mapping());
@@ -147,8 +147,8 @@ namespace {
       mdspan<const value_type, extents_type, layout_type, input_accessor_type> x_c{x_storage.data()};
       auto x_c_conj = conjugated(x_c);
 
-      using expected_accessor_type = conjugated_accessor<nondefault_accessor<const value_type>>;
-      using expected_element_type = std::add_const_t<value_type>;
+      using expected_accessor_type = nondefault_accessor<const value_type>;
+      using expected_element_type = const value_type;
       static_assert(std::is_same_v<decltype(x_c_conj),
                     mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>>);
       EXPECT_EQ(x_c_conj.mapping(), x_c.mapping());
