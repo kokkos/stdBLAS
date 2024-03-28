@@ -46,8 +46,8 @@
 #include <cstdlib>
 #include <cmath>
 
-namespace std {
-namespace experimental {
+namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
+namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
@@ -67,7 +67,7 @@ struct is_custom_vector_abs_sum_avail<
 	       ),
       Scalar
       >::value
-    && !linalg::impl::is_inline_exec_v<Exec>
+    && ! impl::is_inline_exec_v<Exec>
     >
   >
   : std::true_type{};
@@ -80,8 +80,8 @@ template<class ElementType,
          class Accessor,
          class Scalar>
 Scalar vector_abs_sum(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext0>, Layout, Accessor> v,
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> v,
   Scalar init)
 {
   const SizeType numElt = v.extent(0);
@@ -100,19 +100,18 @@ template<class ExecutionPolicy,
          class Scalar>
 Scalar vector_abs_sum(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext0>, Layout, Accessor> v,
+  mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> v,
   Scalar init)
 {
   constexpr bool use_custom = is_custom_vector_abs_sum_avail<
     decltype(execpolicy_mapper(exec)), decltype(v), Scalar
     >::value;
 
-  if constexpr(use_custom){
+  if constexpr (use_custom) {
     return vector_abs_sum(execpolicy_mapper(exec), v, init);
   }
-  else
-  {
-    return vector_abs_sum(std::experimental::linalg::impl::inline_exec_t(), v, init);
+  else {
+    return vector_abs_sum(impl::inline_exec_t{}, v, init);
   }
 }
 
@@ -122,10 +121,10 @@ template<class ElementType,
          class Accessor,
          class Scalar>
 Scalar vector_abs_sum(
-  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext0>, Layout, Accessor> v,
+  mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> v,
   Scalar init)
 {
-  return vector_abs_sum(std::experimental::linalg::impl::default_exec_t(), v, init);
+  return vector_abs_sum(impl::default_exec_t{}, v, init);
 }
 
 namespace vector_abs_detail {
@@ -139,7 +138,7 @@ namespace vector_abs_detail {
     class Layout,
     class Accessor>
   auto vector_abs_return_type_deducer(
-    std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext0>, Layout, Accessor> x)
+    mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> x)
   -> decltype(abs(x(0)));
 } // namespace vector_abs_detail
 
@@ -149,7 +148,7 @@ template<class ElementType,
          class Layout,
          class Accessor>
 auto vector_abs_sum(
-  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext0>, Layout, Accessor> x)
+  mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> x)
 -> decltype(vector_abs_detail::vector_abs_return_type_deducer(x))
 {
   using return_t = decltype(vector_abs_detail::vector_abs_return_type_deducer(x));
@@ -163,7 +162,7 @@ template<class ExecutionPolicy,
          class Accessor>
 auto vector_abs_sum(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext0>, Layout, Accessor> x)
+  mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> x)
 -> decltype(vector_abs_detail::vector_abs_return_type_deducer(x))
 {
   using return_t = decltype(vector_abs_detail::vector_abs_return_type_deducer(x));
@@ -172,7 +171,7 @@ auto vector_abs_sum(
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
-} // end namespace experimental
-} // end namespace std
+} // end namespace MDSPAN_IMPL_PROPOSED_NAMESPACE
+} // end namespace MDSPAN_IMPL_STANDARD_NAMESPACE
 
 #endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_VECTOR_ABS_SUM_HPP_

@@ -1,9 +1,7 @@
 #include "./gtest_fixtures.hpp"
 
-#include <experimental/linalg>
-
 namespace {
-  using std::experimental::linalg::scale;
+  using LinearAlgebra::scale;
 
   TEST(BLAS1_scale, mdspan_double)
   {

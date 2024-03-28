@@ -1,15 +1,9 @@
 #include "./gtest_fixtures.hpp"
 
-#include <experimental/linalg>
-#include <array>
-
 namespace {
-  using std::experimental::linalg::symmetric_matrix_rank_k_update;
-  using std::experimental::linalg::transposed;
-  using std::experimental::linalg::upper_triangle;
-  using std::extents;
-  using std::layout_left;
-  using std::mdspan;
+  using LinearAlgebra::symmetric_matrix_rank_k_update;
+  using LinearAlgebra::transposed;
+  using LinearAlgebra::upper_triangle;
 
   // This is a regression test that follows on from
   // https://github.com/kokkos/stdBLAS/issues/261 .
@@ -17,7 +11,7 @@ namespace {
   // The reference implementation needs to implement all constraints
   // of hermitian_matrix_rank_k_update in order to disambiguate
   // overloads.
-  TEST(BLAS3_herk, Issue261_FollowOn)
+  TEST(BLAS3_herk, AmbiguousOverloads)
   {
     constexpr auto map_C = layout_left::mapping{extents<std::size_t,3,3>{}};
     constexpr auto map_expected = map_C;

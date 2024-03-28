@@ -41,7 +41,7 @@
 //@HEADER
 */
 
-#include <experimental/mdspan>
+#include <mdspan/mdspan.hpp>
 
 #include <type_traits>
 

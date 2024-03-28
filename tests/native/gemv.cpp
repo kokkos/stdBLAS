@@ -1,11 +1,9 @@
 #include "./gtest_fixtures.hpp"
-
-#include <experimental/linalg>
 #include <iostream>
 
 namespace {
-  using std::experimental::linalg::matrix_vector_product;
-  using std::experimental::linalg::transposed;
+  using LinearAlgebra::matrix_vector_product;
+  using LinearAlgebra::transposed;
   using std::cout;
   using std::endl;
 

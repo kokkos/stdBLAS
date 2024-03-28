@@ -1,13 +1,8 @@
-#include "gtest/gtest.h"
-#include "gtest_fixtures.hpp"
-
-#include <experimental/linalg>
-#include <experimental/mdspan>
-#include <vector>
+#include "./gtest_fixtures.hpp"
 
 namespace {
 
-  using std::experimental::linalg::vector_abs_sum;
+  using LinearAlgebra::vector_abs_sum;
 
   TEST_F(unsigned_double_vector, abs_sum)
   {

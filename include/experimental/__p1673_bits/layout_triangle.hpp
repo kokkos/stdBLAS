@@ -49,8 +49,8 @@
 #include <type_traits>
 #include <cstdint>
 
-namespace std {
-namespace experimental {
+namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
+namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
@@ -68,7 +68,7 @@ template <
   size_t... ExtIdxs, size_t... ExtMinus2Idxs
 >
 struct __lower_triangle_layout_impl<
-  std::experimental::extents<Exts..., ExtLast, ExtLast>,
+  extents<Exts..., ExtLast, ExtLast>,
   BaseMap, LastTwoMap,
   std::integer_sequence<size_t, ExtIdxs...>,
   std::integer_sequence<size_t, ExtMinus2Idxs...>
@@ -110,7 +110,7 @@ class layout_blas_packed;
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
-} // end namespace experimental
-} // end namespace std
+} // end namespace MDSPAN_IMPL_PROPOSED_NAMESPACE
+} // end namespace MDSPAN_IMPL_STANDARD_NAMESPACE
 
 #endif //LINALG_INCLUDE_EXPERIMENTAL_BITS_LAYOUT_TRIANGLE_HPP_

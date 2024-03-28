@@ -55,14 +55,14 @@
     class Accessor_ ## MATRIX_NAME
 
 #define P1673_MATRIX_EXTENTS_PARAMETER( MATRIX_NAME ) \
-  ::std::experimental::extents< \
+  extents< \
     SizeType_ ## MATRIX_NAME , \
     numRows_ ## MATRIX_NAME , \
     numCols_ ## MATRIX_NAME \
   >
 
 #define P1673_MATRIX_PARAMETER( MATRIX_NAME ) \
-  ::std::experimental::mdspan< \
+  mdspan< \
     ElementType_ ## MATRIX_NAME , \
     P1673_MATRIX_EXTENTS_PARAMETER( MATRIX_NAME ), \
     Layout_ ## MATRIX_NAME , \
