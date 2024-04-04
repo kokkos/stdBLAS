@@ -43,10 +43,10 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_TRANSPOSED_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_TRANSPOSED_HPP_
 
-#include <experimental/mdspan>
+#include <mdspan/mdspan.hpp>
 
-namespace std {
-namespace experimental {
+namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
+namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
@@ -59,7 +59,7 @@ namespace impl {
   )
   struct transpose_extents_t_impl
   {
-    using type = extents<typename Extents::size_type, Extents::static_extent(1), Extents::static_extent(0)>;
+    using type = extents<typename Extents::index_type, Extents::static_extent(1), Extents::static_extent(0)>;
   };
 
   template<class Extents>
@@ -72,8 +72,8 @@ namespace impl {
   transpose_extents_t<Extents> transpose_extents(const Extents& e)
   {
     static_assert(std::is_same_v<
-      typename transpose_extents_t<Extents>::size_type,
-      typename Extents::size_type>, "Please fix transpose_extents_t to account "
+      typename transpose_extents_t<Extents>::index_type,
+      typename Extents::index_type>, "Please fix transpose_extents_t to account "
       "for P2553, which adds a template parameter SizeType to extents.");
 
     constexpr size_t ext0 = Extents::static_extent(0);
@@ -98,83 +98,78 @@ namespace impl {
 template<class Layout>
 class layout_transpose {
 public:
+  using nested_layout_type = Layout;
+  
   template<class Extents>
   struct mapping {
   private:
     using nested_mapping_type =
       typename Layout::template mapping<impl::transpose_extents_t<Extents>>;
-    nested_mapping_type nested_mapping_;
 
   public:
     using extents_type = Extents;
+    using index_type = typename extents_type::index_type;
     using size_type = typename extents_type::size_type;
+    using rank_type = typename extents_type::rank_type;
     using layout_type = layout_transpose;
 
     constexpr explicit mapping(const nested_mapping_type& map)
-      : nested_mapping_(map) {}
+      : nested_mapping_(map),
+        extents_(impl::transpose_extents(map.extents()))
+    {}
 
-    constexpr extents_type extents() const
-      noexcept(noexcept(nested_mapping_.extents()))
+    constexpr const extents_type& extents() const noexcept
     {
-      return impl::transpose_extents(nested_mapping_.extents());
+      return extents_;
     }
 
-    constexpr size_type required_span_size() const
+    constexpr index_type required_span_size() const
       noexcept(noexcept(nested_mapping_.required_span_size()))
     {
       return nested_mapping_.required_span_size();
     }
 
-    template<class IndexType, class... Indices>
-    typename Extents::size_type operator() (Indices... rest, IndexType i, IndexType j) const
-      noexcept(noexcept(nested_mapping_(rest..., j, i)))
+    template<class IndexType0, class IndexType1>
+      requires(std::is_convertible_v<IndexType0, index_type> &&
+               std::is_convertible_v<IndexType1, index_type>)
+    index_type operator() (IndexType0 i, IndexType1 j) const
     {
-      return nested_mapping_(rest..., j, i);
+      return nested_mapping_(j, i);
     }
 
-    nested_mapping_type nested_mapping() const
+    const nested_mapping_type& nested_mapping() const
     {
       return nested_mapping_;
     }
 
-    static constexpr bool is_always_unique() {
+    static constexpr bool is_always_unique() noexcept {
       return nested_mapping_type::is_always_unique();
     }
-    static constexpr bool is_always_contiguous() {
+    static constexpr bool is_always_exhaustive() noexcept {
       return nested_mapping_type::is_always_contiguous();
     }
-    static constexpr bool is_always_strided() {
+    static constexpr bool is_always_strided() noexcept {
       return nested_mapping_type::is_always_strided();
     }
 
     constexpr bool is_unique() const
-      noexcept(noexcept(nested_mapping_.is_unique()))
     {
       return nested_mapping_.is_unique();
     }
-    constexpr bool is_contiguous() const
-      noexcept(noexcept(nested_mapping_.is_contiguous()))
+    constexpr bool is_exhaustive() const
     {
-      return nested_mapping_.is_contiguous();
+      return nested_mapping_.is_exhaustive();
     }
     constexpr bool is_strided() const
-      noexcept(noexcept(nested_mapping_.is_strided()))
     {
       return nested_mapping_.is_strided();
     }
 
-    constexpr size_type stride(size_t r) const
-      noexcept(noexcept(nested_mapping_.stride(r)))
+    constexpr index_type stride(size_t r) const
     {
-      if (r == extents_type::rank() - 1) {
-	return nested_mapping_.stride(extents_type::rank() - 2);
-      }
-      else if (r == extents_type::rank() - 2) {
-	return nested_mapping_.stride(extents_type::rank() - 1);
-      }
-      else {
-	return nested_mapping_.stride(r);
-      }
+      assert(this->is_strided());
+      assert(r < extents_type::rank());
+      return nested_mapping_.stride(r == 0 ? 1 : 0);
     }
 
     template<class OtherExtents>
@@ -183,6 +178,10 @@ public:
     {
       return lhs.nested_mapping_ == rhs.nested_mapping_;
     }
+
+  private:
+    nested_mapping_type nested_mapping_;
+    extents_type extents_;
   };
 };
 
@@ -260,7 +259,7 @@ namespace impl {
       // https://github.com/kokkos/stdBLAS/issues/242
       return return_mapping_type{
 	transpose_extents(orig_map.extents()),
-	std::array<typename extents_type::size_type, OriginalExtents::rank() /* orig_map.rank() */ >{
+	std::array<typename extents_type::index_type, OriginalExtents::rank() /* orig_map.rank() */ >{
 	  orig_map.stride(1),
 	  orig_map.stride(0)}};
     }
@@ -328,7 +327,7 @@ auto transposed(mdspan<ElementType, Extents, Layout, Accessor> a)
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
-} // end namespace experimental
-} // end namespace std
+} // end namespace MDSPAN_IMPL_PROPOSED_NAMESPACE
+} // end namespace MDSPAN_IMPL_STANDARD_NAMESPACE
 
 #endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_TRANSPOSED_HPP_

@@ -1,6 +1,4 @@
 #include "./gtest_fixtures.hpp"
-
-#include <experimental/linalg>
 #include <iostream>
 
 #if (! defined(__GNUC__)) || (__GNUC__ > 9)
@@ -12,8 +10,8 @@
 
 namespace {
 
-using std::experimental::linalg::matrix_vector_product;
-using std::experimental::linalg::scaled;
+using LinearAlgebra::matrix_vector_product;
+using LinearAlgebra::scaled;
 
 TEST(gemv, no_ambiguity)
 {
@@ -24,16 +22,20 @@ TEST(gemv, no_ambiguity)
     std::vector<double> x_vec(M);
     std::vector<double> y_vec(N);
 
-    mdspan<double, extents<std::size_t, dynamic_extent,dynamic_extent>> A(A_vec.data(),N,M);
-    mdspan<double, extents<std::size_t, dynamic_extent>> x(x_vec.data(),M);
-    mdspan<double, extents<std::size_t, dynamic_extent>> y(y_vec.data(),N);
-    for(int i=0; i<A.extent(0); i++)
-      for(int j=0; j<A.extent(1); j++)
-        A(i,j) = 100.0*i+j;
-    for(int i=0; i<x.extent(0); i++)
-      x(i) = 1. * i;
-    for(int i=0; i<y.extent(0); i++)
-      y(i) = -1. * i;
+    mdspan<double, extents<std::size_t, dynamic_extent,dynamic_extent>> A(A_vec.data(), N, M);
+    mdspan<double, extents<std::size_t, dynamic_extent>> x(x_vec.data(), M);
+    mdspan<double, extents<std::size_t, dynamic_extent>> y(y_vec.data(), N);
+    for (int i = 0; i < A.extent(0); ++i) {
+      for (int j = 0; j < A.extent(1); ++j) {
+        A(i,j) = 100.0 * i + j;
+      }
+    }
+    for(int i = 0; i < x.extent(0); ++i) {
+      x(i) = 1.0 * i;
+    }
+    for(int i = 0; i < y.extent(0); ++i) {
+      y(i) = -1.0 * i;
+    }
 
     matrix_vector_product(A, x, y);
     // The following is an ambiguous call unless the implementation

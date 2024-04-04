@@ -43,8 +43,8 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_SCALE_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_SCALE_HPP_
 
-namespace std {
-namespace experimental {
+namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
+namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
@@ -58,7 +58,7 @@ template<class ElementType,
          class Scalar>
 void linalg_scale_rank_1(
   const Scalar alpha,
-  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext0>, Layout, Accessor> x)
+  mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> x)
 {
   for (SizeType i = 0; i < x.extent(0); ++i) {
     x(i) *= alpha;
@@ -74,7 +74,7 @@ template<class ElementType,
          class Scalar>
 void linalg_scale_rank_2(
   const Scalar alpha,
-  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A)
+  mdspan<ElementType, extents<SizeType, numRows, numCols>, Layout, Accessor> A)
 {
   for (SizeType j = 0; j < A.extent(1); ++j) {
     for (SizeType i = 0; i < A.extent(0); ++i) {
@@ -95,7 +95,7 @@ struct is_custom_scale_avail<
 		     std::declval<Scalar>(),
 		     std::declval<x_t>()))
       >
-    && !linalg::impl::is_inline_exec_v<Exec>
+    && ! impl::is_inline_exec_v<Exec>
     >
   >
   : std::true_type{};
@@ -109,9 +109,9 @@ template<class Scalar,
          class Layout,
          class Accessor>
 void scale(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
+  impl::inline_exec_t&& /* exec */,
   const Scalar alpha,
-  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext ...>, Layout, Accessor> x)
+  mdspan<ElementType, extents<SizeType, ext ...>, Layout, Accessor> x)
 {
   static_assert(x.rank() <= 2);
 
@@ -133,7 +133,7 @@ template<class ExecutionPolicy,
 void scale(
   ExecutionPolicy&& exec,
   const Scalar alpha,
-  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext ...>, Layout, Accessor> x)
+  mdspan<ElementType, extents<SizeType, ext ...>, Layout, Accessor> x)
 {
   // Call custom overload if available else call std implementation
 
@@ -141,10 +141,10 @@ void scale(
     decltype(execpolicy_mapper(exec)), decltype(alpha), decltype(x)
     >::value;
 
-  if constexpr(use_custom) {
+  if constexpr (use_custom) {
     scale(execpolicy_mapper(exec), alpha, x);
   } else {
-    scale(std::experimental::linalg::impl::inline_exec_t(), alpha, x);
+    scale(impl::inline_exec_t{}, alpha, x);
   }
 }
 
@@ -155,14 +155,14 @@ template<class Scalar,
          class Layout,
          class Accessor>
 void scale(const Scalar alpha,
-           std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext ...>, Layout, Accessor> x)
+           mdspan<ElementType, extents<SizeType, ext ...>, Layout, Accessor> x)
 {
-  scale(std::experimental::linalg::impl::default_exec_t(), alpha, x);
+  scale(impl::default_exec_t{}, alpha, x);
 }
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
-} // end namespace experimental
-} // end namespace std
+} // end namespace MDSPAN_IMPL_PROPOSED_NAMESPACE
+} // end namespace MDSPAN_IMPL_STANDARD_NAMESPACE
 
 #endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_SCALE_HPP_

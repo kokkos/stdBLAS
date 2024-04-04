@@ -45,12 +45,12 @@
 
 #include <utility>
 
-namespace std {
-namespace experimental {
+namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
+namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
-namespace {
+namespace impl {
 
 template<class ElementType_x,
 	 class SizeType_x,
@@ -63,8 +63,8 @@ template<class ElementType_x,
          class Layout_y,
          class Accessor_y>
 void swap_rank_1(
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
 {
   static_assert(x.static_extent(0) == dynamic_extent ||
                 y.static_extent(0) == dynamic_extent ||
@@ -91,8 +91,8 @@ template<class ElementType_x,
          class Layout_y,
          class Accessor_y>
 void swap_rank_2(
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, numRows_x, numCols_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, numRows_y, numCols_y>, Layout_y, Accessor_y> y)
+  mdspan<ElementType_x, extents<SizeType_x, numRows_x, numCols_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, numRows_y, numCols_y>, Layout_y, Accessor_y> y)
 {
   static_assert(x.static_extent(0) == dynamic_extent ||
                 y.static_extent(0) == dynamic_extent ||
@@ -124,12 +124,12 @@ struct is_custom_vector_swap_elements_avail<
 			     std::declval<y_t>())
 	       )
       >
-    && !linalg::impl::is_inline_exec_v<Exec>
+    && ! is_inline_exec_v<Exec>
     >
   >
   : std::true_type{};
 
-} // end anonymous namespace
+} // namespace impl
 
 MDSPAN_TEMPLATE_REQUIRES(
          class ElementType_x,
@@ -145,17 +145,17 @@ MDSPAN_TEMPLATE_REQUIRES(
          /* requires */ (sizeof...(ext_x) == sizeof...(ext_y))
 )
 void swap_elements(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y)
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType_x, extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y)
 {
   static_assert(x.rank() <= 2);
 
   if constexpr (x.rank() == 1 && y.rank() == 1) {
-    swap_rank_1(x, y);
+    impl::swap_rank_1(x, y);
   }
   else if constexpr (x.rank() == 2 && y.rank() == 2) {
-    swap_rank_2(x, y);
+    impl::swap_rank_2(x, y);
   }
 }
 
@@ -175,19 +175,17 @@ MDSPAN_TEMPLATE_REQUIRES(
 )
 void swap_elements(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y)
 {
-  constexpr bool use_custom = is_custom_vector_swap_elements_avail<
-    decltype(execpolicy_mapper(exec)), decltype(x), decltype(y)
-    >::value;
+  constexpr bool use_custom = impl::is_custom_vector_swap_elements_avail<
+    decltype(execpolicy_mapper(exec)), decltype(x), decltype(y)>::value;
 
-  if constexpr(use_custom){
+  if constexpr (use_custom) {
     return swap_elements(execpolicy_mapper(exec), x, y);
   }
-  else
-  {
-    return swap_elements(std::experimental::linalg::impl::inline_exec_t(), x, y);
+  else {
+    return swap_elements(impl::inline_exec_t{}, x, y);
   }
 }
 
@@ -205,15 +203,15 @@ MDSPAN_TEMPLATE_REQUIRES(
          /* requires */ (sizeof...(ext_x) == sizeof...(ext_y))
 )
 void swap_elements(
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y)
 {
-  swap_elements(std::experimental::linalg::impl::default_exec_t(), x, y);
+  swap_elements(impl::default_exec_t{}, x, y);
 }
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
-} // end namespace experimental
-} // end namespace std
+} // end namespace MDSPAN_IMPL_PROPOSED_NAMESPACE
+} // end namespace MDSPAN_IMPL_STANDARD_NAMESPACE
 
 #endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_LINALG_SWAP_HPP_

@@ -6,8 +6,8 @@
 
 #include <type_traits>
 
-namespace std {
-namespace experimental {
+namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
+namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
 namespace linalg {
 namespace impl {
@@ -53,20 +53,20 @@ inline constexpr bool is_linalg_execution_policy_other_than_inline_v =
 } // namespace impl
 } // namespace linalg
 } // inline namespace __p1673_version_0
-} // namespace experimental
-} // namespace std
+} // namespace MDSPAN_IMPL_PROPOSED_NAMESPACE
+} // namespace MDSPAN_IMPL_STANDARD_NAMESPACE
 
 #if defined(LINALG_ENABLE_KOKKOS)
 #include <experimental/__p1673_bits/kokkos-kernels/exec_policy_wrapper_kk.hpp>
 #endif
 
 
-namespace std {
-namespace experimental {
+namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
+namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
 namespace linalg {
 template<class T>
-auto execpolicy_mapper(T) { return std::experimental::linalg::impl::inline_exec_t(); }
+auto execpolicy_mapper(T) { return impl::inline_exec_t(); }
 }
 }
 }
