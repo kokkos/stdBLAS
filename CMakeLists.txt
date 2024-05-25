@@ -5,6 +5,8 @@ project(LinAlg
   LANGUAGES CXX
 )
 
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 ################################################################################
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -121,7 +123,7 @@ option(LINALG_ENABLE_BLAS
   "Assume that we are linking with a BLAS library."
   ${BLAS_FOUND})
 
-find_package(KokkosKernels)
+find_package(KokkosKernels QUIET)
 option(LINALG_ENABLE_KOKKOS
   "Enable Kokkos-based implementation. Default: autodetect Kokkos installation."
   ${KokkosKernels_FOUND})
@@ -150,6 +152,22 @@ if(LINALG_ENABLE_KOKKOS)
   target_include_directories(linalg INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tpl-implementations/include>
   )
+endif()
+
+if(LINALG_ENABLE_HPX)
+  find_package(HPX 1.8.1 REQUIRED)
+  target_link_libraries(linalg INTERFACE HPX::hpx)
+  target_include_directories(linalg INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tpl-implementations/include>
+  )
+  if(MSVC)
+    target_compile_definitions(linalg INTERFACE NOMINMAX _CRT_SECURE_NO_WARNINGS)
+  endif()
+  message(STATUS "HPX version: " ${HPX_VERSION_STRING})
+endif()
+
+if(LINALG_ENABLE_KOKKOS_DEFAULT AND LINALG_ENABLE_HPX_DEFAULT)
+  message(FATAL_ERROR "Only one of the Kokkos and HPX backends can be marked as default. Please set either LINALG_ENABLE_KOKKOS_DEFAULT or LINALG_ENABLE_HPX_DEFAULT to OFF")
 endif()
 
 target_include_directories(linalg INTERFACE
