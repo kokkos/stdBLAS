@@ -68,13 +68,19 @@ namespace {
       return iterator (x_, current_index_ + n);
     }
 
+    iterator& operator+=(difference_type n) {
+      current_index_ += n;
+      return *this;
+    }
+
     iterator operator-(difference_type n) const {
       return iterator (x_, current_index_ - n);
     }
 
-    // iterator operator+(iterator it) const {
-    //   return iterator (x_, current_index_ + it.current_index_);
-    // }
+    iterator& operator-=(difference_type n) {
+      current_index_ -= n;
+      return *this;
+    }
 
     difference_type operator-(iterator it) const {
       return current_index_ - it.current_index_;
@@ -92,6 +98,18 @@ namespace {
 
     bool operator<(iterator other) const {
       return current_index_ < other.current_index_;
+    }
+
+    bool operator<=(iterator other) const {
+      return current_index_ <= other.current_index_;
+    }
+
+    bool operator> (iterator other) const {
+      return current_index_ > other.current_index_;
+    }
+
+    bool operator>= (iterator other) const {
+      return current_index_ >= other.current_index_;
     }
 
     reference operator*() const {
