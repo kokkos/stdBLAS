@@ -15,30 +15,30 @@ namespace {
     constexpr auto map_C = layout_left::mapping{extents<std::size_t,3,3>{}};
     constexpr auto map_expected = map_C;
 
-    // [1.0   1.0   2.0]
-    // [      1.0   2.0]
-    // [            2.0]
-    //
     // Fill in the "empty spots" with a large negative value.
     // The algorithm should never see it, but if it does,
     // then the results will be wrong in an obvious way.
     constexpr double flag = -1000.0;
     constexpr std::array<double, 9> WA_original{
-      1.0, flag, flag, 1.0, 1.0, flag, 2.0, 2.0, 2.0};
-    // [1.0   2.0   3.0]
-    // [2.0   4.0   5.0]
-    // [3.0   5.0   6.0]
+      1.0, 2.0, 3.0, 3.0, 5.0, 6.0};
+    // [1.0   3.0]
+    // [2.0   5.0]
+    // [3.0   6.0]
     constexpr std::array<double, 9> WC_original{
-      1.0, 2.0, 3.0, 2.0, 4.0, 5.0, 3.0, 5.0, 6.0};
-    // [1.0   1.0   2.0]   [1.0            ]   [6.0  5.0  4.0]
-    // [      1.0   2.0] * [1.0   1.0      ] = [5.0  5.0  4.0]
-    // [            2.0]   [2.0   2.0   2.0]   [4.0  4.0  4.0]
+      1.0, flag, flag, 3.0, 4.0, flag, 2.0, 5.0, 7.0};
+    // [1.0   3.0   2.0]
+    // [***   4.0   5.0]
+    // [***   ***   7.0]
+
+    // [1.0   3.0]   [1.0   2.0   3.0]   [10.0  17.0  21.0]
+    // [2.0   5.0] * [3.0   5.0   6.0] = [17.0  29.0  36.0]
+    // [3.0   6.0]                       [21.0  36.0  45.0]
     //
-    // [6.0   5.0   4.0]   [1.0   2.0   3.0]   [7.0  7.0  7.0]
-    // [5.0   5.0   4.0] + [2.0   4.0   5.0] = [7.0  9.0  9.0]
-    // [4.0   4.0   4.0]   [3.0   5.0   6.0]   [7.0  9.0 10.0]
+    // [1.0   3.0   2.0]   [10.0  17.0  21.0]   [11.0  20.0  23.0]
+    // [***   4.0   5.0] + [17.0  29.0  36.0] = [ ***  33.0  41.0]
+    // [***   ***   7.0]   [21.0  36.0  45.0]   [ ***   ***  52.0]
     constexpr std::array<double, 9> expected_storage_original{
-      7.0, 7.0, 7.0, 7.0, 9.0, 9.0, 7.0, 9.0, 10.0};
+      11.0, flag, flag, 20.0, 33.0, flag, 23.0, 41.0, 52.0};
 
     std::array<double, 9> WC = WC_original;
     mdspan C{WC.data(), map_C};
