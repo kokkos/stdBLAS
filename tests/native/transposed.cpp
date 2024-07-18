@@ -259,7 +259,7 @@ namespace {
     constexpr std::size_t subdim = 4;
     const std::pair<std::size_t, std::size_t> sub(0, subdim);
     auto A_sub = submdspan(A, sub, sub);
-    static_assert(std::is_same_v<decltype(A_sub)::layout_type, layout_stride>);
+    static_assert(std::is_same_v<decltype(A_sub)::layout_type, layout_right_padded<dynamic_extent>>);
     ASSERT_EQ( A_sub.rank(), std::size_t(2) );
     ASSERT_EQ( A_sub.extent(0), subdim );
     ASSERT_EQ( A_sub.extent(1), subdim );
