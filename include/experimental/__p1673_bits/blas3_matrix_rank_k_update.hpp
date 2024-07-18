@@ -147,8 +147,6 @@ void symmetric_matrix_rank_k_update(
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C,
   Triangle /* t */)
 {
-  using size_type = std::common_type_t<SizeType_A, SizeType_C>;
-
   constexpr bool lower_tri =
     std::is_same_v<Triangle, lower_triangle_t>;
   using size_type = std::common_type_t<SizeType_A, SizeType_C>;
