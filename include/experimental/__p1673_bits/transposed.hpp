@@ -251,7 +251,12 @@ namespace impl {
     template<class OriginalExtents>
     static auto mapping(const typename layout_stride::template mapping<OriginalExtents>& orig_map) {
       using original_mapping_type = typename layout_stride::template mapping<OriginalExtents>;
-      using extents_type = transpose_extents_t<typename original_mapping_type::extents_type>;
+      // MSVC 2022 doesn't like the following commented-out line of code.
+      // See https://github.com/kokkos/stdBLAS/issues/242#issuecomment-1174738571
+      //
+      //using extents_type = transpose_extents_t<typename original_mapping_type::extents_type>;
+      using original_extents_type = typename original_mapping_type::extents_type;
+      using extents_type = transpose_extents_t<original_extents_type>;
       using return_mapping_type = typename layout_type::template mapping<extents_type>;
       // NOTE (mfh 2022/07/04) Commented-out code relates
       // to the build error reported in my comment here:
