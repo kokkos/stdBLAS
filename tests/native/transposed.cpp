@@ -199,6 +199,106 @@ namespace {
     }
   }
 
+  template<size_t PaddingValue>
+  void test_transposed_layout_left_padded(auto runtime_padding_value)
+  {
+    auto test_one = [=] (auto in_exts, auto out_exts,
+                         std::vector<char>& fake_storage)
+    {
+      using in_extents_type = decltype(in_exts);
+      using out_extents_type = decltype(out_exts);
+
+      typename layout_left_padded<PaddingValue>::template mapping<in_extents_type> in_map{
+        in_exts, runtime_padding_value
+      };
+      typename layout_right_padded<PaddingValue>::template mapping<out_extents_type> out_map{
+        out_exts, runtime_padding_value
+      };
+      test_transposed_layout(in_map, out_map, fake_storage);
+    };
+
+    std::vector<char> storage;
+    {
+      using in_extents_type = extents<int, 3, 4>;
+      using out_extents_type = extents<int, 4, 3>;
+      test_one(in_extents_type{}, out_extents_type{}, storage);
+    }
+    {
+      using in_extents_type = extents<int, 3, dynamic_extent>;
+      using out_extents_type = extents<int, dynamic_extent, 3>;
+      test_one(in_extents_type{4}, out_extents_type{4}, storage);
+    }
+    {
+      using in_extents_type = extents<int, dynamic_extent, dynamic_extent>;
+      using out_extents_type = extents<int, dynamic_extent, dynamic_extent>;
+      test_one(in_extents_type{3, 4}, out_extents_type{4, 3}, storage);
+    }
+  }
+
+  TEST(transposed_layout, layout_left_padded)
+  {
+    {
+      constexpr size_t padding_value = dynamic_extent;
+      constexpr size_t runtime_padding_value = 5u;
+      test_transposed_layout_left_padded<padding_value>(runtime_padding_value);
+    }
+    {
+      constexpr size_t padding_value = 5u;
+      constexpr size_t runtime_padding_value = padding_value;
+      test_transposed_layout_left_padded<padding_value>(runtime_padding_value);
+    }
+  }
+
+  template<size_t PaddingValue>
+  void test_transposed_layout_right_padded(auto runtime_padding_value)
+  {
+    auto test_one = [=] (auto in_exts, auto out_exts,
+                         std::vector<char>& fake_storage)
+    {
+      using in_extents_type = decltype(in_exts);
+      using out_extents_type = decltype(out_exts);
+
+      typename layout_left_padded<PaddingValue>::template mapping<in_extents_type> in_map{
+        in_exts, runtime_padding_value
+      };
+      typename layout_right_padded<PaddingValue>::template mapping<out_extents_type> out_map{
+        out_exts, runtime_padding_value
+      };
+      test_transposed_layout(in_map, out_map, fake_storage);
+    };
+
+    std::vector<char> storage;
+    {
+      using in_extents_type = extents<int, 3, 4>;
+      using out_extents_type = extents<int, 4, 3>;
+      test_one(in_extents_type{}, out_extents_type{}, storage);
+    }
+    {
+      using in_extents_type = extents<int, 3, dynamic_extent>;
+      using out_extents_type = extents<int, dynamic_extent, 3>;
+      test_one(in_extents_type{4}, out_extents_type{4}, storage);
+    }
+    {
+      using in_extents_type = extents<int, dynamic_extent, dynamic_extent>;
+      using out_extents_type = extents<int, dynamic_extent, dynamic_extent>;
+      test_one(in_extents_type{3, 4}, out_extents_type{4, 3}, storage);
+    }
+  }
+
+  TEST(transposed_layout, layout_right_padded)
+  {
+    {
+      constexpr size_t padding_value = dynamic_extent;
+      constexpr size_t runtime_padding_value = 5u;
+      test_transposed_layout_right_padded<padding_value>(runtime_padding_value);
+    }
+    {
+      constexpr size_t padding_value = 5u;
+      constexpr size_t runtime_padding_value = padding_value;
+      test_transposed_layout_right_padded<padding_value>(runtime_padding_value);
+    }
+  }
+
   TEST(transposed, mdspan_double)
   {
     using real_t = double;

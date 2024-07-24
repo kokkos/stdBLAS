@@ -94,10 +94,19 @@ private:
 template<class ElementType, class Extents, class Layout, class Accessor>
 auto conjugated(mdspan<ElementType, Extents, Layout, Accessor> a)
 {
-  if constexpr (std::is_arithmetic_v<std::remove_cv_t<ElementType>>) {
+  using value_type = typename decltype(a)::value_type;
+
+  if constexpr (std::is_arithmetic_v<value_type>) {
     return mdspan<ElementType, Extents, Layout, Accessor>
       (a.data_handle(), a.mapping(), a.accessor());
-  } else {
+  }
+  // P3050 optimizes conjugated for nonarithmetic, non-(custom complex) types.
+  // A "custom complex" type T has ADL-findable conj(T).
+  else if constexpr (! impl::has_conj<value_type>::value) {
+    return mdspan<ElementType, Extents, Layout, Accessor>
+      (a.data_handle(), a.mapping(), a.accessor());
+  }
+  else {
     using return_element_type =
       typename conjugated_accessor<Accessor>::element_type;
     using return_accessor_type = conjugated_accessor<Accessor>;
