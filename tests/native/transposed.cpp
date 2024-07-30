@@ -107,7 +107,7 @@ namespace {
     ASSERT_EQ(out.is_strided(), out_expected.is_strided());
     if (out_expected.is_strided()) {
       for (size_t r = 0; r < 2u; ++r) {
-        out.stride(r) == out_expected.stride(r);
+        ASSERT_EQ(out.stride(r), out_expected.stride(r));
       }
     }
   }
