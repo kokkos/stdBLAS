@@ -1182,27 +1182,23 @@ void triangular_matrix_vector_product(
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (size_type j = 0; j < A.extent(1); ++j) {
-      for (size_type i = j + size_type(1); i < A.extent(0); ++i) {
+      const size_type i_lower = explicitDiagonal ? j : j + size_type(1);
+      for (size_type i = i_lower; i < A.extent(0); ++i) {
         z(i) += A(i,j) * x(j);
       }
       if constexpr (! explicitDiagonal) {
         z(j) += /* 1 times */ x(j);
-      }
-      else {
-        z(j) += A(j,j) * x(j);
       }
     }
   }
   else {
     for (size_type j = 0; j < A.extent(1); ++j) {
-      for (size_type i = 0; i < j; ++i) {
+      const ptrdiff_t i_upper = explicitDiagonal ? j : j - size_type(1);
+      for (size_type i = 0; i <= i_upper; ++i) {
         z(i) += A(i,j) * x(j);
       }
       if constexpr (! explicitDiagonal) {
         z(j) += /* 1 times */ x(j);
-      }
-      else {
-        z(j) += A(j,j) * x(j);
       }
     }
   }
