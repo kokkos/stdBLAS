@@ -516,7 +516,8 @@ void symmetric_matrix_vector_product(
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (size_type j = 0; j < A.extent(1); ++j) {
-      for (size_type i = j; i < A.extent(0); ++i) {
+      y(j) += A(j,j) * x(j);
+      for (size_type i = j + size_type(1); i < A.extent(0); ++i) {
         const auto A_ij = A(i,j);
         y(i) += A_ij * x(j);
         y(j) += A_ij * x(i);
@@ -525,11 +526,12 @@ void symmetric_matrix_vector_product(
   }
   else {
     for (size_type j = 0; j < A.extent(1); ++j) {
-      for (size_type i = 0; i <= j; ++i) {
+      for (size_type i = 0; i < j; ++i) {
         const auto A_ij = A(i,j);
         y(i) += A_ij * x(j);
         y(j) += A_ij * x(i);
       }
+      y(j) += A(j,j) * x(j);
     }
   }
 }
@@ -638,7 +640,8 @@ void symmetric_matrix_vector_product(
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (size_type j = 0; j < A.extent(1); ++j) {
-      for (size_type i = j; i < A.extent(0); ++i) {
+      z(j) += A(j,j) * x(j);
+      for (size_type i = j + size_type(1); i < A.extent(0); ++i) {
         const auto A_ij = A(i,j);
         z(i) += A_ij * x(j);
         z(j) += A_ij * x(i);
@@ -647,11 +650,12 @@ void symmetric_matrix_vector_product(
   }
   else {
     for (size_type j = 0; j < A.extent(1); ++j) {
-      for (size_type i = 0; i <= j; ++i) {
+      for (size_type i = 0; i < j; ++i) {
         const auto A_ij = A(i,j);
         z(i) += A_ij * x(j);
         z(j) += A_ij * x(i);
       }
+      z(j) += A(j,j) * x(j);
     }
   }
 }
@@ -767,7 +771,8 @@ void hermitian_matrix_vector_product(
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (size_type j = 0; j < A.extent(1); ++j) {
-      for (size_type i = j; i < A.extent(0); ++i) {
+      y(j) += impl::real_part(A(j,j)) * x(j);
+      for (size_type i = j + size_type(1); i < A.extent(0); ++i) {
         const auto A_ij = A(i,j);
         y(i) += A_ij * x(j);
         y(j) += impl::conj_if_needed(A_ij) * x(i);
@@ -776,11 +781,12 @@ void hermitian_matrix_vector_product(
   }
   else {
     for (size_type j = 0; j < A.extent(1); ++j) {
-      for (size_type i = 0; i <= j; ++i) {
+      for (size_type i = 0; i < j; ++i) {
         const auto A_ij = A(i,j);
         y(i) += A_ij * x(j);
         y(j) += impl::conj_if_needed(A_ij) * x(i);
       }
+      y(j) += impl::real_part(A(j,j)) * x(j);
     }
   }
 }
@@ -896,7 +902,8 @@ void hermitian_matrix_vector_product(
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (size_type j = 0; j < A.extent(1); ++j) {
-      for (size_type i = j; i < A.extent(0); ++i) {
+      z(j) += impl::real_part(A(j,j)) * x(j);
+      for (size_type i = j + size_type(1); i < A.extent(0); ++i) {
         const auto A_ij = A(i,j);
         z(i) += A_ij * x(j);
         z(j) += impl::conj_if_needed(A_ij) * x(i);
@@ -905,11 +912,12 @@ void hermitian_matrix_vector_product(
   }
   else {
     for (size_type j = 0; j < A.extent(1); ++j) {
-      for (size_type i = 0; i <= j; ++i) {
+      for (size_type i = 0; i < j; ++i) {
         const auto A_ij = A(i,j);
         z(i) += A_ij * x(j);
         z(j) += impl::conj_if_needed(A_ij) * x(i);
       }
+      z(j) += impl::real_part(A(j,j)) * x(j);
     }
   }
 }
