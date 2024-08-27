@@ -54,7 +54,7 @@ namespace {
     gs(2,1) = 13.52;
 
     // Check the non-overwriting version
-    triangular_matrix_left_product(A, lower_triangle, explicit_diagonal, B, C);
+    triangular_matrix_product(A, lower_triangle, explicit_diagonal, B, C);
 
     for (ptrdiff_t j = 0; j < n; ++j) {
       for (ptrdiff_t i = 0; i < m; ++i) {
@@ -107,7 +107,7 @@ TEST(BLAS3_trmm, left_lower_tri_implicit_diag)
     B(2,0) = 1.8;
     B(2,1) = 1.6;
 
-    triangular_matrix_left_product(A, lower_triangle, implicit_unit_diagonal, B, C);
+    triangular_matrix_product(A, lower_triangle, implicit_unit_diagonal, B, C);
 
     // Fill GS
     gs(0,0) = -4.4;
@@ -184,7 +184,7 @@ TEST(BLAS3_trmm, left_upper_tri_explicit_diag)
     gs(2,1) = -1.6;
 
     // Check the non-overwriting version
-    triangular_matrix_left_product(A, upper_triangle, explicit_diagonal, B, C);
+    triangular_matrix_product(A, upper_triangle, explicit_diagonal, B, C);
 
     for (ptrdiff_t j = 0; j < n; ++j) {
       for (ptrdiff_t i = 0; i < m; ++i) {
@@ -237,7 +237,7 @@ TEST(BLAS3_trmm, left_upper_tri_implicit_diag)
     B(2,0) = 1.8;
     B(2,1) = 1.6;
 
-    triangular_matrix_left_product(A, upper_triangle, implicit_unit_diagonal, B, C);
+    triangular_matrix_product(A, upper_triangle, implicit_unit_diagonal, B, C);
 
     // Fill GS
     gs(0,0) = -1.78;
@@ -314,7 +314,7 @@ TEST(BLAS3_trmm, right_lower_tri_explicit_diag)
     gs(1,2) = -1.6;
 
     // Check the non-overwriting version
-    triangular_matrix_right_product(A, lower_triangle, explicit_diagonal, B, C);
+    triangular_matrix_product(B, A, lower_triangle, explicit_diagonal, C);
 
     for (ptrdiff_t j = 0; j < m; ++j) {
       for (ptrdiff_t i = 0; i < n; ++i) {
@@ -367,7 +367,7 @@ TEST(BLAS3_trmm, right_lower_tri_implicit_diag)
     B(0,2) = 1.8;
     B(1,2) = 1.6;
 
-    triangular_matrix_right_product(A, lower_triangle, implicit_unit_diagonal, B, C);
+    triangular_matrix_product(B, A, lower_triangle, implicit_unit_diagonal, C);
 
     // Fill GS
     gs(0,0) = -1.78;
@@ -444,7 +444,7 @@ TEST(BLAS3_trmm, right_upper_tri_explicit_diag)
     gs(1,2) = 13.52;
 
     // Check the non-overwriting version
-    triangular_matrix_right_product(A, upper_triangle, explicit_diagonal, B, C);
+    triangular_matrix_product(B, A, upper_triangle, explicit_diagonal, C);
 
     for (ptrdiff_t j = 0; j < m; ++j) {
       for (ptrdiff_t i = 0; i < n; ++i) {
@@ -497,7 +497,7 @@ TEST(BLAS3_trmm, right_upper_tri_implicit_diag)
     B(0,2) = 1.8;
     B(1,2) = 1.6;
 
-    triangular_matrix_right_product(A, upper_triangle, implicit_unit_diagonal, B, C);
+    triangular_matrix_product(B, A, upper_triangle, implicit_unit_diagonal, C);
 
     // Fill GS
     gs(0,0) = -4.4;

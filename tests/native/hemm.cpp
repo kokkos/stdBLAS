@@ -60,7 +60,7 @@ namespace {
     gs(2,0) = 14.88 + 21.26i;
     gs(2,1) = 23.16 + 20.3i;
 
-    hermitian_matrix_left_product(A, lower_triangle, B, C);
+    hermitian_matrix_product(A, lower_triangle, B, C);
 
     // TODO: Choose a more reasonable value
     constexpr double TOL = 1e-9;
@@ -116,7 +116,7 @@ namespace {
     gs(2,0) = 14.88 + 21.26i;
     gs(2,1) = 23.16 + 20.3i;
 
-    hermitian_matrix_left_product(A, upper_triangle, B, C);
+    hermitian_matrix_product(A, upper_triangle, B, C);
 
     // TODO: Choose a more reasonable value
     constexpr double TOL = 1e-9;
@@ -172,7 +172,7 @@ namespace {
     gs(0,2) = 14.88 - 21.26i;
     gs(1,2) = 23.16 - 20.3i;
 
-    hermitian_matrix_right_product(A, lower_triangle, B, C);
+    hermitian_matrix_product(B, A, lower_triangle, C);
 
     // TODO: Choose a more reasonable value
     constexpr double TOL = 1e-9;
@@ -228,7 +228,7 @@ namespace {
     gs(0,2) = 14.88 - 21.26i;
     gs(1,2) = 23.16 - 20.3i;
 
-    hermitian_matrix_right_product(A, upper_triangle, B, C);
+    hermitian_matrix_product(B, A, upper_triangle, C);
 
     // TODO: Choose a more reasonable value
     constexpr double TOL = 1e-9;

@@ -397,7 +397,7 @@ struct is_custom_triang_mat_left_product_avail<
   std::enable_if_t<
     std::is_void_v<
       decltype(
-	       triangular_matrix_left_product
+	       triangular_matrix_product
 	       (std::declval<Exec>(),
 		std::declval<A_t>(),
 		std::declval<Tr_t>(),
@@ -419,12 +419,12 @@ struct is_custom_triang_mat_right_product_avail<
   std::enable_if_t<
     std::is_void_v<
       decltype(
-	       triangular_matrix_right_product
+	       triangular_matrix_product
 	       (std::declval<Exec>(),
-		std::declval<A_t>(),
+		std::declval<B_t>(),
+    	std::declval<A_t>(),
 		std::declval<Tr_t>(),
 		std::declval<DiagSt_t>(),
-		std::declval<B_t>(),
 		std::declval<C_t>()))
       >
     && ! impl::is_inline_exec_v<Exec>
@@ -483,7 +483,7 @@ struct is_custom_sym_matrix_left_product_avail<
   std::enable_if_t<
     std::is_void_v<
       decltype(
-	       symmetric_matrix_left_product
+	       symmetric_matrix_product
 	       (std::declval<Exec>(),
 		std::declval<A_t>(),
 		std::declval<Tr_t>(),
@@ -505,11 +505,11 @@ struct is_custom_sym_matrix_right_product_avail<
   std::enable_if_t<
     std::is_void_v<
       decltype(
-	       symmetric_matrix_right_product
+	       symmetric_matrix_product
 	       (std::declval<Exec>(),
-		std::declval<A_t>(),
-		std::declval<Tr_t>(),
 		std::declval<B_t>(),
+    	std::declval<A_t>(),
+		std::declval<Tr_t>(),
 		std::declval<C_t>()))
       >
     && ! impl::is_inline_exec_v<Exec>
@@ -526,7 +526,7 @@ struct is_custom_sym_matrix_left_product_with_update_avail<
   std::enable_if_t<
     std::is_void_v<
       decltype(
-	       symmetric_matrix_left_product
+	       symmetric_matrix_product
 	       (std::declval<Exec>(),
 		std::declval<A_t>(),
 		std::declval<Tr_t>(),
@@ -548,11 +548,11 @@ struct is_custom_sym_matrix_right_product_with_update_avail<
   std::enable_if_t<
     std::is_void_v<
       decltype(
-	       symmetric_matrix_right_product
+	       symmetric_matrix_product
 	       (std::declval<Exec>(),
-		std::declval<A_t>(),
-		std::declval<Tr_t>(),
 		std::declval<B_t>(),
+    	std::declval<A_t>(),
+		std::declval<Tr_t>(),
 		std::declval<E_t>(),
 		std::declval<C_t>()))
       >
@@ -571,7 +571,7 @@ struct is_custom_herm_matrix_left_product_avail<
   std::enable_if_t<
     std::is_void_v<
       decltype(
-	       hermitian_matrix_left_product
+	       hermitian_matrix_product
 	       (std::declval<Exec>(),
 		std::declval<A_t>(),
 		std::declval<Tr_t>(),
@@ -592,11 +592,11 @@ struct is_custom_herm_matrix_right_product_avail<
   std::enable_if_t<
     std::is_void_v<
       decltype(
-	       hermitian_matrix_right_product
+	       hermitian_matrix_product
 	       (std::declval<Exec>(),
-		std::declval<A_t>(),
-		std::declval<Tr_t>(),
 		std::declval<B_t>(),
+    	std::declval<A_t>(),
+		std::declval<Tr_t>(),
 		std::declval<C_t>()))
       >
     && ! impl::is_inline_exec_v<Exec>
@@ -614,7 +614,7 @@ struct is_custom_herm_matrix_left_product_with_update_avail<
   std::enable_if_t<
     std::is_void_v<
       decltype(
-	       hermitian_matrix_left_product
+	       hermitian_matrix_product
 	       (std::declval<Exec>(),
 		std::declval<A_t>(),
 		std::declval<Tr_t>(),
@@ -636,11 +636,11 @@ struct is_custom_herm_matrix_right_product_with_update_avail<
   std::enable_if_t<
     std::is_void_v<
       decltype(
-	       hermitian_matrix_right_product
+	       hermitian_matrix_product
 	       (std::declval<Exec>(),
-		std::declval<A_t>(),
-		std::declval<Tr_t>(),
 		std::declval<B_t>(),
+    	std::declval<A_t>(),
+		std::declval<Tr_t>(),
 		std::declval<E_t>(),
 		std::declval<C_t>()))
       >
@@ -897,7 +897,7 @@ template<class ElementType_A,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void triangular_matrix_left_product(
+void triangular_matrix_product(
   impl::inline_exec_t&& /* exec */,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle /* t */,
@@ -954,7 +954,7 @@ template<class ExecutionPolicy,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void triangular_matrix_left_product(
+void triangular_matrix_product(
   ExecutionPolicy&& exec,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
@@ -966,10 +966,10 @@ void triangular_matrix_left_product(
     decltype(execpolicy_mapper(exec)), decltype(A), Triangle, DiagonalStorage, decltype(B), decltype(C)>::value;
 
   if constexpr (use_custom) {
-    triangular_matrix_left_product(execpolicy_mapper(exec), A, t, d, B, C);
+    triangular_matrix_product(execpolicy_mapper(exec), A, t, d, B, C);
   }
   else {
-    triangular_matrix_left_product(impl::inline_exec_t{}, A, t, d, B, C);
+    triangular_matrix_product(impl::inline_exec_t{}, A, t, d, B, C);
   }
 }
 
@@ -987,14 +987,14 @@ template<class ElementType_A,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void triangular_matrix_left_product(
+void triangular_matrix_product(
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
   mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  triangular_matrix_left_product(impl::default_exec_t{}, A, t, d, B, C);
+  triangular_matrix_product(impl::default_exec_t{}, A, t, d, B, C);
 }
 
 
@@ -1012,12 +1012,12 @@ template<class ElementType_A,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void triangular_matrix_right_product(
+void triangular_matrix_product(
   impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle /* t */,
   DiagonalStorage /* d */,
-  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   using size_type = ::std::common_type_t<SizeType_A, SizeType_B, SizeType_C>;
@@ -1069,12 +1069,12 @@ template<class ExecutionPolicy,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void triangular_matrix_right_product(
+void triangular_matrix_product(
   ExecutionPolicy&& exec,
+  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
-  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   constexpr bool use_custom = is_custom_triang_mat_right_product_avail<
@@ -1082,10 +1082,10 @@ void triangular_matrix_right_product(
     decltype(A), Triangle, DiagonalStorage, decltype(B), decltype(C)>::value;
 
   if constexpr (use_custom) {
-    triangular_matrix_right_product(execpolicy_mapper(exec), A, t, d, B, C);
+    triangular_matrix_product(execpolicy_mapper(exec), B, A, t, d, C);
   }
   else {
-    triangular_matrix_right_product(impl::inline_exec_t{}, A, t, d, B, C);
+    triangular_matrix_product(impl::inline_exec_t{}, B, A, t, d, C);
   }
 }
 
@@ -1103,14 +1103,14 @@ template<class ElementType_A,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void triangular_matrix_right_product(
+void triangular_matrix_product(
+  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d ,
-  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  triangular_matrix_right_product(impl::default_exec_t{}, A, t, d, B, C);
+  triangular_matrix_product(impl::default_exec_t{}, B, A, t, d, C);
 }
 
 
@@ -1326,7 +1326,7 @@ template<class ElementType_A,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void symmetric_matrix_left_product(
+void symmetric_matrix_product(
   impl::inline_exec_t&& /* exec */,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle /* t */,
@@ -1373,7 +1373,7 @@ template<class ExecutionPolicy,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void symmetric_matrix_left_product(
+void symmetric_matrix_product(
   ExecutionPolicy&& exec,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
@@ -1385,10 +1385,10 @@ void symmetric_matrix_left_product(
     decltype(A), Triangle, decltype(B), decltype(C)>::value;
 
   if constexpr (use_custom) {
-    symmetric_matrix_left_product(execpolicy_mapper(exec), A, t, B, C);
+    symmetric_matrix_product(execpolicy_mapper(exec), A, t, B, C);
   }
   else {
-    symmetric_matrix_left_product(impl::inline_exec_t{}, A, t, B, C);
+    symmetric_matrix_product(impl::inline_exec_t{}, A, t, B, C);
   }
 }
 
@@ -1405,13 +1405,13 @@ template<class ElementType_A,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void symmetric_matrix_left_product(
+void symmetric_matrix_product(
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  symmetric_matrix_left_product(impl::default_exec_t{}, A, t, B, C);
+  symmetric_matrix_product(impl::default_exec_t{}, A, t, B, C);
 }
 
 
@@ -1430,11 +1430,11 @@ template<class ElementType_A,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void symmetric_matrix_right_product(
+void symmetric_matrix_product(
   impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle /* t */,
-  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   using size_type = ::std::common_type_t<SizeType_A, SizeType_B, SizeType_C>;
@@ -1477,11 +1477,11 @@ template<class ExecutionPolicy,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void symmetric_matrix_right_product(
+void symmetric_matrix_product(
   ExecutionPolicy&& exec ,
+  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
-  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   constexpr bool use_custom = is_custom_sym_matrix_right_product_avail<
@@ -1489,10 +1489,10 @@ void symmetric_matrix_right_product(
     decltype(A), Triangle, decltype(B), decltype(C)>::value;
 
   if constexpr (use_custom) {
-    symmetric_matrix_right_product(execpolicy_mapper(exec), A, t, B, C);
+    symmetric_matrix_product(execpolicy_mapper(exec), B, A, t, C);
   }
   else {
-    symmetric_matrix_right_product(impl::inline_exec_t{}, A, t, B, C);
+    symmetric_matrix_product(impl::inline_exec_t{}, B, A, t, C);
   }
 }
 
@@ -1509,13 +1509,13 @@ template<class ElementType_A,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void symmetric_matrix_right_product(
-  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
-  Triangle t ,
+void symmetric_matrix_product(
   mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  symmetric_matrix_right_product(impl::default_exec_t{}, A, t, B, C);
+  symmetric_matrix_product(impl::default_exec_t{}, B, A, t, C);
 }
 
 
@@ -1538,7 +1538,7 @@ template<class ElementType_A,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void symmetric_matrix_left_product(
+void symmetric_matrix_product(
   impl::inline_exec_t&& /* exec */,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle /* t */,
@@ -1567,7 +1567,7 @@ template<class ExecutionPolicy,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void symmetric_matrix_left_product(
+void symmetric_matrix_product(
   ExecutionPolicy&& exec,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
@@ -1579,10 +1579,10 @@ void symmetric_matrix_left_product(
     decltype(execpolicy_mapper(exec)), decltype(A), Triangle, decltype(B), decltype(E), decltype(C)>::value;
 
   if constexpr (use_custom) {
-    symmetric_matrix_left_product(execpolicy_mapper(exec), A, t, B, E, C);
+    symmetric_matrix_product(execpolicy_mapper(exec), A, t, B, E, C);
   }
   else {
-    symmetric_matrix_left_product(impl::inline_exec_t{}, A, t, B, E, C);
+    symmetric_matrix_product(impl::inline_exec_t{}, A, t, B, E, C);
   }
 }
 
@@ -1603,14 +1603,14 @@ template<class ElementType_A,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void symmetric_matrix_left_product(
+void symmetric_matrix_product(
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t ,
   mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  symmetric_matrix_left_product(impl::default_exec_t{}, A, t, B, E, C);
+  symmetric_matrix_product(impl::default_exec_t{}, A, t, B, E, C);
 }
 
 
@@ -1633,11 +1633,11 @@ template<class ElementType_A,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void symmetric_matrix_right_product(
+void symmetric_matrix_product(
   impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle /* t */,
-  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
@@ -1662,11 +1662,11 @@ template<class ExecutionPolicy,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void symmetric_matrix_right_product(
+void symmetric_matrix_product(
   ExecutionPolicy&& exec ,
+  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
-  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
@@ -1674,10 +1674,10 @@ void symmetric_matrix_right_product(
     decltype(execpolicy_mapper(exec)), decltype(A), Triangle, decltype(B), decltype(E), decltype(C)>::value;
 
   if constexpr (use_custom) {
-    symmetric_matrix_right_product(execpolicy_mapper(exec), A, t, B, E, C);
+    symmetric_matrix_product(execpolicy_mapper(exec), B, A, t, E, C);
   }
   else {
-    symmetric_matrix_right_product(impl::inline_exec_t{}, A, t, B, E, C);
+    symmetric_matrix_product(impl::inline_exec_t{}, B, A, t, E, C);
   }
 }
 
@@ -1698,14 +1698,14 @@ template<class ElementType_A,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void symmetric_matrix_right_product(
+void symmetric_matrix_product(
+  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
-  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  symmetric_matrix_right_product(impl::default_exec_t{}, A, t, B, E, C);
+  symmetric_matrix_product(impl::default_exec_t{}, B, A, t, E, C);
 }
 
 
@@ -1724,7 +1724,7 @@ template<class ElementType_A,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void hermitian_matrix_left_product(
+void hermitian_matrix_product(
   impl::inline_exec_t&& /* exec */,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle /* t */,
@@ -1771,7 +1771,7 @@ template<class ExecutionPolicy,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void hermitian_matrix_left_product(
+void hermitian_matrix_product(
   ExecutionPolicy&& exec ,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
@@ -1783,10 +1783,10 @@ void hermitian_matrix_left_product(
     decltype(A), Triangle, decltype(B), decltype(C)>::value;
 
   if constexpr (use_custom) {
-    hermitian_matrix_left_product(execpolicy_mapper(exec), A, t, B, C);
+    hermitian_matrix_product(execpolicy_mapper(exec), A, t, B, C);
   }
   else {
-    hermitian_matrix_left_product(impl::inline_exec_t{}, A, t, B, C);
+    hermitian_matrix_product(impl::inline_exec_t{}, A, t, B, C);
   }
 }
 
@@ -1803,13 +1803,13 @@ template<class ElementType_A,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void hermitian_matrix_left_product(
+void hermitian_matrix_product(
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t ,
   mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  hermitian_matrix_left_product(impl::default_exec_t{}, A, t, B, C);
+  hermitian_matrix_product(impl::default_exec_t{}, A, t, B, C);
 }
 
 // Overwriting Hermitian matrix-matrix right product
@@ -1827,11 +1827,11 @@ template<class ElementType_A,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void hermitian_matrix_right_product(
+void hermitian_matrix_product(
   impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle /* t */,
-  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   using size_type = ::std::common_type_t<SizeType_A, SizeType_B, SizeType_C>;
@@ -1874,11 +1874,11 @@ template<class ExecutionPolicy,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void hermitian_matrix_right_product(
+void hermitian_matrix_product(
   ExecutionPolicy&& exec ,
+  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
-  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
   constexpr bool use_custom = is_custom_herm_matrix_right_product_avail<
@@ -1886,10 +1886,10 @@ void hermitian_matrix_right_product(
     decltype(A), Triangle, decltype(B), decltype(C)>::value;
 
   if constexpr (use_custom) {
-    hermitian_matrix_right_product(execpolicy_mapper(exec), A, t, B, C);
+    hermitian_matrix_product(execpolicy_mapper(exec), B, A, t, C);
   }
   else {
-    hermitian_matrix_right_product(impl::inline_exec_t{}, A, t, B, C);
+    hermitian_matrix_product(impl::inline_exec_t{}, B, A, t, C);
   }
 }
 
@@ -1906,13 +1906,13 @@ template<class ElementType_A,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void hermitian_matrix_right_product(
+void hermitian_matrix_product(
+  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t ,
-  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  hermitian_matrix_right_product(impl::default_exec_t{}, A, t, B, C);
+  hermitian_matrix_product(impl::default_exec_t{}, B, A, t, C);
 }
 
 
@@ -1935,7 +1935,7 @@ template<class ElementType_A,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void hermitian_matrix_left_product(
+void hermitian_matrix_product(
   impl::inline_exec_t&& /* exec */,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle /* t */,
@@ -1964,7 +1964,7 @@ template<class ExecutionPolicy,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void hermitian_matrix_left_product(
+void hermitian_matrix_product(
   ExecutionPolicy&& exec ,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
@@ -1976,10 +1976,10 @@ void hermitian_matrix_left_product(
     decltype(execpolicy_mapper(exec)), decltype(A), Triangle, decltype(B), decltype(E), decltype(C)>::value;
 
   if constexpr (use_custom) {
-    hermitian_matrix_left_product(execpolicy_mapper(exec), A, t, B, E, C);
+    hermitian_matrix_product(execpolicy_mapper(exec), A, t, B, E, C);
   }
   else {
-    hermitian_matrix_left_product(impl::inline_exec_t{}, A, t, B, E, C);
+    hermitian_matrix_product(impl::inline_exec_t{}, A, t, B, E, C);
   }
 }
 
@@ -2000,14 +2000,14 @@ template<class ElementType_A,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void hermitian_matrix_left_product(
+void hermitian_matrix_product(
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t ,
   mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  hermitian_matrix_left_product(impl::default_exec_t{}, A, t, B, E, C);
+  hermitian_matrix_product(impl::default_exec_t{}, A, t, B, E, C);
 }
 
 
@@ -2030,11 +2030,11 @@ template<class ElementType_A,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void hermitian_matrix_right_product(
+void hermitian_matrix_product(
   impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle /* t */,
-  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
@@ -2059,11 +2059,11 @@ template<class ExecutionPolicy,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void hermitian_matrix_right_product(
+void hermitian_matrix_product(
   ExecutionPolicy&& exec ,
+  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
-  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
@@ -2071,10 +2071,10 @@ void hermitian_matrix_right_product(
     decltype(execpolicy_mapper(exec)), decltype(A), Triangle, decltype(B), decltype(E), decltype(C)>::value;
 
   if constexpr (use_custom) {
-    hermitian_matrix_right_product(execpolicy_mapper(exec), A, t, B, E, C);
+    hermitian_matrix_product(execpolicy_mapper(exec), B, A, t, E, C);
   }
   else {
-    hermitian_matrix_right_product(impl::inline_exec_t{}, A, t, B, E, C);
+    hermitian_matrix_product(impl::inline_exec_t{}, B, A, t, E, C);
   }
 }
 
@@ -2095,14 +2095,14 @@ template<class ElementType_A,
          class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
          class Layout_C,
          class Accessor_C>
-void hermitian_matrix_right_product(
+void hermitian_matrix_product(
+  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t ,
-  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
   mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  hermitian_matrix_right_product(impl::default_exec_t{}, A, t, B, E, C);
+  hermitian_matrix_product(impl::default_exec_t{}, B, A, t, E, C);
 }
 
 template <class Exec, class A_t, class B_t, class C_t>
