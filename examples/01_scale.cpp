@@ -8,6 +8,7 @@
 #include "experimental/__p2630_bits/submdspan.hpp"
 #include <experimental/linalg>
 #include <iostream>
+#include <vector>
 
 #if (! defined(__GNUC__)) || (__GNUC__ > 9)
 #  define MDSPAN_EXAMPLES_USE_EXECUTION_POLICIES 1
