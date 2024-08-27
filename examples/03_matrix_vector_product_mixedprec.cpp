@@ -8,6 +8,7 @@
 #include "experimental/__p2630_bits/submdspan.hpp"
 #include <experimental/linalg>
 #include <iostream>
+#include <vector>
 
 namespace MdSpan = MDSPAN_IMPL_STANDARD_NAMESPACE;
 namespace LinearAlgebra = MDSPAN_IMPL_STANDARD_NAMESPACE :: MDSPAN_IMPL_PROPOSED_NAMESPACE :: linalg;
