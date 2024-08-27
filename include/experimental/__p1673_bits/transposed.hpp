@@ -200,7 +200,7 @@ namespace impl {
   struct transposed_element_accessor<
     ElementType, default_accessor<ElementType>>
   {
-    using element_type = std::add_const_t<ElementType>;
+    using element_type = ElementType;
     using accessor_type = default_accessor<element_type>;
 
     static accessor_type accessor(const default_accessor<ElementType>& a) { return accessor_type(a); }
