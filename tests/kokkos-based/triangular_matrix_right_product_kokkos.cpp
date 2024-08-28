@@ -90,8 +90,8 @@ void test_overwriting_triangular_matrix_right_product_impl(A_t A, B_t B, C_t C, 
       updating_triangular_matrix_right_product_gold_solution(A, t, d, B, C_gold, C_gold);
     };
   const auto compute = [&]() {
-      std::experimental::linalg::triangular_matrix_right_product(
-        KokkosKernelsSTD::kokkos_exec<>(), A, t, d, B, C);
+      std::experimental::linalg::triangular_matrix_product(
+        KokkosKernelsSTD::kokkos_exec<>(), B, A, t, d, C);
     };
   const auto tol = tolerance<typename C_t::value_type>(1e-20, 1e-10f);
   test_op_CAB(A, B, C, tol, get_gold, compute);
@@ -106,7 +106,7 @@ void test_overwriting_triangular_matrix_right_product_impl(A_t A, C_t C, Triangl
       updating_triangular_matrix_right_product_gold_solution(A, t, d, C, C_gold, C_gold);
     };
   const auto compute = [&]() {
-      std::experimental::linalg::triangular_matrix_right_product(
+      std::experimental::linalg::triangular_matrix_product(
         KokkosKernelsSTD::kokkos_exec<>(), A, t, d, C);
     };
   const auto tol = tolerance<typename C_t::value_type>(1e-20, 1e-10f);

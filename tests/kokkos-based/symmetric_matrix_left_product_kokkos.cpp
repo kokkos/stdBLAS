@@ -73,7 +73,7 @@ void test_updating_symmetric_matrix_left_product_impl(A_t A, B_t B, E_t E, C_t C
       updating_symmetric_matrix_left_product_gold_solution(A, t, B, E, C_gold);
     };
   const auto compute = [&]() {
-      std::experimental::linalg::symmetric_matrix_left_product(
+      std::experimental::linalg::symmetric_matrix_product(
         KokkosKernelsSTD::kokkos_exec<>(), A, t, B, E, C);
     };
   const auto tol = tolerance<typename C_t::value_type>(1e-20, 1e-10f);
@@ -88,7 +88,7 @@ void test_overwriting_symmetric_matrix_left_product_impl(A_t A, B_t B, C_t C, Tr
       updating_symmetric_matrix_left_product_gold_solution(A, t, B, C_gold, C_gold);
     };
   const auto compute = [&]() {
-      std::experimental::linalg::symmetric_matrix_left_product(
+      std::experimental::linalg::symmetric_matrix_product(
         KokkosKernelsSTD::kokkos_exec<>(), A, t, B, C);
     };
   const auto tol = tolerance<typename C_t::value_type>(1e-20, 1e-10f);
