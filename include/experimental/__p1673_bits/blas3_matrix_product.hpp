@@ -1737,9 +1737,12 @@ void hermitian_matrix_product(
     for (size_type j = 0; j < C.extent(1); ++j) {
       for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
-        for (size_type k = 0; k < A.extent(1); ++k){
-          ElementType_A aik = i <= k ? impl::conj_if_needed(A(k,i)) : A(i,k);
-          C(i,j) += aik * B(k,j);
+        for (size_type k = 0; k < i; ++k){
+          C(i,j) += A(i,k) * B(k,j);
+        }
+        C(i,j) += impl::real_part(A(i,i)) * B(i,j);
+        for (size_type k = i+1; k < A.extent(0); ++k){
+          C(i,j) += impl::conj_if_needed(A(k,i)) * B(k,j);
         }
       }
     }
@@ -1748,9 +1751,12 @@ void hermitian_matrix_product(
     for (size_type j = 0; j < C.extent(1); ++j) {
       for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
-        for (size_type k = 0; k < A.extent(1); ++k) {
-          ElementType_A aik = i >= k ? impl::conj_if_needed(A(k,i)) : A(i,k);
-          C(i,j) += aik * B(k,j);
+        for (size_type k = 0; k < i; ++k) {
+          C(i,j) += impl::conj_if_needed(A(k,i)) * B(k,j);
+        }
+        C(i,j) += impl::real_part(A(i,i)) * B(i,j);
+        for (size_type k = i+1; k < A.extent(1); ++k) {
+          C(i,j) += A(i,k) * B(k,j);
         }
       }
     }
