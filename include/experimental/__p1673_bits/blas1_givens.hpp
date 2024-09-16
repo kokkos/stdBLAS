@@ -428,11 +428,11 @@ void givens_rotation_apply(
   const Real s)
 {
   constexpr bool use_custom = is_custom_givens_rotation_apply_avail<
-    decltype(detail::map_execpolicy_with_check(exec)), decltype(x), decltype(y), Real, Real
+    decltype(impl::map_execpolicy_with_check(exec)), decltype(x), decltype(y), Real, Real
     >::value;
 
   if constexpr (use_custom) {
-    givens_rotation_apply(detail::map_execpolicy_with_check(exec), x, y, c, s);
+    givens_rotation_apply(impl::map_execpolicy_with_check(exec), x, y, c, s);
   }
   else
   {
@@ -524,14 +524,14 @@ void givens_rotation_apply(
   const std::complex<Real> s)
 {
   constexpr bool use_custom = is_custom_givens_rotation_apply_avail<
-    decltype(detail::map_execpolicy_with_check(exec)), decltype(x), decltype(y), Real, complex<Real>
+    decltype(impl::map_execpolicy_with_check(exec)), decltype(x), decltype(y), Real, complex<Real>
     >::value;
 
   if constexpr (use_custom) {
-    givens_rotation_apply(detail::map_execpolicy_with_check(exec), x, y, c, s);
+    givens_rotation_apply(impl::map_execpolicy_with_check(exec), x, y, c, s);
   }
   else {
-    givens_rotation_apply(std::experimental::linalg::impl::inline_exec_t(), x, y, c, s);
+    givens_rotation_apply(impl::inline_exec_t{}, x, y, c, s);
   }
 }
 

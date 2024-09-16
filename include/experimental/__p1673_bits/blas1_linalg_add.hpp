@@ -223,12 +223,12 @@ void add(
   mdspan<ElementType_z, extents<SizeType_z, ext_z ...>, Layout_z, Accessor_z> z)
 {
   constexpr bool use_custom = is_custom_add_avail<
-    decltype(detail::map_execpolicy_with_check(exec)), decltype(x), decltype(y), decltype(z)
+    decltype(impl::map_execpolicy_with_check(exec)), decltype(x), decltype(y), decltype(z)
     >::value;
 
   if constexpr (use_custom) {
     // for the customization point, it is up to impl to check requirements
-    add(detail::map_execpolicy_with_check(exec), x, y, z);
+    add(impl::map_execpolicy_with_check(exec), x, y, z);
   }
   else
   {

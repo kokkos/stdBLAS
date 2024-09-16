@@ -319,11 +319,11 @@ void triangular_matrix_matrix_left_solve(
   P1673_MATRIX_PARAMETER( X ))
 {
   constexpr bool use_custom = is_custom_tri_matrix_matrix_left_solve_avail<
-    decltype(detail::map_execpolicy_with_check(exec)),
+    decltype(impl::map_execpolicy_with_check(exec)),
     decltype(A), Triangle, DiagonalStorage, decltype(B), decltype(X)>::value;
 
   if constexpr (use_custom) {
-    triangular_matrix_matrix_left_solve(detail::map_execpolicy_with_check(exec), A, t, d, B, X);
+    triangular_matrix_matrix_left_solve(impl::map_execpolicy_with_check(exec), A, t, d, B, X);
   } else {
     triangular_matrix_matrix_left_solve(impl::inline_exec_t{}, A, t, d, B, X);
   }
@@ -388,11 +388,11 @@ void triangular_matrix_matrix_right_solve(
   P1673_MATRIX_PARAMETER( X ))
 {
   constexpr bool use_custom = is_custom_tri_matrix_matrix_right_solve_avail<
-    decltype(detail::map_execpolicy_with_check(exec)),
+    decltype(impl::map_execpolicy_with_check(exec)),
     decltype(A), Triangle, DiagonalStorage, decltype(B), decltype(X)>::value;
 
   if constexpr (use_custom) {
-    triangular_matrix_matrix_right_solve(detail::map_execpolicy_with_check(exec), A, t, d, B, X);
+    triangular_matrix_matrix_right_solve(impl::map_execpolicy_with_check(exec), A, t, d, B, X);
   } else {
     triangular_matrix_matrix_right_solve(impl::inline_exec_t{}, A, t, d, B, X);
   }
@@ -461,11 +461,11 @@ void triangular_matrix_matrix_solve(
   P1673_MATRIX_PARAMETER( X ))
 {
   constexpr bool use_custom = is_custom_tri_matrix_matrix_solve_avail<
-    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), Triangle,
+    decltype(impl::map_execpolicy_with_check(exec)), decltype(A), Triangle,
     DiagonalStorage, Side, decltype(B), decltype(X)>::value;
 
   if constexpr (use_custom) {
-    triangular_matrix_matrix_solve(detail::map_execpolicy_with_check(exec), A, t, d, s, B, X);
+    triangular_matrix_matrix_solve(impl::map_execpolicy_with_check(exec), A, t, d, s, B, X);
   } else {
     triangular_matrix_matrix_solve(impl::inline_exec_t{}, A, t, d, s, B, X);
   }

@@ -137,11 +137,11 @@ sum_of_squares_result<Scalar> vector_sum_of_squares(
   sum_of_squares_result<Scalar> init)
 {
   constexpr bool use_custom = is_custom_vector_sum_of_squares_avail<
-    decltype(detail::map_execpolicy_with_check(exec)), decltype(v), Scalar
+    decltype(impl::map_execpolicy_with_check(exec)), decltype(v), Scalar
     >::value;
 
   if constexpr (use_custom) {
-    return vector_sum_of_squares(detail::map_execpolicy_with_check(exec), v, init);
+    return vector_sum_of_squares(impl::map_execpolicy_with_check(exec), v, init);
   }
   else {
     return vector_sum_of_squares(impl::inline_exec_t{}, v, init);

@@ -129,11 +129,11 @@ Scalar dot(
                 v1.static_extent(0) == v2.static_extent(0));
 
   constexpr bool use_custom = is_custom_dot_avail<
-    decltype(detail::map_execpolicy_with_check(exec)), decltype(v1), decltype(v2), Scalar
+    decltype(impl::map_execpolicy_with_check(exec)), decltype(v1), decltype(v2), Scalar
     >::value;
 
   if constexpr (use_custom) {
-    return dot(detail::map_execpolicy_with_check(exec), v1, v2, init);
+    return dot(impl::map_execpolicy_with_check(exec), v1, v2, init);
   }
   else {
     return dot(impl::inline_exec_t{}, v1, v2, init);

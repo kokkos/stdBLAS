@@ -344,12 +344,12 @@ void triangular_matrix_vector_solve(
   mdspan<ElementType_X, extents<SizeType_X, ext_X>, Layout_X, Accessor_X> x)
 {
   constexpr bool use_custom = is_custom_tri_mat_vec_solve_avail<
-    decltype(detail::map_execpolicy_with_check(exec)),
+    decltype(impl::map_execpolicy_with_check(exec)),
     decltype(A), decltype(t), decltype(d), decltype(b), decltype(x)
     >::value;
 
   if constexpr (use_custom) {
-    triangular_matrix_vector_solve(detail::map_execpolicy_with_check(exec), A, t, d, b, x);
+    triangular_matrix_vector_solve(impl::map_execpolicy_with_check(exec), A, t, d, b, x);
   }
   else {
     triangular_matrix_vector_solve(impl::inline_exec_t{},

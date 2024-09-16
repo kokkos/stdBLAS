@@ -71,7 +71,7 @@ namespace linalg {
 template<class T>
 auto execpolicy_mapper(T) { return impl::inline_exec_t(); }
 
-namespace detail {
+namespace impl {
 
 // std::remove_cvref_t is a C++20 feature.
 template<class T>
@@ -97,7 +97,7 @@ inline auto map_execpolicy_with_check = [](auto&& policy) {
   return execpolicy_mapper(std::forward<decltype(policy)>(policy));
 };
 
-} // namespace detail
+} // namespace impl
 
 } // namespace linalg
 } // namespace __p1673_version_0

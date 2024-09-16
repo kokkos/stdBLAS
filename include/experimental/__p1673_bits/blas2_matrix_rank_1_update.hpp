@@ -210,11 +210,11 @@ void matrix_rank_1_update(
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A)
 {
   constexpr bool use_custom = is_custom_matrix_rank_1_update_avail<
-    decltype(detail::map_execpolicy_with_check(exec)), decltype(x), decltype(y), decltype(A)
+    decltype(impl::map_execpolicy_with_check(exec)), decltype(x), decltype(y), decltype(A)
     >::value;
 
   if constexpr (use_custom) {
-    matrix_rank_1_update(detail::map_execpolicy_with_check(exec), x, y, A);
+    matrix_rank_1_update(impl::map_execpolicy_with_check(exec), x, y, A);
   }
   else {
     matrix_rank_1_update(impl::inline_exec_t{}, x, y, A);
@@ -467,11 +467,11 @@ void symmetric_matrix_rank_1_update(
   Triangle t)
 {
   constexpr bool use_custom = is_custom_symmetric_matrix_rank_1_update_avail<
-    decltype(detail::map_execpolicy_with_check(exec)), decltype(x), decltype(A), Triangle
+    decltype(impl::map_execpolicy_with_check(exec)), decltype(x), decltype(A), Triangle
     >::value;
 
   if constexpr (use_custom) {
-    symmetric_matrix_rank_1_update(detail::map_execpolicy_with_check(exec), x, A, t);
+    symmetric_matrix_rank_1_update(impl::map_execpolicy_with_check(exec), x, A, t);
   }
   else {
     symmetric_matrix_rank_1_update(impl::inline_exec_t{}, x, A, t);
@@ -680,11 +680,11 @@ void hermitian_matrix_rank_1_update(
   Triangle t)
 {
   constexpr bool use_custom = is_custom_hermitian_matrix_rank_1_update_avail<
-    decltype(detail::map_execpolicy_with_check(exec)), decltype(x), decltype(A), Triangle
+    decltype(impl::map_execpolicy_with_check(exec)), decltype(x), decltype(A), Triangle
     >::value;
 
   if constexpr (use_custom) {
-    hermitian_matrix_rank_1_update(detail::map_execpolicy_with_check(exec), x, A, t);
+    hermitian_matrix_rank_1_update(impl::map_execpolicy_with_check(exec), x, A, t);
   }
   else {
     hermitian_matrix_rank_1_update(impl::inline_exec_t{}, x, A, t);

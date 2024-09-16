@@ -139,11 +139,11 @@ Scalar matrix_frob_norm(
   Scalar init)
 {
   constexpr bool use_custom = is_custom_matrix_frob_norm_avail<
-    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), Scalar
+    decltype(impl::map_execpolicy_with_check(exec)), decltype(A), Scalar
     >::value;
 
   if constexpr (use_custom) {
-    return matrix_frob_norm(detail::map_execpolicy_with_check(exec), A, init);
+    return matrix_frob_norm(impl::map_execpolicy_with_check(exec), A, init);
   }
   else {
     return matrix_frob_norm(impl::inline_exec_t(), A, init);
