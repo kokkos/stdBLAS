@@ -467,7 +467,7 @@ void symmetric_matrix_rank_1_update(
   Triangle t)
 {
   constexpr bool use_custom = is_custom_symmetric_matrix_rank_1_update_avail<
-    decltype(impl::map_execpolicy_with_check(exec)), decltype(x), decltype(A), Triangle
+    decltype(impl::map_execpolicy_with_check(exec)), void, decltype(x), decltype(A), Triangle
     >::value;
 
   if constexpr (use_custom) {
@@ -680,7 +680,7 @@ void hermitian_matrix_rank_1_update(
   Triangle t)
 {
   constexpr bool use_custom = is_custom_hermitian_matrix_rank_1_update_avail<
-    decltype(impl::map_execpolicy_with_check(exec)), decltype(x), decltype(A), Triangle
+    decltype(impl::map_execpolicy_with_check(exec)), void, decltype(x), decltype(A), Triangle
     >::value;
 
   if constexpr (use_custom) {

@@ -43,7 +43,7 @@ template<class T>
 inline constexpr bool is_linalg_execution_policy_other_than_inline_v =
   ! is_inline_exec_v<T> &&
   (
-#if (! defined(__GNUC__)) || (__GNUC__ > 9)
+#ifdef LINALG_HAS_EXECUTION
     std::is_execution_policy_v<T> ||
 #endif
     is_custom_linalg_execution_policy_v<T>
@@ -86,10 +86,9 @@ using remove_cvref_t =
 // it's a generic lambda instead of a function template.
 inline auto map_execpolicy_with_check = [](auto&& policy) {
   using input_type = remove_cvref_t<decltype(policy)>;
-  using ::std::experimental::linalg::execpolicy_mapper;
   using return_type = remove_cvref_t<decltype(execpolicy_mapper(std::forward<decltype(policy)>(policy)))>;
   // Only inline_exec_t is allowed to map to itself.
-  using inline_type = ::std::experimental::linalg::impl::inline_exec_t;
+  using inline_type = impl::inline_exec_t;
   static_assert(std::is_same_v<input_type, inline_type> ||
     ! std::is_same_v<input_type, return_type>,
     "Specializations of execpolicy_mapper must return "

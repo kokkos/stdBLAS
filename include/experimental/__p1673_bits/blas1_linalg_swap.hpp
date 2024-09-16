@@ -178,7 +178,7 @@ void swap_elements(
   mdspan<ElementType_x, extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
   mdspan<ElementType_y, extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y)
 {
-  constexpr bool use_custom = is_custom_vector_swap_elements_avail<
+  constexpr bool use_custom = impl::is_custom_vector_swap_elements_avail<
     decltype(impl::map_execpolicy_with_check(exec)), decltype(x), decltype(y)
     >::value;
 

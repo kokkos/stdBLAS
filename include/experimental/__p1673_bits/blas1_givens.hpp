@@ -524,7 +524,7 @@ void givens_rotation_apply(
   const std::complex<Real> s)
 {
   constexpr bool use_custom = is_custom_givens_rotation_apply_avail<
-    decltype(impl::map_execpolicy_with_check(exec)), decltype(x), decltype(y), Real, complex<Real>
+    decltype(impl::map_execpolicy_with_check(exec)), decltype(x), decltype(y), Real, std::complex<Real>
     >::value;
 
   if constexpr (use_custom) {
