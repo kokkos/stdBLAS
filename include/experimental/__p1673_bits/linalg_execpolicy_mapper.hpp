@@ -1,10 +1,9 @@
-// For GCC 9 (< 10), <execution> unconditionally includes a TBB header file.
-// If GCC < 10 was not built with TBB support, this causes a build error.
-#if (! defined(__GNUC__)) || (__GNUC__ > 9)
-#include <execution>
+#ifdef LINALG_HAS_EXECUTION
+#  include <execution>
 #endif
 
 #include <type_traits>
+#include <utility>
 
 namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
 namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
@@ -65,9 +64,42 @@ namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
 namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
 namespace linalg {
+
+// Specialize this function to map a public execution policy
+// (e.g., std::execution::parallel_policy) to an internal policy.
+// This function must always return a different type than its input.
 template<class T>
 auto execpolicy_mapper(T) { return impl::inline_exec_t(); }
-}
-}
-}
-}
+
+namespace detail {
+
+// std::remove_cvref_t is a C++20 feature.
+template<class T>
+using remove_cvref_t =
+#ifdef __cpp_lib_remove_cvref
+  std::remove_cvref_t<T>;
+#else
+  std::remove_const_t<std::remove_reference_t<decltype(policy)>>;
+#endif
+
+// This function is not to be specialized; that's why
+// it's a generic lambda instead of a function template.
+inline auto map_execpolicy_with_check = [](auto&& policy) {
+  using input_type = remove_cvref_t<decltype(policy)>;
+  using ::std::experimental::linalg::execpolicy_mapper;
+  using return_type = remove_cvref_t<decltype(execpolicy_mapper(std::forward<decltype(policy)>(policy)))>;
+  // Only inline_exec_t is allowed to map to itself.
+  using inline_type = ::std::experimental::linalg::impl::inline_exec_t;
+  static_assert(std::is_same_v<input_type, inline_type> ||
+    ! std::is_same_v<input_type, return_type>,
+    "Specializations of execpolicy_mapper must return "
+    "a different policy type than their input");
+  return execpolicy_mapper(std::forward<decltype(policy)>(policy));
+};
+
+} // namespace detail
+
+} // namespace linalg
+} // namespace __p1673_version_0
+} // namespace experimental
+} // namespace std

@@ -171,13 +171,12 @@ void copy(
   mdspan<ElementType_x, extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
   mdspan<ElementType_y, extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y)
 {
-
   constexpr bool use_custom = is_custom_copy_avail<
-    decltype(execpolicy_mapper(exec)), decltype(x), decltype(y)
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(x), decltype(y)
     >::value;
 
-  if constexpr(use_custom){
-    copy(execpolicy_mapper(exec), x, y);
+  if constexpr (use_custom) {
+    copy(detail::map_execpolicy_with_check(exec), x, y);
   }
   else {
     copy(impl::inline_exec_t{}, x, y);

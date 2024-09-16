@@ -308,12 +308,11 @@ void matrix_vector_product(
   mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
 {
   constexpr bool use_custom = is_custom_mat_vec_product_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), decltype(x), decltype(y)>::value;
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), decltype(x), decltype(y)>::value;
 
-  if constexpr (use_custom) {
-    matrix_vector_product(execpolicy_mapper(exec), A, x, y);
-  }
-  else {
+  if constexpr(use_custom) {
+    matrix_vector_product(detail::map_execpolicy_with_check(exec), A, x, y);
+  } else {
     matrix_vector_product(impl::inline_exec_t{}, A, x, y);
   }
 }
@@ -437,12 +436,11 @@ void matrix_vector_product(
 {
 
   constexpr bool use_custom = is_custom_mat_vec_product_with_update_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), decltype(x), decltype(y), decltype(z)>::value;
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), decltype(x), decltype(y), decltype(z)>::value;
 
-  if constexpr (use_custom) {
-    matrix_vector_product(execpolicy_mapper(exec), A, x, y, z);
-  }
-  else {
+  if constexpr(use_custom) {
+    matrix_vector_product(detail::map_execpolicy_with_check(exec), A, x, y, z);
+  } else {
     matrix_vector_product(impl::inline_exec_t{}, A, x, y, z);
   }
 }
@@ -559,12 +557,11 @@ void symmetric_matrix_vector_product(
   mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
 {
   constexpr bool use_custom = is_custom_sym_mat_vec_product_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), Triangle, decltype(x), decltype(y)>::value;
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), Triangle, decltype(x), decltype(y)>::value;
 
-  if constexpr (use_custom) {
-    symmetric_matrix_vector_product(execpolicy_mapper(exec), A, t, x, y);
-  }
-  else {
+  if constexpr(use_custom) {
+    symmetric_matrix_vector_product(detail::map_execpolicy_with_check(exec), A, t, x, y);
+  } else {
     symmetric_matrix_vector_product(impl::inline_exec_t{}, A, t, x, y);
   }
 }
@@ -688,12 +685,11 @@ void symmetric_matrix_vector_product(
   mdspan<ElementType_z, extents<SizeType_z, ext_z>, Layout_z, Accessor_z> z)
 {
   constexpr bool use_custom = is_custom_sym_mat_vec_product_with_update_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), Triangle, decltype(x), decltype(y), decltype(z)>::value;
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), Triangle, decltype(x), decltype(y), decltype(z)>::value;
 
-  if constexpr (use_custom) {
-    symmetric_matrix_vector_product(execpolicy_mapper(exec), A, t, x, y, z);
-  }
-  else {
+  if constexpr(use_custom) {
+    symmetric_matrix_vector_product(detail::map_execpolicy_with_check(exec), A, t, x, y, z);
+  } else {
     symmetric_matrix_vector_product(impl::inline_exec_t{}, A, t, x, y, z);
   }
 }
@@ -817,12 +813,11 @@ void hermitian_matrix_vector_product(
   mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
 {
   constexpr bool use_custom = is_custom_hermitian_mat_vec_product_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), Triangle, decltype(x), decltype(y)>::value;
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), Triangle, decltype(x), decltype(y)>::value;
 
-  if constexpr (use_custom) {
-    hermitian_matrix_vector_product(execpolicy_mapper(exec), A, t, x, y);
-  }
-  else {
+  if constexpr(use_custom) {
+    hermitian_matrix_vector_product(detail::map_execpolicy_with_check(exec), A, t, x, y);
+  } else {
     hermitian_matrix_vector_product(impl::inline_exec_t{}, A, t, x, y);
   }
 }
@@ -950,12 +945,11 @@ void hermitian_matrix_vector_product(
   mdspan<ElementType_z, extents<SizeType_z, ext_z>, Layout_z, Accessor_z> z)
 {
   constexpr bool use_custom = is_custom_hermitian_mat_vec_product_with_update_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), Triangle, decltype(x), decltype(y), decltype(z)>::value;
+    decltype(detail::map_execpolicy_with_check(exec)), decltype(A), Triangle, decltype(x), decltype(y), decltype(z)>::value;
 
-  if constexpr (use_custom) {
-    hermitian_matrix_vector_product(execpolicy_mapper(exec), A, t, x, y, z);
-  }
-  else {
+  if constexpr(use_custom) {
+    hermitian_matrix_vector_product(detail::map_execpolicy_with_check(exec), A, t, x, y, z);
+  } else {
     hermitian_matrix_vector_product(impl::inline_exec_t{}, A, t, x, y, z);
   }
 }
@@ -1085,12 +1079,12 @@ void triangular_matrix_vector_product(
 {
 
   constexpr bool use_custom = is_custom_tri_mat_vec_product_avail<
-    decltype(execpolicy_mapper(exec)),
+    decltype(detail::map_execpolicy_with_check(exec)),
     decltype(A), decltype(t), decltype(d), decltype(x), decltype(y)
     >::value;
 
   if constexpr (use_custom) {
-    triangular_matrix_vector_product(execpolicy_mapper(exec), A, t, d, x, y);
+    triangular_matrix_vector_product(detail::map_execpolicy_with_check(exec), A, t, d, x, y);
   }
   else {
     triangular_matrix_vector_product(impl::inline_exec_t{},
@@ -1234,14 +1228,13 @@ void triangular_matrix_vector_product(
   mdspan<ElementType_z, extents<SizeType_z, ext_z>, Layout_z, Accessor_z> z)
 {
   constexpr bool use_custom = is_custom_tri_mat_vec_product_with_update_avail<
-    decltype(execpolicy_mapper(exec)),
+    decltype(detail::map_execpolicy_with_check(exec)),
     decltype(A), decltype(t), decltype(d), decltype(x), decltype(y), decltype(z)
     >::value;
 
   if constexpr (use_custom) {
-    triangular_matrix_vector_product(execpolicy_mapper(exec), A, t, d, x, y, z);
-  }
-  else {
+    triangular_matrix_vector_product(detail::map_execpolicy_with_check(exec), A, t, d, x, y, z);
+  } else {
     triangular_matrix_vector_product(impl::inline_exec_t{}, A, t, d, x, y, z);
   }
 }
