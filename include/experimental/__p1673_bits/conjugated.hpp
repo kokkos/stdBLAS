@@ -100,12 +100,14 @@ auto conjugated(mdspan<ElementType, Extents, Layout, Accessor> a)
     return mdspan<ElementType, Extents, Layout, Accessor>
       (a.data_handle(), a.mapping(), a.accessor());
   }
-  // P3050 optimizes conjugated for nonarithmetic, non-(custom complex) types.
-  // A "custom complex" type T has ADL-findable conj(T).
+#if defined(LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX)
+  // P3050 optimizes conjugated for non-arithmetic, non-(custom complex)
+  // types.  A "custom complex" type T has ADL-findable conj(T).
   else if constexpr (! impl::has_conj<value_type>::value) {
     return mdspan<ElementType, Extents, Layout, Accessor>
       (a.data_handle(), a.mapping(), a.accessor());
   }
+#endif // LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX
   else {
     using return_element_type =
       typename conjugated_accessor<Accessor>::element_type;

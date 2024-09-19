@@ -25,6 +25,8 @@ option(LINALG_ENABLE_ATOMIC_REF "Try to enable atomic_ref support" OFF)
 
 option(LINALG_FIX_TRANSPOSED_FOR_PADDED_LAYOUTS "Enable implementation of P3222 (Fix transposed for P2642 padded layouts).  OFF by default, though this will change if P3222 is voted into the C++ Standard Working Draft." OFF)
 
+option(LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX "Enable implementation of P3050 (Fix conjugated for noncomplex value types).  OFF by default, though this will change if P3050 is voted into the C++ Standard Working Draft." OFF)
+
 ################################################################################
 
 # Decide on the standard to use

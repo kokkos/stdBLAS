@@ -103,10 +103,19 @@ namespace {
       mdspan<value_type, extents_type, layout_type, input_accessor_type> x_nc{x_storage.data()};
       auto x_nc_conj = conjugated(x_nc);
 
+#if defined(LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX)
       using expected_accessor_type = default_accessor<value_type>;
       using expected_element_type = value_type;
-      static_assert(std::is_same_v<decltype(x_nc_conj),
-                    mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>>);
+#else
+      using expected_accessor_type = conjugated_accessor<default_accessor<value_type>>;
+      using expected_element_type = std::add_const_t<value_type>;
+#endif
+      static_assert(std::is_same_v<typename decltype(x_nc_conj)::element_type, expected_element_type>);
+      static_assert(std::is_same_v<typename decltype(x_nc_conj)::extents_type, extents_type>);      
+      static_assert(std::is_same_v<typename decltype(x_nc_conj)::layout_type, layout_type>);
+      static_assert(std::is_same_v<typename decltype(x_nc_conj)::accessor_type, expected_accessor_type>);
+      using expected_mdspan_type = mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>;
+      static_assert(std::is_same_v<decltype(x_nc_conj), expected_mdspan_type>);
       EXPECT_EQ(x_nc_conj.mapping(), x_nc.mapping());
     }
     {
@@ -114,10 +123,18 @@ namespace {
       mdspan<const value_type, extents_type, layout_type, input_accessor_type> x_c{x_storage.data()};
       auto x_c_conj = conjugated(x_c);
 
+#if defined(LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX)
       using expected_accessor_type = default_accessor<const value_type>;
-      using expected_element_type = const value_type;
-      static_assert(std::is_same_v<decltype(x_c_conj),
-                    mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>>);
+#else
+      using expected_accessor_type = conjugated_accessor<default_accessor<const value_type>>;
+#endif
+      using expected_element_type = const value_type;      
+      static_assert(std::is_same_v<typename decltype(x_c_conj)::element_type, expected_element_type>);
+      static_assert(std::is_same_v<typename decltype(x_c_conj)::extents_type, extents_type>);      
+      static_assert(std::is_same_v<typename decltype(x_c_conj)::layout_type, layout_type>);
+      static_assert(std::is_same_v<typename decltype(x_c_conj)::accessor_type, expected_accessor_type>);
+      using expected_mdspan_type = mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>;
+      static_assert(std::is_same_v<decltype(x_c_conj), expected_mdspan_type>);
       EXPECT_EQ(x_c_conj.mapping(), x_c.mapping());
     }
   }
@@ -136,10 +153,20 @@ namespace {
       mdspan<value_type, extents_type, layout_type, input_accessor_type> x_nc{x_storage.data()};
       auto x_nc_conj = conjugated(x_nc);
 
+#if defined(LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX)
       using expected_accessor_type = nondefault_accessor<value_type>;
-      using expected_element_type = value_type;
-      static_assert(std::is_same_v<decltype(x_nc_conj),
-                    mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>>);
+      using expected_element_type = value_type;      
+#else
+      using expected_accessor_type = conjugated_accessor<nondefault_accessor<value_type>>;
+      using expected_element_type = std::add_const_t<value_type>; 
+#endif
+      static_assert(std::is_same_v<typename decltype(x_nc_conj)::element_type, expected_element_type>);
+      static_assert(std::is_same_v<typename decltype(x_nc_conj)::extents_type, extents_type>);
+      static_assert(std::is_same_v<typename decltype(x_nc_conj)::layout_type, layout_type>);
+      static_assert(std::is_same_v<typename decltype(x_nc_conj)::accessor_type, expected_accessor_type>);
+      using expected_mdspan_type =
+        mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>;
+      static_assert(std::is_same_v<decltype(x_nc_conj), expected_mdspan_type>);
       EXPECT_EQ(x_nc_conj.mapping(), x_nc.mapping());
     }
     {
@@ -147,7 +174,11 @@ namespace {
       mdspan<const value_type, extents_type, layout_type, input_accessor_type> x_c{x_storage.data()};
       auto x_c_conj = conjugated(x_c);
 
+#if defined(LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX)
       using expected_accessor_type = nondefault_accessor<const value_type>;
+#else
+      using expected_accessor_type = conjugated_accessor<nondefault_accessor<const value_type>>;
+#endif
       using expected_element_type = const value_type;
       static_assert(std::is_same_v<decltype(x_c_conj),
                     mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>>);
