@@ -20,7 +20,7 @@ jobs:
       run: cmake -E make_directory mdspan-build
       
     - name: Check Out
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         repository: kokkos/mdspan
         path: mdspan-src
@@ -38,7 +38,7 @@ jobs:
       run: make install
       
     - name: Upload
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: mdspan
         path: mdspan-install
@@ -49,7 +49,7 @@ jobs:
     
     steps:
     - name: Download mdspan
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
         name: mdspan
         path: mdspan-install 
@@ -58,7 +58,7 @@ jobs:
       run: cmake -E make_directory stdblas-build
         
     - name: Check Out
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         path: stdblas-src
         
@@ -68,7 +68,7 @@ jobs:
       run: cmake $GITHUB_WORKSPACE/stdblas-src -Dmdspan_DIR=$GITHUB_WORKSPACE/mdspan-install/lib/cmake/mdspan -DLINALG_ENABLE_TESTS=On -DLINALG_ENABLE_EXAMPLES=On -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/stdblas-install
 
     - name: Upload workspace
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: workspace
         path: .
@@ -80,7 +80,7 @@ jobs:
     steps:
     
     - name: Download workspace
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
         name: workspace
         path: .
@@ -95,7 +95,7 @@ jobs:
       run: tar -cvf stdblas.tar *
 
     - name: Upload workspace
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: stdblas
         path: stdblas.tar
@@ -107,7 +107,7 @@ jobs:
     steps:
     
     - name: Download workspace
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
         name: stdblas
         path: .
@@ -128,7 +128,7 @@ jobs:
     steps:
     
     - name: Download workspace
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
         name: stdblas
         path: .
