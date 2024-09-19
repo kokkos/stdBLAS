@@ -104,11 +104,11 @@ Scalar vector_abs_sum(
   Scalar init)
 {
   constexpr bool use_custom = is_custom_vector_abs_sum_avail<
-    decltype(execpolicy_mapper(exec)), decltype(v), Scalar
+    decltype(impl::map_execpolicy_with_check(exec)), decltype(v), Scalar
     >::value;
 
   if constexpr (use_custom) {
-    return vector_abs_sum(execpolicy_mapper(exec), v, init);
+    return vector_abs_sum(impl::map_execpolicy_with_check(exec), v, init);
   }
   else {
     return vector_abs_sum(impl::inline_exec_t{}, v, init);

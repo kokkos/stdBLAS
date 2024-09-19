@@ -188,13 +188,12 @@ void symmetric_matrix_rank_k_update(
   Triangle t)
 {
   constexpr bool use_custom = is_custom_sym_mat_rank_k_update_avail<
-    decltype(execpolicy_mapper(exec)),
+    decltype(impl::map_execpolicy_with_check(exec)),
     ScaleFactorType, decltype(A), decltype(C), Triangle>::value;
 
   if constexpr (use_custom) {
-    symmetric_matrix_rank_k_update(execpolicy_mapper(exec), alpha, A, C, t);
-  }
-  else {
+    symmetric_matrix_rank_k_update(impl::map_execpolicy_with_check(exec), alpha, A, C, t);
+  } else {
     symmetric_matrix_rank_k_update(impl::inline_exec_t{}, alpha, A, C, t);
   }
 }
@@ -287,13 +286,12 @@ void symmetric_matrix_rank_k_update(
   Triangle t)
 {
   constexpr bool use_custom = is_custom_sym_mat_rank_k_update_avail<
-    decltype(execpolicy_mapper(exec)), void, decltype(A), decltype(C), Triangle
+    decltype(impl::map_execpolicy_with_check(exec)), void, decltype(A), decltype(C), Triangle
     >::value;
 
   if constexpr (use_custom) {
-    symmetric_matrix_rank_k_update(execpolicy_mapper(exec), A, C, t);
-  }
-  else {
+    symmetric_matrix_rank_k_update(impl::map_execpolicy_with_check(exec), A, C, t);
+  } else {
     symmetric_matrix_rank_k_update(impl::inline_exec_t{}, A, C, t);
   }
 }
@@ -391,13 +389,12 @@ void hermitian_matrix_rank_k_update(
   Triangle t)
 {
   constexpr bool use_custom = is_custom_herm_mat_rank_k_update_avail<
-    decltype(execpolicy_mapper(exec)),
+    decltype(impl::map_execpolicy_with_check(exec)),
     ScaleFactorType, decltype(A), decltype(C), Triangle>::value;
 
   if constexpr (use_custom) {
-    hermitian_matrix_rank_k_update(execpolicy_mapper(exec), alpha, A, C, t);
-  }
-  else {
+    hermitian_matrix_rank_k_update(impl::map_execpolicy_with_check(exec), alpha, A, C, t);
+  } else {
     hermitian_matrix_rank_k_update(impl::inline_exec_t{}, alpha, A, C, t);
   }
 }
@@ -492,13 +489,12 @@ void hermitian_matrix_rank_k_update(
   Triangle t)
 {
   constexpr bool use_custom = is_custom_herm_mat_rank_k_update_avail<
-    decltype(execpolicy_mapper(exec)),
+    decltype(impl::map_execpolicy_with_check(exec)),
     void, decltype(A), decltype(C), Triangle>::value;
 
   if constexpr (use_custom) {
-    hermitian_matrix_rank_k_update(execpolicy_mapper(exec), A, C, t);
-  }
-  else {
+    hermitian_matrix_rank_k_update(impl::map_execpolicy_with_check(exec), A, C, t);
+  } else {
     hermitian_matrix_rank_k_update(impl::inline_exec_t{}, A, C, t);
   }
 }

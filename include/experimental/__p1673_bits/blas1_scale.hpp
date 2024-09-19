@@ -138,11 +138,11 @@ void scale(
   // Call custom overload if available else call std implementation
 
   constexpr bool use_custom = is_custom_scale_avail<
-    decltype(execpolicy_mapper(exec)), decltype(alpha), decltype(x)
+    decltype(impl::map_execpolicy_with_check(exec)), decltype(alpha), decltype(x)
     >::value;
 
   if constexpr (use_custom) {
-    scale(execpolicy_mapper(exec), alpha, x);
+    scale(impl::map_execpolicy_with_check(exec), alpha, x);
   } else {
     scale(impl::inline_exec_t{}, alpha, x);
   }
