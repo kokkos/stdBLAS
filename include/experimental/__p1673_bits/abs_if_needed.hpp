@@ -64,14 +64,16 @@ namespace impl {
 //   input, the program is ill-formed, no diagnostic required.
 
 // Inline static variables require C++17.
-constexpr inline auto abs_if_needed = [](const auto& t)
+constexpr inline auto abs_if_needed = [](auto t)
 {
-  using T = std::remove_const_t<decltype(t)>;  
-  if constexpr (std::is_unsigned_v<T>) {
-    return t;
-  }
-  else if (std::is_arithmetic_v<T>) {
-    return std::abs(t);
+  using T = std::remove_const_t<std::remove_reference_t<decltype(t)>>;
+  if constexpr (std::is_arithmetic_v<T>) {
+    if constexpr (std::is_unsigned_v<T>) {
+      return t;
+    }
+    else {
+      return std::abs(t);
+    }
   }
   else {
     return abs(t);

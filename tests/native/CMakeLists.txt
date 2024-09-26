@@ -12,6 +12,7 @@ macro(linalg_add_test name)
   add_test(${name} ${name})
 endmacro()
 
+linalg_add_test(abs_if_needed)
 linalg_add_test(abs_sum)
 linalg_add_test(add)
 linalg_add_test(conjugate_transposed)
