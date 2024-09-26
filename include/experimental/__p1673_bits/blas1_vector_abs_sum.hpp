@@ -84,12 +84,20 @@ Scalar vector_abs_sum(
   mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> v,
   Scalar init)
 {
+  using std::abs;
+  using result_t = decltype(init + abs(impl::real_part(std::declval<ElementType>())));
   const SizeType numElt = v.extent(0);
+  result_t value = init;
   for (SizeType i = 0; i < numElt; ++i) {
-    using std::abs;
-    init += abs(v(i));
+    if constexpr (std::is_arithmetic_v<ElementType>) {
+        value += abs(v(i));
+    }
+    else {
+        value += abs(impl::real_part(v(i)));
+        value += abs(impl::imag_part(v(i)));
+    }
   }
-  return init;
+  return value;
 }
 
 template<class ExecutionPolicy,
