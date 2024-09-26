@@ -43,7 +43,6 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_PROXY_REFERENCE_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_PROXY_REFERENCE_HPP_
 
-#include "experimental/__p1673_bits/conj_if_needed.hpp"
 #if defined(__cpp_lib_atomic_ref) && defined(LINALG_ENABLE_ATOMIC_REF)
 #  include <atomic>
 #endif
@@ -66,56 +65,6 @@ static constexpr bool is_atomic_ref_not_arithmetic_v = false;
 template<class U>
 static constexpr bool is_atomic_ref_not_arithmetic_v<std::atomic_ref<U>> = ! std::is_arithmetic_v<U>;
 #endif
-
-template<class T>
-T imag_part_impl(const T& t, std::false_type)
-{
-  return T{};
-}
-
-template<class T>
-auto imag_part_impl(const T& t, std::true_type)
-{
-  if constexpr (std::is_arithmetic_v<T>) {
-    return T{};
-  } else {
-    return imag(t);
-  }
-}
-
-template<class T>
-auto imag_part(const T& t)
-{
-  return imag_part_impl(t, has_imag<T>{});
-}
-
-template<class T>
-T real_part_impl(const T& t, std::false_type)
-{
-  return t;
-}
-
-template<class T>
-auto real_part_impl(const T& t, std::true_type)
-{
-  if constexpr (std::is_arithmetic_v<T>) {
-    return t;
-  } else {
-    return real(t);
-  }
-}
-
-template<class T>
-auto real_part(const T& t)
-{
-  return real_part_impl(t, has_real<T>{});
-}
-
-// template<class R>
-// R imag_part(const std::complex<R>& z)
-// {
-//   return std::imag(z);
-// }
 
 // A "tag" for identifying the proxy reference types in this proposal.
 // It's helpful for this tag to be a complete type, so that we can use
@@ -224,11 +173,11 @@ public:
   }
 
   friend auto real(const derived_type& x) {
-    return real_part(value_type(static_cast<const this_type&>(x)));
+    return impl::real_if_needed(value_type(static_cast<const this_type&>(x)));
   }
   
   friend auto imag(const derived_type& x) {
-    return imag_part(value_type(static_cast<const this_type&>(x)));
+    return impl::imag_if_needed(value_type(static_cast<const this_type&>(x)));
   }
 
   friend auto conj(const derived_type& x) {

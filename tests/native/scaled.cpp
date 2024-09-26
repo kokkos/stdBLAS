@@ -7,8 +7,7 @@ namespace {
   template<class ScalingFactor, class OriginalValueType>
   void test_scaled_accessor_element_constification()
   {
-    using LinearAlgebra::accessor_scaled;
-    using LinearAlgebra::scaled_scalar;
+    using LinearAlgebra::scaled_accessor;
 
     using nc_def_acc_type = default_accessor<OriginalValueType>;
     using c_def_acc_type =
@@ -82,7 +81,7 @@ namespace {
     // Make sure that scaled_accessor compiles
     {
       using accessor_t = vector_t::accessor_type;
-      using LinearAlgebra::accessor_scaled;
+      using LinearAlgebra::scaled_accessor;
       using scaled_accessor_t =
         scaled_accessor<scaling_factor_type, accessor_t>;
       scaled_accessor_t accessor0{scalingFactor, y.accessor()};

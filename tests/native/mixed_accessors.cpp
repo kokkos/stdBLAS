@@ -109,8 +109,8 @@ struct atomic_accessor {
 #endif // __cpp_lib_atomic_ref
 
 namespace {
-  using std::experimental::linalg::conjugated;
-  using std::experimental::linalg::scaled;
+  using LinearAlgebra::conjugated;
+  using LinearAlgebra::scaled;
 
   TEST(mixed_accessors, mdspan_scaled_and_my_proxy)
   {

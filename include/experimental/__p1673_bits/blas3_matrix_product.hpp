@@ -191,8 +191,8 @@ constexpr bool valid_input_blas_accessor()
 
   using def_acc_type = default_accessor<elt_type>;
   using conj_def_acc_type = conjugated_accessor<def_acc_type>;
-  using scal_def_acc_type = accessor_scaled<val_type, def_acc_type>;
-  using scal_conj_acc_type = accessor_scaled<val_type, conj_def_acc_type>;
+  using scal_def_acc_type = scaled_accessor<val_type, def_acc_type>;
+  using scal_conj_acc_type = scaled_accessor<val_type, conj_def_acc_type>;
   using conj_scal_acc_type = conjugated_accessor<scal_def_acc_type>;
 
   // The two matrices' accessor types need not be the same.
@@ -1730,7 +1730,7 @@ void hermitian_matrix_product(
         for (size_type k = 0; k < i; ++k){
           C(i,j) += A(i,k) * B(k,j);
         }
-        C(i,j) += impl::real_part(A(i,i)) * B(i,j);
+        C(i,j) += impl::real_if_needed(A(i,i)) * B(i,j);
         for (size_type k = i+1; k < A.extent(0); ++k){
           C(i,j) += impl::conj_if_needed(A(k,i)) * B(k,j);
         }
@@ -1744,7 +1744,7 @@ void hermitian_matrix_product(
         for (size_type k = 0; k < i; ++k) {
           C(i,j) += impl::conj_if_needed(A(k,i)) * B(k,j);
         }
-        C(i,j) += impl::real_part(A(i,i)) * B(i,j);
+        C(i,j) += impl::real_if_needed(A(i,i)) * B(i,j);
         for (size_type k = i+1; k < A.extent(1); ++k) {
           C(i,j) += A(i,k) * B(k,j);
         }

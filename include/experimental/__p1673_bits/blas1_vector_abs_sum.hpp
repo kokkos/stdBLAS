@@ -87,8 +87,8 @@ Scalar vector_abs_sum(
   using value_type = typename decltype(v)::value_type;
   using sum_type =
     decltype(init +
-             impl::abs_if_needed(impl::real_part(std::declval<value_type>())) +
-             impl::abs_if_needed(impl::imag_part(std::declval<value_type>())));
+             impl::abs_if_needed(impl::real_if_needed(std::declval<value_type>())) +
+             impl::abs_if_needed(impl::imag_if_needed(std::declval<value_type>())));
   static_assert(std::is_convertible_v<sum_type, Scalar>);
   // TODO Implement the Remarks in para 4.
   
@@ -100,8 +100,8 @@ Scalar vector_abs_sum(
   }
   else {
     for (SizeType i = 0; i < numElt; ++i) {
-      init += impl::abs_if_needed(impl::real_part(v(i)));
-      init += impl::abs_if_needed(impl::imag_part(v(i)));
+      init += impl::abs_if_needed(impl::real_if_needed(v(i)));
+      init += impl::abs_if_needed(impl::imag_if_needed(v(i)));
     }
   }
 

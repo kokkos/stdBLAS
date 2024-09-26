@@ -80,7 +80,7 @@ Scalar dot(kokkos_exec<ExeSpace>,
 	   ElementType_x,
 	   std::experimental::extents<ext_x>,
 	   Layout_x,
-	   std::experimental::linalg::conjugate_accessor<
+	   std::experimental::linalg::conjugated_accessor<
 	   std::experimental::default_accessor<ElementType_x>, ElementType_x
 	   >
 	   > x,
