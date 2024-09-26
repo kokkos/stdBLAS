@@ -84,11 +84,27 @@ Scalar vector_abs_sum(
   mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> v,
   Scalar init)
 {
+  using value_type = typename decltype(v)::value_type;
+  using sum_type =
+    decltype(init +
+             impl::abs_if_needed(impl::real_part(std::declval<value_type>())) +
+             impl::abs_if_needed(impl::imag_part(std::declval<value_type>())));
+  static_assert(std::is_convertible_v<sum_type, Scalar>);
+  // TODO Implement the Remarks in para 4.
+  
   const SizeType numElt = v.extent(0);
-  for (SizeType i = 0; i < numElt; ++i) {
-    using std::abs;
-    init += abs(v(i));
+  if constexpr (std::is_arithmetic_v<value_type>) {
+    for (SizeType i = 0; i < numElt; ++i) {
+      init += impl::abs_if_needed(v(i));
+    }
   }
+  else {
+    for (SizeType i = 0; i < numElt; ++i) {
+      init += impl::abs_if_needed(impl::real_part(v(i)));
+      init += impl::abs_if_needed(impl::imag_part(v(i)));
+    }
+  }
+
   return init;
 }
 
