@@ -1,50 +1,311 @@
 #include "./gtest_fixtures.hpp"
 
-#include <experimental/linalg>
-
 namespace {
-  using std::experimental::linalg::conjugated;
+  using LinearAlgebra::conjugated;
+  using LinearAlgebra::conjugated_accessor;
 
-  template<class ValueType>
-  void test_conjugate_accessor_element_constification()
+  // A clone of default_accessor, which we use to test the return type of conjugated.
+  template<class ElementType>
+  class nondefault_accessor {
+  public:
+    using reference        = ElementType&;
+    using element_type     = ElementType;
+    using data_handle_type = ElementType*;
+    using offset_policy    = nondefault_accessor<ElementType>;
+
+    constexpr nondefault_accessor() noexcept = default;
+    MDSPAN_TEMPLATE_REQUIRES(
+      class OtherElementType,
+      /* requires */ (std::is_convertible_v<OtherElementType(*)[], element_type(*)[]>)
+    )
+    nondefault_accessor(nondefault_accessor<OtherElementType> /* accessor */) noexcept
+    {}
+
+    reference access(data_handle_type p, ::std::size_t i) const noexcept
+    {
+      return p[i];
+    }
+
+    typename offset_policy::data_handle_type
+      offset(data_handle_type p, ::std::size_t i) const noexcept
+    {
+      return p + i;
+    }
+  };
+
+  TEST(conjugated, real_default_accessor)
   {
-    using std::experimental::linalg::conjugate_accessor;
-    using std::experimental::default_accessor;
-    using value_type = std::remove_cv_t<ValueType>;
-    constexpr bool is_arith = std::is_arithmetic_v<value_type>;
+    std::array<float, 3> x_storage{};
+    using extents_type = extents<int, 3>;
+    using layout_type = layout_right;
 
-    using nc_def_acc_type = default_accessor<value_type>;
-    using c_def_acc_type = default_accessor<const value_type>;
-    nc_def_acc_type nc_acc;
-    c_def_acc_type c_acc;
-
-    using aj_nc_type = conjugate_accessor<nc_def_acc_type>;
-    using expected_nc_ref = value_type; // conjugate_accessor's reference type is its element_type
-    static_assert(std::is_same_v<expected_nc_ref, typename aj_nc_type::reference>);
-    using expected_nc_elt = value_type;
-    static_assert(std::is_same_v<expected_nc_elt, typename aj_nc_type::element_type>);
-    static_assert(std::is_same_v<typename aj_nc_type::data_handle_type, value_type*>);
-
-    using aj_c_type = conjugate_accessor<c_def_acc_type>;
-    using expected_c_ref = value_type; // conjugate_accessor's reference type is its element_type
-    static_assert(std::is_same_v<expected_c_ref, typename aj_c_type::reference>);
-    using expected_c_elt = value_type;
-    static_assert(std::is_same_v<expected_c_elt, typename aj_c_type::element_type>);
-    static_assert(std::is_same_v<typename aj_c_type::data_handle_type, const value_type*>);
-
-    aj_nc_type acc_conj_nc(nc_acc);
-    aj_c_type acc_conj_c0(c_acc);
-
-    // Test element_type constification (converting) constructor
-    aj_c_type acc_conj_c1(nc_acc);
+    {
+      using input_accessor_type = default_accessor<float>;
+      using expected_accessor_type = default_accessor<float>;
+      mdspan<float, extents_type, layout_type, input_accessor_type> x_nc{x_storage.data()};
+      auto x_nc_conj = conjugated(x_nc);
+      static_assert(std::is_same_v<decltype(x_nc_conj),
+                    mdspan<float, extents_type, layout_type, expected_accessor_type>>);
+      EXPECT_EQ(x_nc_conj.mapping(), x_nc.mapping());
+    }
+    {
+      using input_accessor_type = default_accessor<const float>;
+      using expected_accessor_type = default_accessor<const float>;
+      mdspan<const float, extents_type, layout_type, input_accessor_type> x_c{x_storage.data()};
+      auto x_c_conj = conjugated(x_c);
+      static_assert(std::is_same_v<decltype(x_c_conj),
+                    mdspan<const float, extents_type, layout_type, expected_accessor_type>>);
+      EXPECT_EQ(x_c_conj.mapping(), x_c.mapping());
+    }
   }
 
-  TEST(conjugate_accessor, element_constification)
+  TEST(conjugated, real_nondefault_accessor)
   {
-    test_conjugate_accessor_element_constification<double>();
-    test_conjugate_accessor_element_constification<int>();
-    test_conjugate_accessor_element_constification<std::complex<double>>();
-    test_conjugate_accessor_element_constification<std::complex<float>>();
+    std::array<float, 3> x_storage{};
+    using extents_type = extents<int, 3>;
+    using layout_type = layout_right;
+
+    {
+      using input_accessor_type = nondefault_accessor<float>;
+      // Implementation currently is more like P3050R0 than P1673R13.
+      using expected_accessor_type = nondefault_accessor<float>;
+      mdspan<float, extents_type, layout_type, input_accessor_type> x_nc{x_storage.data()};
+      auto x_nc_conj = conjugated(x_nc);
+      static_assert(std::is_same_v<decltype(x_nc_conj),
+                    mdspan<float, extents_type, layout_type, expected_accessor_type>>);
+      EXPECT_EQ(x_nc_conj.mapping(), x_nc.mapping());
+    }
+    {
+      using input_accessor_type = nondefault_accessor<const float>;
+      // Implementation currently is more like P3050R0 than P1673R13.
+      using expected_accessor_type = nondefault_accessor<const float>;
+      mdspan<const float, extents_type, layout_type, input_accessor_type> x_c{x_storage.data()};
+      auto x_c_conj = conjugated(x_c);
+      static_assert(std::is_same_v<decltype(x_c_conj),
+                    mdspan<const float, extents_type, layout_type, expected_accessor_type>>);
+      EXPECT_EQ(x_c_conj.mapping(), x_c.mapping());
+    }
+  }
+
+  struct nonarithmetic_real {};
+
+  // P3050 changes the behavior of conjugated for nonarithmetic "real" types.
+  // "Real" means "types T for which conj<std::declval<T>()) is not ADL-findable."
+  TEST(conjugated, nonarithmetic_real_default_accessor)
+  {
+    using value_type = nonarithmetic_real;
+    std::array<value_type, 3> x_storage{};
+    using extents_type = extents<int, 3>;
+    using layout_type = layout_right;
+
+    {
+      using input_accessor_type = default_accessor<value_type>;
+      mdspan<value_type, extents_type, layout_type, input_accessor_type> x_nc{x_storage.data()};
+      auto x_nc_conj = conjugated(x_nc);
+
+      using expected_accessor_type = conjugated_accessor<default_accessor<value_type>>;
+      using expected_element_type = std::add_const_t<value_type>;
+      static_assert(std::is_same_v<decltype(x_nc_conj),
+                    mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>>);
+      EXPECT_EQ(x_nc_conj.mapping(), x_nc.mapping());
+    }
+    {
+      using input_accessor_type = default_accessor<const value_type>;
+      mdspan<const value_type, extents_type, layout_type, input_accessor_type> x_c{x_storage.data()};
+      auto x_c_conj = conjugated(x_c);
+
+      using expected_accessor_type = conjugated_accessor<default_accessor<const value_type>>;
+      using expected_element_type = std::add_const_t<value_type>;
+      static_assert(std::is_same_v<decltype(x_c_conj),
+                    mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>>);
+      EXPECT_EQ(x_c_conj.mapping(), x_c.mapping());
+    }
+  }
+
+  // P3050 changes the behavior of conjugated for nonarithmetic "real" types.
+  // "Real" means "types T for which conj<std::declval<T>()) is not ADL-findable."
+  TEST(conjugated, nonarithmetic_real_nondefault_accessor)
+  {
+    using value_type = nonarithmetic_real;
+    std::array<value_type, 3> x_storage{};
+    using extents_type = extents<int, 3>;
+    using layout_type = layout_right;
+
+    {
+      using input_accessor_type = nondefault_accessor<value_type>;
+      mdspan<value_type, extents_type, layout_type, input_accessor_type> x_nc{x_storage.data()};
+      auto x_nc_conj = conjugated(x_nc);
+
+      using expected_accessor_type = conjugated_accessor<nondefault_accessor<value_type>>;
+      using expected_element_type = std::add_const_t<value_type>;
+      static_assert(std::is_same_v<decltype(x_nc_conj),
+                    mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>>);
+      EXPECT_EQ(x_nc_conj.mapping(), x_nc.mapping());
+    }
+    {
+      using input_accessor_type = nondefault_accessor<const value_type>;
+      mdspan<const value_type, extents_type, layout_type, input_accessor_type> x_c{x_storage.data()};
+      auto x_c_conj = conjugated(x_c);
+
+      using expected_accessor_type = conjugated_accessor<nondefault_accessor<const value_type>>;
+      using expected_element_type = std::add_const_t<value_type>;
+      static_assert(std::is_same_v<decltype(x_c_conj),
+                    mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>>);
+      EXPECT_EQ(x_c_conj.mapping(), x_c.mapping());
+    }
+  }
+
+  TEST(conjugated, complex_default_accessor)
+  {
+    using value_type = std::complex<double>;
+    std::array<value_type, 3> x_storage{};
+    using extents_type = extents<int, 3>;
+    using layout_type = layout_right;
+
+    {
+      using input_accessor_type = default_accessor<value_type>;
+      mdspan<value_type, extents_type, layout_type, input_accessor_type> x_nc{x_storage.data()};
+      auto x_nc_conj = conjugated(x_nc);
+
+      using expected_accessor_type = conjugated_accessor<default_accessor<value_type>>;
+      using expected_element_type = std::add_const_t<value_type>;
+      static_assert(std::is_same_v<decltype(x_nc_conj),
+        mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>>);
+      EXPECT_EQ(x_nc_conj.mapping(), x_nc.mapping());
+      static_assert(std::is_same_v<decltype(x_nc_conj.accessor().nested_accessor()), const input_accessor_type&>);
+    }
+    {
+      using input_accessor_type = default_accessor<const value_type>;
+      mdspan<const value_type, extents_type, layout_type, input_accessor_type> x_c{x_storage.data()};
+      auto x_c_conj = conjugated(x_c);
+
+      using expected_accessor_type = conjugated_accessor<default_accessor<const value_type>>;
+      using expected_element_type = std::add_const_t<value_type>;
+      static_assert(std::is_same_v<decltype(x_c_conj),
+        mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>>);
+      EXPECT_EQ(x_c_conj.mapping(), x_c.mapping());
+      static_assert(std::is_same_v<decltype(x_c_conj.accessor().nested_accessor()), const input_accessor_type&>);
+    }
+  }
+
+  TEST(conjugated, complex_nondefault_accessor)
+  {
+    using value_type = std::complex<double>;
+    std::array<value_type, 3> x_storage{};
+    using extents_type = extents<int, 3>;
+    using layout_type = layout_right;
+
+    {
+      using input_accessor_type = nondefault_accessor<value_type>;
+      mdspan<value_type, extents_type, layout_type, input_accessor_type> x_nc{x_storage.data()};
+      auto x_nc_conj = conjugated(x_nc);
+
+      using expected_accessor_type = conjugated_accessor<nondefault_accessor<value_type>>;
+      using expected_element_type = std::add_const_t<value_type>;
+      static_assert(std::is_same_v<decltype(x_nc_conj),
+        mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>>);
+      EXPECT_EQ(x_nc_conj.mapping(), x_nc.mapping());
+      static_assert(std::is_same_v<decltype(x_nc_conj.accessor().nested_accessor()), const input_accessor_type&>);
+    }
+    {
+      using input_accessor_type = nondefault_accessor<const value_type>;
+      mdspan<const value_type, extents_type, layout_type, input_accessor_type> x_c{x_storage.data()};
+      auto x_c_conj = conjugated(x_c);
+
+      using expected_accessor_type = conjugated_accessor<nondefault_accessor<const value_type>>;
+      using expected_element_type = std::add_const_t<value_type>;
+      static_assert(std::is_same_v<decltype(x_c_conj),
+        mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>>);
+      EXPECT_EQ(x_c_conj.mapping(), x_c.mapping());
+      static_assert(std::is_same_v<decltype(x_c_conj.accessor().nested_accessor()), const input_accessor_type&>);
+    }
+  }
+
+  struct custom_complex {
+    friend custom_complex conj(const custom_complex& z) {
+      return z;
+    }
+  };
+
+  TEST(conjugated, impl_has_conj)
+  {
+    using MDSPAN_IMPL_STANDARD_NAMESPACE :: MDSPAN_IMPL_PROPOSED_NAMESPACE :: linalg::impl::has_conj;
+
+    static_assert(! has_conj<int>::value);
+    static_assert(! has_conj< ::std::size_t>::value);
+    static_assert(! has_conj<float>::value);
+    static_assert(! has_conj<double>::value);
+    static_assert(! has_conj<nonarithmetic_real>::value);
+
+    static_assert(has_conj<std::complex<float>>::value);
+    static_assert(has_conj<std::complex<double>>::value);
+    static_assert(has_conj<custom_complex>::value);
+  }
+
+  TEST(conjugated, custom_complex_default_accessor)
+  {
+    using value_type = custom_complex;
+    std::array<value_type, 3> x_storage{};
+    using extents_type = extents<int, 3>;
+    using layout_type = layout_right;
+
+    {
+      using input_accessor_type = default_accessor<value_type>;
+      mdspan<value_type, extents_type, layout_type, input_accessor_type> x_nc{x_storage.data()};
+      auto x_nc_conj = conjugated(x_nc);
+
+      using expected_accessor_type = conjugated_accessor<default_accessor<value_type>>;
+      using expected_element_type = std::add_const_t<value_type>;
+      static_assert(std::is_same_v<decltype(x_nc_conj),
+        mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>>);
+      EXPECT_EQ(x_nc_conj.mapping(), x_nc.mapping());
+      static_assert(std::is_same_v<decltype(x_nc_conj.accessor().nested_accessor()), const input_accessor_type&>);
+    }
+    {
+      using input_accessor_type = default_accessor<const value_type>;
+      mdspan<const value_type, extents_type, layout_type, input_accessor_type> x_c{x_storage.data()};
+      auto x_c_conj = conjugated(x_c);
+
+      using expected_accessor_type = conjugated_accessor<default_accessor<const value_type>>;
+      using expected_element_type = std::add_const_t<value_type>;
+      static_assert(std::is_same_v<decltype(x_c_conj),
+        mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>>);
+      EXPECT_EQ(x_c_conj.mapping(), x_c.mapping());
+      static_assert(std::is_same_v<decltype(x_c_conj.accessor().nested_accessor()), const input_accessor_type&>);
+    }
+  }
+
+  TEST(conjugated, custom_complex_nondefault_accessor)
+  {
+    using value_type = custom_complex;
+    std::array<value_type, 3> x_storage{};
+    using extents_type = extents<int, 3>;
+    using layout_type = layout_right;
+
+    {
+      using input_accessor_type = nondefault_accessor<value_type>;
+      mdspan<value_type, extents_type, layout_type, input_accessor_type> x_nc{x_storage.data()};
+      auto x_nc_conj = conjugated(x_nc);
+
+      using expected_accessor_type = conjugated_accessor<nondefault_accessor<value_type>>;
+      using expected_element_type = std::add_const_t<value_type>;
+      static_assert(std::is_same_v<decltype(x_nc_conj),
+        mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>>);
+      EXPECT_EQ(x_nc_conj.mapping(), x_nc.mapping());
+      static_assert(std::is_same_v<decltype(x_nc_conj.accessor().nested_accessor()), const input_accessor_type&>);
+    }
+    {
+      using input_accessor_type = nondefault_accessor<const value_type>;
+      mdspan<const value_type, extents_type, layout_type, input_accessor_type> x_c{x_storage.data()};
+      auto x_c_conj = conjugated(x_c);
+
+      using expected_accessor_type = conjugated_accessor<nondefault_accessor<const value_type>>;
+      using expected_element_type = std::add_const_t<value_type>;
+      static_assert(std::is_same_v<decltype(x_c_conj),
+        mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>>);
+      EXPECT_EQ(x_c_conj.mapping(), x_c.mapping());
+      static_assert(std::is_same_v<decltype(x_c_conj.accessor().nested_accessor()), const input_accessor_type&>);
+    }
   }
 
   TEST(conjugated, mdspan_complex_double)
@@ -67,11 +328,10 @@ namespace {
       y(k) = y_k;
     }
 
-    // Make sure that conjugate_accessor compiles
+    // Make sure that conjugated_accessor compiles
     {
       using accessor_t = vector_t::accessor_type;
-      using std::experimental::linalg::conjugate_accessor;
-      using accessor_conj_t = conjugate_accessor<accessor_t>;
+      using accessor_conj_t = conjugated_accessor<accessor_t>;
       accessor_conj_t acc{y.accessor()};
     }
 

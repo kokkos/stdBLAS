@@ -43,51 +43,52 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATED_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATED_HPP_
 
-#include <experimental/mdspan>
+#include <mdspan/mdspan.hpp>
 
-namespace std {
-namespace experimental {
+namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
+namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
-template<class Accessor>
-class conjugate_accessor {
+template<class NestedAccessor>
+class conjugated_accessor {
 private:
-  Accessor accessor_;
-
+  using nested_element_type = typename NestedAccessor::element_type;
+  using nc_result_type = decltype(impl::conj_if_needed(std::declval<nested_element_type>()));
 public:
-  using element_type = decltype(impl::conj_if_needed(std::declval<typename Accessor::element_type>()));
-  using reference = element_type;
-  using data_handle_type = typename Accessor::data_handle_type;
-  using offset_policy = conjugate_accessor<typename Accessor::offset_policy>;
+  using element_type = std::add_const_t<nc_result_type>;
+  using reference = std::remove_const_t<element_type>;
+  using data_handle_type = typename NestedAccessor::data_handle_type;
+  using offset_policy =
+    conjugated_accessor<typename NestedAccessor::offset_policy>;
 
-  conjugate_accessor(const Accessor& accessor) :
-    accessor_(accessor)
-  {}
+  constexpr conjugated_accessor() = default;
+  constexpr conjugated_accessor(const NestedAccessor& acc) : nested_accessor_(acc) {}
 
   MDSPAN_TEMPLATE_REQUIRES(
     class OtherNestedAccessor,
-    /* requires */ (
-      std::is_constructible_v<Accessor, const OtherNestedAccessor&>
-    )
+    /* requires */ (std::is_convertible_v<NestedAccessor, const OtherNestedAccessor&>)
   )
-  conjugate_accessor(const conjugate_accessor<OtherNestedAccessor>& other) :
-    accessor_(other.nested_accessor())
+  constexpr conjugated_accessor(const conjugated_accessor<OtherNestedAccessor>& other)
+    : nested_accessor_(other.nested_accessor())
   {}
 
-  reference access(data_handle_type p, ::std::size_t i) const
-    noexcept(noexcept(impl::conj_if_needed(typename Accessor::element_type(accessor_.access(p, i)))))
+  constexpr reference
+    access(data_handle_type p, ::std::size_t i) const noexcept
   {
-    return impl::conj_if_needed(typename Accessor::element_type(accessor_.access(p, i)));
+    return impl::conj_if_needed(nested_element_type(nested_accessor_.access(p, i)));
   }
 
-  typename offset_policy::data_handle_type offset(data_handle_type p, ::std::size_t i) const
-    noexcept(noexcept(accessor_.offset(p, i)))
+  constexpr typename offset_policy::data_handle_type
+    offset(data_handle_type p, ::std::size_t i) const noexcept
   {
-    return accessor_.offset(p, i);
+    return nested_accessor_.offset(p, i);
   }
 
-  Accessor nested_accessor() const { return accessor_; }
+  const NestedAccessor& nested_accessor() const noexcept { return nested_accessor_; }
+
+private:
+  NestedAccessor nested_accessor_;
 };
 
 template<class ElementType, class Extents, class Layout, class Accessor>
@@ -98,8 +99,8 @@ auto conjugated(mdspan<ElementType, Extents, Layout, Accessor> a)
       (a.data_handle(), a.mapping(), a.accessor());
   } else {
     using return_element_type =
-      typename conjugate_accessor<Accessor>::element_type;
-    using return_accessor_type = conjugate_accessor<Accessor>;
+      typename conjugated_accessor<Accessor>::element_type;
+    using return_accessor_type = conjugated_accessor<Accessor>;
     return mdspan<return_element_type, Extents, Layout, return_accessor_type>
       (a.data_handle(), a.mapping(), return_accessor_type(a.accessor()));
   }
@@ -108,7 +109,7 @@ auto conjugated(mdspan<ElementType, Extents, Layout, Accessor> a)
 // Conjugation is self-annihilating
 template<class ElementType, class Extents, class Layout, class NestedAccessor>
 auto conjugated(
-  mdspan<ElementType, Extents, Layout, conjugate_accessor<NestedAccessor>> a)
+  mdspan<ElementType, Extents, Layout, conjugated_accessor<NestedAccessor>> a)
 {
   using return_element_type = typename NestedAccessor::element_type;
   using return_accessor_type = NestedAccessor;
@@ -118,7 +119,7 @@ auto conjugated(
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
-} // end namespace experimental
-} // end namespace std
+} // end namespace MDSPAN_IMPL_PROPOSED_NAMESPACE
+} // end namespace MDSPAN_IMPL_STANDARD_NAMESPACE
 
 #endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_CONJUGATED_HPP_

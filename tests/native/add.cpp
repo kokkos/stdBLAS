@@ -1,11 +1,7 @@
 #include "./gtest_fixtures.hpp"
 
-#include <experimental/linalg>
-#include <array>
-#include <vector>
-
 namespace {
-  using std::experimental::linalg::add;
+  using LinearAlgebra::add;
 
   TEST(BLAS1_add, vector_double)
   {

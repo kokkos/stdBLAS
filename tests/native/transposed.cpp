@@ -1,16 +1,18 @@
 #include "./gtest_fixtures.hpp"
-
-#include <experimental/linalg>
 #include <type_traits>
 
 namespace {
-  using std::experimental::linalg::transposed;
+  using LinearAlgebra::layout_transpose;
+  using LinearAlgebra::transposed;
+  using MdSpan::layout_left;
+  using MdSpan::layout_right;
+  using MdSpan::layout_stride;
 
   template<std::size_t ext0, std::size_t ext1>
   void test_transpose_extents()
   {
-    using std::experimental::linalg::impl::transpose_extents_t;
-    using std::experimental::linalg::impl::transpose_extents;
+    using LinearAlgebra::impl::transpose_extents_t;
+    using LinearAlgebra::impl::transpose_extents;
 
     using extents_type = extents<std::size_t, ext0, ext1>;
     using expected_transpose_extents_type = extents<std::size_t, ext1, ext0>;
@@ -65,8 +67,6 @@ namespace {
   template<std::size_t ext0, std::size_t ext1>
   void test_layout_transpose()
   {
-    using std::experimental::linalg::layout_transpose;
-    using std::experimental::layout_left;
     using extents_type = extents<std::size_t, ext0, ext1>;
     using mapping_type = typename layout_transpose<layout_left>::mapping<extents_type>;
   }
@@ -79,6 +79,124 @@ namespace {
     test_layout_transpose<dynamic_extent, 3>();
     test_layout_transpose<3, dynamic_extent>();
     test_layout_transpose<dynamic_extent, dynamic_extent>();
+  }
+
+  template<class InputLayoutMapping, class ExpectedLayoutMapping>
+  void test_transposed_layout(const InputLayoutMapping& in,
+                              const ExpectedLayoutMapping& out_expected,
+                              std::vector<char>& fake_storage)
+  {
+    using LinearAlgebra::impl::transpose_extents_t;
+    using LinearAlgebra::impl::transpose_extents;
+
+    ASSERT_EQ(in.extents().rank(), 2u);
+    ASSERT_EQ(out_expected.extents().rank(), 2u);
+
+    const size_t required_bytes = in.required_span_size();
+    if (fake_storage.size() < required_bytes) {
+      fake_storage.resize(required_bytes);
+    }
+    mdspan in_md{fake_storage.data(), in};
+
+    auto out_md = transposed(in_md);
+    auto out = out_md.mapping();
+    static_assert(std::is_same_v<decltype(out), ExpectedLayoutMapping>);
+    EXPECT_EQ(out.extents(), out_expected.extents());
+    EXPECT_EQ(out.is_exhaustive(), out_expected.is_exhaustive());
+    EXPECT_EQ(out.is_unique(), out_expected.is_unique());
+    ASSERT_EQ(out.is_strided(), out_expected.is_strided());
+    if (out_expected.is_strided()) {
+      for (size_t r = 0; r < 2u; ++r) {
+        out.stride(r) == out_expected.stride(r);
+      }
+    }
+  }
+
+  TEST(transposed_layout, layout_left)
+  {
+    auto test_one = [] (auto in_exts, auto out_exts, std::vector<char>& fake_storage) {
+      layout_left::mapping in_map{in_exts};
+      layout_right::mapping out_map{out_exts};
+      test_transposed_layout(in_map, out_map, fake_storage);
+    };
+
+    std::vector<char> storage;
+    {
+      using in_extents_type = extents<int, 3, 4>;
+      using out_extents_type = extents<int, 4, 3>;
+      test_one(in_extents_type{}, out_extents_type{}, storage);
+    }
+    {
+      using in_extents_type = extents<int, 3, dynamic_extent>;
+      using out_extents_type = extents<int, dynamic_extent, 3>;
+      test_one(in_extents_type{4}, out_extents_type{4}, storage);
+    }
+    {
+      using in_extents_type = extents<int, dynamic_extent, dynamic_extent>;
+      using out_extents_type = extents<int, dynamic_extent, dynamic_extent>;
+      test_one(in_extents_type{3, 4}, out_extents_type{4, 3}, storage);
+    }
+  }
+
+  TEST(transposed_layout, layout_right)
+  {
+    auto test_one = [] (auto in_exts, auto out_exts, std::vector<char>& fake_storage) {
+      layout_right::mapping in_map{in_exts};
+      layout_left::mapping out_map{out_exts};
+      test_transposed_layout(in_map, out_map, fake_storage);
+    };
+
+    std::vector<char> storage;
+    {
+      using in_extents_type = extents<int, 3, 4>;
+      using out_extents_type = extents<int, 4, 3>;
+      test_one(in_extents_type{}, out_extents_type{}, storage);
+    }
+    {
+      using in_extents_type = extents<int, 3, dynamic_extent>;
+      using out_extents_type = extents<int, dynamic_extent, 3>;
+      test_one(in_extents_type{4}, out_extents_type{4}, storage);
+    }
+    {
+      using in_extents_type = extents<int, dynamic_extent, dynamic_extent>;
+      using out_extents_type = extents<int, dynamic_extent, dynamic_extent>;
+      test_one(in_extents_type{3, 4}, out_extents_type{4, 3}, storage);
+    }
+  }
+
+  TEST(transposed_layout, layout_stride)
+  {
+    auto test_one = [] (auto in_exts, auto out_exts, std::vector<char>& fake_storage) {
+      using index_type = decltype(in_exts.extent(0));
+      const std::array<index_type, 2> in_strides{
+        static_cast<index_type>(2),
+        static_cast<index_type>((in_exts.extent(0) + 1) * 2)
+      };
+      const std::array<index_type, 2> out_strides{
+        in_strides[1],
+        in_strides[0]
+      };
+      layout_stride::mapping in_map{in_exts, in_strides};
+      layout_stride::mapping out_map{out_exts, out_strides};
+      test_transposed_layout(in_map, out_map, fake_storage);
+    };
+
+    std::vector<char> storage;
+    {
+      using in_extents_type = extents<int, 3, 4>;
+      using out_extents_type = extents<int, 4, 3>;
+      test_one(in_extents_type{}, out_extents_type{}, storage);
+    }
+    {
+      using in_extents_type = extents<int, 3, dynamic_extent>;
+      using out_extents_type = extents<int, dynamic_extent, 3>;
+      test_one(in_extents_type{4}, out_extents_type{4}, storage);
+    }
+    {
+      using in_extents_type = extents<int, dynamic_extent, dynamic_extent>;
+      using out_extents_type = extents<int, dynamic_extent, dynamic_extent>;
+      test_one(in_extents_type{3, 4}, out_extents_type{4, 3}, storage);
+    }
   }
 
   TEST(transposed, mdspan_double)
@@ -112,8 +230,6 @@ namespace {
     }
 
     auto A_t = transposed (A);
-    using std::experimental::layout_left;
-    using std::experimental::layout_right;
     static_assert(std::is_same_v<decltype(A)::layout_type, layout_right>);
     static_assert(std::is_same_v<decltype(A_t)::layout_type, layout_left>);
     EXPECT_EQ(A_t.extent(0), A.extent(1));
@@ -140,12 +256,10 @@ namespace {
       }
     }
 
-    using std::experimental::submdspan;
     constexpr std::size_t subdim = 4;
     const std::pair<std::size_t, std::size_t> sub(0, subdim);
     auto A_sub = submdspan(A, sub, sub);
-    using std::experimental::layout_stride;
-    static_assert(std::is_same_v<decltype(A_sub)::layout_type, layout_stride>);
+    static_assert(std::is_same_v<decltype(A_sub)::layout_type, layout_right_padded<dynamic_extent>>);
     ASSERT_EQ( A_sub.rank(), std::size_t(2) );
     ASSERT_EQ( A_sub.extent(0), subdim );
     ASSERT_EQ( A_sub.extent(1), subdim );

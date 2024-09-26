@@ -43,8 +43,8 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_LINALG_COPY_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_LINALG_COPY_HPP_
 
-namespace std {
-namespace experimental {
+namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
+namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
@@ -61,8 +61,8 @@ template<class ElementType_x,
          class Layout_y,
          class Accessor_y>
 void copy_rank_1(
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
 {
   static_assert(x.static_extent(0) == dynamic_extent ||
                 y.static_extent(0) == dynamic_extent ||
@@ -86,8 +86,8 @@ template<class ElementType_x,
          class Layout_y,
          class Accessor_y>
 void copy_rank_2(
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, numRows_x, numCols_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, numRows_y, numCols_y>, Layout_y, Accessor_y> y)
+  mdspan<ElementType_x, extents<SizeType_x, numRows_x, numCols_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, numRows_y, numCols_y>, Layout_y, Accessor_y> y)
 {
   static_assert(x.static_extent(0) == dynamic_extent ||
                 y.static_extent(0) == dynamic_extent ||
@@ -118,7 +118,7 @@ struct is_custom_copy_avail<
 		)
 	       )
       >
-    && !linalg::impl::is_inline_exec_v<Exec>
+    && ! impl::is_inline_exec_v<Exec>
     >
   >
   : std::true_type{};
@@ -140,9 +140,9 @@ MDSPAN_TEMPLATE_REQUIRES(
          /* requires */ (sizeof...(ext_x) == sizeof...(ext_y) && sizeof...(ext_x) <= 2)
 )
 void copy(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y)
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType_x, extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y)
 {
   if constexpr (x.rank() == 1) {
     copy_rank_1(x, y);
@@ -168,20 +168,18 @@ MDSPAN_TEMPLATE_REQUIRES(
 )
 void copy(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y)
 {
-
   constexpr bool use_custom = is_custom_copy_avail<
-    decltype(execpolicy_mapper(exec)), decltype(x), decltype(y)
+    decltype(impl::map_execpolicy_with_check(exec)), decltype(x), decltype(y)
     >::value;
 
-  if constexpr(use_custom){
-    copy(execpolicy_mapper(exec), x, y);
+  if constexpr (use_custom) {
+    copy(impl::map_execpolicy_with_check(exec), x, y);
   }
-  else
-  {
-    copy(std::experimental::linalg::impl::inline_exec_t(), x, y);
+  else {
+    copy(impl::inline_exec_t{}, x, y);
   }
 }
 
@@ -199,15 +197,15 @@ MDSPAN_TEMPLATE_REQUIRES(
          /* requires */ (sizeof...(ext_x) == sizeof...(ext_y))
 )
 void copy(
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y)
 {
-  copy(std::experimental::linalg::impl::default_exec_t(), x, y);
+  copy(impl::default_exec_t(), x, y);
 }
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
-} // end namespace experimental
-} // end namespace std
+} // end namespace MDSPAN_IMPL_PROPOSED_NAMESPACE
+} // end namespace MDSPAN_IMPL_STANDARD_NAMESPACE
 
 #endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_LINALG_COPY_HPP_

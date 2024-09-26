@@ -46,8 +46,8 @@
 #include <cmath>
 #include <cstdlib>
 
-namespace std {
-namespace experimental {
+namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
+namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
@@ -70,7 +70,7 @@ struct is_custom_matrix_frob_norm_avail<
 	       ),
       Scalar
       >::value
-    && !linalg::impl::is_inline_exec_v<Exec>
+    && ! impl::is_inline_exec_v<Exec>
     >
   >
   : std::true_type{};
@@ -85,8 +85,8 @@ template<
     class Accessor,
     class Scalar>
 Scalar matrix_frob_norm(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A,
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType, extents<SizeType, numRows, numCols>, Layout, Accessor> A,
   Scalar init)
 {
   using std::abs;
@@ -135,19 +135,18 @@ template<class ExecutionPolicy,
   class Scalar>
 Scalar matrix_frob_norm(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A,
+  mdspan<ElementType, extents<SizeType, numRows, numCols>, Layout, Accessor> A,
   Scalar init)
 {
-
   constexpr bool use_custom = is_custom_matrix_frob_norm_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), Scalar
+    decltype(impl::map_execpolicy_with_check(exec)), decltype(A), Scalar
     >::value;
 
-  if constexpr(use_custom){
-    return matrix_frob_norm(execpolicy_mapper(exec), A, init);
+  if constexpr (use_custom) {
+    return matrix_frob_norm(impl::map_execpolicy_with_check(exec), A, init);
   }
-  else{
-    return matrix_frob_norm(std::experimental::linalg::impl::inline_exec_t(), A, init);
+  else {
+    return matrix_frob_norm(impl::inline_exec_t(), A, init);
   }
 }
 
@@ -160,19 +159,17 @@ template<
     class Accessor,
     class Scalar>
 Scalar matrix_frob_norm(
-  std::experimental::mdspan<
+  mdspan<
     ElementType,
-    std::experimental::extents<SizeType, numRows, numCols>,
+    extents<SizeType, numRows, numCols>,
     Layout,
     Accessor> A,
   Scalar init)
 {
-  return matrix_frob_norm(std::experimental::linalg::impl::default_exec_t(), A, init);
+  return matrix_frob_norm(impl::default_exec_t{}, A, init);
 }
 
-namespace matrix_frob_norm_detail
-{
-
+namespace matrix_frob_norm_detail {
   // The point of this is to do correct ADL for abs,
   // without exposing "using std::abs" in the outer namespace.
   using std::abs;
@@ -182,9 +179,9 @@ namespace matrix_frob_norm_detail
     class Layout,
     class Accessor>
   auto matrix_frob_norm_return_type_deducer(
-    std::experimental::mdspan<
+    mdspan<
       ElementType,
-      std::experimental::extents<SizeType, numRows, numCols>,
+      extents<SizeType, numRows, numCols>,
       Layout,
       Accessor
     > A) -> decltype( abs(A(0,0)) * abs(A(0,0)) );
@@ -199,8 +196,8 @@ template<
   class Layout,
   class Accessor>
 auto matrix_frob_norm(
-  std::experimental::mdspan<
-    ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor
+  mdspan<
+    ElementType, extents<SizeType, numRows, numCols>, Layout, Accessor
   > A)
   -> decltype(matrix_frob_norm_detail::matrix_frob_norm_return_type_deducer(A))
 {
@@ -218,9 +215,9 @@ template<
   class Accessor>
 auto matrix_frob_norm(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<
+  mdspan<
     ElementType,
-    std::experimental::extents<SizeType, numRows, numCols>,
+    extents<SizeType, numRows, numCols>,
     Layout,
     Accessor
   > A)
@@ -232,7 +229,7 @@ auto matrix_frob_norm(
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
-} // end namespace experimental
-} // end namespace std
+} // end namespace MDSPAN_IMPL_PROPOSED_NAMESPACE
+} // end namespace MDSPAN_IMPL_STANDARD_NAMESPACE
 
 #endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_MATRIX_FROB_NORM_HPP_

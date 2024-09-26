@@ -1,15 +1,14 @@
 #include "./gtest_fixtures.hpp"
-
-#include <experimental/linalg>
 #include <type_traits>
 
 namespace {
-  using std::experimental::linalg::scaled;
+  using LinearAlgebra::scaled;
 
   template<class ScalingFactor, class OriginalValueType>
   void test_scaled_accessor_element_constification()
   {
-    using std::experimental::linalg::scaled_accessor;
+    using LinearAlgebra::accessor_scaled;
+    using LinearAlgebra::scaled_scalar;
 
     using nc_def_acc_type = default_accessor<OriginalValueType>;
     using c_def_acc_type =
@@ -83,7 +82,7 @@ namespace {
     // Make sure that scaled_accessor compiles
     {
       using accessor_t = vector_t::accessor_type;
-      using std::experimental::linalg::scaled_accessor;
+      using LinearAlgebra::accessor_scaled;
       using scaled_accessor_t =
         scaled_accessor<scaling_factor_type, accessor_t>;
       scaled_accessor_t accessor0{scalingFactor, y.accessor()};

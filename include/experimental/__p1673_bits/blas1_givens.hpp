@@ -46,8 +46,8 @@
 #include <cmath>
 #include <complex>
 
-namespace std {
-namespace experimental {
+namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
+namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
@@ -103,15 +103,13 @@ struct is_custom_givens_rotation_apply_avail<
 		)
 	       )
       >
-    && !linalg::impl::is_inline_exec_v<Exec>
+    && ! impl::is_inline_exec_v<Exec>
     >
   >
   : std::true_type{};
 } // end anonymous namespace
 
-
-
-MDSPAN_TEMPLATE_REQUIRES( class Real, /* requires */ ( _MDSPAN_TRAIT(is_floating_point, Real) ) )
+MDSPAN_TEMPLATE_REQUIRES( class Real, /* requires */ ( _MDSPAN_TRAIT(std::is_floating_point, Real) ) )
 void givens_rotation_setup(const Real f,
                            const Real g,
                            Real& cs,
@@ -217,8 +215,8 @@ void givens_rotation_setup(const Real f,
 }
 
 namespace impl {
-MDSPAN_TEMPLATE_REQUIRES( class Real, /* requires */ ( _MDSPAN_TRAIT(is_floating_point, Real) ) )
-Real abs1(const complex<Real>& ff) {
+MDSPAN_TEMPLATE_REQUIRES( class Real, /* requires */ ( _MDSPAN_TRAIT(std::is_floating_point, Real) ) )
+Real abs1(const std::complex<Real>& ff) {
   using std::abs;
   using std::imag;
   using std::max;
@@ -227,8 +225,8 @@ Real abs1(const complex<Real>& ff) {
   return max(abs(real(ff)), abs(imag(ff)));
 }
 
-MDSPAN_TEMPLATE_REQUIRES( class Real, /* requires */ ( _MDSPAN_TRAIT(is_floating_point, Real) ) )
-Real abssq(const complex<Real>& ff) {
+MDSPAN_TEMPLATE_REQUIRES( class Real, /* requires */ ( _MDSPAN_TRAIT(std::is_floating_point, Real) ) )
+Real abssq(const std::complex<Real>& ff) {
   using std::imag;
   using std::real;
 
@@ -236,24 +234,26 @@ Real abssq(const complex<Real>& ff) {
 }
 }
 
-MDSPAN_TEMPLATE_REQUIRES( class Real, /* requires */ ( _MDSPAN_TRAIT(is_floating_point, Real) ) )
-void givens_rotation_setup(const complex<Real>& f,
-                           const complex<Real>& g,
+MDSPAN_TEMPLATE_REQUIRES( class Real, /* requires */ ( _MDSPAN_TRAIT(std::is_floating_point, Real) ) )
+void givens_rotation_setup(const std::complex<Real>& f,
+                           const std::complex<Real>& g,
                            Real& cs,
-                           complex<Real>& sn,
-                           complex<Real>& r)
+                           std::complex<Real>& sn,
+                           std::complex<Real>& r)
 {
+  using std::abs;
+  using std::complex;
+  using std::imag;
+  using std::isnan;
+  using std::log;
+  using std::max;
+  using std::pow;
+  using std::real;
+
   const Real two = 2.0;
   const Real one = 1.0;
   const Real zero = 0.0;
   const complex<Real> czero (0.0, 0.0);
-
-  using std::abs;
-  using std::imag;
-  using std::isnan;
-  using std::log;
-  using std::pow;
-  using std::real;
 
   // safmin == min (smallest normalized positive floating-point
   // number) for IEEE 754 floating-point arithmetic only.
@@ -383,12 +383,12 @@ MDSPAN_TEMPLATE_REQUIRES(
          class Layout2,
          class Accessor2,
          class Real,
-         /* requires */ (_MDSPAN_TRAIT(is_floating_point, Real))
+         /* requires */ (_MDSPAN_TRAIT(std::is_floating_point, Real))
 )
 void givens_rotation_apply(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType1, std::experimental::extents<SizeType1, ext1>, Layout1, Accessor1> x,
-  std::experimental::mdspan<ElementType2, std::experimental::extents<SizeType2, ext2>, Layout2, Accessor2> y,
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType1, extents<SizeType1, ext1>, Layout1, Accessor1> x,
+  mdspan<ElementType2, extents<SizeType2, ext2>, Layout2, Accessor2> y,
   const Real c,
   const Real s)
 {
@@ -418,26 +418,25 @@ MDSPAN_TEMPLATE_REQUIRES(
          class Layout2,
          class Accessor2,
          class Real,
-         /* requires */ (_MDSPAN_TRAIT(is_floating_point, Real))
+         /* requires */ (_MDSPAN_TRAIT(std::is_floating_point, Real))
 )
 void givens_rotation_apply(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType1, std::experimental::extents<SizeType1, ext1>, Layout1, Accessor1> x,
-  std::experimental::mdspan<ElementType2, std::experimental::extents<SizeType2, ext2>, Layout2, Accessor2> y,
+  mdspan<ElementType1, extents<SizeType1, ext1>, Layout1, Accessor1> x,
+  mdspan<ElementType2, extents<SizeType2, ext2>, Layout2, Accessor2> y,
   const Real c,
   const Real s)
 {
-
   constexpr bool use_custom = is_custom_givens_rotation_apply_avail<
-    decltype(execpolicy_mapper(exec)), decltype(x), decltype(y), Real, Real
+    decltype(impl::map_execpolicy_with_check(exec)), decltype(x), decltype(y), Real, Real
     >::value;
 
-  if constexpr(use_custom){
-    givens_rotation_apply(execpolicy_mapper(exec), x, y, c, s);
+  if constexpr (use_custom) {
+    givens_rotation_apply(impl::map_execpolicy_with_check(exec), x, y, c, s);
   }
   else
   {
-    givens_rotation_apply(std::experimental::linalg::impl::inline_exec_t(), x, y, c, s);
+    givens_rotation_apply(impl::inline_exec_t(), x, y, c, s);
   }
 }
 
@@ -453,15 +452,15 @@ MDSPAN_TEMPLATE_REQUIRES(
          class Layout2,
          class Accessor2,
          class Real,
-         /* requires */ (_MDSPAN_TRAIT(is_floating_point, Real))
+         /* requires */ (_MDSPAN_TRAIT(std::is_floating_point, Real))
 )
 void givens_rotation_apply(
-  std::experimental::mdspan<ElementType1, std::experimental::extents<SizeType1, ext1>, Layout1, Accessor1> x,
-  std::experimental::mdspan<ElementType2, std::experimental::extents<SizeType2, ext2>, Layout2, Accessor2> y,
+  mdspan<ElementType1, extents<SizeType1, ext1>, Layout1, Accessor1> x,
+  mdspan<ElementType2, extents<SizeType2, ext2>, Layout2, Accessor2> y,
   const Real c,
   const Real s)
 {
-  givens_rotation_apply(std::experimental::linalg::impl::default_exec_t(), x, y, c, s);
+  givens_rotation_apply(impl::default_exec_t{}, x, y, c, s);
 }
 
 
@@ -479,14 +478,14 @@ MDSPAN_TEMPLATE_REQUIRES(
          class Layout2,
          class Accessor2,
          class Real,
-         /* requires */ (_MDSPAN_TRAIT(is_floating_point, Real))
+         /* requires */ (_MDSPAN_TRAIT(std::is_floating_point, Real))
 )
 void givens_rotation_apply(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType1, std::experimental::extents<SizeType1, ext1>, Layout1, Accessor1> x,
-  std::experimental::mdspan<ElementType2, std::experimental::extents<SizeType2, ext2>, Layout2, Accessor2> y,
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType1, extents<SizeType1, ext1>, Layout1, Accessor1> x,
+  mdspan<ElementType2, extents<SizeType2, ext2>, Layout2, Accessor2> y,
   const Real c,
-  const complex<Real> s)
+  const std::complex<Real> s)
 {
   static_assert(x.static_extent(0) == dynamic_extent ||
                 y.static_extent(0) == dynamic_extent ||
@@ -515,26 +514,24 @@ MDSPAN_TEMPLATE_REQUIRES(
          class Layout2,
          class Accessor2,
          class Real,
-         /* requires */ (_MDSPAN_TRAIT(is_floating_point, Real))
+         /* requires */ (_MDSPAN_TRAIT(std::is_floating_point, Real))
 )
 void givens_rotation_apply(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType1, std::experimental::extents<SizeType1, ext1>, Layout1, Accessor1> x,
-  std::experimental::mdspan<ElementType2, std::experimental::extents<SizeType2, ext2>, Layout2, Accessor2> y,
+  mdspan<ElementType1, extents<SizeType1, ext1>, Layout1, Accessor1> x,
+  mdspan<ElementType2, extents<SizeType2, ext2>, Layout2, Accessor2> y,
   const Real c,
-  const complex<Real> s)
+  const std::complex<Real> s)
 {
-
   constexpr bool use_custom = is_custom_givens_rotation_apply_avail<
-    decltype(execpolicy_mapper(exec)), decltype(x), decltype(y), Real, complex<Real>
+    decltype(impl::map_execpolicy_with_check(exec)), decltype(x), decltype(y), Real, std::complex<Real>
     >::value;
 
-  if constexpr(use_custom){
-    givens_rotation_apply(execpolicy_mapper(exec), x, y, c, s);
+  if constexpr (use_custom) {
+    givens_rotation_apply(impl::map_execpolicy_with_check(exec), x, y, c, s);
   }
-  else
-  {
-    givens_rotation_apply(std::experimental::linalg::impl::inline_exec_t(), x, y, c, s);
+  else {
+    givens_rotation_apply(impl::inline_exec_t{}, x, y, c, s);
   }
 }
 
@@ -550,20 +547,20 @@ MDSPAN_TEMPLATE_REQUIRES(
          class Layout2,
          class Accessor2,
          class Real,
-         /* requires */ (_MDSPAN_TRAIT(is_floating_point, Real))
+         /* requires */ (_MDSPAN_TRAIT(std::is_floating_point, Real))
 )
 void givens_rotation_apply(
-  std::experimental::mdspan<ElementType1, std::experimental::extents<SizeType1, ext1>, Layout1, Accessor1> x,
-  std::experimental::mdspan<ElementType2, std::experimental::extents<SizeType2, ext2>, Layout2, Accessor2> y,
+  mdspan<ElementType1, extents<SizeType1, ext1>, Layout1, Accessor1> x,
+  mdspan<ElementType2, extents<SizeType2, ext2>, Layout2, Accessor2> y,
   const Real c,
-  const complex<Real> s)
+  const std::complex<Real> s)
 {
-  givens_rotation_apply(std::experimental::linalg::impl::default_exec_t(), x, y, c, s);
+  givens_rotation_apply(impl::default_exec_t{}, x, y, c, s);
 }
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
-} // end namespace experimental
-} // end namespace std
+} // end namespace MDSPAN_IMPL_PROPOSED_NAMESPACE
+} // end namespace MDSPAN_IMPL_STANDARD_NAMESPACE
 
 #endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_GIVENS_HPP_

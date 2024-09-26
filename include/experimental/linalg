@@ -51,6 +51,7 @@
 #include "__p1673_bits/layout_tags.hpp"
 #include "__p1673_bits/layout_triangle.hpp"
 #include "__p1673_bits/packed_layout.hpp"
+#include "__p1673_bits/abs_if_needed.hpp"
 #include "__p1673_bits/conj_if_needed.hpp"
 #include "__p1673_bits/real_if_needed.hpp"
 #include "__p1673_bits/imag_if_needed.hpp"

@@ -43,8 +43,8 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_LINALG_ADD_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_LINALG_ADD_HPP_
 
-namespace std {
-namespace experimental {
+namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
+namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
@@ -66,9 +66,9 @@ template<class ElementType_x,
          class Layout_z,
          class Accessor_z>
 void add_rank_1(
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_z, std::experimental::extents<SizeType_z, ext_z>, Layout_z, Accessor_z> z)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_z, extents<SizeType_z, ext_z>, Layout_z, Accessor_z> z)
 {
   static_assert(x.static_extent(0) == dynamic_extent ||
                 z.static_extent(0) == dynamic_extent ||
@@ -105,9 +105,9 @@ template<class ElementType_x,
          class Layout_z,
          class Accessor_z>
 void add_rank_2(
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, numRows_x, numCols_x>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, numRows_y, numCols_y>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_z, std::experimental::extents<SizeType_z, numRows_z, numCols_z>, Layout_z, Accessor_z> z)
+  mdspan<ElementType_x, extents<SizeType_x, numRows_x, numCols_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, numRows_y, numCols_y>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_z, extents<SizeType_z, numRows_z, numCols_z>, Layout_z, Accessor_z> z)
 {
   static_assert(x.static_extent(0) == dynamic_extent ||
                 z.static_extent(0) == dynamic_extent ||
@@ -153,7 +153,7 @@ struct is_custom_add_avail<
 		)
 	       )
       >
-    && !linalg::impl::is_inline_exec_v<Exec>
+    && ! impl::is_inline_exec_v<Exec>
     >
   >
   : std::true_type{};
@@ -180,10 +180,10 @@ MDSPAN_TEMPLATE_REQUIRES(
          /* requires */ (sizeof...(ext_x) == sizeof...(ext_y) && sizeof...(ext_x) == sizeof...(ext_z))
 )
 void add(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_z, std::experimental::extents<SizeType_z, ext_z ...>, Layout_z, Accessor_z> z)
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType_x, extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_z, extents<SizeType_z, ext_z ...>, Layout_z, Accessor_z> z)
 {
   // this static assert is only here because for
   // the default case we support rank-1 and rank2.
@@ -218,22 +218,21 @@ MDSPAN_TEMPLATE_REQUIRES(
 )
 void add(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_z, std::experimental::extents<SizeType_z, ext_z ...>, Layout_z, Accessor_z> z)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_z, extents<SizeType_z, ext_z ...>, Layout_z, Accessor_z> z)
 {
-
   constexpr bool use_custom = is_custom_add_avail<
-    decltype(execpolicy_mapper(exec)), decltype(x), decltype(y), decltype(z)
+    decltype(impl::map_execpolicy_with_check(exec)), decltype(x), decltype(y), decltype(z)
     >::value;
 
-  if constexpr(use_custom){
+  if constexpr (use_custom) {
     // for the customization point, it is up to impl to check requirements
-    add(execpolicy_mapper(exec), x, y, z);
+    add(impl::map_execpolicy_with_check(exec), x, y, z);
   }
   else
   {
-    add(std::experimental::linalg::impl::inline_exec_t(), x, y, z);
+    add(impl::inline_exec_t{}, x, y, z);
   }
 }
 
@@ -256,16 +255,16 @@ MDSPAN_TEMPLATE_REQUIRES(
          /* requires */ (sizeof...(ext_x) == sizeof...(ext_y) && sizeof...(ext_x) == sizeof...(ext_z))
 )
 void add(
-  std::experimental::mdspan<ElementType_x, std::experimental::extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
-  std::experimental::mdspan<ElementType_y, std::experimental::extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y,
-  std::experimental::mdspan<ElementType_z, std::experimental::extents<SizeType_z, ext_z ...>, Layout_z, Accessor_z> z)
+  mdspan<ElementType_x, extents<SizeType_x, ext_x ...>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y ...>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_z, extents<SizeType_z, ext_z ...>, Layout_z, Accessor_z> z)
 {
-  add(std::experimental::linalg::impl::default_exec_t(), x, y, z);
+  add(impl::default_exec_t{}, x, y, z);
 }
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
-} // end namespace experimental
-} // end namespace std
+} // end namespace MDSPAN_IMPL_PROPOSED_NAMESPACE
+} // end namespace MDSPAN_IMPL_STANDARD_NAMESPACE
 
 #endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_LINALG_ADD_HPP_

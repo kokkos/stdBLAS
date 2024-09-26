@@ -46,8 +46,8 @@
 #include <cmath>
 #include <cstdlib>
 
-namespace std {
-namespace experimental {
+namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
+namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
@@ -70,7 +70,7 @@ struct is_custom_matrix_inf_norm_avail<
 	       ),
       Scalar
       >::value
-    && !linalg::impl::is_inline_exec_v<Exec>
+    && ! impl::is_inline_exec_v<Exec>
     >
   >
   : std::true_type{};
@@ -86,8 +86,8 @@ template<
     class Accessor,
     class Scalar>
 Scalar matrix_inf_norm(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A,
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType, extents<SizeType, numRows, numCols>, Layout, Accessor> A,
   Scalar init)
 {
   using std::abs;
@@ -125,19 +125,18 @@ template<
   class Scalar>
 Scalar matrix_inf_norm(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A,
+  mdspan<ElementType, extents<SizeType, numRows, numCols>, Layout, Accessor> A,
   Scalar init)
 {
-
   constexpr bool use_custom = is_custom_matrix_inf_norm_avail<
-    decltype(execpolicy_mapper(exec)), decltype(A), Scalar
+    decltype(impl::map_execpolicy_with_check(exec)), decltype(A), Scalar
     >::value;
 
-  if constexpr(use_custom){
-    return matrix_inf_norm(execpolicy_mapper(exec), A, init);
+  if constexpr (use_custom) {
+    return matrix_inf_norm(impl::map_execpolicy_with_check(exec), A, init);
   }
   else{
-    return matrix_inf_norm(std::experimental::linalg::impl::inline_exec_t(), A, init);
+    return matrix_inf_norm(impl::inline_exec_t{}, A, init);
   }
 }
 
@@ -150,10 +149,10 @@ template<
     class Accessor,
     class Scalar>
 Scalar matrix_inf_norm(
-  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A,
+  mdspan<ElementType, extents<SizeType, numRows, numCols>, Layout, Accessor> A,
   Scalar init)
 {
-  return matrix_inf_norm(std::experimental::linalg::impl::default_exec_t(), A, init);
+  return matrix_inf_norm(impl::default_exec_t{}, A, init);
 }
 
 namespace matrix_inf_norm_detail {
@@ -170,7 +169,7 @@ namespace matrix_inf_norm_detail {
     class Layout,
     class Accessor>
   auto matrix_inf_norm_return_type_deducer(
-    std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A) -> decltype(abs(A(0,0)));
+    mdspan<ElementType, extents<SizeType, numRows, numCols>, Layout, Accessor> A) -> decltype(abs(A(0,0)));
 
 } // namespace matrix_inf_norm_detail
 
@@ -182,7 +181,7 @@ template<
   class Layout,
   class Accessor>
 auto matrix_inf_norm(
-  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A)
+  mdspan<ElementType, extents<SizeType, numRows, numCols>, Layout, Accessor> A)
 -> decltype(matrix_inf_norm_detail::matrix_inf_norm_return_type_deducer(A))
 {
   using return_t = decltype(matrix_inf_norm_detail::matrix_inf_norm_return_type_deducer(A));
@@ -198,7 +197,7 @@ template<class ExecutionPolicy,
          class Accessor>
 auto matrix_inf_norm(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, numRows, numCols>, Layout, Accessor> A)
+  mdspan<ElementType, extents<SizeType, numRows, numCols>, Layout, Accessor> A)
 -> decltype(matrix_inf_norm_detail::matrix_inf_norm_return_type_deducer(A))
 {
   using return_t = decltype(matrix_inf_norm_detail::matrix_inf_norm_return_type_deducer(A));
@@ -207,7 +206,7 @@ auto matrix_inf_norm(
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
-} // end namespace experimental
-} // end namespace std
+} // end namespace MDSPAN_IMPL_PROPOSED_NAMESPACE
+} // end namespace MDSPAN_IMPL_STANDARD_NAMESPACE
 
 #endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_MATRIX_INF_NORM_HPP_

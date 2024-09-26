@@ -46,8 +46,8 @@
 #include <cmath>
 #include <cstdlib>
 
-namespace std {
-namespace experimental {
+namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
+namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
@@ -75,7 +75,7 @@ struct is_custom_vector_sum_of_squares_avail<
 	       ),
       sum_of_squares_result<Scalar>
       >::value
-    && !linalg::impl::is_inline_exec_v<Exec>
+    && ! impl::is_inline_exec_v<Exec>
     >
   >
   : std::true_type{};
@@ -89,8 +89,8 @@ template<class ElementType,
          class Accessor,
          class Scalar>
 sum_of_squares_result<Scalar> vector_sum_of_squares(
-  std::experimental::linalg::impl::inline_exec_t&& /* exec */,
-  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext0>, Layout, Accessor> x,
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> x,
   sum_of_squares_result<Scalar> init)
 {
   using std::abs;
@@ -133,20 +133,18 @@ template<class ExecutionPolicy,
          class Scalar>
 sum_of_squares_result<Scalar> vector_sum_of_squares(
   ExecutionPolicy&& exec,
-  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext0>, Layout, Accessor> v,
+  mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> v,
   sum_of_squares_result<Scalar> init)
 {
-
   constexpr bool use_custom = is_custom_vector_sum_of_squares_avail<
-    decltype(execpolicy_mapper(exec)), decltype(v), Scalar
+    decltype(impl::map_execpolicy_with_check(exec)), decltype(v), Scalar
     >::value;
 
-  if constexpr(use_custom){
-    return vector_sum_of_squares(execpolicy_mapper(exec), v, init);
+  if constexpr (use_custom) {
+    return vector_sum_of_squares(impl::map_execpolicy_with_check(exec), v, init);
   }
-  else
-  {
-    return vector_sum_of_squares(std::experimental::linalg::impl::inline_exec_t(), v, init);
+  else {
+    return vector_sum_of_squares(impl::inline_exec_t{}, v, init);
   }
 }
 
@@ -157,16 +155,16 @@ template<class ElementType,
          class Accessor,
          class Scalar>
 sum_of_squares_result<Scalar> vector_sum_of_squares(
-  std::experimental::mdspan<ElementType, std::experimental::extents<SizeType, ext0>, Layout, Accessor> v,
+  mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> v,
   sum_of_squares_result<Scalar> init)
 {
-  return vector_sum_of_squares(std::experimental::linalg::impl::default_exec_t(), v, init);
+  return vector_sum_of_squares(impl::default_exec_t{}, v, init);
 }
 
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
-} // end namespace experimental
-} // end namespace std
+} // end namespace MDSPAN_IMPL_PROPOSED_NAMESPACE
+} // end namespace MDSPAN_IMPL_STANDARD_NAMESPACE
 
 #endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_VECTOR_SUM_OF_SQUARES_HPP_

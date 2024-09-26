@@ -1,15 +1,13 @@
 #include "./gtest_fixtures.hpp"
-
-#include <experimental/linalg>
 #include <iostream>
 
 namespace {
-  using std::experimental::linalg::explicit_diagonal;
-  using std::experimental::linalg::implicit_unit_diagonal;
-  using std::experimental::linalg::lower_triangle;
-  using std::experimental::linalg::matrix_product;
-  using std::experimental::linalg::transposed;
-  using std::experimental::linalg::upper_triangle;
+  using LinearAlgebra::explicit_diagonal;
+  using LinearAlgebra::implicit_unit_diagonal;
+  using LinearAlgebra::lower_triangle;
+  using LinearAlgebra::matrix_product;
+  using LinearAlgebra::transposed;
+  using LinearAlgebra::upper_triangle;
   using std::complex;
   using std::cout;
   using std::endl;
@@ -62,7 +60,7 @@ namespace {
     gs(2,0) = 14.88 + 21.26i;
     gs(2,1) = 23.16 + 20.3i;
 
-    hermitian_matrix_left_product(A, lower_triangle, B, C);
+    hermitian_matrix_product(A, lower_triangle, B, C);
 
     // TODO: Choose a more reasonable value
     constexpr double TOL = 1e-9;
@@ -118,7 +116,7 @@ namespace {
     gs(2,0) = 14.88 + 21.26i;
     gs(2,1) = 23.16 + 20.3i;
 
-    hermitian_matrix_left_product(A, upper_triangle, B, C);
+    hermitian_matrix_product(A, upper_triangle, B, C);
 
     // TODO: Choose a more reasonable value
     constexpr double TOL = 1e-9;
@@ -174,7 +172,7 @@ namespace {
     gs(0,2) = 14.88 - 21.26i;
     gs(1,2) = 23.16 - 20.3i;
 
-    hermitian_matrix_right_product(A, lower_triangle, B, C);
+    hermitian_matrix_product(B, A, lower_triangle, C);
 
     // TODO: Choose a more reasonable value
     constexpr double TOL = 1e-9;
@@ -230,7 +228,7 @@ namespace {
     gs(0,2) = 14.88 - 21.26i;
     gs(1,2) = 23.16 - 20.3i;
 
-    hermitian_matrix_right_product(A, upper_triangle, B, C);
+    hermitian_matrix_product(B, A, upper_triangle, C);
 
     // TODO: Choose a more reasonable value
     constexpr double TOL = 1e-9;

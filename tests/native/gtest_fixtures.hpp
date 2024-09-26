@@ -51,96 +51,109 @@
 // This must be defined before including any mdspan headers.
 #define MDSPAN_USE_PAREN_OPERATOR 1
 
-#include <experimental/mdspan>
+#include <mdspan/mdspan.hpp>
+#include "experimental/__p2630_bits/submdspan.hpp"
+#include <experimental/linalg>
+#include <array>
 #include <complex>
 #include <vector>
 
-  using std::experimental::default_accessor;
-  using std::dextents; // not in experimental namespace
+namespace KokkosStd = MDSPAN_IMPL_STANDARD_NAMESPACE;
+namespace KokkosEx = MDSPAN_IMPL_STANDARD_NAMESPACE :: MDSPAN_IMPL_PROPOSED_NAMESPACE;
+
+namespace MdSpan = MDSPAN_IMPL_STANDARD_NAMESPACE;
+namespace MdSpanEx = MDSPAN_IMPL_STANDARD_NAMESPACE :: MDSPAN_IMPL_PROPOSED_NAMESPACE;
+namespace LinearAlgebra = MDSPAN_IMPL_STANDARD_NAMESPACE :: MDSPAN_IMPL_PROPOSED_NAMESPACE :: linalg;
+
+using MdSpan::default_accessor;
+using MdSpan::dextents; // not in experimental namespace
 #if defined(__cpp_lib_span)
 #include <span>
-  using std::dynamic_extent;
+using std::dynamic_extent;
 #else
-  using std::experimental::dynamic_extent;
+using MdSpan::dynamic_extent;
 #endif
-  using std::experimental::extents;
-  using std::full_extent; // not in experimental namespace
-  using std::experimental::layout_left;
-  using std::experimental::layout_right;
-  using std::experimental::layout_stride;
-  using std::experimental::mdspan;
-  using std::experimental::submdspan;
+using MdSpan::extents;
+using MdSpan::full_extent; // not in experimental namespace
+using MdSpan::layout_left;
+using MdSpan::layout_right;
+using MdSpan::layout_stride;
+using MdSpan::mdspan;
+using MdSpan::submdspan;
 
-  using dbl_vector_t = mdspan<double, extents<std::size_t, dynamic_extent>>;
-  using cpx_vector_t = mdspan<std::complex<double>, extents<std::size_t, dynamic_extent>>;
-  constexpr ptrdiff_t NROWS(10);
+using MdSpanEx::layout_left_padded;
+using MdSpanEx::layout_right_padded;
 
-  // 1-norm:   4.6
-  // inf-norm: 0.9
-  class unsigned_double_vector : public ::testing::Test {
-    protected:
-      unsigned_double_vector() :
-        storage(10),
-        v(storage.data(), 10)
-      {
-        v(0) = 0.5;
-        v(1) = 0.2;
-        v(2) = 0.1;
-        v(3) = 0.4;
-        v(4) = 0.8;
-        v(5) = 0.7;
-        v(6) = 0.3;
-        v(7) = 0.5;
-        v(8) = 0.2;
-        v(9) = 0.9;
-      }
+using dbl_vector_t = mdspan<double, extents<std::size_t, dynamic_extent>>;
+using cpx_vector_t = mdspan<std::complex<double>, extents<std::size_t, dynamic_extent>>;
+constexpr ptrdiff_t NROWS = 10u;
 
-      std::vector<double> storage;
-      dbl_vector_t v;
-  }; // end class unsigned_double_vector
+// 1-norm:   4.6
+// inf-norm: 0.9
+class unsigned_double_vector : public ::testing::Test {
+protected:
+  unsigned_double_vector() :
+    storage(10),
+    v(storage.data(), 10)
+  {
+    v(0) = 0.5;
+    v(1) = 0.2;
+    v(2) = 0.1;
+    v(3) = 0.4;
+    v(4) = 0.8;
+    v(5) = 0.7;
+    v(6) = 0.3;
+    v(7) = 0.5;
+    v(8) = 0.2;
+    v(9) = 0.9;
+  }
 
-  // 1-norm:   4.6
-  // inf-norm: 0.9
-  class signed_double_vector : public ::testing::Test {
-    protected:
-      signed_double_vector() :
-        storage(10),
-        v(storage.data(), 10)
-      {
-        v(0) =  0.5;
-        v(1) =  0.2;
-        v(2) =  0.1;
-        v(3) =  0.4;
-        v(4) = -0.8;
-        v(5) = -0.7;
-        v(6) = -0.3;
-        v(7) =  0.5;
-        v(8) =  0.2;
-        v(9) = -0.9;
-      }
+  std::vector<double> storage;
+  dbl_vector_t v;
+}; // end class unsigned_double_vector
 
-      std::vector<double> storage;
-      dbl_vector_t v;
-  }; // end class signed_double_vector
+// 1-norm:   4.6
+// inf-norm: 0.9
+class signed_double_vector : public ::testing::Test {
+protected:
+  signed_double_vector() :
+    storage(10),
+    v(storage.data(), 10)
+  {
+    v(0) =  0.5;
+    v(1) =  0.2;
+    v(2) =  0.1;
+    v(3) =  0.4;
+    v(4) = -0.8;
+    v(5) = -0.7;
+    v(6) = -0.3;
+    v(7) =  0.5;
+    v(8) =  0.2;
+    v(9) = -0.9;
+  }
 
-  // 1-norm:   3.5188912597625004
-  // 2-norm:   1.6673332000533068
-  // inf-norm: 1.063014581273465
-  class signed_complex_vector : public ::testing::Test {
-    protected:
-      signed_complex_vector() :
-        storage(5),
-        v(storage.data(), 5)
-      {
-        v(0) = std::complex<double>( 0.5,  0.2);
-        v(1) = std::complex<double>( 0.1,  0.4);
-        v(2) = std::complex<double>(-0.8, -0.7);
-        v(3) = std::complex<double>(-0.3,  0.5);
-        v(4) = std::complex<double>( 0.2, -0.9);
-      }
+  std::vector<double> storage;
+  dbl_vector_t v;
+}; // end class signed_double_vector
 
-      std::vector<std::complex<double>> storage;
-      cpx_vector_t v;
-  }; // end class signed_double_vector
+// 1-norm:   3.5188912597625004
+// 2-norm:   1.6673332000533068
+// inf-norm: 1.063014581273465
+class signed_complex_vector : public ::testing::Test {
+protected:
+  signed_complex_vector() :
+    storage(5),
+    v(storage.data(), 5)
+  {
+    v(0) = std::complex<double>( 0.5,  0.2);
+    v(1) = std::complex<double>( 0.1,  0.4);
+    v(2) = std::complex<double>(-0.8, -0.7);
+    v(3) = std::complex<double>(-0.3,  0.5);
+    v(4) = std::complex<double>( 0.2, -0.9);
+  }
+
+  std::vector<std::complex<double>> storage;
+  cpx_vector_t v;
+}; // end class signed_double_vector
 
 #endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_FIXTURES_HPP_
