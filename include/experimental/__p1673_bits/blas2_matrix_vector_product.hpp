@@ -549,12 +549,12 @@ template<class ExecutionPolicy,
          class SizeType_y, ::std::size_t ext_y,
          class Layout_y,
          class Accessor_y>
-auto symmetric_matrix_vector_product (
+void symmetric_matrix_vector_product(
   ExecutionPolicy&& exec,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y) -> std::enable_if_t<!std::is_same_v<ExecutionPolicy, impl::inline_exec_t>>
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
 {
   constexpr bool use_custom = is_custom_sym_mat_vec_product_avail<
     decltype(impl::map_execpolicy_with_check(exec)), decltype(A), Triangle, decltype(x), decltype(y)>::value;
