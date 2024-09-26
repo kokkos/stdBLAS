@@ -84,20 +84,28 @@ Scalar vector_abs_sum(
   mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> v,
   Scalar init)
 {
-  using std::abs;
-  using result_t = decltype(init + abs(impl::real_part(std::declval<ElementType>())));
+  using value_type = typename decltype(v)::value_type;
+  using sum_type =
+    decltype(init +
+             impl::abs_if_needed(impl::real_part(std::declval<value_type>())) +
+             impl::abs_if_needed(impl::imag_part(std::declval<value_type>())));
+  static_assert(std::is_convertible_v<sum_type, Scalar>);
+  // TODO Implement the Remarks in para 4.
+  
   const SizeType numElt = v.extent(0);
-  result_t value = init;
-  for (SizeType i = 0; i < numElt; ++i) {
-    if constexpr (std::is_arithmetic_v<ElementType>) {
-        value += abs(v(i));
-    }
-    else {
-        value += abs(impl::real_part(v(i)));
-        value += abs(impl::imag_part(v(i)));
+  if constexpr (std::is_arithmetic_v<value_type>) {
+    for (SizeType i = 0; i < numElt; ++i) {
+      init += impl::abs_if_needed(v(i));
     }
   }
-  return value;
+  else {
+    for (SizeType i = 0; i < numElt; ++i) {
+      init += impl::abs_if_needed(impl::real_part(v(i)));
+      init += impl::abs_if_needed(impl::imag_part(v(i)));
+    }
+  }
+
+  return init;
 }
 
 template<class ExecutionPolicy,
