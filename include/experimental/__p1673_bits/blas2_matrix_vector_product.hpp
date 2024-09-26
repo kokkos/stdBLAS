@@ -549,12 +549,12 @@ template<class ExecutionPolicy,
          class SizeType_y, ::std::size_t ext_y,
          class Layout_y,
          class Accessor_y>
-void symmetric_matrix_vector_product(
+auto symmetric_matrix_vector_product (
   ExecutionPolicy&& exec,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
-  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y)
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y) -> std::enable_if_t<!std::is_same_v<ExecutionPolicy, impl::inline_exec_t>>
 {
   constexpr bool use_custom = is_custom_sym_mat_vec_product_avail<
     decltype(impl::map_execpolicy_with_check(exec)), decltype(A), Triangle, decltype(x), decltype(y)>::value;
@@ -676,13 +676,13 @@ template<class ExecutionPolicy,
          class SizeType_z, ::std::size_t ext_z,
          class Layout_z,
          class Accessor_z>
-void symmetric_matrix_vector_product(
+auto symmetric_matrix_vector_product(
   ExecutionPolicy&& exec,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
   mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
-  mdspan<ElementType_z, extents<SizeType_z, ext_z>, Layout_z, Accessor_z> z)
+  mdspan<ElementType_z, extents<SizeType_z, ext_z>, Layout_z, Accessor_z> z) -> std::enable_if_t<!std::is_same_v<ExecutionPolicy, impl::inline_exec_t>>
 {
   constexpr bool use_custom = is_custom_sym_mat_vec_product_with_update_avail<
     decltype(impl::map_execpolicy_with_check(exec)), decltype(A), Triangle, decltype(x), decltype(y), decltype(z)>::value;
@@ -936,13 +936,13 @@ template<class ExecutionPolicy,
          class SizeType_z, ::std::size_t ext_z,
          class Layout_z,
          class Accessor_z>
-void hermitian_matrix_vector_product(
+auto hermitian_matrix_vector_product(
   ExecutionPolicy&& exec,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
   mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
-  mdspan<ElementType_z, extents<SizeType_z, ext_z>, Layout_z, Accessor_z> z)
+  mdspan<ElementType_z, extents<SizeType_z, ext_z>, Layout_z, Accessor_z> z) -> std::enable_if_t<!std::is_same_v<ExecutionPolicy, impl::inline_exec_t>>
 {
   constexpr bool use_custom = is_custom_hermitian_mat_vec_product_with_update_avail<
     decltype(impl::map_execpolicy_with_check(exec)), decltype(A), Triangle, decltype(x), decltype(y), decltype(z)>::value;
@@ -1036,18 +1036,18 @@ void triangular_matrix_vector_product(
         y(i) += A(i,j) * x(j);
       }
       if constexpr (! explicitDiagonal) {
-        y(j) += /* 1 times */ x(j);
+        y(j) = y(j) + /* 1 times */ x(j);
       }
     }
   }
   else {
-    for (ptrdiff_t j = 0; j < A.extent(1); ++j) {
-      const ptrdiff_t i_upper = explicitDiagonal ? j : j - 1;
-      for (ptrdiff_t i = 0; i <= i_upper; ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      const size_type i_upper = explicitDiagonal ? j + size_type(1) : j;
+      for (size_type i = 0; i < i_upper; ++i) {
         y(i) += A(i,j) * x(j);
       }
       if constexpr (! explicitDiagonal) {
-        y(j) += /* 1 times */ x(j);
+        y(j) = y(j) + /* 1 times */ x(j);
       }
     }
   }
@@ -1181,18 +1181,18 @@ void triangular_matrix_vector_product(
         z(i) += A(i,j) * x(j);
       }
       if constexpr (! explicitDiagonal) {
-        z(j) += /* 1 times */ x(j);
+        z(j) = z(j) + /* 1 times */ x(j);
       }
     }
   }
   else {
     for (size_type j = 0; j < A.extent(1); ++j) {
-      const ptrdiff_t i_upper = explicitDiagonal ? j : j - size_type(1);
-      for (size_type i = 0; i <= i_upper; ++i) {
+      const size_type i_upper = explicitDiagonal ? j + size_type(1) : j;
+      for (size_type i = 0; i < i_upper; ++i) {
         z(i) += A(i,j) * x(j);
       }
       if constexpr (! explicitDiagonal) {
-        z(j) += /* 1 times */ x(j);
+        z(j) = z(j) + /* 1 times */ x(j);
       }
     }
   }
@@ -1218,14 +1218,14 @@ template<class ExecutionPolicy,
          class SizeType_z, ::std::size_t ext_z,
          class Layout_z,
          class Accessor_z>
-void triangular_matrix_vector_product(
+auto triangular_matrix_vector_product(
   ExecutionPolicy&& exec,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle t,
   DiagonalStorage d,
   mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
   mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
-  mdspan<ElementType_z, extents<SizeType_z, ext_z>, Layout_z, Accessor_z> z)
+  mdspan<ElementType_z, extents<SizeType_z, ext_z>, Layout_z, Accessor_z> z) -> std::enable_if_t<!std::is_same_v<ExecutionPolicy, impl::inline_exec_t>>
 {
   constexpr bool use_custom = is_custom_tri_mat_vec_product_with_update_avail<
     decltype(impl::map_execpolicy_with_check(exec)),
