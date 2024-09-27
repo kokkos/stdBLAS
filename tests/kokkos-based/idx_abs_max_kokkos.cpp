@@ -7,7 +7,7 @@ namespace
 
 template<class x_t>
 std::experimental::extents<>::size_type
-idx_abs_max_gold_solution(x_t x)
+vector_idx_abs_max_gold_solution(x_t x)
 {
 
   using std::abs;
@@ -26,7 +26,7 @@ idx_abs_max_gold_solution(x_t x)
 }
 
 template<class x_t>
-void kokkos_blas1_idx_abs_max_test_impl(x_t x)
+void kokkos_blas1_vector_idx_abs_max_test_impl(x_t x)
 {
 
   namespace stdla = std::experimental::linalg;
@@ -34,11 +34,11 @@ void kokkos_blas1_idx_abs_max_test_impl(x_t x)
   // copy x to verify it is not changed after kernel
   auto x_preKernel = kokkostesting::create_stdvector_and_copy(x);
 
-  const auto gold = idx_abs_max_gold_solution(x);
-  const auto result = stdla::idx_abs_max(KokkosKernelsSTD::kokkos_exec<>(), x);
+  const auto gold = vector_idx_abs_max_gold_solution(x);
+  const auto result = stdla::vector_idx_abs_max(KokkosKernelsSTD::kokkos_exec<>(), x);
   EXPECT_TRUE(gold == result);
   static_assert(std::is_same_v<decltype(gold), decltype(result)>,
-		"test:idx_abs_max: gold and result types not same");
+		"test:vector_idx_abs_max: gold and result types not same");
 
   // x should not change after kernel
   const std::size_t extent = x.extent(0);
@@ -50,21 +50,21 @@ void kokkos_blas1_idx_abs_max_test_impl(x_t x)
 }//end anonym namespace
 
 
-TEST_F(blas1_signed_float_fixture, kokkos_idx_abs_max)
+TEST_F(blas1_signed_float_fixture, kokkos_vector_idx_abs_max)
 {
-  kokkos_blas1_idx_abs_max_test_impl(x);
+  kokkos_blas1_vector_idx_abs_max_test_impl(x);
 }
 
-TEST_F(blas1_signed_double_fixture, kokkos_idx_abs_max)
+TEST_F(blas1_signed_double_fixture, kokkos_vector_idx_abs_max)
 {
-  kokkos_blas1_idx_abs_max_test_impl(x);
+  kokkos_blas1_vector_idx_abs_max_test_impl(x);
 }
 
-TEST_F(blas1_signed_complex_double_fixture, kokkos_idx_abs_max)
+TEST_F(blas1_signed_complex_double_fixture, kokkos_vector_idx_abs_max)
 {
   using kc_t   = Kokkos::complex<double>;
   using stdc_t = value_type;
   if constexpr(alignof(value_type) == alignof(kc_t)){
-    kokkos_blas1_idx_abs_max_test_impl(x);
+    kokkos_blas1_vector_idx_abs_max_test_impl(x);
   }
 }

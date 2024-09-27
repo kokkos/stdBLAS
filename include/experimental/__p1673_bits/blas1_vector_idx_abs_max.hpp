@@ -52,15 +52,15 @@ namespace linalg {
 namespace {
 
 template <class Exec, class v_t, class = void>
-struct is_custom_idx_abs_max_avail : std::false_type {};
+struct is_custom_vector_idx_abs_max_avail : std::false_type {};
 
 template <class Exec, class v_t>
-struct is_custom_idx_abs_max_avail<
+struct is_custom_vector_idx_abs_max_avail<
   Exec, v_t,
   std::enable_if_t<
     //FRizzi: maybe should use is_convertible?
     std::is_same<
-      decltype(idx_abs_max(std::declval<Exec>(), std::declval<v_t>())),
+      decltype(vector_idx_abs_max(std::declval<Exec>(), std::declval<v_t>())),
       typename v_t::extents_type::size_type
       >::value
     && ! impl::is_inline_exec_v<Exec>
@@ -72,7 +72,7 @@ template<class ElementType,
          class SizeType, ::std::size_t ext0,
          class Layout,
          class Accessor>
-SizeType idx_abs_max_default_impl(
+SizeType vector_idx_abs_max_default_impl(
   mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> v)
 {
   using std::abs;
@@ -99,11 +99,11 @@ template<class ElementType,
          class SizeType, ::std::size_t ext0,
          class Layout,
          class Accessor>
-SizeType idx_abs_max(
+SizeType vector_idx_abs_max(
   impl::inline_exec_t&& /* exec */,
   mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> v)
 {
-  return idx_abs_max_default_impl(v);
+  return vector_idx_abs_max_default_impl(v);
 }
 
 template<class ExecutionPolicy,
@@ -111,7 +111,7 @@ template<class ExecutionPolicy,
          class SizeType, ::std::size_t ext0,
          class Layout,
          class Accessor>
-SizeType idx_abs_max(
+SizeType vector_idx_abs_max(
   ExecutionPolicy&& exec,
   mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> v)
 {
@@ -119,15 +119,15 @@ SizeType idx_abs_max(
     return std::numeric_limits<SizeType>::max();
   }
 
-  constexpr bool use_custom = is_custom_idx_abs_max_avail<
+  constexpr bool use_custom = is_custom_vector_idx_abs_max_avail<
     decltype(impl::map_execpolicy_with_check(exec)), decltype(v)
     >::value;
 
   if constexpr (use_custom) {
-    return idx_abs_max(impl::map_execpolicy_with_check(exec), v);
+    return vector_idx_abs_max(impl::map_execpolicy_with_check(exec), v);
   }
   else {
-    return idx_abs_max(impl::inline_exec_t{}, v);
+    return vector_idx_abs_max(impl::inline_exec_t{}, v);
   }
 }
 
@@ -135,10 +135,10 @@ template<class ElementType,
          class SizeType, ::std::size_t ext0,
          class Layout,
          class Accessor>
-SizeType idx_abs_max(
+SizeType vector_idx_abs_max(
   mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> v)
 {
-  return idx_abs_max(impl::default_exec_t{}, v);
+  return vector_idx_abs_max(impl::default_exec_t{}, v);
 }
 
 } // end namespace linalg
