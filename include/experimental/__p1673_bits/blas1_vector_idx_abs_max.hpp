@@ -77,14 +77,15 @@ SizeType vector_idx_abs_max_default_impl(
 {
   using std::abs;
   using value_type = typename decltype(v)::value_type;
+  using magnitude_type =
+    decltype(impl::abs_if_needed(impl::real_if_needed(std::declval<value_type>())) +
+             impl::abs_if_needed(impl::imag_if_needed(std::declval<value_type>())));
 
   if (v.extent(0) == 0) {
     return std::numeric_limits<SizeType>::max();
   }
 
   if constexpr (std::is_arithmetic_v<value_type>) {
-    using magnitude_type = decltype(impl::abs_if_needed(std::declval<value_type>()));
-
     SizeType maxInd = 0;
     magnitude_type maxVal = abs(v(0));
     for (SizeType i = 1; i < v.extent(0); ++i) {
@@ -93,12 +94,10 @@ SizeType vector_idx_abs_max_default_impl(
         maxInd = i;
       }
     }
+
+    return maxInd;
   }
   else {
-    using magnitude_type =
-      decltype(impl::abs_if_needed(impl::real_if_needed(std::declval<value_type>())) +
-               impl::abs_if_needed(impl::imag_if_needed(std::declval<value_type>())));
-
     SizeType maxInd = 0;
     magnitude_type maxVal = impl::abs_if_needed(impl::real_if_needed(v(0))) +
                             impl::abs_if_needed(impl::imag_if_needed(v(0)));
@@ -112,9 +111,9 @@ SizeType vector_idx_abs_max_default_impl(
         maxInd = i;
       }
     }
-  }
 
-  return maxInd; // FIXME check for NaN "never less than" stuff
+    return maxInd;
+  }
 }
 
 } // end anonymous namespace
