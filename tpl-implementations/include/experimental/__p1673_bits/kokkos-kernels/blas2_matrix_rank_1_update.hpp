@@ -1,4 +1,4 @@
- /*
+/*
 //@HEADER
 // ************************************************************************
 //
@@ -120,7 +120,7 @@ void matrix_rank_1_update(kokkos_exec<ExecSpace> &&/* exec */,
   std::experimental::mdspan<ElementType_x, std::experimental::extents<ext_x>, Layout_x,
     std::experimental::default_accessor<ElementType_x>> x,
   std::experimental::mdspan<ElementType_y, std::experimental::extents<ext_y>, Layout_y,
-    std::experimental::linalg::accessor_conjugate<
+    std::experimental::linalg::conjugated_accessor<
       std::experimental::default_accessor<ElementType_y>, ElementType_y>> y,
   std::experimental::mdspan<ElementType_A, std::experimental::extents<numRows_A, numCols_A>, Layout_A,
     std::experimental::default_accessor<ElementType_A>> A)

@@ -534,7 +534,7 @@ void hermitian_matrix_rank_1_update(
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (size_type j = 0; j < A.extent(1); ++j) {
-      A(j,j) = impl::real_part(A(j,j));
+      A(j,j) = impl::real_if_needed(A(j,j));
       for (size_type i = j; i < A.extent(0); ++i) {
         A(i,j) += alpha * x(i) * impl::conj_if_needed(x(j));
       }
@@ -542,7 +542,7 @@ void hermitian_matrix_rank_1_update(
   }
   else {
     for (size_type j = 0; j < A.extent(1); ++j) {
-      A(j,j) = impl::real_part(A(j,j));
+      A(j,j) = impl::real_if_needed(A(j,j));
       for (size_type i = 0; i <= j; ++i) {
         A(i,j) += alpha * x(i) * impl::conj_if_needed(x(j));
       }
@@ -643,7 +643,7 @@ void hermitian_matrix_rank_1_update(
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (size_type j = 0; j < A.extent(1); ++j) {
-      A(j,j) = impl::real_part(A(j,j));
+      A(j,j) = impl::real_if_needed(A(j,j));
       for (size_type i = j; i < A.extent(0); ++i) {
         A(i,j) += x(i) * impl::conj_if_needed(x(j));
       }
@@ -651,7 +651,7 @@ void hermitian_matrix_rank_1_update(
   }
   else {
     for (size_type j = 0; j < A.extent(1); ++j) {
-      A(j,j) = impl::real_part(A(j,j));
+      A(j,j) = impl::real_if_needed(A(j,j));
       for (size_type i = 0; i <= j; ++i) {
         A(i,j) += x(i) * impl::conj_if_needed(x(j));
       }

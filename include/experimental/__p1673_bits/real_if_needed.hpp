@@ -40,24 +40,57 @@
 //@HEADER
 */
 
-#ifndef LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_KOKKOSKERNELS_CONJUGATE_IF_NEEDED_HPP_
-#define LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_KOKKOSKERNELS_CONJUGATE_IF_NEEDED_HPP_
+#ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_REAL_IF_NEEDED_HPP_
+#define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_REAL_IF_NEEDED_HPP_
 
-#include "experimental/__p1673_bits/conj_if_needed.hpp"
+#include <complex>
+#include <type_traits>
 
-namespace std {
-namespace experimental {
+namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
+namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
+inline namespace __p1673_version_0 {
 namespace linalg {
 namespace impl{
 
-// conj_if_needed doesn't use an is_complex trait.
-// Instead, it checks whether conj(x) (namespace-unqualified) is a valid expression,
-// calls that if so, else assumes that x represents a real number and returns x.
-// Thus, we don't actually need to do anything here.
+template<class T, class = void>
+struct has_real : std::false_type {};
+
+// If I can find unqualified real via overload resolution,
+// then assume that real(t) returns the real part of t.
+template<class T>
+struct has_real<T, decltype(real(std::declval<T>()), void())> : std::true_type {};
+
+template<class T>
+T real_if_needed_impl(const T& t, std::false_type)
+{
+  // If real(t) can't be ADL-found, then assume
+  // that T represents a noncomplex number type.
+  return t;
+}
+
+template<class T>
+auto real_if_needed_impl(const T& t, std::true_type)
+{
+  if constexpr (std::is_arithmetic_v<T>) {
+    // Overloads for integers have a return type of double.
+    // We want to preserve the input type T.
+    return t;
+  } else {
+    return real(t);
+  }
+}
+
+// Inline static variables require C++17.
+constexpr inline auto real_if_needed = [](const auto& t)
+{
+  using T = std::remove_const_t<decltype(t)>;
+  return real_if_needed_impl(t, has_real<T>{});
+};
 
 } // end namespace impl
 } // end namespace linalg
-} // end namespace experimental
-} // end namespace std
+} // end inline namespace __p1673_version_0
+} // end namespace MDSPAN_IMPL_PROPOSED_NAMESPACE
+} // end namespace MDSPAN_IMPL_STANDARD_NAMESPACE
 
-#endif //LINALG_TPLIMPLEMENTATIONS_INCLUDE_EXPERIMENTAL___P1673_BITS_KOKKOSKERNELS_CONJUGATE_IF_NEEDED_HPP_
+#endif //LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_REAL_IF_NEEDED_HPP_

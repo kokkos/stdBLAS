@@ -1,20 +1,4 @@
-#include "./gtest_fixtures.hpp"
-
-namespace TestLinearAlgebra {
-
-class MyReal {
-public:
-  MyReal() = default;
-  explicit MyReal(double value) : value_(value) {}
-  double value() const { return value_; }
-
-  friend MyReal abs(MyReal x) { return MyReal{std::abs(x.value())}; }
-
-private:
-  double value_ = 0.0;
-};
-
-} // namespace TestLinearAlgebra
+#include "./my_numbers.hpp"
 
 namespace {
   TEST(impl_abs_if_needed, arithmetic_types) {
@@ -95,4 +79,33 @@ namespace {
     }
   }
 
+  TEST(impl_abs_if_needed, std_complex) {
+    {
+      auto input = std::complex<double>(-3.0, 4.0);
+      auto result = LinearAlgebra::impl::abs_if_needed(input);
+      static_assert(std::is_same_v<decltype(result), double>);
+      EXPECT_EQ(result, 5.0);
+    }
+    {
+      auto input = std::complex<float>(0.0f, 2.0f);
+      auto result = LinearAlgebra::impl::abs_if_needed(input);
+      static_assert(std::is_same_v<decltype(result), float>);
+      EXPECT_EQ(result, 2.0f);
+    }
+  }
+
+  TEST(impl_abs_if_needed, custom_complex) {
+    {
+      auto input = TestLinearAlgebra::MyComplex(-3.0, 4.0);
+      auto result = LinearAlgebra::impl::abs_if_needed(input);
+      static_assert(std::is_same_v<decltype(result), double>);
+      EXPECT_EQ(result, 5.0);
+    }
+    {
+      auto input = TestLinearAlgebra::MyComplex(0.0, 2.0);
+      auto result = LinearAlgebra::impl::abs_if_needed(input);
+      static_assert(std::is_same_v<decltype(result), double>);
+      EXPECT_EQ(result, 2.0);
+    }
+  }
 } // end anonymous namespace

@@ -217,7 +217,7 @@ void hermitian_matrix_rank_2_update(
     const size_type i_lower = lower_tri ? j : size_type(0);
     const size_type i_upper = lower_tri ? A.extent(0) : j+1;
 
-    A(j,j) = impl::real_part(A(j,j));
+    A(j,j) = impl::real_if_needed(A(j,j));
     for (size_type i = i_lower; i < i_upper; ++i) {
       A(i,j) += x(i) * impl::conj_if_needed(y(j)) + y(i) * impl::conj_if_needed(x(j));
     }

@@ -69,6 +69,9 @@ public:
     class OtherNestedAccessor,
     /* requires */ (std::is_convertible_v<NestedAccessor, const OtherNestedAccessor&>)
   )
+#if defined(__cpp_conditional_explicit)
+  explicit(!std::is_convertible_v<OtherNestedAccessor, NestedAccessor>)
+#endif
   constexpr conjugated_accessor(const conjugated_accessor<OtherNestedAccessor>& other)
     : nested_accessor_(other.nested_accessor())
   {}
