@@ -76,20 +76,44 @@ SizeType vector_idx_abs_max_default_impl(
   mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> v)
 {
   using std::abs;
-  using magnitude_type = decltype(abs(v(0)));
+  using value_type = typename decltype(v)::value_type;
 
   if (v.extent(0) == 0) {
     return std::numeric_limits<SizeType>::max();
   }
 
-  SizeType maxInd = 0;
-  magnitude_type maxVal = abs(v(0));
-  for (SizeType i = 1; i < v.extent(0); ++i) {
-    if (maxVal < abs(v(i))) {
-      maxVal = abs(v(i));
-      maxInd = i;
+  if constexpr (std::is_arithmetic_v<value_type>) {
+    using magnitude_type = decltype(impl::abs_if_needed(std::declval<value_type>()));
+
+    SizeType maxInd = 0;
+    magnitude_type maxVal = abs(v(0));
+    for (SizeType i = 1; i < v.extent(0); ++i) {
+      if (maxVal < abs(v(i))) {
+        maxVal = abs(v(i));
+        maxInd = i;
+      }
     }
   }
+  else {
+    using magnitude_type =
+      decltype(impl::abs_if_needed(impl::real_if_needed(std::declval<value_type>())) +
+               impl::abs_if_needed(impl::imag_if_needed(std::declval<value_type>())));
+
+    SizeType maxInd = 0;
+    magnitude_type maxVal = impl::abs_if_needed(impl::real_if_needed(v(0))) +
+                            impl::abs_if_needed(impl::imag_if_needed(v(0)));
+
+    for (SizeType i = 1; i < v.extent(0); ++i) {
+      magnitude_type val = impl::abs_if_needed(impl::real_if_needed(v(i))) +
+                           impl::abs_if_needed(impl::imag_if_needed(v(i)));
+
+      if (maxVal < val) {
+        maxVal = val;
+        maxInd = i;
+      }
+    }
+  }
+
   return maxInd; // FIXME check for NaN "never less than" stuff
 }
 
