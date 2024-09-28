@@ -18,7 +18,7 @@ namespace {
 
   TEST_F(signed_complex_vector, vector_idx_abs_max)
   {
-    constexpr size_t expected(2);
+    constexpr size_t expected(3);
     EXPECT_EQ(expected, vector_idx_abs_max(v));
   }
 

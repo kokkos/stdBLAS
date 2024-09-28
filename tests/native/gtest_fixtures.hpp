@@ -142,14 +142,15 @@ protected:
 class signed_complex_vector : public ::testing::Test {
 protected:
   signed_complex_vector() :
-    storage(5),
-    v(storage.data(), 5)
+    storage(6),
+    v(storage.data(), 6)
   {
     v(0) = std::complex<double>( 0.5,  0.2);
     v(1) = std::complex<double>( 0.1,  0.4);
-    v(2) = std::complex<double>(-0.8, -0.7);
-    v(3) = std::complex<double>(-0.3,  0.5);
-    v(4) = std::complex<double>( 0.2, -0.9);
+    v(2) = std::complex<double>(-0.8,  0.7);
+    v(3) = std::complex<double>(-0.79, -0.711);
+    v(4) = std::complex<double>(-0.3,  0.5);
+    v(5) = std::complex<double>( 0.2, -0.9);
   }
 
   std::vector<std::complex<double>> storage;
