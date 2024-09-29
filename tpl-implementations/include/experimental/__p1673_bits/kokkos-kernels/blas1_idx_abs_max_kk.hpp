@@ -14,14 +14,14 @@ template<class ExeSpace,
          std::experimental::extents<>::size_type ext0,
          class Layout>
 std::experimental::extents<>::size_type
-idx_abs_max(kokkos_exec<ExeSpace> /*kexe*/,
+vector_idx_abs_max(kokkos_exec<ExeSpace> /*kexe*/,
 	    std::experimental::mdspan<
 	    ElementType,
 	    std::experimental::extents<ext0>,
 	    Layout,
 	    std::experimental::default_accessor<ElementType>> v)
 {
-  Impl::signal_kokkos_impl_called("idx_abs_max");
+  Impl::signal_kokkos_impl_called("vector_idx_abs_max");
 
   auto v_view = Impl::mdspan_to_view(v);
 

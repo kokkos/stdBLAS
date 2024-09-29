@@ -90,7 +90,6 @@ Scalar vector_abs_sum(
              impl::abs_if_needed(impl::real_if_needed(std::declval<value_type>())) +
              impl::abs_if_needed(impl::imag_if_needed(std::declval<value_type>())));
   static_assert(std::is_convertible_v<sum_type, Scalar>);
-  // TODO Implement the Remarks in para 4.
   
   const SizeType numElt = v.extent(0);
   if constexpr (std::is_arithmetic_v<value_type>) {

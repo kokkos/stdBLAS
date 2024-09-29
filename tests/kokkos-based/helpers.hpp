@@ -137,9 +137,9 @@ auto abs_max(mdspan<ElementType, extents<Extent>, LayoutPolicy, AccessorPolicy> 
   if (size == 0) {
     throw std::runtime_error("abs_max() requires non-empty input");
   }
-  const auto i = std::experimental::linalg::idx_abs_max(v);
+  const auto i = std::experimental::linalg::vector_idx_abs_max(v);
   if (i >= size) { // shouldn't happen: empty case is handled above
-    throw std::runtime_error("Fatal: idx_abs_max() failed");
+    throw std::runtime_error("Fatal: vector_idx_abs_max() failed");
   }
   return std::abs(v[i]);
 }
