@@ -96,25 +96,32 @@ auto conjugated(mdspan<ElementType, Extents, Layout, Accessor> a)
 {
   using value_type = typename decltype(a)::value_type;
 
+  // Current status of [linalg] only optimizes if Accessor is
+  // conjugated_accessor<Accessor> for some Accessor.
+  // There's a separate specialization for that case below.
+
+#if defined(LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX)
+  // P3050 optimizes conjugated's accessor type for when
+  // we know that it can't be complex: arithmetic types,
+  // and types for which `conj` is not ADL-findable.
   if constexpr (std::is_arithmetic_v<value_type>) {
     return mdspan<ElementType, Extents, Layout, Accessor>
       (a.data_handle(), a.mapping(), a.accessor());
   }
-#if defined(LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX)
-  // P3050 optimizes conjugated for non-arithmetic, non-(custom complex)
-  // types.  A "custom complex" type T has ADL-findable conj(T).
   else if constexpr (! impl::has_conj<value_type>::value) {
     return mdspan<ElementType, Extents, Layout, Accessor>
       (a.data_handle(), a.mapping(), a.accessor());
   }
-#endif // LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX
   else {
-    using return_element_type =
-      typename conjugated_accessor<Accessor>::element_type;
-    using return_accessor_type = conjugated_accessor<Accessor>;
-    return mdspan<return_element_type, Extents, Layout, return_accessor_type>
-      (a.data_handle(), a.mapping(), return_accessor_type(a.accessor()));
+#endif // LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX
+  using return_element_type =
+    typename conjugated_accessor<Accessor>::element_type;
+  using return_accessor_type = conjugated_accessor<Accessor>;
+  return mdspan<return_element_type, Extents, Layout, return_accessor_type>
+    (a.data_handle(), a.mapping(), return_accessor_type(a.accessor()));
+#if defined(LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX)
   }
+#endif // LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX
 }
 
 // Conjugation is self-annihilating
