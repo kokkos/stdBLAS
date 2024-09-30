@@ -17,7 +17,7 @@ double dnrm2_wrapper(const int N, const double* X, const int INCX)
 #endif // 0
 
 namespace {
-  using LinearAlgebra::vector_norm2;
+  using LinearAlgebra::vector_two_norm;
 
   TEST(BLAS1_norm2, mdspan_zero)
   {
@@ -32,17 +32,17 @@ namespace {
     vector_t x(storage.data(), vectorSize);
 
     // Testing for absolute equality
-    const auto normResult = vector_norm2(x, mag_t{});
+    const auto normResult = vector_two_norm(x, mag_t{});
     static_assert( std::is_same_v<std::remove_const_t<decltype(normResult)>, mag_t> );
     const mag_t expectedNormResult{};
     EXPECT_EQ( expectedNormResult, normResult );
 
     // Make sure that init always gets added to the result.
-    const mag_t normResultPlusOne = vector_norm2(x, mag_t(1.0));
+    const mag_t normResultPlusOne = vector_two_norm(x, mag_t(1.0));
     EXPECT_EQ( expectedNormResult + mag_t(1.0), normResultPlusOne );
 
     // Test 'auto' overload.
-    const auto normResultAuto = vector_norm2(x);
+    const auto normResultAuto = vector_two_norm(x);
     static_assert( std::is_same_v<std::remove_const_t<decltype(normResultAuto)>, mag_t> );
     EXPECT_EQ( expectedNormResult, normResultAuto );
   }
@@ -64,17 +64,17 @@ namespace {
     x[0] = -3;
 
     // Testing for absolute equality
-    const auto normResult = vector_norm2(x, mag_t{});
+    const auto normResult = vector_two_norm(x, mag_t{});
     static_assert( std::is_same_v<std::remove_const_t<decltype(normResult)>, mag_t> );
     const mag_t expectedNormResult = abs( x[0] );
     EXPECT_EQ( expectedNormResult, normResult );
 
     // Make sure that init always gets added to the result.
-    const mag_t normResultPlusOne = vector_norm2(x, mag_t(1.0));
+    const mag_t normResultPlusOne = vector_two_norm(x, mag_t(1.0));
     EXPECT_EQ( expectedNormResult + mag_t(1.0), normResultPlusOne );
 
     // Test 'auto' overload.
-    const auto normResultAuto = vector_norm2(x);
+    const auto normResultAuto = vector_two_norm(x);
     static_assert( std::is_same_v<std::remove_const_t<decltype(normResultAuto)>, mag_t> );
     EXPECT_EQ( expectedNormResult, normResultAuto );
   }
@@ -104,13 +104,13 @@ namespace {
       expectedNormResultSquared += x_k * x_k;
     }
 
-    const auto normResult = vector_norm2(x, mag_t{});
+    const auto normResult = vector_two_norm(x, mag_t{});
     static_assert( std::is_same_v<std::remove_const_t<decltype(normResult)>, mag_t> );
     const mag_t expectedNormResult = sqrt(expectedNormResultSquared);
     EXPECT_NEAR( expectedNormResult, normResult, tol );
 
     // Test 'auto' overload.
-    const auto normResultAuto = vector_norm2(x);
+    const auto normResultAuto = vector_two_norm(x);
     static_assert( std::is_same_v<std::remove_const_t<decltype(normResultAuto)>, mag_t> );
     EXPECT_NEAR( expectedNormResult, normResultAuto, tol );
 
@@ -149,13 +149,13 @@ namespace {
       expectedNormResultSquared += abs(x_k) * abs(x_k);
     }
 
-    const auto normResult = vector_norm2(x, mag_t{});
+    const auto normResult = vector_two_norm(x, mag_t{});
     static_assert( std::is_same_v<std::remove_const_t<decltype(normResult)>, mag_t> );
     const mag_t expectedNormResult = sqrt(expectedNormResultSquared);
     EXPECT_NEAR( expectedNormResult, normResult, tol );
 
     // Test 'auto' overload.
-    const auto normResultAuto = vector_norm2(x);
+    const auto normResultAuto = vector_two_norm(x);
     static_assert( std::is_same_v<std::remove_const_t<decltype(normResultAuto)>, mag_t> );
     EXPECT_NEAR( expectedNormResult, normResultAuto, tol );
   }
