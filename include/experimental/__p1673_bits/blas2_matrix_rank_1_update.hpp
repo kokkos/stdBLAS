@@ -46,10 +46,93 @@ struct is_custom_matrix_rank_1_update_avail<
   >
   : std::true_type{};
 
+#if defined(LINALG_FIX_RANK_UPDATES)
+
+// For the overwriting case, use E_t = void.
+// For the no-alpha case, use ScaleFactorType = void.
+template <class Exec, class ScaleFactorType, class x_t, class E_t, class A_t, class Tr_t, class = void>
+struct is_custom_symmetric_matrix_rank_1_update_avail : std::false_type
+{};
+
+// Overwriting, ExecutionPolicy != inline_exec_t, no alpha
+template <class Exec, class x_t, class A_t, class Tr_t>
+struct is_custom_symmetric_matrix_rank_1_update_avail<
+  Exec, /* ScaleFactorType = */ void, x_t, /* E_t = */ void, A_t, Tr_t,
+  std::enable_if_t<
+    std::is_void_v<
+      decltype(symmetric_matrix_rank_1_update(
+        std::declval<Exec>(),
+	std::declval<x_t>(),
+        std::declval<A_t>(),
+        std::declval<Tr_t>()))
+    > &&
+    ! impl::is_inline_exec_v<Exec>
+  >
+> : std::true_type
+{};
+
+// Updating, ExecutionPolicy != inline_exec_t, no alpha
+template <class Exec, class x_t, class E_t, class A_t, class Tr_t>
+struct is_custom_symmetric_matrix_rank_1_update_avail<
+  Exec, /* ScaleFactorType = */ void, x_t, E_t, A_t, Tr_t,
+  std::enable_if_t<
+    std::is_void_v<
+      decltype(symmetric_matrix_rank_1_update(
+        std::declval<Exec>(),
+	std::declval<x_t>(),
+        std::declval<E_t>(), // implies not void
+        std::declval<A_t>(),
+        std::declval<Tr_t>()))
+    > &&
+    ! impl::is_inline_exec_v<Exec>
+  >
+> : std::true_type
+{};
+
+// Overwriting, ExecutionPolicy != inline_exec_t, alpha
+template <class Exec, class ScaleFactorType, class x_t, class A_t, class Tr_t>
+struct is_custom_symmetric_matrix_rank_1_update_avail<
+  Exec, ScaleFactorType, x_t, /* E_t = */ void, A_t, Tr_t,
+  std::enable_if_t<
+    std::is_void_v<
+      decltype(symmetric_matrix_rank_1_update(
+        std::declval<Exec>(),
+        std::declval<ScaleFactorType>(), // implies not void
+        std::declval<x_t>(),
+        std::declval<A_t>(),
+        std::declval<Tr_t>()))
+    > &&
+    ! impl::is_inline_exec_v<Exec>
+  >
+> : std::true_type
+{};
+
+// Updating, ExecutionPolicy != inline_exec_t, alpha
+template <class Exec, class ScaleFactorType, class x_t, class E_t, class A_t, class Tr_t>
+struct is_custom_symmetric_matrix_rank_1_update_avail<
+  Exec, ScaleFactorType, x_t, E_t, A_t, Tr_t,
+  std::enable_if_t<
+    std::is_void_v<
+      decltype(symmetric_matrix_rank_1_update(
+        std::declval<Exec>(),
+        std::declval<ScaleFactorType>(), // implies not void
+        std::declval<x_t>(),
+        std::declval<E_t>(), // implies not void
+        std::declval<A_t>(),
+        std::declval<Tr_t>()))
+    > &&
+    ! impl::is_inline_exec_v<Exec>
+  >
+> : std::true_type
+{};
+
+#else
+
 template <class Exec, class ScaleFactorType, class x_t, class A_t, class Tr_t, class = void>
 struct is_custom_symmetric_matrix_rank_1_update_avail : std::false_type
 {};
 
+// ExecutionPolicy != inline_exec_t, no alpha
 template <class Exec, class x_t, class A_t, class Tr_t>
 struct is_custom_symmetric_matrix_rank_1_update_avail<
   Exec, void, x_t, A_t, Tr_t,
@@ -69,6 +152,7 @@ struct is_custom_symmetric_matrix_rank_1_update_avail<
   : std::true_type
 {};
 
+// ExecutionPolicy != inline_exec_t,  alpha
 template <class Exec, class ScaleFactorType, class x_t, class A_t, class Tr_t>
 struct is_custom_symmetric_matrix_rank_1_update_avail<
   Exec, ScaleFactorType, x_t, A_t, Tr_t,
@@ -88,6 +172,8 @@ struct is_custom_symmetric_matrix_rank_1_update_avail<
   >
   : std::true_type
 {};
+
+#endif // LINALG_FIX_RANK_UPDATES
 
 #if defined(LINALG_FIX_RANK_UPDATES)
 
@@ -344,10 +430,10 @@ void matrix_rank_1_update_c(
   matrix_rank_1_update(exec, x, conjugated(y), A);
 }
 
-// Rank-1 update of a symmetric matrix
+// Symmetric matrix rank-1 update
 
-// Rank-1 update of a symmetric matrix with scaling factor alpha
-
+// Overwriting symmetric rank-1 matrix update
+// (inline_exec_t, alpha)
 MDSPAN_TEMPLATE_REQUIRES(
   class ScaleFactorType,
   class ElementType_x,
@@ -372,24 +458,84 @@ void symmetric_matrix_rank_1_update(
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle /* t */)
 {
-  using size_type = std::common_type_t<SizeType_x, SizeType_A>;
+  using index_type = std::common_type_t<SizeType_x, SizeType_A>;
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-    for (size_type j = 0; j < A.extent(1); ++j) {
-      for (size_type i = j; i < A.extent(0); ++i) {
+    for (index_type i = 0; i < A.extent(0); ++i) {
+      for (index_type j = 0; j <= i; ++j) {
+#if defined(LINALG_FIX_RANK_UPDATES)
+        A(i,j) = typename decltype(A)::value_type{};
+#endif // LINALG_FIX_RANK_UPDATES
         A(i,j) += alpha * x(i) * x(j);
       }
     }
   }
-  else {
-    for (size_type j = 0; j < A.extent(1); ++j) {
-      for (size_type i = 0; i <= j; ++i) {
+  else { // upper triangle
+    for (index_type j = 0; j < A.extent(1); ++j) {
+      for (index_type i = 0; i <= j; ++i) {
+#if defined(LINALG_FIX_RANK_UPDATES)
+        A(i,j) = typename decltype(A)::value_type{};
+#endif // LINALG_FIX_RANK_UPDATES
         A(i,j) += alpha * x(i) * x(j);
       }
     }
   }
 }
 
+#if defined(LINALG_FIX_RANK_UPDATES)
+// Updating symmetric rank-1 matrix update
+// (inline_exec_t, alpha)
+MDSPAN_TEMPLATE_REQUIRES(
+  class ScaleFactorType,
+  class ElementType_x,
+  class SizeType_x, ::std::size_t ext_x,
+  class Layout_x,
+  class Accessor_x,
+  class ElementType_E,
+  class SizeType_E, ::std::size_t numRows_E,
+  ::std::size_t numCols_E,
+  class Layout_E,
+  class Accessor_E,
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A,
+  ::std::size_t numCols_A,
+  class Layout_A, // TODO Implement Constraints and Mandates
+  class Accessor_A,
+  class Triangle,
+  /* requires */ (
+    std::is_same_v<Triangle, lower_triangle_t> ||
+    std::is_same_v<Triangle, upper_triangle_t>
+  )
+)
+void symmetric_matrix_rank_1_update(
+  impl::inline_exec_t&& /* exec */,
+  ScaleFactorType alpha,
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle /* t */)
+{
+  using index_type = std::common_type_t<SizeType_x, SizeType_E, SizeType_A>;
+
+  if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
+    for (index_type j = 0; j < A.extent(1); ++j) {
+      for (index_type i = j; i < A.extent(0); ++i) {
+        A(i,j) = E(i,j) + alpha * x(i) * x(j);
+      }
+    }
+  }
+  else {
+    for (index_type j = 0; j < A.extent(1); ++j) {
+      for (index_type i = 0; i <= j; ++i) {
+        A(i,j) = E(i,j) + alpha * x(i) * x(j);
+      }
+    }
+  }
+}
+#endif // LINALG_FIX_RANK_UPDATES
+
+// Overwriting symmetric rank-1 matrix update
+// (ExecutionPolicy&&, alpha)
 MDSPAN_TEMPLATE_REQUIRES(
   class ExecutionPolicy,
   class ScaleFactorType,
@@ -417,7 +563,14 @@ void symmetric_matrix_rank_1_update(
   Triangle t)
 {
   constexpr bool use_custom = is_custom_symmetric_matrix_rank_1_update_avail<
-    decltype(execpolicy_mapper(exec)), ScaleFactorType, decltype(x), decltype(A), Triangle
+      decltype(execpolicy_mapper(exec)),
+      ScaleFactorType,
+      decltype(x),
+#if defined(LINALG_FIX_RANK_UPDATES)
+      /* decltype(E) = */ void,
+#endif // LINALG_FIX_RANK_UPDATES
+      decltype(A),
+      Triangle
     >::value;
 
   if constexpr (use_custom) {
@@ -428,6 +581,64 @@ void symmetric_matrix_rank_1_update(
   }
 }
 
+#if defined(LINALG_FIX_RANK_UPDATES)
+// Updating symmetric rank-1 matrix update
+// (ExecutionPolicy&&, alpha)
+MDSPAN_TEMPLATE_REQUIRES(
+  class ExecutionPolicy,
+  class ScaleFactorType,
+  class ElementType_x,
+  class SizeType_x, ::std::size_t ext_x,
+  class Layout_x,
+  class Accessor_x,
+  class ElementType_E,
+  // Work-around for MDSPAN_TEMPLATE_REQUIRES not taking too many arguments:
+  // combine (SizeType_E, numRows_E, numCols_E) into Extents_E
+  // and add rank() == 2 constraint.
+  class Extents_E,
+  class Layout_E,
+  class Accessor_E,
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A,
+  ::std::size_t numCols_A,
+  class Layout_A, // TODO Implement Constraints and Mandates
+  class Accessor_A,
+  class Triangle,
+  /* requires */ (
+    impl::is_linalg_execution_policy_other_than_inline_v<ExecutionPolicy> &&
+    (std::is_same_v<Triangle, lower_triangle_t> ||
+     std::is_same_v<Triangle, upper_triangle_t>) &&
+    Extents_E::rank() == 2
+  )
+)
+void symmetric_matrix_rank_1_update(
+  ExecutionPolicy&& exec,
+  ScaleFactorType alpha,
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_E, Extents_E,                                 Layout_E, Accessor_E> E,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t)
+{
+  constexpr bool use_custom = is_custom_symmetric_matrix_rank_1_update_avail<
+      decltype(execpolicy_mapper(exec)),
+      ScaleFactorType,
+      decltype(x),
+      decltype(E),
+      decltype(A),
+      Triangle
+    >::value;
+
+  if constexpr (use_custom) {
+    symmetric_matrix_rank_1_update(execpolicy_mapper(exec), alpha, x, E, A, t);
+  }
+  else {
+    symmetric_matrix_rank_1_update(impl::inline_exec_t{}, alpha, x, E, A, t);
+  }
+}
+#endif // LINALG_FIX_RANK_UPDATES
+
+// Overwriting symmetric rank-1 matrix update
+// (no execution policy, alpha)
 MDSPAN_TEMPLATE_REQUIRES(
   class ScaleFactorType,
   class ElementType_x,
@@ -455,8 +666,45 @@ void symmetric_matrix_rank_1_update(
   symmetric_matrix_rank_1_update(impl::default_exec_t{}, alpha, x, A, t);
 }
 
-// Rank-1 update of a symmetric matrix without scaling factor alpha
+#if defined(LINALG_FIX_RANK_UPDATES)
+// Updating symmetric rank-1 matrix update
+// (no execution policy, alpha)
+MDSPAN_TEMPLATE_REQUIRES(
+  class ScaleFactorType,
+  class ElementType_x,
+  class SizeType_x, ::std::size_t ext_x,
+  class Layout_x,
+  class Accessor_x,
+  class ElementType_E,
+  class SizeType_E, ::std::size_t numRows_E,
+  ::std::size_t numCols_E,
+  class Layout_E,
+  class Accessor_E,
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A,
+  ::std::size_t numCols_A,
+  class Layout_A, // TODO Implement Constraints and Mandates
+  class Accessor_A,
+  class Triangle,
+  /* requires */ (
+    (! impl::is_linalg_execution_policy_other_than_inline_v<ScaleFactorType>) &&
+    (std::is_same_v<Triangle, lower_triangle_t> ||
+     std::is_same_v<Triangle, upper_triangle_t>)
+  )
+)
+void symmetric_matrix_rank_1_update(
+  ScaleFactorType alpha,
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t)
+{
+  symmetric_matrix_rank_1_update(impl::default_exec_t{}, alpha, x, E, A, t);
+}
+#endif // LINALG_FIX_RANK_UPDATES
 
+// Overwriting symmetric rank-1 matrix update
+// (inline_exec_t, no alpha)
 MDSPAN_TEMPLATE_REQUIRES(
   class ElementType_x,
   class SizeType_x, ::std::size_t ext_x,
@@ -479,24 +727,83 @@ void symmetric_matrix_rank_1_update(
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
   Triangle /* t */)
 {
-  using size_type = std::common_type_t<SizeType_x, SizeType_A>;
+  using index_type = std::common_type_t<SizeType_x, SizeType_A>;
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
-    for (size_type j = 0; j < A.extent(1); ++j) {
-      for (size_type i = j; i < A.extent(0); ++i) {
+    for (index_type i = 0; i < A.extent(0); ++i) {
+      for (index_type j = 0; j <= i; ++j) {
+#if defined(LINALG_FIX_RANK_UPDATES)
+        A(i,j) = x(i) * x(j);
+#else
         A(i,j) += x(i) * x(j);
+#endif // LINALG_FIX_RANK_UPDATES
       }
     }
   }
-  else {
-    for (size_type j = 0; j < A.extent(1); ++j) {
-      for (size_type i = 0; i <= j; ++i) {
+  else { // upper triangle
+    for (index_type j = 0; j < A.extent(1); ++j) {
+      for (index_type i = 0; i <= j; ++i) {
+#if defined(LINALG_FIX_RANK_UPDATES)
+        A(i,j) = typename decltype(A)::value_type{};
+#endif // LINALG_FIX_RANK_UPDATES
         A(i,j) += x(i) * x(j);
       }
     }
   }
 }
 
+#if defined(LINALG_FIX_RANK_UPDATES)
+// Updating symmetric rank-1 matrix update
+// (inline_exec_t, no alpha)
+MDSPAN_TEMPLATE_REQUIRES(
+  class ElementType_x,
+  class SizeType_x, ::std::size_t ext_x,
+  class Layout_x,
+  class Accessor_x,
+  class ElementType_E,
+  class SizeType_E, ::std::size_t numRows_E,
+  ::std::size_t numCols_E,
+  class Layout_E,
+  class Accessor_E,
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A,
+  ::std::size_t numCols_A,
+  class Layout_A,
+  class Accessor_A,
+  class Triangle,
+  /* requires */ (
+    std::is_same_v<Triangle, lower_triangle_t> ||
+    std::is_same_v<Triangle, upper_triangle_t>
+  )
+)
+void symmetric_matrix_rank_1_update(
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle /* t */)
+{
+  using index_type = std::common_type_t<SizeType_x, SizeType_E, SizeType_A>;
+
+  if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
+    for (index_type i = 0; i < A.extent(0); ++i) {
+      for (index_type j = 0; j <= i; ++j) {
+        A(i,j) = E(i,j) + x(i) * x(j);
+      }
+    }
+  }
+  else { // upper triangle
+    for (index_type j = 0; j < A.extent(1); ++j) {
+      for (index_type i = 0; i <= j; ++i) {
+        A(i,j) = E(i,j) + x(i) * x(j);
+      }
+    }
+  }
+}
+#endif // LINALG_FIX_RANK_UPDATES
+
+// Overwriting symmetric rank-1 matrix update
+// (ExecutionPolicy&&, no alpha)
 MDSPAN_TEMPLATE_REQUIRES(
   class ExecutionPolicy,
   class ElementType_x,
@@ -522,7 +829,14 @@ void symmetric_matrix_rank_1_update(
   Triangle t)
 {
   constexpr bool use_custom = is_custom_symmetric_matrix_rank_1_update_avail<
-    decltype(impl::map_execpolicy_with_check(exec)), void, decltype(x), decltype(A), Triangle
+      decltype(impl::map_execpolicy_with_check(exec)),
+      /* ScaleFactorType = */ void,
+      decltype(x),
+#if defined(LINALG_FIX_RANK_UPDATES)
+      /* decltype(E) = */ void,
+#endif // LINALG_FIX_RANK_UPDATES
+      decltype(A),
+      Triangle
     >::value;
 
   if constexpr (use_custom) {
@@ -533,6 +847,59 @@ void symmetric_matrix_rank_1_update(
   }
 }
 
+#if defined(LINALG_FIX_RANK_UPDATES)
+// Updating symmetric rank-1 matrix update
+// (ExecutionPolicy&&, no alpha)
+MDSPAN_TEMPLATE_REQUIRES(
+  class ExecutionPolicy,
+  class ElementType_x,
+  class SizeType_x, ::std::size_t ext_x,
+  class Layout_x,
+  class Accessor_x,
+  class ElementType_E,
+  class SizeType_E, ::std::size_t numRows_E,
+  ::std::size_t numCols_E,
+  class Layout_E,
+  class Accessor_E,
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A,
+  ::std::size_t numCols_A,
+  class Layout_A,
+  class Accessor_A,
+  class Triangle,
+  /* requires */ (
+    impl::is_linalg_execution_policy_other_than_inline_v<ExecutionPolicy> &&
+    (std::is_same_v<Triangle, lower_triangle_t> ||
+     std::is_same_v<Triangle, upper_triangle_t>)
+  )
+)
+void symmetric_matrix_rank_1_update(
+  ExecutionPolicy&& exec,
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t)
+{
+  constexpr bool use_custom = is_custom_symmetric_matrix_rank_1_update_avail<
+      decltype(impl::map_execpolicy_with_check(exec)),
+      /* ScaleFactorType = */ void,
+      decltype(x),
+      decltype(E),
+      decltype(A),
+      Triangle
+    >::value;
+
+  if constexpr (use_custom) {
+    symmetric_matrix_rank_1_update(impl::map_execpolicy_with_check(exec), x, E, A, t);
+  }
+  else {
+    symmetric_matrix_rank_1_update(impl::inline_exec_t{}, x, E, A, t);
+  }
+}
+#endif // LINALG_FIX_RANK_UPDATES
+
+// Overwriting symmetric rank-1 matrix update
+// (no execution policy, no alpha)
 MDSPAN_TEMPLATE_REQUIRES(
   class ElementType_x,
   class SizeType_x, ::std::size_t ext_x,
@@ -557,7 +924,39 @@ void symmetric_matrix_rank_1_update(
   symmetric_matrix_rank_1_update(impl::default_exec_t{}, x, A, t);
 }
 
-// Hermitian matrix rank-k update
+#if defined(LINALG_FIX_RANK_UPDATES)
+// Updating symmetric rank-1 matrix update
+// (no execution policy, no alpha)
+MDSPAN_TEMPLATE_REQUIRES(
+  class ElementType_x,
+  class SizeType_x, ::std::size_t ext_x,
+  class Layout_x,
+  class Accessor_x,
+  class ElementType_E,
+  class SizeType_E, ::std::size_t numRows_E,
+  ::std::size_t numCols_E,
+  class Layout_E,
+  class Accessor_E,
+  class ElementType_A,
+  class SizeType_A, ::std::size_t numRows_A,
+  ::std::size_t numCols_A,
+  class Layout_A,
+  class Accessor_A,
+  class Triangle,
+  /* requires */ (
+    std::is_same_v<Triangle, lower_triangle_t> ||
+    std::is_same_v<Triangle, upper_triangle_t>
+  )
+)
+void symmetric_matrix_rank_1_update(
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t)
+{
+  symmetric_matrix_rank_1_update(impl::default_exec_t{}, x, E, A, t);
+}
+#endif // LINALG_FIX_RANK_UPDATES
 
 // Hermitian matrix rank-1 update
 
@@ -950,8 +1349,6 @@ void hermitian_matrix_rank_1_update(
     }
   }
   else { // upper triangle
-    printf("OH HAI MARK\n");
-
     for (index_type j = 0; j < A.extent(1); ++j) {
       for (index_type i = 0; i <= j; ++i) {
         if (i == j) {

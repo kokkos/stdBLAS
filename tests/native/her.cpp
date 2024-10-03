@@ -68,14 +68,6 @@ namespace {
     };
 #endif // LINALG_FIX_RANK_UPDATES
 
-    void refresh() {
-      A = std::vector<V>{
-        V(-1.0, 0.0), V(-2.0, 0.0),  V(-4.0, 0.0),
-        V(-2.0, 0.0), V(-3.0, 0.0),  V(-5.0, 0.0),
-        V(-4.0, 0.0), V(-5.0, 0.0),  V(-6.0, 0.0)
-      };
-    }
-
     using A_type = mdspan<V, extents<int, 3, 3>>;
     using const_A_type = mdspan<const V, extents<int, 3, 3>>;
     using x_type = mdspan<const V, extents<int, 3>>;
