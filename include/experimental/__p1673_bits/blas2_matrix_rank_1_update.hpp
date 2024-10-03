@@ -25,9 +25,53 @@ namespace linalg {
 
 namespace { // (anonymous)
 
+#if defined(LINALG_FIX_RANK_UPDATES)
+
+// For the overwriting case, use E_t = void.
+template <class Exec, class x_t, class y_t, class E_t, class A_t, class = void>
+struct is_custom_matrix_rank_1_update_avail : std::false_type {};
+
+// Overwriting, ExecutionPolicy != inline_exec_t
+template <class Exec, class x_t, class y_t, class A_t>
+struct is_custom_matrix_rank_1_update_avail<
+  Exec, x_t, y_t, /* E_t = */ void, A_t,
+  std::enable_if_t<
+    std::is_void_v<
+      decltype(matrix_rank_1_update(
+        std::declval<Exec>(),
+        std::declval<x_t>(),
+        std::declval<y_t>(),
+        std::declval<A_t>()))
+    > &&
+    ! impl::is_inline_exec_v<Exec>
+  >
+> : std::true_type
+{};
+
+// Updating, ExecutionPolicy != inline_exec_t
+template <class Exec, class x_t, class y_t, class E_t, class A_t>
+struct is_custom_matrix_rank_1_update_avail<
+  Exec, x_t, y_t, E_t, A_t,
+  std::enable_if_t<
+    std::is_void_v<
+      decltype(matrix_rank_1_update(
+        std::declval<Exec>(),
+        std::declval<x_t>(),
+        std::declval<y_t>(),
+        std::declval<E_t>(), // implies not void
+        std::declval<A_t>()))
+    > &&
+    ! impl::is_inline_exec_v<Exec>
+  >
+> : std::true_type
+{};
+
+#else
+
 template <class Exec, class x_t, class y_t, class A_t, class = void>
 struct is_custom_matrix_rank_1_update_avail : std::false_type {};
 
+// ExecutionPolicy != inline_exec_t
 template <class Exec, class x_t, class y_t, class A_t>
 struct is_custom_matrix_rank_1_update_avail<
   Exec, x_t, y_t, A_t,
@@ -45,6 +89,8 @@ struct is_custom_matrix_rank_1_update_avail<
     >
   >
   : std::true_type{};
+
+#endif // LINALG_FIX_RANK_UPDATES
 
 #if defined(LINALG_FIX_RANK_UPDATES)
 
@@ -152,7 +198,7 @@ struct is_custom_symmetric_matrix_rank_1_update_avail<
   : std::true_type
 {};
 
-// ExecutionPolicy != inline_exec_t,  alpha
+// ExecutionPolicy != inline_exec_t, alpha
 template <class Exec, class ScaleFactorType, class x_t, class A_t, class Tr_t>
 struct is_custom_symmetric_matrix_rank_1_update_avail<
   Exec, ScaleFactorType, x_t, A_t, Tr_t,
@@ -300,8 +346,10 @@ struct is_custom_hermitian_matrix_rank_1_update_avail<
 
 } // namespace (anonymous)
 
-// Nonsymmetric non-conjugated rank-1 update
+// Nonsymmetric nonconjugated matrix rank-1 update
 
+// Overwriting nonsymmetric nonconjugated matrix rank-1 update
+// (inline_exec_t)
 template<class ElementType_x,
          class SizeType_x, ::std::size_t ext_x,
          class Layout_x,
@@ -325,11 +373,55 @@ void matrix_rank_1_update(
 
   for (size_type i = 0; i < A.extent(0); ++i) {
     for (size_type j = 0; j < A.extent(1); ++j) {
+#if defined(LINALG_FIX_RANK_UPDATES)
+      A(i,j) = x(i) * y(j);
+#else
       A(i,j) += x(i) * y(j);
+#endif
     }
   }
 }
 
+#if defined(LINALG_FIX_RANK_UPDATES)
+// Updating nonsymmetric nonconjugated matrix rank-1 update
+// (inline_exec_t)
+template<class ElementType_x,
+         class SizeType_x, ::std::size_t ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         class SizeType_y, ::std::size_t ext_y,
+         class Layout_y,
+         class Accessor_y,
+         class ElementType_E,
+         class SizeType_E, ::std::size_t numRows_E,
+         ::std::size_t numCols_E,
+         class Layout_E,
+         class Accessor_E,
+         class ElementType_A,
+         class SizeType_A, ::std::size_t numRows_A,
+         ::std::size_t numCols_A,
+         class Layout_A,
+         class Accessor_A>
+void matrix_rank_1_update(
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A)
+{
+  using size_type = ::std::common_type_t<SizeType_x, SizeType_y, SizeType_A>;
+
+  for (size_type i = 0; i < A.extent(0); ++i) {
+    for (size_type j = 0; j < A.extent(1); ++j) {
+      A(i,j) = E(i,j) + x(i) * y(j);
+    }
+  }
+}
+#endif // LINALG_FIX_RANK_UPDATES
+
+// Overwriting nonsymmetric nonconjugated matrix rank-1 update
+// (ExecutionPolicy&&)
 template<class ExecutionPolicy,
          class ElementType_x,
          class SizeType_x, ::std::size_t ext_x,
@@ -351,7 +443,13 @@ void matrix_rank_1_update(
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A)
 {
   constexpr bool use_custom = is_custom_matrix_rank_1_update_avail<
-    decltype(impl::map_execpolicy_with_check(exec)), decltype(x), decltype(y), decltype(A)
+      decltype(impl::map_execpolicy_with_check(exec)),
+      decltype(x),
+      decltype(y),
+#if defined(LINALG_FIX_RANK_UPDATES)
+      /* decltype(E) = */ void,
+#endif // LINALG_FIX_RANK_UPDATES
+      decltype(A)
     >::value;
 
   if constexpr (use_custom) {
@@ -362,6 +460,54 @@ void matrix_rank_1_update(
   }
 }
 
+#if defined(LINALG_FIX_RANK_UPDATES)
+// Updating nonsymmetric nonconjugated matrix rank-1 update
+// (ExecutionPolicy&&)
+template<class ExecutionPolicy,
+         class ElementType_x,
+         class SizeType_x, ::std::size_t ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         class SizeType_y, ::std::size_t ext_y,
+         class Layout_y,
+         class Accessor_y,
+         class ElementType_E,
+         class SizeType_E, ::std::size_t numRows_E,
+         ::std::size_t numCols_E,
+         class Layout_E,
+         class Accessor_E,
+         class ElementType_A,
+         class SizeType_A, ::std::size_t numRows_A,
+         ::std::size_t numCols_A,
+         class Layout_A,
+         class Accessor_A>
+void matrix_rank_1_update(
+  ExecutionPolicy&& exec,
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A)
+{
+  constexpr bool use_custom = is_custom_matrix_rank_1_update_avail<
+      decltype(impl::map_execpolicy_with_check(exec)),
+      decltype(x),
+      decltype(y),
+      decltype(E),
+      decltype(A)
+    >::value;
+
+  if constexpr (use_custom) {
+    matrix_rank_1_update(impl::map_execpolicy_with_check(exec), x, y, E, A);
+  }
+  else {
+    matrix_rank_1_update(impl::inline_exec_t{}, x, y, E, A);
+  }
+}
+#endif // LINALG_FIX_RANK_UPDATES
+
+// Overwriting nonsymmetric nonconjugated rank-1 matrix update
+// (no execution policy)
 template<class ElementType_x,
          class SizeType_x, ::std::size_t ext_x,
          class Layout_x,
@@ -383,6 +529,36 @@ void matrix_rank_1_update(
   matrix_rank_1_update(impl::default_exec_t{}, x, y, A);
 }
 
+#if defined(LINALG_FIX_RANK_UPDATES)
+// Updating nonsymmetric nonconjugated rank-1 matrix update
+// (no execution policy)
+template<class ElementType_x,
+         class SizeType_x, ::std::size_t ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         class SizeType_y, ::std::size_t ext_y,
+         class Layout_y,
+         class Accessor_y,
+         class ElementType_E,
+         class SizeType_E, ::std::size_t numRows_E,
+         ::std::size_t numCols_E,
+         class Layout_E,
+         class Accessor_E,
+         class ElementType_A,
+         class SizeType_A, ::std::size_t numRows_A,
+         ::std::size_t numCols_A,
+         class Layout_A,
+         class Accessor_A>
+void matrix_rank_1_update(
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A)
+{
+  matrix_rank_1_update(impl::default_exec_t{}, x, y, E, A);
+}
+#endif // LINALG_FIX_RANK_UPDATES
 
 // Nonsymmetric conjugated rank-1 update
 

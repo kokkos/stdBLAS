@@ -3,6 +3,7 @@
 namespace {
   using LinearAlgebra::lower_triangle;
   using LinearAlgebra::matrix_rank_1_update;
+  using LinearAlgebra::scaled;
   using LinearAlgebra::upper_triangle;
 
   // A = [1.0   2.0  3.0]
@@ -81,7 +82,7 @@ namespace {
 
     std::vector<V> A_plus_two_x_yT = {
       V(13.0), V( 30.0), V( 55.0),
-      V(34.0), V( 88.0), V(138.0),
+      V(34.0), V( 81.0), V(138.0),
       V(71.0), V(157.0), V(293.0)
     };
 #endif // LINALG_FIX_RANK_UPDATES
@@ -135,12 +136,12 @@ namespace {
       mdspan x = problem.x_view();
       mdspan y = problem.y_view();
       mdspan A_plus_x_yT = problem.A_plus_x_yT_view();
-      const char what[] = " is wrong for A = A + 1.0 x y^T";
+      const char what[] = " is wrong for A = A + (1.0 x) y^T";
 
 #if defined(LINALG_FIX_RANK_UPDATES)
-      matrix_rank_1_update(1.0, x, y, A, A);
+      matrix_rank_1_update(scaled(1.0, x), y, A, A);
 #else
-      matrix_rank_1_update(1.0, x, y, A);
+      matrix_rank_1_update(scaled(1.0, x), y, A);
 #endif // LINALG_FIX_RANK_UPDATES
       for (int row = 0; row < A.extent(0); ++row) {
         for (int col = row; col < A.extent(1); ++col) {
@@ -180,9 +181,9 @@ namespace {
       mdspan x = problem.x_view();
       mdspan y = problem.y_view();
       mdspan x_yT = problem.x_yT_view();
-      const char what[] = " is wrong for A = 1.0 x y^T";
+      const char what[] = " is wrong for A = (1.0 x) y^T";
 
-      matrix_rank_1_update(1.0, x, y, A);
+      matrix_rank_1_update(scaled(1.0, x), y, A);
       for (int row = 0; row < A.extent(0); ++row) {
         for (int col = row; col < A.extent(1); ++col) {
           EXPECT_EQ(A(row, col), x_yT(row, col))
@@ -198,9 +199,9 @@ namespace {
       mdspan x = problem.x_view();
       mdspan y = problem.y_view();
       mdspan two_x_yT = problem.two_x_yT_view();
-      const char what[] = " is wrong for A = 2.0 x y^T";
+      const char what[] = " is wrong for A = (2.0 x) y^T";
 
-      matrix_rank_1_update(2.0, x, y, A);
+      matrix_rank_1_update(scaled(2.0, x), y, A);
       for (int row = 0; row < A.extent(0); ++row) {
         for (int col = row; col < A.extent(1); ++col) {
           EXPECT_EQ(A(row, col), two_x_yT(row, col))
@@ -214,10 +215,11 @@ namespace {
       mdspan A = problem.A_view();
       mdspan A_original = problem.A_original_view();
       mdspan x = problem.x_view();
+      mdspan y = problem.y_view();
       mdspan A_plus_two_x_yT = problem.A_plus_two_x_yT_view();
-      const char what[] = " is wrong for A = A + 2.0 x y^T";
+      const char what[] = " is wrong for A = A + (2.0 x) y^T";
 
-      matrix_rank_1_update(2.0, x, y, A, A);
+      matrix_rank_1_update(scaled(2.0, x), y, A, A);
       for (int row = 0; row < A.extent(0); ++row) {
         for (int col = row; col < A.extent(1); ++col) {
           EXPECT_EQ(A(row, col), A_plus_two_x_yT(row, col))
