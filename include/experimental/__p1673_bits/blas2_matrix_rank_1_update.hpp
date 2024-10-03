@@ -988,6 +988,10 @@ void hermitian_matrix_rank_1_update(
 {
   using index_type = std::common_type_t<SizeType_x, SizeType_A>;
 
+#if defined(LINALG_FIX_RANK_UPDATES)
+  alpha = impl::real_if_needed(alpha);
+#endif // LINALG_FIX_RANK_UPDATES
+
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (index_type i = 0; i < A.extent(0); ++i) {
       for (index_type j = 0; j <= i; ++j) {
@@ -1050,6 +1054,10 @@ void hermitian_matrix_rank_1_update(
   Triangle /* t */)
 {
   using index_type = std::common_type_t<SizeType_x, SizeType_E, SizeType_A>;
+
+#if defined(LINALG_FIX_RANK_UPDATES)
+  alpha = impl::real_if_needed(alpha);
+#endif // LINALG_FIX_RANK_UPDATES
 
   if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
     for (index_type j = 0; j < A.extent(1); ++j) {
