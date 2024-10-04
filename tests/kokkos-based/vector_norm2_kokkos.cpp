@@ -7,7 +7,7 @@ namespace
 {
 
 template<class x_t, class T>
-T vector_norm2_gold_solution(x_t x, T initValue, bool useInit)
+T vector_two_norm_gold_solution(x_t x, T initValue, bool useInit)
 {
   using std::abs;
   using value_type = typename x_t::value_type;
@@ -32,7 +32,7 @@ T vector_norm2_gold_solution(x_t x, T initValue, bool useInit)
 }
 
 template<class x_t, class T>
-void kokkos_blas1_vector_norm2_test_impl(x_t x, T initValue, bool useInit)
+void kokkos_blas1_vector_two_norm_test_impl(x_t x, T initValue, bool useInit)
 {
   namespace stdla = std::experimental::linalg;
 
@@ -42,14 +42,14 @@ void kokkos_blas1_vector_norm2_test_impl(x_t x, T initValue, bool useInit)
   // copy x to verify they are not changed after kernel
   auto x_preKernel = kokkostesting::create_stdvector_and_copy(x);
 
-  const T gold = vector_norm2_gold_solution(x, initValue, useInit);
+  const T gold = vector_two_norm_gold_solution(x, initValue, useInit);
 
   T result = {};
   if (useInit){
-    result = stdla::vector_norm2(KokkosKernelsSTD::kokkos_exec<>(),
+    result = stdla::vector_two_norm(KokkosKernelsSTD::kokkos_exec<>(),
 				 x, initValue);
   }else{
-    result = stdla::vector_norm2(KokkosKernelsSTD::kokkos_exec<>(),
+    result = stdla::vector_two_norm(KokkosKernelsSTD::kokkos_exec<>(),
 				 x);
   }
 
@@ -73,42 +73,42 @@ void kokkos_blas1_vector_norm2_test_impl(x_t x, T initValue, bool useInit)
 }
 }//end anonym namespace
 
-TEST_F(blas1_signed_float_fixture, kokkos_vector_norm2_noinitvalue)
+TEST_F(blas1_signed_float_fixture, kokkos_vector_two_norm_noinitvalue)
 {
-  kokkos_blas1_vector_norm2_test_impl(x, static_cast<float>(0), false);
+  kokkos_blas1_vector_two_norm_test_impl(x, static_cast<float>(0), false);
 }
 
-TEST_F(blas1_signed_float_fixture, kokkos_vector_norm2_initvalue)
+TEST_F(blas1_signed_float_fixture, kokkos_vector_two_norm_initvalue)
 {
-  kokkos_blas1_vector_norm2_test_impl(x, static_cast<float>(3), true);
+  kokkos_blas1_vector_two_norm_test_impl(x, static_cast<float>(3), true);
 }
 
-TEST_F(blas1_signed_double_fixture, kokkos_vector_norm2_noinitvalue)
+TEST_F(blas1_signed_double_fixture, kokkos_vector_two_norm_noinitvalue)
 {
-  kokkos_blas1_vector_norm2_test_impl(x, static_cast<double>(0), false);
+  kokkos_blas1_vector_two_norm_test_impl(x, static_cast<double>(0), false);
 }
 
-TEST_F(blas1_signed_double_fixture, kokkos_vector_norm2_initvalue)
+TEST_F(blas1_signed_double_fixture, kokkos_vector_two_norm_initvalue)
 {
-  kokkos_blas1_vector_norm2_test_impl(x, static_cast<double>(5), true);
+  kokkos_blas1_vector_two_norm_test_impl(x, static_cast<double>(5), true);
 }
 
-TEST_F(blas1_signed_complex_double_fixture, kokkos_vector_norm2_noinitvalue)
+TEST_F(blas1_signed_complex_double_fixture, kokkos_vector_two_norm_noinitvalue)
 {
   namespace stdla = std::experimental::linalg;
   using kc_t = Kokkos::complex<double>;
   using stdc_t = value_type;
   if constexpr (alignof(value_type) == alignof(kc_t)){
-    kokkos_blas1_vector_norm2_test_impl(x, static_cast<double>(0), false);
+    kokkos_blas1_vector_two_norm_test_impl(x, static_cast<double>(0), false);
   }
 }
 
-TEST_F(blas1_signed_complex_double_fixture, kokkos_vector_norm2_initvalue)
+TEST_F(blas1_signed_complex_double_fixture, kokkos_vector_two_norm_initvalue)
 {
   namespace stdla = std::experimental::linalg;
   using kc_t = Kokkos::complex<double>;
   using stdc_t = value_type;
   if constexpr (alignof(value_type) == alignof(kc_t)){
-    kokkos_blas1_vector_norm2_test_impl(x, static_cast<double>(5), true);
+    kokkos_blas1_vector_two_norm_test_impl(x, static_cast<double>(5), true);
   }
 }

@@ -55,15 +55,15 @@ namespace linalg {
 namespace
 {
 template <class Exec, class x_t, class Scalar, class = void>
-struct is_custom_vector_norm2_avail : std::false_type {};
+struct is_custom_vector_two_norm_avail : std::false_type {};
 
 template <class Exec, class x_t, class Scalar>
-struct is_custom_vector_norm2_avail<
+struct is_custom_vector_two_norm_avail<
   Exec, x_t, Scalar,
   std::enable_if_t<
     std::is_same<
       decltype(
-	       vector_norm2(std::declval<Exec>(),
+	       vector_two_norm(std::declval<Exec>(),
 			    std::declval<x_t>(),
 			    std::declval<Scalar>())
 	       ),
@@ -80,7 +80,7 @@ template<class ElementType,
          class Layout,
          class Accessor,
          class Scalar>
-Scalar vector_norm2(
+Scalar vector_two_norm(
   impl::inline_exec_t&& exec,
   mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> x,
   Scalar init)
@@ -105,20 +105,20 @@ template<class ExecutionPolicy,
          class Layout,
          class Accessor,
          class Scalar>
-Scalar vector_norm2(
+Scalar vector_two_norm(
   ExecutionPolicy&& exec,
   mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> x,
   Scalar init)
 {
-  constexpr bool use_custom = is_custom_vector_norm2_avail<
+  constexpr bool use_custom = is_custom_vector_two_norm_avail<
     decltype(impl::map_execpolicy_with_check(exec)), decltype(x), Scalar
     >::value;
 
   if constexpr (use_custom) {
-    return vector_norm2(impl::map_execpolicy_with_check(exec), x, init);
+    return vector_two_norm(impl::map_execpolicy_with_check(exec), x, init);
   }
   else {
-    return vector_norm2(impl::inline_exec_t{}, x, init);
+    return vector_two_norm(impl::inline_exec_t{}, x, init);
   }
 }
 
@@ -127,15 +127,15 @@ template<class ElementType,
          class Layout,
          class Accessor,
          class Scalar>
-Scalar vector_norm2(
+Scalar vector_two_norm(
   mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> x,
   Scalar init)
 {
-  return vector_norm2(impl::default_exec_t{}, x, init);
+  return vector_two_norm(impl::default_exec_t{}, x, init);
 }
 
 
-namespace vector_norm2_detail {
+namespace vector_two_norm_detail {
   using std::abs;
 
   // The point of this is to do correct ADL for abs,
@@ -145,21 +145,21 @@ namespace vector_norm2_detail {
     class SizeType, ::std::size_t ext0,
     class Layout,
     class Accessor>
-  auto vector_norm2_return_type_deducer(
+  auto vector_two_norm_return_type_deducer(
     mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> x)
   -> decltype(abs(x(0)) * abs(x(0)));
-} // namespace vector_norm2_detail
+} // namespace vector_two_norm_detail
 
 template<class ElementType,
          class SizeType, ::std::size_t ext0,
          class Layout,
          class Accessor>
-auto vector_norm2(
+auto vector_two_norm(
   mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> x)
--> decltype(vector_norm2_detail::vector_norm2_return_type_deducer(x))
+-> decltype(vector_two_norm_detail::vector_two_norm_return_type_deducer(x))
 {
-  using return_t = decltype(vector_norm2_detail::vector_norm2_return_type_deducer(x));
-  return vector_norm2(x, return_t{});
+  using return_t = decltype(vector_two_norm_detail::vector_two_norm_return_type_deducer(x));
+  return vector_two_norm(x, return_t{});
 }
 
 template<class ExecutionPolicy,
@@ -167,13 +167,13 @@ template<class ExecutionPolicy,
          class SizeType, ::std::size_t ext0,
          class Layout,
          class Accessor>
-auto vector_norm2(
+auto vector_two_norm(
   ExecutionPolicy&& exec,
   mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> x)
--> decltype(vector_norm2_detail::vector_norm2_return_type_deducer(x))
+-> decltype(vector_two_norm_detail::vector_two_norm_return_type_deducer(x))
 {
-  using return_t = decltype(vector_norm2_detail::vector_norm2_return_type_deducer(x));
-  return vector_norm2(exec, x, return_t{});
+  using return_t = decltype(vector_two_norm_detail::vector_two_norm_return_type_deducer(x));
+  return vector_two_norm(exec, x, return_t{});
 }
 
 } // end namespace linalg

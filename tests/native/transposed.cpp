@@ -102,14 +102,15 @@ namespace {
     auto out = out_md.mapping();
     static_assert(std::is_same_v<decltype(out), ExpectedLayoutMapping>);
     EXPECT_EQ(out.extents(), out_expected.extents());
-    EXPECT_EQ(out.is_exhaustive(), out_expected.is_exhaustive());
-    EXPECT_EQ(out.is_unique(), out_expected.is_unique());
-    ASSERT_EQ(out.is_strided(), out_expected.is_strided());
-    if (out_expected.is_strided()) {
+    EXPECT_EQ(out.is_strided(), out_expected.is_strided());
+    if (out.is_strided() && out_expected.is_strided()) {
       for (size_t r = 0; r < 2u; ++r) {
-        out.stride(r) == out_expected.stride(r);
+        EXPECT_EQ(out.stride(r), out_expected.stride(r))
+          << "Strides not equal at r = " << r;
       }
     }
+    EXPECT_EQ(out.is_unique(), out_expected.is_unique());
+    EXPECT_EQ(out.is_exhaustive(), out_expected.is_exhaustive());
   }
 
   TEST(transposed_layout, layout_left)
@@ -198,6 +199,108 @@ namespace {
       test_one(in_extents_type{3, 4}, out_extents_type{4, 3}, storage);
     }
   }
+
+#if defined(LINALG_FIX_TRANSPOSED_FOR_PADDED_LAYOUTS)
+  template<size_t PaddingValue>
+  void test_transposed_layout_left_padded(auto runtime_padding_value)
+  {
+    auto test_one = [=] (auto in_exts, auto out_exts,
+                         std::vector<char>& fake_storage)
+    {
+      using in_extents_type = decltype(in_exts);
+      using in_mapping_type = typename layout_left_padded<PaddingValue>::template mapping<in_extents_type>;
+      using out_extents_type = decltype(out_exts);
+      using out_mapping_type = typename layout_right_padded<PaddingValue>::template mapping<out_extents_type>;
+
+      in_mapping_type in_map{in_exts, runtime_padding_value};
+      out_mapping_type out_map{out_exts, runtime_padding_value};
+      test_transposed_layout(in_map, out_map, fake_storage);
+    };
+
+    std::vector<char> storage;
+    {
+      using in_extents_type = extents<int, 3, 4>;
+      using out_extents_type = extents<int, 4, 3>;
+      test_one(in_extents_type{}, out_extents_type{}, storage);
+    }
+    {
+      using in_extents_type = extents<int, 3, dynamic_extent>;
+      using out_extents_type = extents<int, dynamic_extent, 3>;
+      test_one(in_extents_type{4}, out_extents_type{4}, storage);
+    }
+    {
+      using in_extents_type = extents<int, dynamic_extent, dynamic_extent>;
+      using out_extents_type = extents<int, dynamic_extent, dynamic_extent>;
+      test_one(in_extents_type{3, 4}, out_extents_type{4, 3}, storage);
+    }
+  }
+
+  TEST(transposed_layout, layout_left_padded)
+  {
+    {
+      constexpr size_t padding_value = dynamic_extent;
+      constexpr size_t runtime_padding_value = 5u;
+      test_transposed_layout_left_padded<padding_value>(runtime_padding_value);
+    }
+    {
+      constexpr size_t padding_value = 5u;
+      constexpr size_t runtime_padding_value = padding_value;
+      test_transposed_layout_left_padded<padding_value>(runtime_padding_value);
+    }
+  }
+
+  template<size_t PaddingValue>
+  void test_transposed_layout_right_padded(auto runtime_padding_value)
+  {
+    auto test_one = [=] (auto in_exts, auto out_exts,
+                         std::vector<char>& fake_storage)
+    {
+      using in_extents_type = decltype(in_exts);
+      using in_mapping_type = typename layout_right_padded<PaddingValue>::template mapping<in_extents_type>;
+      using out_extents_type = decltype(out_exts);
+      using out_mapping_type = typename layout_left_padded<PaddingValue>::template mapping<out_extents_type>;
+
+      in_mapping_type in_map{in_exts, runtime_padding_value};
+      EXPECT_EQ(in_map.stride(0), runtime_padding_value);
+      EXPECT_EQ(in_map.stride(1), 1);
+      out_mapping_type out_map{out_exts, runtime_padding_value};
+      EXPECT_EQ(out_map.stride(0), 1);
+      EXPECT_EQ(out_map.stride(1), runtime_padding_value);
+      test_transposed_layout(in_map, out_map, fake_storage);
+    };
+
+    std::vector<char> storage;
+    {
+      using in_extents_type = extents<int, 3, 4>;
+      using out_extents_type = extents<int, 4, 3>;
+      test_one(in_extents_type{}, out_extents_type{}, storage);
+    }
+    {
+      using in_extents_type = extents<int, 3, dynamic_extent>;
+      using out_extents_type = extents<int, dynamic_extent, 3>;
+      test_one(in_extents_type{4}, out_extents_type{4}, storage);
+    }
+    {
+      using in_extents_type = extents<int, dynamic_extent, dynamic_extent>;
+      using out_extents_type = extents<int, dynamic_extent, dynamic_extent>;
+      test_one(in_extents_type{3, 4}, out_extents_type{4, 3}, storage);
+    }
+  }
+
+  TEST(transposed_layout, layout_right_padded)
+  {
+    {
+      constexpr size_t padding_value = dynamic_extent;
+      constexpr size_t runtime_padding_value = 5u;
+      test_transposed_layout_right_padded<padding_value>(runtime_padding_value);
+    }
+    {
+      constexpr size_t padding_value = 5u;
+      constexpr size_t runtime_padding_value = padding_value;
+      test_transposed_layout_right_padded<padding_value>(runtime_padding_value);
+    }
+  }
+#endif // LINALG_FIX_TRANSPOSED_FOR_PADDED_LAYOUTS
 
   TEST(transposed, mdspan_double)
   {

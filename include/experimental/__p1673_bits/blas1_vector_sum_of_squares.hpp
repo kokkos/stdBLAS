@@ -107,12 +107,13 @@ sum_of_squares_result<Scalar> vector_sum_of_squares(
   for (SizeType i = 0; i < x.extent(0); ++i) {
     if (abs(x(i)) != 0.0) {
       const auto absxi = abs(x(i));
-      const auto quotient = scale / absxi;
       if (scale < absxi) {
+          const auto quotient = scale / absxi;
           ssq = Scalar(1.0) + ssq * quotient * quotient;
           scale = absxi;
       }
       else {
+        const auto quotient = absxi / scale;
         ssq = ssq + quotient * quotient;
       }
     }
