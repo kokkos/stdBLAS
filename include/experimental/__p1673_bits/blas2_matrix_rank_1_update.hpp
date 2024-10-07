@@ -583,6 +583,35 @@ void matrix_rank_1_update_c(
   matrix_rank_1_update(x, conjugated(y), A);
 }
 
+#if defined(LINALG_FIX_RANK_UPDATES)
+template<class ElementType_x,
+         class SizeType_x, ::std::size_t ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         class SizeType_y, ::std::size_t ext_y,
+         class Layout_y,
+         class Accessor_y,
+         class ElementType_E,
+         class SizeType_E, ::std::size_t numRows_E,
+         ::std::size_t numCols_E,
+         class Layout_E,
+         class Accessor_E,
+         class ElementType_A,
+         class SizeType_A, ::std::size_t numRows_A,
+         ::std::size_t numCols_A,
+         class Layout_A,
+         class Accessor_A>
+void matrix_rank_1_update_c(
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A)
+{
+  matrix_rank_1_update(x, conjugated(y), E, A);
+}
+#endif // LINALG_FIX_RANK_UPDATES
+
 template<class ExecutionPolicy,
          class ElementType_x,
          class SizeType_x, ::std::size_t ext_x,
@@ -603,8 +632,39 @@ void matrix_rank_1_update_c(
   mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
   mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A)
 {
-  matrix_rank_1_update(exec, x, conjugated(y), A);
+  matrix_rank_1_update(std::forward<ExecutionPolicy>(exec), x, conjugated(y), A);
 }
+
+#if defined(LINALG_FIX_RANK_UPDATES)
+template<class ExecutionPolicy,
+         class ElementType_x,
+         class SizeType_x, ::std::size_t ext_x,
+         class Layout_x,
+         class Accessor_x,
+         class ElementType_y,
+         class SizeType_y, ::std::size_t ext_y,
+         class Layout_y,
+         class Accessor_y,
+         class ElementType_E,
+         class SizeType_E, ::std::size_t numRows_E,
+         ::std::size_t numCols_E,
+         class Layout_E,
+         class Accessor_E,
+         class ElementType_A,
+         class SizeType_A, ::std::size_t numRows_A,
+         ::std::size_t numCols_A,
+         class Layout_A,
+         class Accessor_A>
+void matrix_rank_1_update_c(
+  ExecutionPolicy&& exec,
+  mdspan<ElementType_x, extents<SizeType_x, ext_x>, Layout_x, Accessor_x> x,
+  mdspan<ElementType_y, extents<SizeType_y, ext_y>, Layout_y, Accessor_y> y,
+  mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A)
+{
+  matrix_rank_1_update(std::forward<ExecutionPolicy>(exec), x, conjugated(y), E, A);
+}
+#endif // LINALG_FIX_RANK_UPDATES
 
 // Symmetric matrix rank-1 update
 
