@@ -432,11 +432,57 @@ struct is_custom_triang_mat_right_product_avail<
   >
   : std::true_type{};
 
-template <class Exec, class A_t, class Tr_t, class DiagSt_t, class C_t, class = void>
+template <class Exec, class A_t, class Tr_t, class DiagSt_t, class B_t, class E_t, class C_t, class = void>
 struct is_custom_triang_mat_left_product_with_update_avail : std::false_type {};
 
-template <class Exec, class A_t, class Tr_t, class DiagSt_t, class C_t>
+template <class Exec, class A_t, class Tr_t, class DiagSt_t, class B_t, class E_t, class C_t>
 struct is_custom_triang_mat_left_product_with_update_avail<
+  Exec, A_t, Tr_t, DiagSt_t, B_t, E_t, C_t,
+  std::enable_if_t<
+    std::is_void_v<
+      decltype(
+	       triangular_matrix_product
+	       (std::declval<Exec>(),
+		std::declval<A_t>(),
+		std::declval<Tr_t>(),
+		std::declval<DiagSt_t>(),
+		std::declval<B_t>(),
+    	std::declval<E_t>(),
+		std::declval<C_t>()))
+      >
+    && ! impl::is_inline_exec_v<Exec>
+    >
+  >
+  : std::true_type{};
+
+template <class Exec, class A_t, class Tr_t, class DiagSt_t, class B_t, class E_t, class C_t, class = void>
+struct is_custom_triang_mat_right_product_with_update_avail : std::false_type {};
+
+template <class Exec, class A_t, class Tr_t, class DiagSt_t, class B_t, class E_t, class C_t>
+struct is_custom_triang_mat_right_product_with_update_avail<
+  Exec, A_t, Tr_t, DiagSt_t, B_t, E_t, C_t,
+  std::enable_if_t<
+    std::is_void_v<
+      decltype(
+	       triangular_matrix_product
+	       (std::declval<Exec>(),
+		std::declval<B_t>(),
+    	std::declval<A_t>(),
+		std::declval<Tr_t>(),
+		std::declval<DiagSt_t>(),
+    	std::declval<E_t>(),
+		std::declval<C_t>()))
+      >
+    && ! impl::is_inline_exec_v<Exec>
+    >
+  >
+  : std::true_type{};
+
+template <class Exec, class A_t, class Tr_t, class DiagSt_t, class C_t, class = void>
+struct is_custom_triang_mat_left_product_inplace_avail : std::false_type {};
+
+template <class Exec, class A_t, class Tr_t, class DiagSt_t, class C_t>
+struct is_custom_triang_mat_left_product_inplace_avail<
   Exec, A_t, Tr_t, DiagSt_t, C_t,
   std::enable_if_t<
     std::is_void_v<
@@ -454,10 +500,10 @@ struct is_custom_triang_mat_left_product_with_update_avail<
   : std::true_type{};
 
 template <class Exec, class A_t, class Tr_t, class DiagSt_t, class C_t, class = void>
-struct is_custom_triang_mat_right_product_with_update_avail : std::false_type {};
+struct is_custom_triang_mat_right_product_inplace_avail : std::false_type {};
 
 template <class Exec, class A_t, class Tr_t, class DiagSt_t, class C_t>
-struct is_custom_triang_mat_right_product_with_update_avail<
+struct is_custom_triang_mat_right_product_inplace_avail<
   Exec, A_t, Tr_t, DiagSt_t, C_t,
   std::enable_if_t<
     std::is_void_v<
@@ -964,7 +1010,7 @@ void triangular_matrix_product(
     decltype(impl::map_execpolicy_with_check(exec)), decltype(A), Triangle, DiagonalStorage, decltype(B), decltype(C)>::value;
 
   if constexpr (use_custom) {
-    triangular_matrix_left_product(impl::map_execpolicy_with_check(exec), A, t, d, B, C);
+    triangular_matrix_product(impl::map_execpolicy_with_check(exec), A, t, d, B, C);
   } else {
     triangular_matrix_product(impl::inline_exec_t{}, A, t, d, B, C);
   }
@@ -1079,7 +1125,7 @@ void triangular_matrix_product(
     decltype(A), Triangle, DiagonalStorage, decltype(B), decltype(C)>::value;
 
   if constexpr (use_custom) {
-    triangular_matrix_right_product(impl::map_execpolicy_with_check(exec), A, t, d, B, C);
+    triangular_matrix_product(impl::map_execpolicy_with_check(exec), B, A, t, d, C);
   } else {
     triangular_matrix_product(impl::inline_exec_t{}, B, A, t, d, C);
   }
@@ -1111,6 +1157,267 @@ void triangular_matrix_product(
 
 
 // Updating triangular matrix-matrix product
+
+template<class ElementType_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class DiagonalStorage,
+         class ElementType_B,
+         class SizeType_B, ::std::size_t numRows_B, ::std::size_t numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_E,
+         class SizeType_E, ::std::size_t numRows_E, ::std::size_t numCols_E,
+         class Layout_E,
+         class Accessor_E,
+         class ElementType_C,
+         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void triangular_matrix_product(
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle /* t */,
+  DiagonalStorage /* d */,
+  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
+  mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  using size_type = ::std::common_type_t<SizeType_A, SizeType_B, SizeType_E, SizeType_C>;
+  constexpr bool explicitDiagonal =
+    std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
+
+  if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = E(i,j);
+        const ptrdiff_t k_upper = explicitDiagonal ? i : i - ptrdiff_t(1);
+        for (ptrdiff_t k = 0; k <= k_upper; ++k) {
+          C(i,j) += A(i,k) * B(k,j);
+        }
+        if constexpr (! explicitDiagonal) {
+          C(i,j) += /* 1 times */ B(i,j);
+        }
+      }
+    }
+  }
+  else { // upper_triangle_t
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = E(i,j);
+        const size_type k_lower = explicitDiagonal ? i : i + 1;
+        for (size_type k = k_lower; k < C.extent(0); ++k) {
+          C(i,j) += A(i,k) * B(k,j);
+        }
+        if constexpr (! explicitDiagonal) {
+          C(i,j) += /* 1 times */ B(i,j);
+        }
+      }
+    }
+  }
+}
+
+template<class ExecutionPolicy,
+         class ElementType_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class DiagonalStorage,
+         class ElementType_B,
+         class SizeType_B, ::std::size_t numRows_B, ::std::size_t numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_E,
+         class SizeType_E, ::std::size_t numRows_E, ::std::size_t numCols_E,
+         class Layout_E,
+         class Accessor_E,
+         class ElementType_C,
+         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void triangular_matrix_product(
+  ExecutionPolicy&& exec,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  DiagonalStorage d,
+  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
+  mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  constexpr bool use_custom = is_custom_triang_mat_left_product_with_update_avail<
+    decltype(impl::map_execpolicy_with_check(exec)), decltype(A), Triangle, DiagonalStorage, decltype(B), decltype(E), decltype(C)>::value;
+
+  if constexpr (use_custom) {
+    triangular_matrix_product(impl::map_execpolicy_with_check(exec), A, t, d, B, E, C);
+  } else {
+    triangular_matrix_product(impl::inline_exec_t{}, A, t, d, B, E, C);
+  }
+}
+
+template<class ElementType_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class DiagonalStorage,
+         class ElementType_B,
+         class SizeType_B, ::std::size_t numRows_B, ::std::size_t numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_E,
+         class SizeType_E, ::std::size_t numRows_E, ::std::size_t numCols_E,
+         class Layout_E,
+         class Accessor_E,
+         class ElementType_C,
+         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void triangular_matrix_product(
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  DiagonalStorage d,
+  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
+  mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  triangular_matrix_product(impl::default_exec_t{}, A, t, d, B, E, C);
+}
+
+
+template<class ElementType_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class DiagonalStorage,
+         class ElementType_B,
+         class SizeType_B, ::std::size_t numRows_B, ::std::size_t numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_E,
+         class SizeType_E, ::std::size_t numRows_E, ::std::size_t numCols_E,
+         class Layout_E,
+         class Accessor_E,
+         class ElementType_C,
+         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void triangular_matrix_product(
+  impl::inline_exec_t&& /* exec */,
+  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle /* t */,
+  DiagonalStorage /* d */,
+  mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
+  mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  using size_type = ::std::common_type_t<SizeType_A, SizeType_B, SizeType_E, SizeType_C>;
+  constexpr bool explicitDiagonal =
+    std::is_same_v<DiagonalStorage, explicit_diagonal_t>;
+
+  if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      const size_type k_lower = explicitDiagonal ? j : j + 1;
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = E(i,j);
+        for (size_type k = k_lower; k < C.extent(1); ++k) {
+          C(i,j) += B(i,k) * A(k,j);
+        }
+        if constexpr (! explicitDiagonal) {
+          C(i,j) += /* 1 times */ B(i,j);
+        }
+      }
+    }
+  }
+  else { // upper_triangle_t
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      const ptrdiff_t k_upper = explicitDiagonal ? j : j - ptrdiff_t(1);
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = E(i,j);
+        for (ptrdiff_t k = 0; k <= k_upper; ++k) {
+          C(i,j) += B(i,k) * A(k,j);
+        }
+        if constexpr (! explicitDiagonal) {
+          C(i,j) += /* 1 times */ B(i,j);
+        }
+      }
+    }
+  }
+}
+
+template<class ExecutionPolicy,
+         class ElementType_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class DiagonalStorage,
+         class ElementType_B,
+         class SizeType_B, ::std::size_t numRows_B, ::std::size_t numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_E,
+         class SizeType_E, ::std::size_t numRows_E, ::std::size_t numCols_E,
+         class Layout_E,
+         class Accessor_E,
+         class ElementType_C,
+         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void triangular_matrix_product(
+  ExecutionPolicy&& exec,
+  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  DiagonalStorage d,
+  mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
+  mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  constexpr bool use_custom = is_custom_triang_mat_right_product_with_update_avail<
+    decltype(impl::map_execpolicy_with_check(exec)),
+    decltype(A), Triangle, DiagonalStorage, decltype(B), decltype(E), decltype(C)>::value;
+
+  if constexpr (use_custom) {
+    triangular_matrix_product(impl::map_execpolicy_with_check(exec), B, A, t, d, E, C);
+  } else {
+    triangular_matrix_product(impl::inline_exec_t{}, B, A, t, d, E, C);
+  }
+}
+
+template<class ElementType_A,
+         class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
+         class Layout_A,
+         class Accessor_A,
+         class Triangle,
+         class DiagonalStorage,
+         class ElementType_B,
+         class SizeType_B, ::std::size_t numRows_B, ::std::size_t numCols_B,
+         class Layout_B,
+         class Accessor_B,
+         class ElementType_E,
+         class SizeType_E, ::std::size_t numRows_E, ::std::size_t numCols_E,
+         class Layout_E,
+         class Accessor_E,
+         class ElementType_C,
+         class SizeType_C, ::std::size_t numRows_C, ::std::size_t numCols_C,
+         class Layout_C,
+         class Accessor_C>
+void triangular_matrix_product(
+  mdspan<ElementType_B, extents<SizeType_B, numRows_B, numCols_B>, Layout_B, Accessor_B> B,
+  mdspan<ElementType_A, extents<SizeType_A, numRows_A, numCols_A>, Layout_A, Accessor_A> A,
+  Triangle t,
+  DiagonalStorage d ,
+  mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
+  mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
+{
+  triangular_matrix_product(impl::default_exec_t{}, B, A, t, d, E, C);
+}
+
+
+// In-place triangular matrix-matrix product
 
 template<class ElementType_A,
          class SizeType_A, ::std::size_t numRows_A, ::std::size_t numCols_A,
@@ -1177,7 +1484,7 @@ void triangular_matrix_left_product(
   DiagonalStorage d,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  constexpr bool use_custom = is_custom_triang_mat_left_product_with_update_avail<
+  constexpr bool use_custom = is_custom_triang_mat_left_product_inplace_avail<
     decltype(impl::map_execpolicy_with_check(exec)), decltype(A), Triangle, DiagonalStorage, decltype(C)>::value;
 
   if constexpr (use_custom) {
@@ -1275,7 +1582,7 @@ void triangular_matrix_right_product(
   DiagonalStorage d,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  constexpr bool use_custom = is_custom_triang_mat_right_product_with_update_avail<
+  constexpr bool use_custom = is_custom_triang_mat_right_product_inplace_avail<
     decltype(impl::map_execpolicy_with_check(exec)), decltype(A), Triangle, DiagonalStorage, decltype(C)>::value;
 
   if constexpr (use_custom) {
@@ -1538,7 +1845,30 @@ void symmetric_matrix_product(
   mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  assert(false);
+  using size_type = ::std::common_type_t<SizeType_A, SizeType_B, SizeType_C>;
+
+  if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = E(i,j);
+        for (size_type k = 0; k < A.extent(1); ++k) {
+          ElementType_A aik = i <= k ? A(k,i) : A(i,k);
+          C(i,j) += aik * B(k,j);
+        }
+      }
+    }
+  }
+  else { // upper_triangle_t
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = E(i,j);
+        for (size_type k = 0; k < A.extent(1); ++k) {
+          ElementType_A aik = i >= k ? A(k,i) : A(i,k);
+          C(i,j) += aik * B(k,j);
+        }
+      }
+    }
+  }
 }
 
 template<class ExecutionPolicy,
@@ -1632,7 +1962,30 @@ void symmetric_matrix_product(
   mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  assert(false);
+  using size_type = ::std::common_type_t<SizeType_A, SizeType_B, SizeType_C>;
+
+  if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = E(i,j);
+        for (size_type k = 0; k < A.extent(1); ++k) {
+          ElementType_A akj = j <= k ? A(k,j) : A(j,k);
+          C(i,j) += B(i,k) * akj;
+        }
+      }
+    }
+  }
+  else { // upper_triangle_t
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = E(i,j);
+        for (size_type k = 0; k < A.extent(1); ++k) {
+          ElementType_A akj = j >= k ? A(k,j) : A(j,k);
+          C(i,j) += B(i,k) * akj;
+        }
+      }
+    }
+  }
 }
 
 template<class ExecutionPolicy,
@@ -1835,9 +2188,12 @@ void hermitian_matrix_product(
     for (size_type j = 0; j < C.extent(1); ++j) {
       for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
-        for (size_type k = 0; k < A.extent(1); ++k) {
-          ElementType_A akj = j <= k ? A(k,j) : impl::conj_if_needed(A(j,k));
-          C(i,j) += B(i,k) * akj;
+        for (size_type k = 0; k < j; ++k) {
+          C(i,j) += B(i,k) * impl::conj_if_needed(A(j,k));
+        }
+        C(i,j) += B(i,j) * impl::real_if_needed(A(j,j));
+        for (size_type k = j+1; k < A.extent(1); ++k) {
+          C(i,j) += B(i,k) * A(k,j);
         }
       }
     }
@@ -1846,9 +2202,12 @@ void hermitian_matrix_product(
     for (size_type j = 0; j < C.extent(1); ++j) {
       for (size_type i = 0; i < C.extent(0); ++i) {
         C(i,j) = ElementType_C{};
-        for (size_type k = 0; k < A.extent(1); ++k) {
-          ElementType_A akj = j >= k ? A(k,j) : impl::conj_if_needed(A(j,k));
-          C(i,j) += B(i,k) * akj;
+        for (size_type k = 0; k < j; ++k) {
+          C(i,j) += B(i,k) * A(k,j);
+        }
+        C(i,j) += B(i,j) * impl::real_if_needed(A(j,j));
+        for (size_type k = j+1; k < A.extent(1); ++k) {
+          C(i,j) += B(i,k) * impl::conj_if_needed(A(j,k));
         }
       }
     }
@@ -1937,7 +2296,36 @@ void hermitian_matrix_product(
   mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  assert(false);
+  using size_type = ::std::common_type_t<SizeType_A, SizeType_B, SizeType_C>;
+
+  if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = E(i,j);
+        for (size_type k = 0; k < i; ++k){
+          C(i,j) += A(i,k) * B(k,j);
+        }
+        C(i,j) += impl::real_if_needed(A(i,i)) * B(i,j);
+        for (size_type k = i+1; k < A.extent(0); ++k){
+          C(i,j) += impl::conj_if_needed(A(k,i)) * B(k,j);
+        }
+      }
+    }
+  }
+  else { // upper_triangle_t
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = E(i,j);
+        for (size_type k = 0; k < i; ++k) {
+          C(i,j) += impl::conj_if_needed(A(k,i)) * B(k,j);
+        }
+        C(i,j) += impl::real_if_needed(A(i,i)) * B(i,j);
+        for (size_type k = i+1; k < A.extent(1); ++k) {
+          C(i,j) += A(i,k) * B(k,j);
+        }
+      }
+    }
+  }
 }
 
 template<class ExecutionPolicy,
@@ -2031,7 +2419,36 @@ void hermitian_matrix_product(
   mdspan<ElementType_E, extents<SizeType_E, numRows_E, numCols_E>, Layout_E, Accessor_E> E,
   mdspan<ElementType_C, extents<SizeType_C, numRows_C, numCols_C>, Layout_C, Accessor_C> C)
 {
-  assert(false);
+  using size_type = ::std::common_type_t<SizeType_A, SizeType_B, SizeType_C>;
+
+  if constexpr (std::is_same_v<Triangle, lower_triangle_t>) {
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = E(i,j);
+        for (size_type k = 0; k < j; ++k) {
+          C(i,j) += B(i,k) * impl::conj_if_needed(A(j,k));
+        }
+        C(i,j) += B(i,j) * impl::real_if_needed(A(j,j));
+        for (size_type k = j+1; k < A.extent(1); ++k) {
+          C(i,j) += B(i,k) * A(k,j);
+        }
+      }
+    }
+  }
+  else { // upper_triangle_t
+    for (size_type j = 0; j < C.extent(1); ++j) {
+      for (size_type i = 0; i < C.extent(0); ++i) {
+        C(i,j) = E(i,j);
+        for (size_type k = 0; k < j; ++k) {
+          C(i,j) += B(i,k) * A(k,j);
+        }
+        C(i,j) += B(i,j) * impl::real_if_needed(A(j,j));
+        for (size_type k = j+1; k < A.extent(1); ++k) {
+          C(i,j) += B(i,k) * impl::conj_if_needed(A(j,k));
+        }
+      }
+    }
+  }
 }
 
 template<class ExecutionPolicy,

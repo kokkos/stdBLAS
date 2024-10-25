@@ -135,7 +135,7 @@ auto conjugated(
   using return_element_type = typename NestedAccessor::element_type;
   using return_accessor_type = NestedAccessor;
   return mdspan<return_element_type, Extents, Layout, return_accessor_type>
-    (a.data_handle(), a.mapping(), a.nested_accessor());
+    (a.data_handle(), a.mapping(), a.accessor().nested_accessor());
 }
 
 } // end namespace linalg
