@@ -3,6 +3,7 @@
 namespace {
   using LinearAlgebra::symmetric_matrix_rank_k_update;
   using LinearAlgebra::transposed;
+  using LinearAlgebra::scaled;
   using LinearAlgebra::upper_triangle;
 
   // This is a regression test that follows on from
@@ -43,6 +44,7 @@ namespace {
 
     std::array<double, 9> WC = WC_original;
     mdspan C{WC.data(), map_C};
+    mdspan C_original{WC_original.data(), map_C};
 
     std::array<double, 9> WA = WA_original;
     mdspan A{WA.data(), layout_left::mapping{extents<std::size_t,3,3>{}}};
@@ -54,7 +56,7 @@ namespace {
 
     for (std::size_t row = 0; row < C.extent(0); ++row) {
       for (std::size_t col = 0; col < C.extent(1); ++col) {
-        const auto expected_rc = expected(row, col);
+        const auto expected_rc = (expected(row, col)==flag)?flag:(expected(row, col)-C_original(row, col));
         const auto C_rc = C(row, col);
         EXPECT_EQ(expected_rc, C_rc) << "at (" << row << ", " << col << ")";
       }
@@ -69,7 +71,35 @@ namespace {
 
     for (std::size_t row = 0; row < C.extent(0); ++row) {
       for (std::size_t col = 0; col < C.extent(1); ++col) {
+        const auto expected_rc = (expected(row, col)==flag)?flag:(expected(row, col)-C_original(row, col));
+        const auto C_rc = C(row, col);
+        EXPECT_EQ(expected_rc, C_rc) << "at (" << row << ", " << col << ")";
+      }
+    }
+
+    WA = WA_original;
+    WC = WC_original;
+    expected_storage = expected_storage_original;
+
+    hermitian_matrix_rank_k_update(A, C, C, upper_triangle);
+
+    for (std::size_t row = 0; row < C.extent(0); ++row) {
+      for (std::size_t col = 0; col < C.extent(1); ++col) {
         const auto expected_rc = expected(row, col);
+        const auto C_rc = C(row, col);
+        EXPECT_EQ(expected_rc, C_rc) << "at (" << row << ", " << col << ")";
+      }
+    }
+
+    WA = WA_original;
+    WC = WC_original;
+    expected_storage = expected_storage_original;
+
+    hermitian_matrix_rank_k_update(A, scaled(2., C), C, upper_triangle);
+
+    for (std::size_t row = 0; row < C.extent(0); ++row) {
+      for (std::size_t col = 0; col < C.extent(1); ++col) {
+        const auto expected_rc = (expected(row, col)==flag)?flag:(expected(row, col)+C_original(row, col));
         const auto C_rc = C(row, col);
         EXPECT_EQ(expected_rc, C_rc) << "at (" << row << ", " << col << ")";
       }
