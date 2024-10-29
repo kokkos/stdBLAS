@@ -52,7 +52,7 @@ namespace {
     std::array<double, 9> expected_storage = expected_storage_original;
     mdspan expected{expected_storage.data(), map_expected};
 
-    hermitian_matrix_rank_2k_update(scaled(0.5, A), A,C, upper_triangle);
+    hermitian_matrix_rank_k_update(1.0, A, C, upper_triangle);
 
     for (std::size_t row = 0; row < C.extent(0); ++row) {
       for (std::size_t col = 0; col < C.extent(1); ++col) {
@@ -71,7 +71,7 @@ namespace {
     WC = WC_original;
     expected_storage = expected_storage_original;
 
-    hermitian_matrix_rank_2k_update(scaled(0.5, A), A,C, upper_triangle);
+    hermitian_matrix_rank_k_update(A, C, upper_triangle);
 
     for (std::size_t row = 0; row < C.extent(0); ++row) {
       for (std::size_t col = 0; col < C.extent(1); ++col) {
@@ -91,7 +91,7 @@ namespace {
     WC = WC_original;
     expected_storage = expected_storage_original;
 
-    hermitian_matrix_rank_2k_update(scaled(0.5, A), A,C, C, upper_triangle);
+    hermitian_matrix_rank_k_update(A, C, C, upper_triangle);
 
     for (std::size_t row = 0; row < C.extent(0); ++row) {
       for (std::size_t col = 0; col < C.extent(1); ++col) {
@@ -105,7 +105,7 @@ namespace {
     WC = WC_original;
     expected_storage = expected_storage_original;
 
-    hermitian_matrix_rank_2k_update(scaled(0.5, A), A,scaled(2., C), C, upper_triangle);
+    hermitian_matrix_rank_k_update(A, scaled(2., C), C, upper_triangle);
 
     for (std::size_t row = 0; row < C.extent(0); ++row) {
       for (std::size_t col = 0; col < C.extent(1); ++col) {
