@@ -46,6 +46,25 @@ template<class T>
 inline constexpr bool is_custom_linalg_execution_policy_v =
   std::is_same_v<T, default_exec_t> || std::is_same_v<T, inline_exec_t>;
 
+// value is true if and only if T is
+//
+// * a Standard execution policy (like std::execution::parallel_policy),
+// * one of the C++ implementation-specific execution policies, or
+// * one of the std::linalg-specific custom execution policies
+//   (other than inline_exec).
+//
+// This helps disambiguate ExecutionPolicy from otherwise
+// unconstrained template parameters like ScaleFactorType in
+// algorithms like symmetric_matrix_rank_k_update.
+template<class T>
+inline constexpr bool is_linalg_execution_policy_v =
+  (
+#ifdef LINALG_HAS_EXECUTION
+    std::is_execution_policy_v<T> ||
+#endif
+    is_custom_linalg_execution_policy_v<T>
+  );
+
 // value is true if and only if T is _not_ inline_exec, and if T is
 //
 // * a Standard execution policy (like std::execution::parallel_policy),
@@ -59,12 +78,7 @@ inline constexpr bool is_custom_linalg_execution_policy_v =
 template<class T>
 inline constexpr bool is_linalg_execution_policy_other_than_inline_v =
   ! is_inline_exec_v<T> &&
-  (
-#ifdef LINALG_HAS_EXECUTION
-    std::is_execution_policy_v<T> ||
-#endif
-    is_custom_linalg_execution_policy_v<T>
-  );
+  is_linalg_execution_policy_v<T>;
 
 } // namespace impl
 } // namespace linalg
