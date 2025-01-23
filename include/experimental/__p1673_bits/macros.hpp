@@ -49,7 +49,7 @@ static_assert(_LINALG_CPLUSPLUS >= _LINALG_CXX_STD_17, "stdBLAS requires C++17 o
 #  if defined(LINALG_ENABLE_TBB)
 #    define LINALG_HAS_EXECUTION 1
 #  endif
-#else
+#elif ! defined(__apple_build_version__)
 #  define LINALG_HAS_EXECUTION 1
 #endif
 
