@@ -16,15 +16,19 @@ jobs:
       with:
         repository: kokkos/mdspan
         path: mdspan-src
-      
+
+    - name: create directories
+      run: cmake -E make_directory mdspan-build
+      run: cmake -E make_directory stdblas-build
+
     - name: Configure mdspan
       working-directory: mdspan-build
       run: cmake -S $GITHUB_WORKSPACE/mdspan-src -B $GITHUB_WORKSPACE/mdspan-build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/mdspan-install
-      
+
     - name: Build mdspan
       working-directory: mdspan-build
       run: cmake --build $GITHUB_WORKSPACE/mdspan-build -j 3
-      
+
     - name: Install mdspan
       working-directory: mdspan-build
       run: cmake --install $GITHUB_WORKSPACE/mdspan-build
@@ -33,7 +37,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         path: stdblas-src
-        
+  
     - name: Configure stdblas
       shell: bash
       working-directory: stdblas-build
