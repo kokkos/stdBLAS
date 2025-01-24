@@ -18,8 +18,7 @@ jobs:
         path: mdspan-src
 
     - name: create directories
-      run: cmake -E make_directory mdspan-build
-      run: cmake -E make_directory stdblas-build
+      run: cmake -E make_directory mdspan-build stdblas-build
 
     - name: Configure mdspan
       working-directory: mdspan-build
