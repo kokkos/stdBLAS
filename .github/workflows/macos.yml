@@ -1,0 +1,58 @@
+name: MacOS
+
+on: [push, pull_request]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: RelWithDebInfo
+
+jobs:
+  osx-ci:
+    runs-on: [macos-latest]
+
+    steps:
+    - name: Check Out mdspan
+      uses: actions/checkout@v4
+      with:
+        repository: kokkos/mdspan
+        path: mdspan-src
+
+    - name: create directories
+      run: cmake -E make_directory mdspan-build stdblas-build
+
+    - name: Configure mdspan
+      working-directory: mdspan-build
+      run: cmake -S $GITHUB_WORKSPACE/mdspan-src -B $GITHUB_WORKSPACE/mdspan-build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/mdspan-install
+
+    - name: Build mdspan
+      working-directory: mdspan-build
+      run: cmake --build $GITHUB_WORKSPACE/mdspan-build -j 3
+
+    - name: Install mdspan
+      working-directory: mdspan-build
+      run: cmake --install $GITHUB_WORKSPACE/mdspan-build
+
+    - name: Check Out
+      uses: actions/checkout@v4
+      with:
+        path: stdblas-src
+  
+    - name: Configure stdblas
+      shell: bash
+      working-directory: stdblas-build
+      run: cmake -S $GITHUB_WORKSPACE/stdblas-src -B $GITHUB_WORKSPACE/stdblas-build -Dmdspan_ROOT=$GITHUB_WORKSPACE/mdspan-install/ -DLINALG_ENABLE_TESTS=On -DLINALG_ENABLE_EXAMPLES=On -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/stdblas-install
+
+    - name: Build stdblas
+      working-directory: stdblas-build
+      shell: bash
+      run: cmake --build $GITHUB_WORKSPACE/stdblas-build -j 3
+
+    - name: Test stdblas
+      working-directory: stdblas-build
+      shell: bash
+      run: ctest --output-on-failure
+        
+    - name: Install stdblas
+      working-directory: stdblas-build
+      shell: bash
+      run: cmake --install $GITHUB_WORKSPACE/stdblas-build
