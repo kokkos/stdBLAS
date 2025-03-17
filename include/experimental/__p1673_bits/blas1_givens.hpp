@@ -84,7 +84,7 @@ struct is_custom_apply_givens_rotation_avail<
   : std::true_type{};
 } // end anonymous namespace
 
-MDSPAN_TEMPLATE_REQUIRES( class Real, /* requires */ ( _MDSPAN_TRAIT(std::is_floating_point, Real) ) )
+MDSPAN_TEMPLATE_REQUIRES( class Real, /* requires */ ( MDSPAN_IMPL_TRAIT(std::is_floating_point, Real) ) )
 void setup_givens_rotation(const Real f,
                            const Real g,
                            Real& cs,
@@ -190,7 +190,7 @@ void setup_givens_rotation(const Real f,
 }
 
 namespace impl {
-MDSPAN_TEMPLATE_REQUIRES( class Real, /* requires */ ( _MDSPAN_TRAIT(std::is_floating_point, Real) ) )
+MDSPAN_TEMPLATE_REQUIRES( class Real, /* requires */ ( MDSPAN_IMPL_TRAIT(std::is_floating_point, Real) ) )
 Real abs1(const std::complex<Real>& ff) {
   using std::abs;
   using std::imag;
@@ -200,7 +200,7 @@ Real abs1(const std::complex<Real>& ff) {
   return max(abs(real(ff)), abs(imag(ff)));
 }
 
-MDSPAN_TEMPLATE_REQUIRES( class Real, /* requires */ ( _MDSPAN_TRAIT(std::is_floating_point, Real) ) )
+MDSPAN_TEMPLATE_REQUIRES( class Real, /* requires */ ( MDSPAN_IMPL_TRAIT(std::is_floating_point, Real) ) )
 Real abssq(const std::complex<Real>& ff) {
   using std::imag;
   using std::real;
@@ -209,7 +209,7 @@ Real abssq(const std::complex<Real>& ff) {
 }
 }
 
-MDSPAN_TEMPLATE_REQUIRES( class Real, /* requires */ ( _MDSPAN_TRAIT(std::is_floating_point, Real) ) )
+MDSPAN_TEMPLATE_REQUIRES( class Real, /* requires */ ( MDSPAN_IMPL_TRAIT(std::is_floating_point, Real) ) )
 void setup_givens_rotation(const std::complex<Real>& f,
                            const std::complex<Real>& g,
                            Real& cs,
@@ -358,7 +358,7 @@ MDSPAN_TEMPLATE_REQUIRES(
          class Layout2,
          class Accessor2,
          class Real,
-         /* requires */ (_MDSPAN_TRAIT(std::is_floating_point, Real))
+         /* requires */ (MDSPAN_IMPL_TRAIT(std::is_floating_point, Real))
 )
 void apply_givens_rotation(
   impl::inline_exec_t&& /* exec */,
@@ -393,7 +393,7 @@ MDSPAN_TEMPLATE_REQUIRES(
          class Layout2,
          class Accessor2,
          class Real,
-         /* requires */ (_MDSPAN_TRAIT(std::is_floating_point, Real))
+         /* requires */ (MDSPAN_IMPL_TRAIT(std::is_floating_point, Real))
 )
 void apply_givens_rotation(
   ExecutionPolicy&& exec,
@@ -427,7 +427,7 @@ MDSPAN_TEMPLATE_REQUIRES(
          class Layout2,
          class Accessor2,
          class Real,
-         /* requires */ (_MDSPAN_TRAIT(std::is_floating_point, Real))
+         /* requires */ (MDSPAN_IMPL_TRAIT(std::is_floating_point, Real))
 )
 void apply_givens_rotation(
   mdspan<ElementType1, extents<SizeType1, ext1>, Layout1, Accessor1> x,
@@ -453,7 +453,7 @@ MDSPAN_TEMPLATE_REQUIRES(
          class Layout2,
          class Accessor2,
          class Real,
-         /* requires */ (_MDSPAN_TRAIT(std::is_floating_point, Real))
+         /* requires */ (MDSPAN_IMPL_TRAIT(std::is_floating_point, Real))
 )
 void apply_givens_rotation(
   impl::inline_exec_t&& /* exec */,
@@ -489,7 +489,7 @@ MDSPAN_TEMPLATE_REQUIRES(
          class Layout2,
          class Accessor2,
          class Real,
-         /* requires */ (_MDSPAN_TRAIT(std::is_floating_point, Real))
+         /* requires */ (MDSPAN_IMPL_TRAIT(std::is_floating_point, Real))
 )
 void apply_givens_rotation(
   ExecutionPolicy&& exec,
@@ -522,7 +522,7 @@ MDSPAN_TEMPLATE_REQUIRES(
          class Layout2,
          class Accessor2,
          class Real,
-         /* requires */ (_MDSPAN_TRAIT(std::is_floating_point, Real))
+         /* requires */ (MDSPAN_IMPL_TRAIT(std::is_floating_point, Real))
 )
 void apply_givens_rotation(
   mdspan<ElementType1, extents<SizeType1, ext1>, Layout1, Accessor1> x,
