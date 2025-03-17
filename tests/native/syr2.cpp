@@ -29,7 +29,7 @@ namespace {
   // [1000.0 2000.0 3000.0]         [ 66.0   94.0  128.0]   [1132.0 2188.0 3256.0]
   // [****** 4000.0 5000.0] + 2.0 * [ 94.0  130.0  176.0] = [****** 4260.0 5352.0]
   // [****** ****** 7000.0]         [128.0  176.0  238.0]   [****** ****** 7476.0]
-  TEST(BLAS3_syrk, Test0)
+  TEST(BLAS3_syr2, Test0)
   {
     constexpr auto map_A = layout_left::mapping{extents<std::size_t,3,3>{}};
     constexpr auto map_x = layout_right::mapping{extents<std::size_t,3>{}};
