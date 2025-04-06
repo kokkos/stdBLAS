@@ -32,11 +32,11 @@ template <class BaseLayout, ::std::size_t StaticLDA>
 class __layout_blas_impl {
 private:
 
-  _MDSPAN_NO_UNIQUE_ADDRESS BaseLayout _base_layout;
+  MDSPAN_IMPL_NO_UNIQUE_ADDRESS BaseLayout _base_layout;
 
 public: // but not really
   using __lda_t = impl::__maybe_static_extent<StaticLDA>;
-  _MDSPAN_NO_UNIQUE_ADDRESS __lda_t __lda = { };
+  MDSPAN_IMPL_NO_UNIQUE_ADDRESS __lda_t __lda = { };
 
 private:
   using __extents_type = decltype(std::declval<BaseLayout const&>().extents());
@@ -49,8 +49,8 @@ public:
   MDSPAN_INLINE_FUNCTION_DEFAULTED constexpr __layout_blas_impl() noexcept = default;
   MDSPAN_INLINE_FUNCTION_DEFAULTED constexpr __layout_blas_impl(__layout_blas_impl const&) noexcept = default;
   MDSPAN_INLINE_FUNCTION_DEFAULTED constexpr __layout_blas_impl(__layout_blas_impl&&) noexcept = default;
-  MDSPAN_INLINE_FUNCTION_DEFAULTED _MDSPAN_CONSTEXPR_14_DEFAULTED __layout_blas_impl& operator=(__layout_blas_impl const&) noexcept = default;
-  MDSPAN_INLINE_FUNCTION_DEFAULTED _MDSPAN_CONSTEXPR_14_DEFAULTED __layout_blas_impl& operator=(__layout_blas_impl&&) noexcept = default;
+  MDSPAN_INLINE_FUNCTION_DEFAULTED MDSPAN_IMPL_CONSTEXPR_14_DEFAULTED __layout_blas_impl& operator=(__layout_blas_impl const&) noexcept = default;
+  MDSPAN_INLINE_FUNCTION_DEFAULTED MDSPAN_IMPL_CONSTEXPR_14_DEFAULTED __layout_blas_impl& operator=(__layout_blas_impl&&) noexcept = default;
   MDSPAN_INLINE_FUNCTION_DEFAULTED ~__layout_blas_impl() = default;
 
   MDSPAN_INLINE_FUNCTION
@@ -73,7 +73,7 @@ public:
   MDSPAN_TEMPLATE_REQUIRES(
     class OtherExtents, ::std::size_t OtherLDA,
     /* requires */ (
-      _MDSPAN_TRAIT(std::is_convertible, OtherExtents, __extents_type)
+      MDSPAN_IMPL_TRAIT(std::is_convertible, OtherExtents, __extents_type)
       && (
         !__layout_blas_impl<OtherExtents, OtherLDA>::__lda_t::is_static
         || !__lda_t::is_static
@@ -81,7 +81,7 @@ public:
       )
     )
   )
-  MDSPAN_INLINE_FUNCTION _MDSPAN_CONSTEXPR_14
+  MDSPAN_INLINE_FUNCTION MDSPAN_IMPL_CONSTEXPR_14
   __layout_blas_impl(__layout_blas_impl<OtherExtents, OtherLDA> const& other) // NOLINT(google-explicit-constructor)
     : _base_layout(other.extents()),
       __lda(other.__lda)
@@ -93,7 +93,7 @@ public:
   MDSPAN_TEMPLATE_REQUIRES(
     class OtherExtents, ::std::size_t OtherLDA,
     /* requires */ (
-      _MDSPAN_TRAIT(std::is_convertible, OtherExtents, __extents_type)
+      MDSPAN_IMPL_TRAIT(std::is_convertible, OtherExtents, __extents_type)
       && (
         !__layout_blas_impl<OtherExtents, OtherLDA>::__lda_t::is_static
           || !__lda_t::is_static
@@ -101,7 +101,7 @@ public:
       )
     )
   )
-  MDSPAN_INLINE_FUNCTION _MDSPAN_CONSTEXPR_14
+  MDSPAN_INLINE_FUNCTION MDSPAN_IMPL_CONSTEXPR_14
   __layout_blas_impl& operator=(__layout_blas_impl<OtherExtents, OtherLDA> const& other)
   {
     this->_extents = other.extents();

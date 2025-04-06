@@ -31,7 +31,7 @@ struct __maybe_static_value {
 
   MDSPAN_INLINE_FUNCTION constexpr
   __maybe_static_value(T) noexcept { }
-  MDSPAN_INLINE_FUNCTION _MDSPAN_CONSTEXPR_14
+  MDSPAN_INLINE_FUNCTION MDSPAN_IMPL_CONSTEXPR_14
   __maybe_static_value& operator=(T) noexcept { }
 
   MDSPAN_INLINE_FUNCTION_DEFAULTED constexpr
@@ -40,9 +40,9 @@ struct __maybe_static_value {
   __maybe_static_value(__maybe_static_value const&) noexcept = default;
   MDSPAN_INLINE_FUNCTION_DEFAULTED constexpr
   __maybe_static_value(__maybe_static_value&&) noexcept = default;
-  MDSPAN_INLINE_FUNCTION_DEFAULTED _MDSPAN_CONSTEXPR_14_DEFAULTED
+  MDSPAN_INLINE_FUNCTION_DEFAULTED MDSPAN_IMPL_CONSTEXPR_14_DEFAULTED
   __maybe_static_value& operator=(__maybe_static_value const&) noexcept = default;
-  MDSPAN_INLINE_FUNCTION_DEFAULTED _MDSPAN_CONSTEXPR_14_DEFAULTED
+  MDSPAN_INLINE_FUNCTION_DEFAULTED MDSPAN_IMPL_CONSTEXPR_14_DEFAULTED
   __maybe_static_value& operator=(__maybe_static_value&&) noexcept = default;
   MDSPAN_INLINE_FUNCTION_DEFAULTED
   ~__maybe_static_value() = default;

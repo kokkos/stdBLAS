@@ -28,24 +28,24 @@ namespace linalg {
 // TODO @proposal-bug make sure these can't convert from `{}`
 
 struct column_major_t { };
-_MDSPAN_INLINE_VARIABLE constexpr auto column_major = column_major_t{};
+MDSPAN_IMPL_INLINE_VARIABLE constexpr auto column_major = column_major_t{};
 struct row_major_t { };
-_MDSPAN_INLINE_VARIABLE constexpr auto row_major = row_major_t{};
+MDSPAN_IMPL_INLINE_VARIABLE constexpr auto row_major = row_major_t{};
 
 struct upper_triangle_t { };
-_MDSPAN_INLINE_VARIABLE constexpr auto upper_triangle = upper_triangle_t{};
+MDSPAN_IMPL_INLINE_VARIABLE constexpr auto upper_triangle = upper_triangle_t{};
 struct lower_triangle_t { };
-_MDSPAN_INLINE_VARIABLE constexpr auto lower_triangle = lower_triangle_t{};
+MDSPAN_IMPL_INLINE_VARIABLE constexpr auto lower_triangle = lower_triangle_t{};
 
 struct implicit_unit_diagonal_t { };
-_MDSPAN_INLINE_VARIABLE constexpr auto implicit_unit_diagonal = implicit_unit_diagonal_t{};
+MDSPAN_IMPL_INLINE_VARIABLE constexpr auto implicit_unit_diagonal = implicit_unit_diagonal_t{};
 struct explicit_diagonal_t { };
-_MDSPAN_INLINE_VARIABLE constexpr auto explicit_diagonal = explicit_diagonal_t{};
+MDSPAN_IMPL_INLINE_VARIABLE constexpr auto explicit_diagonal = explicit_diagonal_t{};
 
 struct left_side_t { };
-_MDSPAN_INLINE_VARIABLE constexpr auto left_side = left_side_t{};
+MDSPAN_IMPL_INLINE_VARIABLE constexpr auto left_side = left_side_t{};
 struct right_side_t { };
-_MDSPAN_INLINE_VARIABLE constexpr auto right_side = right_side_t{};
+MDSPAN_IMPL_INLINE_VARIABLE constexpr auto right_side = right_side_t{};
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0
