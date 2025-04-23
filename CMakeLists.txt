@@ -27,6 +27,8 @@ option(LINALG_FIX_TRANSPOSED_FOR_PADDED_LAYOUTS "Enable implementation of P3222 
 
 option(LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX "Enable implementation of P3050 (Fix conjugated for noncomplex value types).  OFF by default, though this will change if P3050 is voted into the C++ Standard Working Draft." OFF)
 
+option(LINALG_FIX_RANK_UPDATES "Enable implementation of P3371 (Fix C++26 by making the rank-1, rank-2, rank-k, and rank-2k updates consistent with the BLAS).  OFF by default, though this will change if P3371 is voted into the C++ Standard Working Draft." OFF)
+
 ################################################################################
 
 # Decide on the standard to use
