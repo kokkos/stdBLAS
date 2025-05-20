@@ -104,7 +104,7 @@ public:
   MDSPAN_INLINE_FUNCTION MDSPAN_IMPL_CONSTEXPR_14
   __layout_blas_impl& operator=(__layout_blas_impl<OtherExtents, OtherLDA> const& other)
   {
-    this->_extents = other.extents();
+    this->_base_layout.extents = other.extents();
     this->__lda = other.__lda.value;
     return *this;
   }
