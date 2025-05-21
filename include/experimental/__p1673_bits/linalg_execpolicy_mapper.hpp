@@ -81,6 +81,13 @@ inline constexpr bool is_linalg_execution_policy_other_than_inline_v =
   is_linalg_execution_policy_v<T>;
 
 } // namespace impl
+
+// Specialize this function to map a public execution policy
+// (e.g., std::execution::parallel_policy) to an internal policy.
+// This function must always return a different type than its input.
+template<class T>
+auto execpolicy_mapper(T) { return impl::inline_exec_t(); }
+
 } // namespace linalg
 } // inline namespace __p1673_version_0
 } // namespace MDSPAN_IMPL_PROPOSED_NAMESPACE
@@ -95,13 +102,6 @@ namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
 namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
 namespace linalg {
-
-// Specialize this function to map a public execution policy
-// (e.g., std::execution::parallel_policy) to an internal policy.
-// This function must always return a different type than its input.
-template<class T>
-auto execpolicy_mapper(T) { return impl::inline_exec_t(); }
-
 namespace impl {
 
 // std::remove_cvref_t is a C++20 feature.
@@ -119,7 +119,7 @@ inline auto map_execpolicy_with_check = [](auto&& policy) {
   using input_type = remove_cvref_t<decltype(policy)>;
   using return_type = remove_cvref_t<decltype(execpolicy_mapper(std::forward<decltype(policy)>(policy)))>;
   // Only inline_exec_t is allowed to map to itself.
-  using inline_type = impl::inline_exec_t;
+  using inline_type = MDSPAN_IMPL_STANDARD_NAMESPACE::MDSPAN_IMPL_PROPOSED_NAMESPACE::linalg::impl::inline_exec_t;
   static_assert(std::is_same_v<input_type, inline_type> ||
     ! std::is_same_v<input_type, return_type>,
     "Specializations of execpolicy_mapper must return "
