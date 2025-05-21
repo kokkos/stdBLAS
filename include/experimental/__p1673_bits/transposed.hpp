@@ -295,21 +295,6 @@ namespace impl {
     row_major_t,
     column_major_t>;
 
-  template<class StorageOrder>
-  struct transposed_layout<layout_blas_general<StorageOrder>> {
-    using layout_type = layout_blas_general<
-      opposite_storage_t<StorageOrder>>;
-
-    template<class OriginalExtents>
-    static auto mapping(const typename layout_blas_general<StorageOrder>::template mapping<OriginalExtents>& orig_map) {
-      using original_mapping_type = typename layout_blas_general<StorageOrder>::template mapping<OriginalExtents>;
-      using extents_type = transpose_extents_t<typename original_mapping_type::extents_type>;
-      using return_mapping_type = typename layout_type::template mapping<extents_type>;
-      const auto whichStride = std::is_same_v<StorageOrder, column_major_t> ? orig_map.stride(1) : orig_map.stride(0);
-      return return_mapping_type{transpose_extents(orig_map.extents()), whichStride};
-    }
-  };
-
   template<class Triangle>
   using opposite_triangle_t = std::conditional_t<
     std::is_same_v<Triangle, upper_triangle_t>,
