@@ -18,7 +18,7 @@ namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
 namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
 namespace linalg {
-  auto execpolicy_mapper(MDSPAN_IMPL_STANDARD_NAMESPACE::MDSPAN_IMPL_PROPOSED_NAMESPACE::linalg::impl::default_exec_t) { return KokkosKernelsSTD::kokkos_exec<>(); }
+  auto execpolicy_mapper(impl::default_exec_t) { return KokkosKernelsSTD::kokkos_exec<>(); }
   auto execpolicy_mapper(std::execution::parallel_policy) { return KokkosKernelsSTD::kokkos_exec<>(); }
   auto execpolicy_mapper(std::execution::parallel_unsequenced_policy) { return KokkosKernelsSTD::kokkos_exec<>(); }
 }
