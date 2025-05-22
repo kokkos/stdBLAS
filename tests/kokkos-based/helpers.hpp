@@ -92,7 +92,7 @@ mdspan_t make_mdspan(ValueType *data, std::size_t ext0, std::size_t ext1) {
 template<class A_t, class ValueType = typename A_t::value_type>
 void set(A_t A, ValueType value)
 {
-  using size_type = typename Kokkos::extents<size_t, >::size_type;
+  using size_type = typename Kokkos::extents<size_t>::size_type;
   for (size_type i = 0; i < A.extent(0); ++i) {
     for (size_type j = 0; j < A.extent(1); ++j) {
       A(i, j) = value;
@@ -112,7 +112,7 @@ auto abs_max(mdspan<ElementType, extents<size_t, Extent>, LayoutPolicy, Accessor
   if (size == 0) {
     throw std::runtime_error("abs_max() requires non-empty input");
   }
-  const auto i = std::experimental::linalg::vector_idx_abs_max(v);
+  const auto i = MDSPAN_IMPL_STANDARD_NAMESPACE::MDSPAN_IMPL_PROPOSED_NAMESPACE::linalg::vector_idx_abs_max(v);
   if (i >= size) { // shouldn't happen: empty case is handled above
     throw std::runtime_error("Fatal: vector_idx_abs_max() failed");
   }
