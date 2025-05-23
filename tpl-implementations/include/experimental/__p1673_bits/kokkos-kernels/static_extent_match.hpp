@@ -24,8 +24,8 @@ namespace Impl {
 template <class size_type>
 constexpr bool static_extent_match(size_type extent1, size_type extent2)
 {
-  return extent1 == std::dynamic_extent ||
-         extent2 == std::dynamic_extent ||
+  return extent1 == Kokkos::dynamic_extent ||
+         extent2 == Kokkos::dynamic_extent ||
          extent1 == extent2;
 }
 

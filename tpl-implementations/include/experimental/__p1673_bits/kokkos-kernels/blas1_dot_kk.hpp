@@ -103,10 +103,11 @@ Scalar dot(kokkos_exec<ExeSpace>,
 
   Impl::signal_kokkos_impl_called("dot");
 
-  // Note lbv 21-05-25: we probably want to specify
-  // the views further based on Layout_{x,y}
-  Kokkos::View<ElementType_x*, ExeSpace> x_view(x);
-  Kokkos::View<ElementType_y*, ExeSpace> y_view(y);
+  auto x_view = Impl::mdspan_to_view(x);
+  auto y_view = Impl::mdspan_to_view(y);
+  // Note lbv 21-05-25: we could do something like this instead?
+  // Kokkos::View<ElementType_x*, ExeSpace> x_view(x);
+  // Kokkos::View<ElementType_y*, ExeSpace> y_view(y);
 
   // this overload is for x with conjugated (with nested default) accessor
   // so can call KokkosBlas::dot because it automatically conjugates x
