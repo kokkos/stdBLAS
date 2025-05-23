@@ -18,17 +18,17 @@
 #ifndef LINALG_TESTS_KOKKOS_BLAS1_FIXTURES_HPP_
 #define LINALG_TESTS_KOKKOS_BLAS1_FIXTURES_HPP_
 
+#include <mdspan/mdspan.hpp>
 #include <experimental/linalg>
-#include <experimental/mdspan>
 #include <Kokkos_Core.hpp>
 #include "gtest/gtest.h"
 #include <random>
 
 // it is fine to put these here even if this
 // is a header since this is limited to tests
-using std::experimental::mdspan;
-using std::experimental::extents;
-using std::experimental::dynamic_extent;
+using Kokkos::mdspan;
+using Kokkos::extents;
+using Kokkos::dynamic_extent;
 
 //
 // helper class for generating random numbers
@@ -170,7 +170,7 @@ public:
   Kokkos::View<value_type*, Kokkos::HostSpace> y_view;
   Kokkos::View<value_type*, Kokkos::HostSpace> z_view;
 
-  using mdspan_t = mdspan<value_type, extents<dynamic_extent>>;
+  using mdspan_t = mdspan<value_type, extents<size_t, dynamic_extent>>;
   mdspan_t x;
   mdspan_t y;
   mdspan_t z;
@@ -292,8 +292,8 @@ public:
   Kokkos::View<value_type*,  Kokkos::HostSpace> y_e0_view;
   Kokkos::View<value_type*,  Kokkos::HostSpace> z_e0_view;
 
-  using mdspan_r1_t = mdspan<value_type, extents<dynamic_extent>>;
-  using mdspan_r2_t = mdspan<value_type, extents<dynamic_extent, dynamic_extent>>;
+  using mdspan_r1_t = mdspan<value_type, extents<size_t, dynamic_extent>>;
+  using mdspan_r2_t = mdspan<value_type, extents<size_t, dynamic_extent, dynamic_extent>>;
   mdspan_r2_t A_e0e1; //e0 x e1
   mdspan_r2_t B_e0e1; //e0 x e1
   mdspan_r2_t A_sym_e0; //e0 x e0, symmetric

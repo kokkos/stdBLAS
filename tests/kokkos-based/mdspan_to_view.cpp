@@ -11,14 +11,14 @@ void expect_shallow_copy(MDSpanType mdsp, KViewType kv)
 template<class MDSpanValueType, class KViewValueType = MDSpanValueType>
 void mdspan_to_view_test_impl()
 {
-  using std::experimental::mdspan;
-  using std::experimental::extents;
-  using std::experimental::dynamic_extent;
+  using Kokkos::mdspan;
+  using Kokkos::extents;
+  using Kokkos::dynamic_extent;
 
   // rank1, non-const
   {
     std::vector<MDSpanValueType> a(5);
-    using mdspan_t = mdspan<MDSpanValueType, extents<dynamic_extent>>;
+    using mdspan_t = mdspan<MDSpanValueType, extents<size_t, dynamic_extent>>;
     mdspan_t mdsp(a.data(), a.size());
 
     auto kv = KokkosKernelsSTD::Impl::mdspan_to_view(mdsp);
@@ -32,7 +32,7 @@ void mdspan_to_view_test_impl()
   // rank1, const
   {
     std::vector<MDSpanValueType> a(5);
-    using mdspan_t = mdspan<const MDSpanValueType, extents<dynamic_extent>>;
+    using mdspan_t = mdspan<const MDSpanValueType, extents<size_t, dynamic_extent>>;
     mdspan_t mdsp(a.data(), a.size());
 
     auto kv = KokkosKernelsSTD::Impl::mdspan_to_view(mdsp);
@@ -46,7 +46,7 @@ void mdspan_to_view_test_impl()
   // rank2, non-const
   {
     std::vector<MDSpanValueType> a(12);
-    using mdspan_t = mdspan<MDSpanValueType, extents<dynamic_extent, dynamic_extent>>;
+    using mdspan_t = mdspan<MDSpanValueType, extents<size_t, dynamic_extent, dynamic_extent>>;
     mdspan_t mdsp(a.data(), 3, 4);
 
     auto kv = KokkosKernelsSTD::Impl::mdspan_to_view(mdsp);
@@ -61,7 +61,7 @@ void mdspan_to_view_test_impl()
   // rank2, const
   {
     std::vector<MDSpanValueType> a(12);
-    using mdspan_t = mdspan<const MDSpanValueType, extents<dynamic_extent, dynamic_extent>>;
+    using mdspan_t = mdspan<const MDSpanValueType, extents<size_t, dynamic_extent, dynamic_extent>>;
     mdspan_t mdsp(a.data(), 3, 4);
 
     auto kv = KokkosKernelsSTD::Impl::mdspan_to_view(mdsp);
@@ -94,21 +94,21 @@ TEST(mdspan_to_view, for_complex_double){
 template<class MDSpanValueType, class KViewValueType = MDSpanValueType>
 void transposed_mdspan_to_view_test_impl()
 {
-  using std::experimental::mdspan;
-  using std::experimental::extents;
-  using std::experimental::dynamic_extent;
+  using Kokkos::mdspan;
+  using Kokkos::extents;
+  using Kokkos::dynamic_extent;
 
-  using lr_t = std::experimental::layout_right;
-  using ll_t = std::experimental::layout_left;
+  using lr_t = Kokkos::layout_right;
+  using ll_t = Kokkos::layout_left;
 
   std::vector<MDSpanValueType> a(12);
   std::iota(a.begin(), a.end(), 0);
 
   {
     // mdspan is layout right
-    using mdspan_t = mdspan<MDSpanValueType, extents<dynamic_extent, dynamic_extent>, lr_t>;
+    using mdspan_t = mdspan<MDSpanValueType, extents<size_t, dynamic_extent, dynamic_extent>, lr_t>;
     mdspan_t mdsp(a.data(), 3, 4);
-    auto mdsp_T = std::experimental::linalg::transposed(mdsp);
+    auto mdsp_T = MDSPAN_IMPL_STANDARD_NAMESPACE::MDSPAN_IMPL_PROPOSED_NAMESPACE::linalg::transposed(mdsp);
 
     auto kv = KokkosKernelsSTD::Impl::mdspan_to_view(mdsp_T);
     using kv_type = decltype(kv);
@@ -117,9 +117,9 @@ void transposed_mdspan_to_view_test_impl()
 
     // the conversion from transposed() to view basically discards the transposition
     // so behaves as if we were tranposing the nested mspan directly
-    static_assert(std::is_same_v<typename kv_type::array_layout, Kokkos::LayoutRight>);
-    EXPECT_TRUE(kv.extent(0) == 3);
-    EXPECT_TRUE(kv.extent(1) == 4);
+    static_assert(std::is_same_v<typename kv_type::array_layout, Kokkos::LayoutLeft>);
+    EXPECT_TRUE(kv.extent(0) == 4);
+    EXPECT_TRUE(kv.extent(1) == 3);
     expect_shallow_copy(mdsp, kv);
 
     int count=0;
@@ -134,9 +134,9 @@ void transposed_mdspan_to_view_test_impl()
 
   {
     // mdspan is layout left
-    using mdspan_t = mdspan<MDSpanValueType, extents<dynamic_extent, dynamic_extent>, ll_t>;
+    using mdspan_t = mdspan<MDSpanValueType, extents<size_t, dynamic_extent, dynamic_extent>, ll_t>;
     mdspan_t mdsp(a.data(), 3, 4);
-    auto mdsp_T = std::experimental::linalg::transposed(mdsp);
+    auto mdsp_T = MDSPAN_IMPL_STANDARD_NAMESPACE::MDSPAN_IMPL_PROPOSED_NAMESPACE::linalg::transposed(mdsp);
 
     auto kv = KokkosKernelsSTD::Impl::mdspan_to_view(mdsp_T);
     using kv_type = decltype(kv);
@@ -145,9 +145,9 @@ void transposed_mdspan_to_view_test_impl()
 
     // the conversion from transposed() to view basically discards the transposition
     // so behaves as if we were tranposing the nested mspan directly
-    static_assert(std::is_same_v<typename kv_type::array_layout, Kokkos::LayoutLeft>);
-    EXPECT_TRUE(kv.extent(0) == 3);
-    EXPECT_TRUE(kv.extent(1) == 4);
+    static_assert(std::is_same_v<typename kv_type::array_layout, Kokkos::LayoutRight>);
+    EXPECT_TRUE(kv.extent(0) == 4);
+    EXPECT_TRUE(kv.extent(1) == 3);
     expect_shallow_copy(mdsp, kv);
 
     int count=0;

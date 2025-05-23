@@ -11,24 +11,24 @@ namespace KokkosKernelsSTD {
 
 template<class ExeSpace,
 	 class ElementType_x,
-	 std::experimental::extents<>::size_type ext_x,
+	 Kokkos::extents<int>::size_type ext_x,
          class Layout_x,
          class ElementType_y,
-	 std::experimental::extents<>::size_type ext_y,
+	 Kokkos::extents<int>::size_type ext_y,
          class Layout_y,
    class Scalar>
 Scalar dot(kokkos_exec<ExeSpace> /*kexe*/,
-	   std::experimental::mdspan<
+	   Kokkos::mdspan<
 	   ElementType_x,
-	   std::experimental::extents<ext_x>,
+	   Kokkos::extents<int, ext_x>,
 	   Layout_x,
-	   std::experimental::default_accessor<ElementType_x>
+	   Kokkos::default_accessor<ElementType_x>
 	   > x,
-	   std::experimental::mdspan<
+	   Kokkos::mdspan<
 	   ElementType_y,
-	   std::experimental::extents<ext_y>,
+	   Kokkos::extents<int, ext_y>,
 	   Layout_y,
-	   std::experimental::default_accessor<ElementType_y>
+	   Kokkos::default_accessor<ElementType_y>
 	   > y,
 	   Scalar init)
 {
@@ -42,8 +42,10 @@ Scalar dot(kokkos_exec<ExeSpace> /*kexe*/,
 
   Impl::signal_kokkos_impl_called("dot");
 
-  auto x_view = Impl::mdspan_to_view(x);
-  auto y_view = Impl::mdspan_to_view(y);
+  // Note lbv 21-05-25: we probably want to specify
+  // the views further based on Layout_{x,y}
+  Kokkos::View<ElementType_x*, ExeSpace> x_view(x);
+  Kokkos::View<ElementType_y*, ExeSpace> y_view(y);
 
   // This overload is for the default_accessor (see the args above).
   // We cannot use KokkosBlas::dot here because it would automatically
@@ -69,26 +71,25 @@ Scalar dot(kokkos_exec<ExeSpace> /*kexe*/,
 
 template<class ExeSpace,
 	 class ElementType_x,
-	 std::experimental::extents<>::size_type ext_x,
+	 Kokkos::extents<int>::size_type ext_x,
          class Layout_x,
          class ElementType_y,
-	 std::experimental::extents<>::size_type ext_y,
+	 Kokkos::extents<int>::size_type ext_y,
          class Layout_y,
 	 class Scalar>
 Scalar dot(kokkos_exec<ExeSpace>,
-	   std::experimental::mdspan<
+	   Kokkos::mdspan<
 	   ElementType_x,
-	   std::experimental::extents<ext_x>,
+	   Kokkos::extents<int, ext_x>,
 	   Layout_x,
-	   std::experimental::linalg::conjugated_accessor<
-	   std::experimental::default_accessor<ElementType_x>, ElementType_x
-	   >
+	   Kokkos::Experimental::linalg::conjugated_accessor<
+	   Kokkos::default_accessor<ElementType_x>>
 	   > x,
-	   std::experimental::mdspan<
+	   Kokkos::mdspan<
 	   ElementType_y,
-	   std::experimental::extents<ext_y>,
+	   Kokkos::extents<int, ext_y>,
 	   Layout_y,
-	   std::experimental::default_accessor<ElementType_y>
+	   Kokkos::default_accessor<ElementType_y>
 	   > y,
 	   Scalar init)
 {
@@ -104,6 +105,9 @@ Scalar dot(kokkos_exec<ExeSpace>,
 
   auto x_view = Impl::mdspan_to_view(x);
   auto y_view = Impl::mdspan_to_view(y);
+  // Note lbv 21-05-25: we could do something like this instead?
+  // Kokkos::View<ElementType_x*, ExeSpace> x_view(x);
+  // Kokkos::View<ElementType_y*, ExeSpace> y_view(y);
 
   // this overload is for x with conjugated (with nested default) accessor
   // so can call KokkosBlas::dot because it automatically conjugates x
