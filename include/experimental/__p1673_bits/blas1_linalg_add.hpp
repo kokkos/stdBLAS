@@ -55,10 +55,8 @@ void add_rank_1(
                 y.static_extent(0) == dynamic_extent ||
                 x.static_extent(0) == y.static_extent(0));
 
-  using size_type = std::common_type_t<SizeType_x, SizeType_y, SizeType_z>;
-  for (size_type i = 0; i < z.extent(0); ++i) {
-    z(i) = x(i) + y(i);
-  }
+  std::transform(par_unseq, x.cbegin(), x.cend(), y.cbegin(),
+                   z.begin(), std::plus<>{});
 }
 
 template<class ElementType_x,
