@@ -12,7 +12,7 @@ jobs:
 
     steps:
     - name: Check Out mdspan
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         repository: kokkos/mdspan
         path: mdspan-src
@@ -33,7 +33,7 @@ jobs:
       run: cmake --install $GITHUB_WORKSPACE/mdspan-build
 
     - name: Check Out
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         path: stdblas-src
   
