@@ -20,7 +20,7 @@ jobs:
       run: cmake -E make_directory mdspan-build
       
     - name: Check Out
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         repository: kokkos/mdspan
         path: mdspan-src
@@ -58,7 +58,7 @@ jobs:
       run: cmake -E make_directory stdblas-build
         
     - name: Check Out
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         path: stdblas-src
         
