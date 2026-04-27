@@ -31,15 +31,14 @@ namespace {
     std::vector<scalar_t> storage(vectorSize);
     vector_t x(storage.data(), vectorSize);
 
-    // Testing for absolute equality
     const auto normResult = vector_two_norm(x, mag_t{});
     static_assert( std::is_same_v<std::remove_const_t<decltype(normResult)>, mag_t> );
     const mag_t expectedNormResult{};
     EXPECT_EQ( expectedNormResult, normResult );
 
-    // Make sure that init always gets added to the result.
-    const mag_t normResultPlusOne = vector_two_norm(x, mag_t(1.0));
-    EXPECT_EQ( expectedNormResult + mag_t(1.0), normResultPlusOne );
+    const mag_t normResultPlusOne = vector_two_norm(x, mag_t(3.0));
+    const mag_t expectedNormResultPlusOne = mag_t(3.0);
+    EXPECT_EQ( expectedNormResultPlusOne, normResultPlusOne );
 
     // Test 'auto' overload.
     const auto normResultAuto = vector_two_norm(x);
@@ -63,15 +62,14 @@ namespace {
 
     x[0] = -3;
 
-    // Testing for absolute equality
     const auto normResult = vector_two_norm(x, mag_t{});
     static_assert( std::is_same_v<std::remove_const_t<decltype(normResult)>, mag_t> );
     const mag_t expectedNormResult = abs( x[0] );
     EXPECT_EQ( expectedNormResult, normResult );
 
-    // Make sure that init always gets added to the result.
-    const mag_t normResultPlusOne = vector_two_norm(x, mag_t(1.0));
-    EXPECT_EQ( expectedNormResult + mag_t(1.0), normResultPlusOne );
+    const mag_t normResultPlusOne = vector_two_norm(x, mag_t(4.0));
+    const mag_t expectedNormResultPlusOne = mag_t(5.0);
+    EXPECT_EQ( expectedNormResultPlusOne, normResultPlusOne );
 
     // Test 'auto' overload.
     const auto normResultAuto = vector_two_norm(x);

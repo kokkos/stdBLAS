@@ -49,7 +49,8 @@ namespace impl {
     static_assert(std::is_same_v<
       typename transpose_extents_t<Extents>::index_type,
       typename Extents::index_type>, "Please fix transpose_extents_t to account "
-      "for P2553, which adds a template parameter SizeType to extents.");
+      "for P2553 and subsequent papers that add a template parameter IndexType "
+      "to extents.");
 
     constexpr size_t ext0 = Extents::static_extent(0);
     constexpr size_t ext1 = Extents::static_extent(1);
@@ -245,7 +246,6 @@ namespace impl {
     }
   };
 
-#if defined(LINALG_FIX_TRANSPOSED_FOR_PADDED_LAYOUTS)
   template<size_t PaddingValue>
   struct transposed_layout<layout_left_padded<PaddingValue>> {
     using layout_type = layout_right_padded<PaddingValue>;
@@ -287,7 +287,6 @@ namespace impl {
       };
     }
   };
-#endif // LINALG_FIX_TRANSPOSED_FOR_PADDED_LAYOUTS
   
   template<class StorageOrder>
   using opposite_storage_t = std::conditional_t<

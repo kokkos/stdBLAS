@@ -67,7 +67,6 @@ namespace {
       V(38.0), V(80.0), V(150.0)
     };
 
-#if defined(LINALG_FIX_RANK_UPDATES)
     std::vector<V> x_yT = {
       V( 6.0), V(14.0), V( 26.0),
       V(15.0), V(35.0), V( 65.0),
@@ -85,7 +84,6 @@ namespace {
       V(34.0), V( 81.0), V(138.0),
       V(71.0), V(157.0), V(293.0)
     };
-#endif // LINALG_FIX_RANK_UPDATES
 
     using A_type = mdspan<V, extents<int, 3, 3>>;
     using const_A_type = mdspan<const V, extents<int, 3, 3>>;
@@ -112,7 +110,6 @@ namespace {
       return result_type{A_plus_x_yT.data()};
     }
 
-#if defined(LINALG_FIX_RANK_UPDATES)
     result_type x_yT_view() const {
       return result_type{x_yT.data()};
     }
@@ -124,7 +121,6 @@ namespace {
     result_type A_plus_two_x_yT_view() const {
       return result_type{A_plus_two_x_yT.data()};
     }
-#endif // LINALG_FIX_RANK_UPDATES
   };
 
   TEST(BLAS3_ger, test0)
@@ -138,11 +134,8 @@ namespace {
       mdspan A_plus_x_yT = problem.A_plus_x_yT_view();
       const char what[] = " is wrong for A = A + (1.0 x) y^T";
 
-#if defined(LINALG_FIX_RANK_UPDATES)
       matrix_rank_1_update(scaled(1.0, x), y, A, A);
-#else
-      matrix_rank_1_update(scaled(1.0, x), y, A);
-#endif // LINALG_FIX_RANK_UPDATES
+
       for (int row = 0; row < A.extent(0); ++row) {
         for (int col = row; col < A.extent(1); ++col) {
           EXPECT_EQ(A(row, col), A_plus_x_yT(row, col))
@@ -160,11 +153,8 @@ namespace {
       mdspan A_plus_x_yT = problem.A_plus_x_yT_view();
       const char what[] = " is wrong for A = A + x y^T";
 
-#if defined(LINALG_FIX_RANK_UPDATES)
       matrix_rank_1_update(x, y, A, A);
-#else
-      matrix_rank_1_update(x, y, A);
-#endif // LINALG_FIX_RANK_UPDATES
+
       for (int row = 0; row < A.extent(0); ++row) {
         for (int col = row; col < A.extent(1); ++col) {
           EXPECT_EQ(A(row, col), A_plus_x_yT(row, col))
@@ -173,7 +163,6 @@ namespace {
       }
     }
 
-#if defined(LINALG_FIX_RANK_UPDATES)
     {
       ger_test_problem problem;
       mdspan A = problem.A_view();
@@ -227,6 +216,5 @@ namespace {
         }
       }
     }
-#endif // LINALG_FIX_RANK_UPDATES
   }
 } // end anonymous namespace

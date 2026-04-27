@@ -18,6 +18,7 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_VECTOR_NORM2_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_VECTOR_NORM2_HPP_
 
+#include "abs_if_needed.hpp"
 #include "blas1_vector_sum_of_squares.hpp"
 #include <cmath>
 #include <cstdlib>
@@ -60,18 +61,26 @@ Scalar vector_two_norm(
   mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> x,
   Scalar init)
 {
-  // Initialize the sum of squares result
-  sum_of_squares_result<Scalar> ssq_init;
-  ssq_init.scaling_factor = Scalar{};
-  // FIXME (Hoemmen 2021/05/27) We'll need separate versions of this
-  // for types whose "one" we don't know how to construct.
-  ssq_init.scaled_sum_of_squares = 1.0;
-
-  // Compute the sum of squares using an algorithm that avoids
-  // underflow and overflow by scaling.
-  auto ssq_res = vector_sum_of_squares(exec, x, ssq_init);
   using std::sqrt;
-  return init + ssq_res.scaling_factor * sqrt(ssq_res.scaled_sum_of_squares);
+
+  if constexpr (std::is_floating_point_v<Scalar> && std::is_floating_point_v<typename decltype(x)::value_type>) {
+    // Initialize the sum of squares result
+    detail::sum_of_squares_result<Scalar> ssq_init;
+    ssq_init.scaling_factor = init == Scalar{} ? Scalar{} : impl::abs_if_needed(init);
+    ssq_init.scaled_sum_of_squares = init == Scalar{} ? Scalar{} : Scalar{1.0};
+
+    // Compute the sum of squares using an algorithm that avoids
+    // underflow and overflow by scaling.
+    auto ssq_res = detail::vector_sum_of_squares(exec, x, ssq_init);
+    return ssq_res.scaling_factor * sqrt(ssq_res.scaled_sum_of_squares);
+  }
+  else {
+    Scalar result = impl::abs_if_needed(init) * impl::abs_if_needed(init);
+    for (SizeType i = 0; i < x.extent(0); ++i) {
+      result += impl::abs_if_needed(x(i)) * impl::abs_if_needed(x(i));
+    }
+    return sqrt(result);
+  }
 }
 
 template<class ExecutionPolicy,

@@ -1,4 +1,4 @@
-name: MacOS
+name: stdBLAS
 
 on: [push, pull_request]
 
@@ -7,8 +7,11 @@ env:
   BUILD_TYPE: RelWithDebInfo
 
 jobs:
-  osx-ci:
-    runs-on: [macos-latest]
+  osmatrix: 
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
     - name: Check Out mdspan
@@ -40,7 +43,7 @@ jobs:
     - name: Configure stdblas
       shell: bash
       working-directory: stdblas-build
-      run: cmake -S $GITHUB_WORKSPACE/stdblas-src -B $GITHUB_WORKSPACE/stdblas-build -Dmdspan_ROOT=$GITHUB_WORKSPACE/mdspan-install/ -DLINALG_ENABLE_TESTS=On -DLINALG_ENABLE_EXAMPLES=On -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/stdblas-install
+      run: cmake -S $GITHUB_WORKSPACE/stdblas-src -B $GITHUB_WORKSPACE/stdblas-build -Dmdspan_DIR=$GITHUB_WORKSPACE/mdspan-install/ -DLINALG_ENABLE_TESTS=On -DLINALG_ENABLE_EXAMPLES=On -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/stdblas-install
 
     - name: Build stdblas
       working-directory: stdblas-build

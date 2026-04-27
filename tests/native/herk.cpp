@@ -56,11 +56,7 @@ namespace {
 
     for (std::size_t row = 0; row < C.extent(0); ++row) {
       for (std::size_t col = 0; col < C.extent(1); ++col) {
-#if !defined(LINALG_FIX_RANK_UPDATES)
-        const auto expected_rc = expected(row, col);
-#else
         const auto expected_rc = (expected(row, col)==flag)?flag:(expected(row, col)-C_original(row, col));
-#endif
         const auto C_rc = C(row, col);
         EXPECT_EQ(expected_rc, C_rc) << "at (" << row << ", " << col << ")";
       }
@@ -75,17 +71,11 @@ namespace {
 
     for (std::size_t row = 0; row < C.extent(0); ++row) {
       for (std::size_t col = 0; col < C.extent(1); ++col) {
-#if !defined(LINALG_FIX_RANK_UPDATES)
-        const auto expected_rc = expected(row, col);
-#else
         const auto expected_rc = (expected(row, col)==flag)?flag:(expected(row, col)-C_original(row, col));
-#endif
         const auto C_rc = C(row, col);
         EXPECT_EQ(expected_rc, C_rc) << "at (" << row << ", " << col << ")";
       }
     }
-
-#if defined(LINALG_FIX_RANK_UPDATES)
 
     WA = WA_original;
     WC = WC_original;
@@ -114,7 +104,6 @@ namespace {
         EXPECT_EQ(expected_rc, C_rc) << "at (" << row << ", " << col << ")";
       }
     }
-#endif
   }
 
 } // end anonymous namespace

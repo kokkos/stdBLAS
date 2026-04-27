@@ -26,6 +26,8 @@ namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
 namespace linalg {
 
+namespace detail {
+
 // Scaled sum of squares of a vector's elements
 template<class Scalar>
 struct sum_of_squares_result {
@@ -53,19 +55,23 @@ struct is_custom_vector_sum_of_squares_avail<
     && ! impl::is_inline_exec_v<Exec>
     >
   >
-  : std::true_type{};
+  : std::bool_constant<
+      std::is_floating_point_v<typename x_t::value_type> &&
+      std::is_floating_point_v<Scalar>
+    >
+  {};
 
 } // end anonymous namespace
 
 template<class ElementType,
-	 class SizeType,
+	 class IndexType,
          ::std::size_t ext0,
          class Layout,
          class Accessor,
          class Scalar>
 sum_of_squares_result<Scalar> vector_sum_of_squares(
   impl::inline_exec_t&& /* exec */,
-  mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> x,
+  mdspan<ElementType, extents<IndexType, ext0>, Layout, Accessor> x,
   sum_of_squares_result<Scalar> init)
 {
   using std::abs;
@@ -79,7 +85,7 @@ sum_of_squares_result<Scalar> vector_sum_of_squares(
 
   Scalar scale = init.scaling_factor;
   Scalar ssq = init.scaled_sum_of_squares;
-  for (SizeType i = 0; i < x.extent(0); ++i) {
+  for (IndexType i = 0; i < x.extent(0); ++i) {
     if (abs(x(i)) != 0.0) {
       const auto absxi = abs(x(i));
       if (scale < absxi) {
@@ -102,14 +108,14 @@ sum_of_squares_result<Scalar> vector_sum_of_squares(
 
 template<class ExecutionPolicy,
          class ElementType,
-	 class SizeType,
+	 class IndexType,
          ::std::size_t ext0,
          class Layout,
          class Accessor,
          class Scalar>
 sum_of_squares_result<Scalar> vector_sum_of_squares(
   ExecutionPolicy&& exec,
-  mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> v,
+  mdspan<ElementType, extents<IndexType, ext0>, Layout, Accessor> v,
   sum_of_squares_result<Scalar> init)
 {
   constexpr bool use_custom = is_custom_vector_sum_of_squares_avail<
@@ -125,18 +131,19 @@ sum_of_squares_result<Scalar> vector_sum_of_squares(
 }
 
 template<class ElementType,
-	 class SizeType,
+	 class IndexType,
          ::std::size_t ext0,
          class Layout,
          class Accessor,
          class Scalar>
 sum_of_squares_result<Scalar> vector_sum_of_squares(
-  mdspan<ElementType, extents<SizeType, ext0>, Layout, Accessor> v,
+  mdspan<ElementType, extents<IndexType, ext0>, Layout, Accessor> v,
   sum_of_squares_result<Scalar> init)
 {
   return vector_sum_of_squares(impl::default_exec_t{}, v, init);
 }
 
+} // end namespace detail
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0

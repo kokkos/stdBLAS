@@ -56,8 +56,8 @@ using MdSpan::layout_stride;
 using MdSpan::mdspan;
 using MdSpan::submdspan;
 
-using MdSpanEx::layout_left_padded;
-using MdSpanEx::layout_right_padded;
+using MdSpan::layout_left_padded; // not in experimental namespace
+using MdSpan::layout_right_padded;
 
 using dbl_vector_t = mdspan<double, extents<std::size_t, dynamic_extent>>;
 using cpx_vector_t = mdspan<std::complex<double>, extents<std::size_t, dynamic_extent>>;

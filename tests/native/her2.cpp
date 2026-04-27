@@ -51,7 +51,6 @@ namespace {
       std::complex{3000.0, 0.0}, std::complex{5000.0, 0.0}, std::complex{7000.0, 0.0}
     };
 
-#if defined(LINALG_FIX_RANK_UPDATES)
     {
       constexpr std::array<std::complex<double>, 3> x_storage = x_storage_original;
       constexpr std::array<std::complex<double>, 3> y_storage = y_storage_original;
@@ -81,7 +80,6 @@ namespace {
         }
       }
     }
-#endif
     {
       constexpr std::array<std::complex<double>, 3> x_storage = x_storage_original;
       constexpr std::array<std::complex<double>, 3> y_storage = y_storage_original;
@@ -94,16 +92,8 @@ namespace {
       mdspan result{result_storage.data(), map_A};
 
       // result := x y^T + y x^T + A
-#if defined(LINALG_FIX_RANK_UPDATES)
       hermitian_matrix_rank_2_update(x, y, A, result, upper_triangle);
-#else
-      for (std::size_t r = 0; r < A.extent(0); ++r) {
-        for (std::size_t c = 0; c < A.extent(0); ++c) {
-          result(r, c) = A(r, c);
-        }
-      }
-      hermitian_matrix_rank_2_update(x, y, result, upper_triangle);
-#endif
+
       // [1000 2000 3000]   [66       39-55i   77-51i]   [1066 2039-55i 3077-51i]
       // [**** 4000 5000] + [39+55i    0      176    ] = [**** 4000     5176    ]
       // [**** **** 7000]   [77+51i  176       0     ]   [**** ****     7000    ]

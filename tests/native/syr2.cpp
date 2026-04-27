@@ -46,7 +46,6 @@ namespace {
     constexpr std::array<double, 9> A_storage_original{
       1000.0, flag, flag, 2000.0, 4000.0, flag, 3000.0, 5000.0, 7000.0};
 
-#if defined(LINALG_FIX_RANK_UPDATES)
     {
       constexpr std::array<double, 3> x_storage = x_storage_original;
       constexpr std::array<double, 3> y_storage = y_storage_original;
@@ -73,7 +72,6 @@ namespace {
         }
       }
     }
-#endif
     {
       constexpr std::array<double, 3> x_storage = x_storage_original;
       constexpr std::array<double, 3> y_storage = y_storage_original;
@@ -86,16 +84,8 @@ namespace {
       mdspan result{result_storage.data(), map_A};
 
       // result := x y^T + y x^T + A
-#if defined(LINALG_FIX_RANK_UPDATES)
       symmetric_matrix_rank_2_update(x, y, A, result, upper_triangle);
-#else
-      for (std::size_t r = 0; r < A.extent(0); ++r) {
-        for (std::size_t c = 0; c < A.extent(0); ++c) {
-          result(r, c) = A(r, c);
-        }
-      }
-      symmetric_matrix_rank_2_update(x, y, result, upper_triangle);
-#endif
+
       // [1000.0 2000.0 3000.0]   [ 66.0   94.0  128.0]   [1066.0 2094.0 3128.0]
       // [****** 4000.0 5000.0] + [ 94.0  130.0  176.0] = [****** 4130.0 5176.0]
       // [****** ****** 7000.0]   [128.0  176.0  238.0]   [****** ****** 7238.0]
@@ -122,16 +112,8 @@ namespace {
       mdspan result{result_storage.data(), map_A};
 
       // result := 2.0 (x y^T + y x^T) + A
-#if defined(LINALG_FIX_RANK_UPDATES)
       symmetric_matrix_rank_2_update(scaled(2.0, x), y, A, result, upper_triangle);
-#else
-      for (std::size_t r = 0; r < A.extent(0); ++r) {
-        for (std::size_t c = 0; c < A.extent(0); ++c) {
-          result(r, c) = A(r, c);
-        }
-      }
-      symmetric_matrix_rank_2_update(scaled(2.0, x), y, result, upper_triangle);
-#endif
+
       // [1000.0 2000.0 3000.0]         [ 66.0   94.0  128.0]   [1132.0 2188.0 3256.0]
       // [****** 4000.0 5000.0] + 2.0 * [ 94.0  130.0  176.0] = [****** 4260.0 5352.0]
       // [****** ****** 7000.0]         [128.0  176.0  238.0]   [****** ****** 7476.0]

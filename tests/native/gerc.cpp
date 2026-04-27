@@ -51,7 +51,6 @@ namespace {
       V(43.0,   4.0), V(65.0,  68.0), V(175.0,  11.0)
     };
 
-#if defined(LINALG_FIX_RANK_UPDATES)
     std::vector<V> x_yT = {
       V( 7.0,   1.0), V(11.0,  13.0), V( 31.0,   3.0),
       V(12.0, -14.0), V(44.0,  -6.0), V( 50.0, -64.0),
@@ -69,7 +68,6 @@ namespace {
       V(28.0, -28.0), V( 99.0, -12.0), V(108.0, -128.0),
       V(81.0,   8.0), V(127.0, 136.0), V(343.0,   21.0)
     };
-#endif // LINALG_FIX_RANK_UPDATES
 
     using A_type = mdspan<V, extents<int, 3, 3>>;
     using const_A_type = mdspan<const V, extents<int, 3, 3>>;
@@ -96,7 +94,6 @@ namespace {
       return result_type{A_plus_x_yT.data()};
     }
 
-#if defined(LINALG_FIX_RANK_UPDATES)
     result_type x_yT_view() const {
       return result_type{x_yT.data()};
     }
@@ -108,7 +105,6 @@ namespace {
     result_type A_plus_two_x_yT_view() const {
       return result_type{A_plus_two_x_yT.data()};
     }
-#endif // LINALG_FIX_RANK_UPDATES
   };
 
   TEST(BLAS3_ger, test0)
@@ -122,11 +118,8 @@ namespace {
       mdspan A_plus_x_yT = problem.A_plus_x_yT_view();
       const char what[] = " is wrong for A = A + (1.0 x) y^T";
 
-#if defined(LINALG_FIX_RANK_UPDATES)
       matrix_rank_1_update_c(scaled(1.0, x), y, A, A);
-#else
-      matrix_rank_1_update_c(scaled(1.0, x), y, A);
-#endif // LINALG_FIX_RANK_UPDATES
+
       for (int row = 0; row < A.extent(0); ++row) {
         for (int col = row; col < A.extent(1); ++col) {
           EXPECT_EQ(A(row, col), A_plus_x_yT(row, col))
@@ -144,11 +137,8 @@ namespace {
       mdspan A_plus_x_yT = problem.A_plus_x_yT_view();
       const char what[] = " is wrong for A = A + x y^T";
 
-#if defined(LINALG_FIX_RANK_UPDATES)
       matrix_rank_1_update_c(x, y, A, A);
-#else
-      matrix_rank_1_update_c(x, y, A);
-#endif // LINALG_FIX_RANK_UPDATES
+
       for (int row = 0; row < A.extent(0); ++row) {
         for (int col = row; col < A.extent(1); ++col) {
           EXPECT_EQ(A(row, col), A_plus_x_yT(row, col))
@@ -157,7 +147,6 @@ namespace {
       }
     }
 
-#if defined(LINALG_FIX_RANK_UPDATES)
     {
       gerc_test_problem problem;
       mdspan A = problem.A_view();
@@ -211,6 +200,5 @@ namespace {
         }
       }
     }
-#endif // LINALG_FIX_RANK_UPDATES
   }
 } // end anonymous namespace

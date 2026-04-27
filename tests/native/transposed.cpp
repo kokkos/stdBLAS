@@ -200,7 +200,6 @@ namespace {
     }
   }
 
-#if defined(LINALG_FIX_TRANSPOSED_FOR_PADDED_LAYOUTS)
   template<size_t PaddingValue>
   void test_transposed_layout_left_padded(auto runtime_padding_value)
   {
@@ -300,7 +299,6 @@ namespace {
       test_transposed_layout_right_padded<padding_value>(runtime_padding_value);
     }
   }
-#endif // LINALG_FIX_TRANSPOSED_FOR_PADDED_LAYOUTS
 
   TEST(transposed, mdspan_double)
   {

@@ -25,8 +25,6 @@ namespace linalg {
 
 namespace {
 
-#if defined(LINALG_FIX_RANK_UPDATES)
-
 // For the overwriting case, use E_t = void.
 template <class Exec, class x_t, class y_t, class E_t, class A_t, class Tr_t, class = void>
 struct is_custom_symmetric_matrix_rank_2_update_avail : std::false_type {};
@@ -72,34 +70,6 @@ struct is_custom_symmetric_matrix_rank_2_update_avail<
   >
   : std::true_type{};
 
-#else
-
-template <class Exec, class x_t, class y_t, class A_t, class Tr_t, class = void>
-struct is_custom_symmetric_matrix_rank_2_update_avail : std::false_type {};
-
-template <class Exec, class x_t, class y_t, class A_t, class Tr_t>
-struct is_custom_symmetric_matrix_rank_2_update_avail<
-  Exec, x_t, y_t, A_t, Tr_t,
-  std::enable_if_t<
-    std::is_void_v<
-      decltype(symmetric_matrix_rank_2_update
-	       (std::declval<Exec>(),
-		std::declval<x_t>(),
-		std::declval<y_t>(),
-		std::declval<A_t>(),
-		std::declval<Tr_t>()
-		)
-	       )
-      >
-    && ! impl::is_inline_exec_v<Exec>
-    >
-  >
-  : std::true_type{};
-
-#endif // LINALG_FIX_RANK_UPDATES
-
-#if defined(LINALG_FIX_RANK_UPDATES)
-
 // For the overwriting case, use E_t = void.
 template <class Exec, class x_t, class y_t, class E_t, class A_t, class Tr_t, class = void>
 struct is_custom_hermitian_matrix_rank_2_update_avail : std::false_type {};
@@ -144,32 +114,6 @@ struct is_custom_hermitian_matrix_rank_2_update_avail<
   >
   : std::true_type{};
 
-#else
-
-template <class Exec, class x_t, class y_t, class A_t, class Tr_t, class = void>
-struct is_custom_hermitian_matrix_rank_2_update_avail : std::false_type {};
-
-template <class Exec, class x_t, class y_t, class A_t, class Tr_t>
-struct is_custom_hermitian_matrix_rank_2_update_avail<
-  Exec, x_t, y_t, A_t, Tr_t,
-  std::enable_if_t<
-    std::is_void_v<
-      decltype(hermitian_matrix_rank_2_update
-	       (std::declval<Exec>(),
-		std::declval<x_t>(),
-		std::declval<y_t>(),
-		std::declval<A_t>(),
-		std::declval<Tr_t>()
-		)
-	       )
-      >
-    && ! impl::is_inline_exec_v<Exec>
-    >
-  >
-  : std::true_type{};
-
-#endif // LINALG_FIX_RANK_UPDATES
-
 } // end anonymous namespace
 
 // Symmetric matrix rank-2 update
@@ -208,16 +152,11 @@ void symmetric_matrix_rank_2_update(
     const index_type i_lower = lower_tri ? j : index_type(0);
     const index_type i_upper = lower_tri ? A.extent(0) : j+1;
     for (index_type i = i_lower; i < i_upper; ++i) {
-#if defined(LINALG_FIX_RANK_UPDATES)
       A(i,j) = x(i) * y(j) + y(i) * x(j);
-#else
-      A(i,j) += x(i) * y(j) + y(i) * x(j);
-#endif // LINALG_FIX_RANK_UPDATES
     }
   }
 }
 
-#if defined(LINALG_FIX_RANK_UPDATES)
 // Updating symmetric rank-2 matrix update
 // (inline_exec_t)
 MDSPAN_TEMPLATE_REQUIRES(
@@ -265,7 +204,6 @@ void symmetric_matrix_rank_2_update(
     }
   }
 }
-#endif // LINALG_FIX_RANK_UPDATES
 
 // Overwriting symmetric rank-2 matrix update
 // (ExecutionPolicy&&)
@@ -301,9 +239,7 @@ void symmetric_matrix_rank_2_update(
   constexpr bool use_custom = is_custom_symmetric_matrix_rank_2_update_avail<
       decltype(impl::map_execpolicy_with_check(exec)),
       decltype(x), decltype(y),
-#if defined(LINALG_FIX_RANK_UPDATES)
       /* decltype(E) = */ void,
-#endif // LINALG_FIX_RANK_UPDATES
       decltype(A), Triangle
     >::value;
 
@@ -315,7 +251,6 @@ void symmetric_matrix_rank_2_update(
   }
 }
 
-#if defined(LINALG_FIX_RANK_UPDATES)
 // Updating symmetric rank-2 matrix update
 // (ExecutionPolicy&&)
 MDSPAN_TEMPLATE_REQUIRES(
@@ -369,7 +304,6 @@ void symmetric_matrix_rank_2_update(
     symmetric_matrix_rank_2_update(impl::inline_exec_t{}, x, y, E, A, t);
   }
 }
-#endif // LINALG_FIX_RANK_UPDATES
 
 // Overwriting symmetric rank-2 matrix update
 // (No ExecutionPolicy&&)
@@ -404,7 +338,6 @@ void symmetric_matrix_rank_2_update(
   symmetric_matrix_rank_2_update(impl::default_exec_t{}, x, y, A, t);
 }
 
-#if defined(LINALG_FIX_RANK_UPDATES)
 // Updating symmetric rank-2 matrix update
 // (No ExecutionPolicy&&)
 MDSPAN_TEMPLATE_REQUIRES(
@@ -443,7 +376,6 @@ void symmetric_matrix_rank_2_update(
 {
   symmetric_matrix_rank_2_update(impl::default_exec_t{}, x, y, E, A, t);
 }
-#endif // LINALG_FIX_RANK_UPDATES
 
 // Hermitian matrix rank-2 update
 
@@ -485,16 +417,11 @@ void hermitian_matrix_rank_2_update(
 
     A(j,j) = impl::real_if_needed(A(j,j));
     for (index_type i = i_lower; i < i_upper; ++i) {
-#if defined(LINALG_FIX_RANK_UPDATES)
       A(i,j) = x(i) * impl::conj_if_needed(y(j)) + y(i) * impl::conj_if_needed(x(j));
-#else
-      A(i,j) += x(i) * impl::conj_if_needed(y(j)) + y(i) * impl::conj_if_needed(x(j));
-#endif
     }
   }
 }
 
-#if defined(LINALG_FIX_RANK_UPDATES)
 // Updating Hermitian rank-2 matrix update
 // (inline_exec_t)
 MDSPAN_TEMPLATE_REQUIRES(
@@ -550,7 +477,6 @@ void hermitian_matrix_rank_2_update(
     }
   }
 }
-#endif // LINALG_FIX_RANK_UPDATES
 
 // Overwriting Hermitian rank-2 matrix update
 // (ExecutionPolicy&&)
@@ -586,9 +512,7 @@ void hermitian_matrix_rank_2_update(
   constexpr bool use_custom = is_custom_hermitian_matrix_rank_2_update_avail<
       decltype(impl::map_execpolicy_with_check(exec)),
       decltype(x), decltype(y),
-#if defined(LINALG_FIX_RANK_UPDATES)
       /* decltype(E) = */ void,
-#endif // LINALG_FIX_RANK_UPDATES
       decltype(A), Triangle
     >::value;
 
@@ -600,7 +524,6 @@ void hermitian_matrix_rank_2_update(
   }
 }
 
-#if defined(LINALG_FIX_RANK_UPDATES)
 // Updating Hermitian rank-2 matrix update
 // (ExecutionPolicy&&)
 MDSPAN_TEMPLATE_REQUIRES(
@@ -654,7 +577,6 @@ void hermitian_matrix_rank_2_update(
     hermitian_matrix_rank_2_update(impl::inline_exec_t{}, x, y, E, A, t);
   }
 }
-#endif
 
 // Overwriting symmetric rank-2 matrix update
 // (No ExecutionPolicy&&)
@@ -689,7 +611,6 @@ void hermitian_matrix_rank_2_update(
   hermitian_matrix_rank_2_update(impl::default_exec_t{}, x, y, A, t);
 }
 
-#if defined(LINALG_FIX_RANK_UPDATES)
 // Updating Hermitian rank-2 matrix update
 // (No ExecutionPolicy&&)
 MDSPAN_TEMPLATE_REQUIRES(
@@ -728,7 +649,6 @@ void hermitian_matrix_rank_2_update(
 {
   hermitian_matrix_rank_2_update(impl::default_exec_t{}, x, y, E, A, t);
 }
-#endif // LINALG_FIX_RANK_UPDATES
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0

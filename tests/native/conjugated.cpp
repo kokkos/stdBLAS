@@ -42,13 +42,8 @@ namespace {
     {
       using input_element_type = float;
       using input_accessor_type = default_accessor<input_element_type>;
-#if defined(LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX)
       using expected_accessor_type = input_accessor_type;
       using expected_element_type = input_element_type;
-#else
-      using expected_accessor_type = conjugated_accessor<input_accessor_type>;
-      using expected_element_type = std::add_const_t<input_element_type>;
-#endif // LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX
 
       mdspan<input_element_type, extents_type, layout_type, input_accessor_type> x_nc{x_storage.data()};
       auto x_nc_conj = conjugated(x_nc);
@@ -59,11 +54,7 @@ namespace {
     {
       using input_element_type = const float;
       using input_accessor_type = default_accessor<input_element_type>;
-#if defined(LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX)
       using expected_accessor_type = default_accessor<input_element_type>;
-#else
-      using expected_accessor_type = conjugated_accessor<input_accessor_type>;
-#endif // LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX
       using expected_element_type = input_element_type;
 
       mdspan<input_element_type, extents_type, layout_type, input_accessor_type> x_c{x_storage.data()};
@@ -83,13 +74,8 @@ namespace {
     {
       using input_element_type = float;
       using input_accessor_type = nondefault_accessor<input_element_type>;
-#if defined(LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX)
       using expected_accessor_type = input_accessor_type;
       using expected_element_type = input_element_type;
-#else
-      using expected_accessor_type = conjugated_accessor<input_accessor_type>;
-      using expected_element_type = std::add_const_t<input_element_type>;
-#endif // LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX
 
       mdspan<input_element_type, extents_type, layout_type, input_accessor_type> x_nc{x_storage.data()};
       auto x_nc_conj = conjugated(x_nc);
@@ -100,11 +86,7 @@ namespace {
     {
       using input_element_type = const float;
       using input_accessor_type = nondefault_accessor<input_element_type>;
-#if defined(LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX)
       using expected_accessor_type = input_accessor_type;
-#else
-      using expected_accessor_type = conjugated_accessor<input_accessor_type>;
-#endif // LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX
       using expected_element_type = input_element_type;
 
       mdspan<const float, extents_type, layout_type, input_accessor_type> x_c{x_storage.data()};
@@ -117,8 +99,6 @@ namespace {
 
   struct nonarithmetic_real {};
 
-  // P3050 changes the behavior of conjugated for nonarithmetic "real" types.
-  // "Real" means "types T for which conj<std::declval<T>()) is not ADL-findable."
   TEST(conjugated, nonarithmetic_real_default_accessor)
   {
     using value_type = nonarithmetic_real;
@@ -131,13 +111,8 @@ namespace {
       mdspan<value_type, extents_type, layout_type, input_accessor_type> x_nc{x_storage.data()};
       auto x_nc_conj = conjugated(x_nc);
 
-#if defined(LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX)
       using expected_accessor_type = default_accessor<value_type>;
       using expected_element_type = value_type;
-#else
-      using expected_accessor_type = conjugated_accessor<default_accessor<value_type>>;
-      using expected_element_type = std::add_const_t<value_type>;
-#endif
       static_assert(std::is_same_v<typename decltype(x_nc_conj)::element_type, expected_element_type>);
       static_assert(std::is_same_v<typename decltype(x_nc_conj)::extents_type, extents_type>);
       static_assert(std::is_same_v<typename decltype(x_nc_conj)::layout_type, layout_type>);
@@ -151,11 +126,7 @@ namespace {
       mdspan<const value_type, extents_type, layout_type, input_accessor_type> x_c{x_storage.data()};
       auto x_c_conj = conjugated(x_c);
 
-#if defined(LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX)
       using expected_accessor_type = default_accessor<const value_type>;
-#else
-      using expected_accessor_type = conjugated_accessor<default_accessor<const value_type>>;
-#endif
       using expected_element_type = const value_type;
       static_assert(std::is_same_v<typename decltype(x_c_conj)::element_type, expected_element_type>);
       static_assert(std::is_same_v<typename decltype(x_c_conj)::extents_type, extents_type>);
@@ -167,8 +138,6 @@ namespace {
     }
   }
 
-  // P3050 changes the behavior of conjugated for nonarithmetic "real" types.
-  // "Real" means "types T for which conj<std::declval<T>()) is not ADL-findable."
   TEST(conjugated, nonarithmetic_real_nondefault_accessor)
   {
     using value_type = nonarithmetic_real;
@@ -181,13 +150,8 @@ namespace {
       mdspan<value_type, extents_type, layout_type, input_accessor_type> x_nc{x_storage.data()};
       auto x_nc_conj = conjugated(x_nc);
 
-#if defined(LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX)
       using expected_accessor_type = nondefault_accessor<value_type>;
       using expected_element_type = value_type;
-#else
-      using expected_accessor_type = conjugated_accessor<nondefault_accessor<value_type>>;
-      using expected_element_type = std::add_const_t<value_type>;
-#endif
       static_assert(std::is_same_v<typename decltype(x_nc_conj)::element_type, expected_element_type>);
       static_assert(std::is_same_v<typename decltype(x_nc_conj)::extents_type, extents_type>);
       static_assert(std::is_same_v<typename decltype(x_nc_conj)::layout_type, layout_type>);
@@ -202,11 +166,7 @@ namespace {
       mdspan<const value_type, extents_type, layout_type, input_accessor_type> x_c{x_storage.data()};
       auto x_c_conj = conjugated(x_c);
 
-#if defined(LINALG_FIX_CONJUGATED_FOR_NONCOMPLEX)
       using expected_accessor_type = nondefault_accessor<const value_type>;
-#else
-      using expected_accessor_type = conjugated_accessor<nondefault_accessor<const value_type>>;
-#endif
       using expected_element_type = const value_type;
       static_assert(std::is_same_v<decltype(x_c_conj),
                     mdspan<expected_element_type, extents_type, layout_type, expected_accessor_type>>);

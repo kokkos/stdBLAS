@@ -26,44 +26,6 @@ namespace linalg {
 namespace
 {
 
-#if !defined(LINALG_FIX_RANK_UPDATES)
-
-template <class Exec, class ScaleFactorType, class A_t, class C_t, class Tr_t, class = void>
-struct is_custom_sym_mat_rank_k_update_avail : std::false_type {};
-
-template <class Exec, class A_t, class C_t, class Tr_t>
-struct is_custom_sym_mat_rank_k_update_avail<
-  Exec, void, A_t, C_t, Tr_t,
-  std::enable_if_t<
-    std::is_void_v<
-      decltype(symmetric_matrix_rank_k_update(std::declval<Exec>(),
-					      std::declval<A_t>(),
-					      std::declval<C_t>(),
-					      std::declval<Tr_t>()))
-      >
-    && ! impl::is_inline_exec_v<Exec>
-    >
-  >
-  : std::true_type{};
-
-template <class Exec, class ScaleFactorType, class A_t, class C_t, class Tr_t>
-struct is_custom_sym_mat_rank_k_update_avail<
-  Exec, ScaleFactorType, A_t, C_t, Tr_t,
-  std::enable_if_t<
-    std::is_void_v<
-      decltype(symmetric_matrix_rank_k_update(std::declval<Exec>(),
-					      std::declval<ScaleFactorType>(),
-					      std::declval<A_t>(),
-					      std::declval<C_t>(),
-					      std::declval<Tr_t>()))
-      >
-    && ! impl::is_inline_exec_v<Exec>
-    >
-  >
-  : std::true_type{};
-
-#else
-
 template <class Exec, class ScaleFactorType, class A_t, class E_t, class C_t, class Tr_t, class = void>
 struct is_custom_sym_mat_rank_k_update_avail : std::false_type {};
 
@@ -131,46 +93,6 @@ struct is_custom_sym_mat_rank_k_update_avail<
   >
   : std::true_type{};
 
-#endif
-
-#if !defined(LINALG_FIX_RANK_UPDATES)
-
-template <class Exec, class ScaleFactorType, class A_t, class C_t, class Tr_t, class = void>
-struct is_custom_herm_mat_rank_k_update_avail : std::false_type {};
-
-template <class Exec, class A_t, class C_t, class Tr_t>
-struct is_custom_herm_mat_rank_k_update_avail<
-  Exec, void, A_t, C_t, Tr_t,
-  std::enable_if_t<
-    std::is_void_v<
-      decltype(hermitian_matrix_rank_k_update(std::declval<Exec>(),
-					      std::declval<A_t>(),
-					      std::declval<C_t>(),
-					      std::declval<Tr_t>()))
-      >
-    && ! impl::is_inline_exec_v<Exec>
-    >
-  >
-  : std::true_type{};
-
-template <class Exec, class ScaleFactorType, class A_t, class C_t, class Tr_t>
-struct is_custom_herm_mat_rank_k_update_avail<
-  Exec, ScaleFactorType, A_t, C_t, Tr_t,
-  std::enable_if_t<
-    std::is_void_v<
-      decltype(hermitian_matrix_rank_k_update(std::declval<Exec>(),
-					      std::declval<ScaleFactorType>(),
-					      std::declval<A_t>(),
-					      std::declval<C_t>(),
-					      std::declval<Tr_t>()))
-      >
-    && ! impl::is_inline_exec_v<Exec>
-    >
-  >
-  : std::true_type{};
-
-#else
-
 template <class Exec, class ScaleFactorType, class A_t, class E_t, class C_t, class Tr_t, class = void>
 struct is_custom_herm_mat_rank_k_update_avail : std::false_type {};
 
@@ -237,8 +159,6 @@ struct is_custom_herm_mat_rank_k_update_avail<
     >
   >
   : std::true_type{};
-
-#endif
 
 } //end anonym namespace
 
@@ -276,9 +196,7 @@ void symmetric_matrix_rank_k_update(
     const size_type i_lower = lower_tri ? j : size_type(0);
     const size_type i_upper = lower_tri ? C.extent(0) : j+1;
     for (size_type i = i_lower; i < i_upper; ++i) {
-#if defined(LINALG_FIX_RANK_UPDATES)
       C(i, j) = ElementType_C{};
-#endif
       for (size_type k = 0; k < A.extent(1); ++k) {
           C(i, j) += alpha * A(i, k) * A(j, k);
       }
@@ -316,9 +234,7 @@ void symmetric_matrix_rank_k_update(
   constexpr bool use_custom = is_custom_sym_mat_rank_k_update_avail<
     decltype(impl::map_execpolicy_with_check(exec)),
     ScaleFactorType, decltype(A),
-#if defined(LINALG_FIX_RANK_UPDATES)
     void,
-#endif
     decltype(C), Triangle>::value;
 
   if constexpr (use_custom) {
@@ -387,9 +303,7 @@ void symmetric_matrix_rank_k_update(
     const size_type i_lower = lower_tri ? j : size_type(0);
     const size_type i_upper = lower_tri ? C.extent(0) : j+1;
     for (size_type i = i_lower; i < i_upper; ++i) {
-#if defined(LINALG_FIX_RANK_UPDATES)
       C(i, j) = ElementType_C{};
-#endif
       for (size_type k = 0; k < A.extent(1); ++k) {
           C(i, j) += A(i, k) * A(j, k);
       }
@@ -422,9 +336,7 @@ void symmetric_matrix_rank_k_update(
 {
   constexpr bool use_custom = is_custom_sym_mat_rank_k_update_avail<
     decltype(impl::map_execpolicy_with_check(exec)), void, decltype(A),
-#if defined(LINALG_FIX_RANK_UPDATES)
     void,
-#endif
     decltype(C), Triangle
     >::value;
 
@@ -457,8 +369,6 @@ void symmetric_matrix_rank_k_update(
 {
   symmetric_matrix_rank_k_update(impl::default_exec_t{}, A, C, t);
 }
-
-#if defined(LINALG_FIX_RANK_UPDATES)
 
 // Rank-k update of a symmetric matrix (updating versions)
 
@@ -694,8 +604,6 @@ void symmetric_matrix_rank_k_update(
   symmetric_matrix_rank_k_update(impl::default_exec_t{}, A, E, C, t);
 }
 
-#endif
-
 // Rank-k update of a Hermitian matrix
 
 // Rank-k update of a Hermitian matrix with scaling factor alpha
@@ -733,13 +641,8 @@ void hermitian_matrix_rank_k_update(
   for (size_type j = 0; j < C.extent(1); ++j) {
     const size_type i_lower = lower_tri ? j : size_type(0);
     const size_type i_upper = lower_tri ? C.extent(0) : j+1;
-#if !defined(LINALG_FIX_RANK_UPDATES)
-    C(j, j) = impl::real_if_needed(C(j, j));
-#endif
     for (size_type i = i_lower; i < i_upper; ++i) {
-#if defined(LINALG_FIX_RANK_UPDATES)
       C(i, j) = ElementType_C{};
-#endif
       for (size_type k = 0; k < A.extent(1); ++k) {
           C(i, j) += alpha * A(i, k) * impl::conj_if_needed(A(j, k));
       }
@@ -776,9 +679,7 @@ void hermitian_matrix_rank_k_update(
   constexpr bool use_custom = is_custom_herm_mat_rank_k_update_avail<
     decltype(impl::map_execpolicy_with_check(exec)),
     ScaleFactorType, decltype(A),
-#if defined(LINALG_FIX_RANK_UPDATES)
     void,
-#endif
     decltype(C), Triangle>::value;
 
   if constexpr (use_custom) {
@@ -845,15 +746,10 @@ void hermitian_matrix_rank_k_update(
   using size_type = std::common_type_t<SizeType_A, SizeType_C>;
 
   for (size_type j = 0; j < C.extent(1); ++j) {
-#if !defined(LINALG_FIX_RANK_UPDATES)
-    C(j, j) = impl::real_if_needed(C(j, j));
-#endif
     const size_type i_lower = lower_tri ? j : size_type(0);
     const size_type i_upper = lower_tri ? C.extent(0) : j+1;
     for (size_type i = i_lower; i < i_upper; ++i) {
-#if defined(LINALG_FIX_RANK_UPDATES)
       C(i, j) = ElementType_C{};
-#endif
       for (size_type k = 0; k < A.extent(1); ++k) {
           C(i, j) += A(i, k) * impl::conj_if_needed(A(j, k));
       }
@@ -887,9 +783,7 @@ void hermitian_matrix_rank_k_update(
   constexpr bool use_custom = is_custom_herm_mat_rank_k_update_avail<
     decltype(impl::map_execpolicy_with_check(exec)),
     void, decltype(A),
-#if defined(LINALG_FIX_RANK_UPDATES)
     void,
-#endif
     decltype(C), Triangle>::value;
 
   if constexpr (use_custom) {
@@ -921,9 +815,6 @@ void hermitian_matrix_rank_k_update(
 {
   hermitian_matrix_rank_k_update(impl::default_exec_t{}, A, C, t);
 }
-
-
-#if defined(LINALG_FIX_RANK_UPDATES)
 
 // Rank-k update of a Hermitian matrix with scaling factor alpha (updating version)
 
@@ -1164,8 +1055,6 @@ void hermitian_matrix_rank_k_update(
 {
   hermitian_matrix_rank_k_update(impl::default_exec_t{}, A, E, C, t);
 }
-
-#endif
 
 } // end namespace linalg
 } // end inline namespace __p1673_version_0

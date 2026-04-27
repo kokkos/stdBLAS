@@ -4,7 +4,7 @@
 
 #include "signal_kokkos_impl_called.hpp"
 
-namespace KokkosKernelsSTD {
+namespace KokkosKernelsSTD::detail {
 
 template<class ExecSpace,
          class ElementType,

@@ -56,7 +56,6 @@ namespace {
       V(18.0), V(50.0), V(115.0)
     };
 
-#if defined(LINALG_FIX_RANK_UPDATES)
     std::vector<V> x_xT = {
       V( 4.0), V(10.0), V( 22.0),
       V(10.0), V(25.0), V( 55.0),
@@ -74,7 +73,6 @@ namespace {
       V(18.0), V( 47.0), V(105.0),
       V(40.0), V(105.0), V(236.0)
     };
-#endif // LINALG_FIX_RANK_UPDATES
 
     using A_type = mdspan<V, extents<int, 3, 3>>;
     using const_A_type = mdspan<const V, extents<int, 3, 3>>;
@@ -97,7 +95,6 @@ namespace {
       return result_type{A_plus_x_xT.data()};
     }
 
-#if defined(LINALG_FIX_RANK_UPDATES)
     result_type x_xT_view() const {
       return result_type{x_xT.data()};
     }
@@ -109,7 +106,6 @@ namespace {
     result_type A_plus_two_x_xT_view() const {
       return result_type{A_plus_two_x_xT.data()};
     }
-#endif // LINALG_FIX_RANK_UPDATES
   };
   
   // This also serves as a regression test for ambiguous overloads of
@@ -129,11 +125,8 @@ namespace {
       mdspan A_plus_x_xT = problem.A_plus_x_xT_view();
       const char what[] = " triangle of A = A + 1.0 x x^T (upper)";
 
-#if defined(LINALG_FIX_RANK_UPDATES)
       symmetric_matrix_rank_1_update(1.0, x, A, A, upper_triangle);
-#else
-      symmetric_matrix_rank_1_update(1.0, x, A, upper_triangle);
-#endif // LINALG_FIX_RANK_UPDATES
+
       for (int row = 0; row < A.extent(0); ++row) {
         // Lower triangle is unchanged.
         for (int col = 0; col < row; ++col) {
@@ -158,11 +151,8 @@ namespace {
       mdspan A_plus_x_xT = problem.A_plus_x_xT_view();
       const char what[] = " triangle of A = A + x x^T (upper)";
 
-#if defined(LINALG_FIX_RANK_UPDATES)
       symmetric_matrix_rank_1_update(x, A, A, upper_triangle);
-#else
-      symmetric_matrix_rank_1_update(x, A, upper_triangle);
-#endif // LINALG_FIX_RANK_UPDATES
+
       for (int row = 0; row < A.extent(0); ++row) {
         // Lower triangle is unchanged.
         for (int col = 0; col < row; ++col) {
@@ -179,7 +169,6 @@ namespace {
       }
     }
 
-#if defined(LINALG_FIX_RANK_UPDATES)
     {
       syr_test_problem problem;
       mdspan A = problem.A_view();
@@ -255,7 +244,6 @@ namespace {
         }
       }
     }
-#endif // LINALG_FIX_RANK_UPDATES
   }
 
   TEST(BLAS3_syr, lower_triangle)
@@ -268,11 +256,8 @@ namespace {
       mdspan A_plus_x_xT = problem.A_plus_x_xT_view();
       const char what[] = " triangle of A = A + 1.0 x x^T (lower)";
 
-#if defined(LINALG_FIX_RANK_UPDATES)
       symmetric_matrix_rank_1_update(1.0, x, A, A, lower_triangle);
-#else
-      symmetric_matrix_rank_1_update(1.0, x, A, lower_triangle);
-#endif // LINALG_FIX_RANK_UPDATES
+
       for (int row = 0; row < A.extent(0); ++row) {
         // Lower triangle is changed.
         for (int col = 0; col <= row; ++col) {
@@ -297,11 +282,8 @@ namespace {
       mdspan A_plus_x_xT = problem.A_plus_x_xT_view();
       const char what[] = " triangle of A = A + x x^T (lower)";
 
-#if defined(LINALG_FIX_RANK_UPDATES)
       symmetric_matrix_rank_1_update(x, A, A, lower_triangle);
-#else
-      symmetric_matrix_rank_1_update(x, A, lower_triangle);
-#endif // LINALG_FIX_RANK_UPDATES
+
       for (int row = 0; row < A.extent(0); ++row) {
         // Lower triangle is changed.
         for (int col = 0; col <= row; ++col) {
@@ -318,7 +300,6 @@ namespace {
       }
     }
 
-#if defined(LINALG_FIX_RANK_UPDATES)
     {
       syr_test_problem problem;
       mdspan A = problem.A_view();
@@ -418,6 +399,5 @@ namespace {
         }
       }
     }
-#endif // LINALG_FIX_RANK_UPDATES
   }
 } // end anonymous namespace
