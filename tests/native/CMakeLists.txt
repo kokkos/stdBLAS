@@ -10,6 +10,7 @@ macro(linalg_add_test name)
     target_link_libraries(${name} linalg GTest::GTest GTest::Main)
   endif()
   add_test(${name} ${name})
+  register_gtest_coverage(${name})
 endmacro()
 
 linalg_add_test(abs_if_needed)

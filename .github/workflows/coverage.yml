@@ -1,0 +1,93 @@
+name: Coverage
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        std: [17, 20]
+
+    env:
+      COVERAGE_ROOT: ${{ github.workspace }}/.coverage
+      LLVM_PREFIX: /usr
+      LLVM_PROFILE_FILE: "$COVERAGE_ROOT/cxx${{ matrix.std }}/%p.profraw"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install LLVM
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y llvm clang
+
+      - name: Configure
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_CXX_STANDARD=${{ matrix.std }} \
+            -DLINALG_ENABLE_TESTS=ON \
+            -DLINALG_ENABLE_COVERAGE=ON \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_CXX_COMPILER=clang++
+
+      - name: Build
+        run: cmake --build build -j
+
+      - name: Run tests (gtest)
+        working-directory: build
+        run: |
+          ctest --output-on-failure
+
+      - name: Collect profraw
+        working-directory: build
+        run: |
+          mkdir -p $COVERAGE_ROOT/cxx${{ matrix.std }}
+
+          find . -name "*.profraw" -exec cp {} $COVERAGE_ROOT/cxx${{ matrix.std }}/ \;
+
+      - name: Merge profdata
+        run: |
+          llvm-profdata merge -sparse \
+            $COVERAGE_ROOT/cxx${{ matrix.std }}/*.profraw \
+            -o $COVERAGE_ROOT/cxx${{ matrix.std }}.profdata
+
+      - name: Build binaries list
+        working-directory: build
+        run: |
+          find tests/native -type f -executable > $COVERAGE_ROOT/binaries.txt
+
+      - name: Export per-binary LCOV
+        working-directory: build
+        run: |
+          : > $COVERAGE_ROOT/cxx${{ matrix.std }}.lcov
+
+          while read exe; do
+            llvm-cov export "$exe" \
+              -instr-profile=$COVERAGE_ROOT/cxx${{ matrix.std }}.profdata \
+              --format=lcov >> $COVERAGE_ROOT/cxx${{ matrix.std }}.lcov
+
+            echo >> $COVERAGE_ROOT/cxx${{ matrix.std }}.lcov
+          done < $COVERAGE_ROOT/binaries.txt
+
+      - name: Normalize paths (CRITICAL)
+        run: |
+          sed -i "s|$GITHUB_WORKSPACE/||g" \
+            $COVERAGE_ROOT/cxx${{ matrix.std }}.lcov
+
+      - name: Remove external dependencies
+        run: |
+          grep -v "_deps" $COVERAGE_ROOT/cxx${{ matrix.std }}.lcov > tmp.lcov
+          mv tmp.lcov $COVERAGE_ROOT/cxx${{ matrix.std }}.lcov
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ${{ env.COVERAGE_ROOT }}/cxx${{ matrix.std }}.lcov
+          flags: cxx${{ matrix.std }}
+          name: stdBLAS-${{ matrix.std }}
+          token: ${{ secrets.CODECOV_TOKEN }}
