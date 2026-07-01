@@ -11,6 +11,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 ################################################################################
 
+option(LINALG_ENABLE_COVERAGE "Enable LLVM source-based coverage" Off)
 option(LINALG_ENABLE_TESTS "Enable tests." Off)
 option(LINALG_ENABLE_EXAMPLES "Build examples." Off)
 #option(LINALG_ENABLE_BENCHMARKS "Enable benchmarks." Off)
@@ -203,6 +204,33 @@ write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/LinAlgConfigVersion
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/LinAlgConfig.cmake ${CMAKE_CURRENT_BINARY_DIR}/LinAlgConfigVersion.cmake
     DESTINATION cmake
 )
+
+################################################################################
+
+set(COVERAGE_BINARIES_FILE "${CMAKE_BINARY_DIR}/coverage_binaries.txt")
+
+# Reset file at configure time
+file(WRITE ${COVERAGE_BINARIES_FILE} "")
+
+if(LINALG_ENABLE_COVERAGE)
+  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    message(STATUS "Enabling Clang source-based coverage")
+    set(COVERAGE_FLAGS "-O0 -g -fprofile-instr-generate -fcoverage-mapping")
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COVERAGE_FLAGS}")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COVERAGE_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fprofile-instr-generate")
+  else()
+    message(FATAL_ERROR "LINALG_ENABLE_COVERAGE requires Clang")
+  endif()
+endif()
+
+function(register_gtest_coverage target)
+  add_custom_command(TARGET ${target} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E echo "$<TARGET_FILE:${target}>" >> ${COVERAGE_BINARIES_FILE}
+    COMMENT "Registering ${target} for coverage"
+  )
+endfunction()
 
 ################################################################################
 

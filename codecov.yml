@@ -1,0 +1,20 @@
+codecov:
+  require_ci_to_pass: yes
+
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        informational: true
+
+flags:
+  cxx17:
+    paths:
+      - include/
+      - tests/
+
+  cxx20:
+    paths:
+      - include/
+      - tests/
