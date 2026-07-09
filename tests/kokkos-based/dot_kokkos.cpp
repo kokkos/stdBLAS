@@ -21,7 +21,7 @@ auto dot_gold_solution(x_t x, y_t y, T initValue, bool useInit)
 template<class x_t, class y_t, class T>
 void kokkos_blas1_dot_test_impl(x_t x, y_t y, T initValue, bool useInit)
 {
-  namespace stdla = std::experimental::linalg;
+  namespace stdla = MDSPAN_IMPL_STANDARD_NAMESPACE::MDSPAN_IMPL_PROPOSED_NAMESPACE::linalg;
 
   using value_type = typename x_t::value_type;
   const std::size_t extent = x.extent(0);
@@ -35,10 +35,10 @@ void kokkos_blas1_dot_test_impl(x_t x, y_t y, T initValue, bool useInit)
 
   T result = {};
   if (useInit){
-    result = stdla::dot(KokkosKernelsSTD::kokkos_exec<>(),
+    result = stdla::dot(Kokkos::DefaultExecutionSpace(),
 			x, y, initValue);
   }else{
-    result = stdla::dot(KokkosKernelsSTD::kokkos_exec<>(),
+    result = stdla::dot(Kokkos::DefaultExecutionSpace(),
 			x, y);
   }
 

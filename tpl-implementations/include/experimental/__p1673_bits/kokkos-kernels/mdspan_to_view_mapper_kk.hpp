@@ -12,12 +12,12 @@ template<class Layout>
 struct LayoutMapper;
 
 template<>
-struct LayoutMapper<std::experimental::layout_left> {
+struct LayoutMapper<Kokkos::layout_left> {
   using type = Kokkos::LayoutLeft;
 };
 
 template<>
-struct LayoutMapper<std::experimental::layout_right> {
+struct LayoutMapper<Kokkos::layout_right> {
   using type = Kokkos::LayoutRight;
 };
 
@@ -54,12 +54,12 @@ auto to_kokkos_pointer(const std::complex<RealType>* p) {
 //
 template<
   class ElementType,
-  std::experimental::extents<>::size_type ext,
+  Kokkos::extents<size_t>::size_type ext,
   class Layout,
   class Accessor>
-auto mdspan_to_view(std::experimental::mdspan<
+auto mdspan_to_view(Kokkos::mdspan<
 		      ElementType,
-		      std::experimental::extents<ext>,
+		      Kokkos::extents<size_t, ext>,
 		      Layout,
 		      Accessor
 		    > a)
@@ -70,13 +70,13 @@ auto mdspan_to_view(std::experimental::mdspan<
 
 template<
   class ElementType,
-  std::experimental::extents<>::size_type ext0,
-  std::experimental::extents<>::size_type ext1,
+  Kokkos::extents<size_t>::size_type ext0,
+  Kokkos::extents<size_t>::size_type ext1,
   class Layout,
   class Accessor>
-auto mdspan_to_view(std::experimental::mdspan<
+auto mdspan_to_view(Kokkos::mdspan<
 		      ElementType,
-		      std::experimental::extents<ext0, ext1>,
+		      Kokkos::extents<size_t, ext0, ext1>,
 		      Layout,
 		      Accessor
 		    > a)
@@ -98,7 +98,7 @@ auto mdspan_to_view(std::experimental::mdspan<
   Suppose that one has: A, B, C : mdspans
   and wants to do:  C = A^T B
   One would do this by calling:
-    AT = std::experimental::linalg::transposed(A)
+    AT = MDSPAN_IMPL_STANDARD_NAMESPACE::MDSPAN_IMPL_PROPOSED_NAMESPACE::linalg::transposed(A)
     matrix_product(kokkos_exec<>, AT, B, C)
 
   Our Kokkos impl would then see:
@@ -124,14 +124,14 @@ auto mdspan_to_view(std::experimental::mdspan<
 */
 template<
   class ElementType,
-  std::experimental::extents<>::size_type ext0,
-  std::experimental::extents<>::size_type ext1,
+  Kokkos::extents<size_t>::size_type ext0,
+  Kokkos::extents<size_t>::size_type ext1,
   class NestedLayout,
   class Accessor>
-auto mdspan_to_view(std::experimental::mdspan<
+auto mdspan_to_view(Kokkos::mdspan<
 		    ElementType,
-		    std::experimental::extents<ext0, ext1>,
-		    std::experimental::linalg::layout_transpose<NestedLayout>,
+		    Kokkos::extents<size_t, ext0, ext1>,
+		    MDSPAN_IMPL_STANDARD_NAMESPACE::MDSPAN_IMPL_PROPOSED_NAMESPACE::linalg::layout_transpose<NestedLayout>,
 		    Accessor
 		    > a)
 {

@@ -24,8 +24,10 @@ namespace Impl {
 template <class size_type>
 constexpr bool static_extent_match(size_type extent1, size_type extent2)
 {
-  return extent1 == std::experimental::dynamic_extent ||
-         extent2 == std::experimental::dynamic_extent ||
+  using MDSPAN_IMPL_STANDARD_NAMESPACE::dynamic_extent;
+
+  return extent1 == dynamic_extent ||
+         extent2 == dynamic_extent ||
          extent1 == extent2;
 }
 
