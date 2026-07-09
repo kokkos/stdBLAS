@@ -117,10 +117,22 @@ if (NOT mdspan_FOUND)
   endif()
 endif()
 
+# Unfortunately there doesn't seem to be a clean way to detect CBLAS support without trying to find a CBLAS header.
 find_package(BLAS)
+find_path(CBLAS_INCLUDE_DIR cblas.h)
+if(CBLAS_INCLUDE_DIR)
+  message(STATUS "Found CBLAS header at ${CBLAS_INCLUDE_DIR}, enabling BLAS support")
+  set(BLAS_FOUND TRUE)
+else()
+  message(STATUS "Could not find CBLAS header, disabling BLAS support")
+  set(BLAS_FOUND FALSE)
+endif()
 option(LINALG_ENABLE_BLAS
   "Assume that we are linking with a BLAS library."
   ${BLAS_FOUND})
+if(LINALG_ENABLE_BLAS AND NOT BLAS_FOUND)
+  message(FATAL_ERROR "Could not find CBLAS header, but LINALG_ENABLE_BLAS is ON. Please install a BLAS library and its CBLAS headers, or set LINALG_ENABLE_BLAS to OFF.")
+endif()
 
 find_package(TBB)
 option(LINALG_ENABLE_TBB
