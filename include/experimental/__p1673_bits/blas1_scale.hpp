@@ -74,8 +74,16 @@ bool try_blas_scale(
 {
   #ifdef KOKKOS_ENABLE_CBLAS
   auto n = x.extent(0);
-  auto incx = x.stride(0);
-  if (x.is_strided() && n <= std::numeric_limits<int>::max()) {
+  // We can't call x.stride(0) until we know that x.is_strided() is true.
+  if (x.is_strided() && n <= std::numeric_limits<impl::cblas_index>::max()) {
+    auto incx = x.stride(0);
+    if (incx > std::numeric_limits<impl::cblas_index>::max()) {
+      return false;
+    }
+    // Strided layout mappings can have stride zero; the BLAS cannot.
+    if (incx == 0) {
+      return false;
+    }
     if constexpr (std::is_same_v<ElementType, float>) {
       cblas_sscal(n, alpha, x.data_handle(), incx);
       return true;
