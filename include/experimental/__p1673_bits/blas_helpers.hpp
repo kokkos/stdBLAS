@@ -82,6 +82,14 @@ constexpr bool is_blas_accessor_type_v =
   is_default_accessor_v<Accessor> ||
   is_aligned_accessor_v<Accessor>;
 
+#ifdef KOKKOS_ENABLE_CBLAS
+// Deduce the BLAS integer index type from the first parameter
+// (the length N) of cblas_dscal, as declared by the cblas.h in scope:
+// int on an LP64 build, a 64-bit integer on an ILP64 build.
+template<class R, class A, class... Rest> A first_param(R (*)(A, Rest...));
+using cblas_index = decltype(first_param(cblas_dscal));
+#endif
+
 // We made the above queries traits, with their typical `_v` prefix.
 // We make maybe_can_blas_scale() a function.
 // That's a matter of taste; it could be a trait too.
