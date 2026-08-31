@@ -59,9 +59,9 @@ constexpr bool maybe_can_blas_scale() {
     impl::is_blas_accessor_type_v<typename MdspanType::accessor_type>;
 
   return blas_value_type && blas_layout && blas_accessor;
-} 
+}
 
-// Return true if the BLAS call was successfull, false otherwise.
+// Return true if a BLAS routine could be called to scale the vector, false otherwise.
 template<class ElementType,
 	 class IndexType,
          ::std::size_t ext0,
