@@ -38,6 +38,17 @@ constexpr bool is_blas_value_type_v =
   std::is_same_v<ValueType, std::complex<float>> ||
   std::is_same_v<ValueType, std::complex<double>>;
 
+// The padded layouts are class templates taking a size_t, so detecting them
+// takes a partial specialization rather than is_same_v.
+template<class Layout>
+constexpr bool is_padded_layout_v = false;
+
+template<std::size_t PaddingValue>
+constexpr bool is_padded_layout_v<layout_left_padded<PaddingValue>> = true;
+
+template<std::size_t PaddingValue>
+constexpr bool is_padded_layout_v<layout_right_padded<PaddingValue>> = true;
+
 template<class Layout>
 constexpr bool is_blas_layout_type_v =
   // Assume that we have a C BLAS, which accepts
@@ -47,17 +58,11 @@ constexpr bool is_blas_layout_type_v =
   // For layout_stride, we need to check the strides first.
   std::is_same_v<Layout, layout_left> ||
   std::is_same_v<Layout, layout_right> ||
-  // AMK 5/20/26 - layout_left_padded and layout_right_padded were added in C++26.
-  // According to cppreference, padded layouts are covered by the same feature test as submdspan.
-  #ifdef __cpp_lib_submdspan
-  std::is_same_v<Layout, layout_left_padded> ||
-  std::is_same_v<Layout, layout_right_padded> ||
-  #endif
+  is_padded_layout_v<Layout> ||
   std::is_same_v<Layout, layout_stride>;
 
-// The BLAS accepts accessors that deal with pointers to memory:
-// default_accessor and aligned_accessor.
-// Those are both templated classes, so we can't just use is_same_v directly.
+// The BLAS accepts accessors that deal with pointers to memory.
+// default_accessor is a class template, so we can't just use is_same_v directly.
 //
 // scale doesn't accept conjugated_accessor or scaled_accessor
 // because those are read-only accessors, and scale needs to
@@ -70,17 +75,8 @@ template<class ElementType>
 constexpr bool is_default_accessor_v<default_accessor<ElementType>> = true;
 
 template<class Accessor>
-constexpr bool is_aligned_accessor_v = false;
-
-#ifdef __cpp_lib_aligned_accessor
-template<class ElementType, std::size_t ByteAlignment>
-constexpr bool is_aligned_accessor_v<aligned_accessor<ElementType, ByteAlignment>> = true;
-#endif
-
-template<class Accessor>
 constexpr bool is_blas_accessor_type_v =
-  is_default_accessor_v<Accessor> ||
-  is_aligned_accessor_v<Accessor>;
+  is_default_accessor_v<Accessor>;
 
 #ifdef KOKKOS_ENABLE_CBLAS
 // Deduce the BLAS integer index type from the first parameter
