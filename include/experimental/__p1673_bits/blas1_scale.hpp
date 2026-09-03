@@ -72,7 +72,7 @@ bool try_blas_scale(
   const Scalar alpha,
   mdspan<ElementType, extents<IndexType, ext0>, Layout, Accessor> x)
 {
-  #ifdef KOKKOS_ENABLE_CBLAS
+  #ifdef LINALG_HAS_CBLAS
   auto n = x.extent(0);
   // We can't call x.stride(0) until we know that x.is_strided() is true.
   if (x.is_strided() && n <= std::numeric_limits<impl::cblas_index>::max()) {

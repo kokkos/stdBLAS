@@ -18,10 +18,11 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS_HELPERS_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS_HELPERS_HPP_
 
+#include "__p1673_bits/linalg_config.h"
 #include <complex>
 #include <mdspan/mdspan.hpp>
 #include <type_traits>
-#ifdef KOKKOS_ENABLE_CBLAS
+#ifdef LINALG_HAS_CBLAS
 #include "cblas.h"
 #endif
 
@@ -78,7 +79,7 @@ template<class Accessor>
 constexpr bool is_blas_accessor_type_v =
   is_default_accessor_v<Accessor>;
 
-#ifdef KOKKOS_ENABLE_CBLAS
+#ifdef LINALG_HAS_CBLAS
 // Deduce the BLAS integer index type from the first parameter
 // (the length N) of cblas_dscal, as declared by the cblas.h in scope:
 // int on an LP64 build, a 64-bit integer on an ILP64 build.
