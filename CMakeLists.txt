@@ -125,22 +125,15 @@ if (NOT mdspan_FOUND)
   endif()
 endif()
 
-# Unfortunately there doesn't seem to be a clean way to detect CBLAS support without trying to find a CBLAS header.
 find_package(BLAS)
-find_path(CBLAS_INCLUDE_DIR cblas.h)
-if(CBLAS_INCLUDE_DIR)
-  message(STATUS "Found CBLAS header at ${CBLAS_INCLUDE_DIR}, enabling BLAS support")
-  set(BLAS_FOUND TRUE)
-else()
-  message(STATUS "Could not find CBLAS header, disabling BLAS support")
-  set(BLAS_FOUND FALSE)
-endif()
-option(LINALG_ENABLE_BLAS
-  "Assume that we are linking with a BLAS library."
-  ${BLAS_FOUND})
+
+option(LINALG_ENABLE_BLAS "Call CBLAS from eligible algorithms." OFF)
 if(LINALG_ENABLE_BLAS AND NOT BLAS_FOUND)
-  message(FATAL_ERROR "Could not find CBLAS header, but LINALG_ENABLE_BLAS is ON. Please install a BLAS library and its CBLAS headers, or set LINALG_ENABLE_BLAS to OFF.")
+  message(FATAL_ERROR
+    "LINALG_ENABLE_BLAS is ON, but find_package(BLAS) found no BLAS library. "
+    "Set -DBLAS_LIBRARIES=<paths>, -DBLA_VENDOR=<vendor>, or -DLINALG_ENABLE_BLAS=OFF.")
 endif()
+set(LINALG_HAS_CBLAS ${LINALG_ENABLE_BLAS})
 
 find_package(TBB)
 option(LINALG_ENABLE_TBB
@@ -170,6 +163,10 @@ message(STATUS "Build include directory: ${CMAKE_CURRENT_BINARY_DIR}/include/exp
 
 add_library(linalg INTERFACE)
 add_library(std::linalg ALIAS linalg)
+
+if(LINALG_HAS_CBLAS)
+  target_link_libraries(linalg INTERFACE ${BLAS_LIBRARIES})
+endif()
 
 # FetchContent defines "mdspan"; an installed package exports "mdspan::mdspan".
 if(TARGET mdspan::mdspan)
