@@ -1,5 +1,14 @@
 
 cmake_minimum_required(VERSION 3.12)
+
+# Honor LINALG_* set() by a parent project before add_subdirectory.
+if(POLICY CMP0077)
+  cmake_policy(SET CMP0077 NEW)
+endif()
+if(POLICY CMP0126)
+  cmake_policy(SET CMP0126 NEW)
+endif()
+
 project(LinAlg
   VERSION 0.0.1
   LANGUAGES CXX
