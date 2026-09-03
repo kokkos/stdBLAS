@@ -1,5 +1,14 @@
 
 cmake_minimum_required(VERSION 3.12)
+
+# Honor LINALG_* set() by a parent project before add_subdirectory.
+if(POLICY CMP0077)
+  cmake_policy(SET CMP0077 NEW)
+endif()
+if(POLICY CMP0126)
+  cmake_policy(SET CMP0126 NEW)
+endif()
+
 project(LinAlg
   VERSION 0.0.1
   LANGUAGES CXX
@@ -118,9 +127,22 @@ if (NOT mdspan_FOUND)
 endif()
 
 find_package(BLAS)
-option(LINALG_ENABLE_BLAS
-  "Assume that we are linking with a BLAS library."
-  ${BLAS_FOUND})
+
+option(LINALG_ENABLE_BLAS "Call CBLAS from eligible algorithms." OFF)
+if(LINALG_ENABLE_BLAS AND NOT BLAS_FOUND)
+  message(FATAL_ERROR
+    "LINALG_ENABLE_BLAS is ON, but find_package(BLAS) found no BLAS library. "
+    "Set -DBLAS_LIBRARIES=<paths>, -DBLA_VENDOR=<vendor>, or -DLINALG_ENABLE_BLAS=OFF.")
+endif()
+set(LINALG_HAS_CBLAS ${LINALG_ENABLE_BLAS})
+
+set(LINALG_CBLAS_HEADER "cblas.h" CACHE STRING
+  "Name of the CBLAS header, if the provider does not call it cblas.h.")
+set(LINALG_CBLAS_INCLUDE_DIRS "" CACHE STRING
+  "Where to find the CBLAS header, as a ;-list, if not on the default include path.")
+if(LINALG_HAS_CBLAS)
+  set(LINALG_CBLAS_INCLUDE "<${LINALG_CBLAS_HEADER}>")
+endif()
 
 find_package(TBB)
 option(LINALG_ENABLE_TBB
@@ -151,7 +173,20 @@ message(STATUS "Build include directory: ${CMAKE_CURRENT_BINARY_DIR}/include/exp
 add_library(linalg INTERFACE)
 add_library(std::linalg ALIAS linalg)
 
-target_link_libraries(linalg INTERFACE mdspan)
+if(LINALG_HAS_CBLAS)
+  target_link_libraries(linalg INTERFACE ${BLAS_LIBRARIES})
+  foreach(_linalg_inc IN LISTS LINALG_CBLAS_INCLUDE_DIRS)
+    target_include_directories(linalg INTERFACE $<BUILD_INTERFACE:${_linalg_inc}>)
+  endforeach()
+  unset(_linalg_inc)
+endif()
+
+# FetchContent defines "mdspan"; an installed package exports "mdspan::mdspan".
+if(TARGET mdspan::mdspan)
+  target_link_libraries(linalg INTERFACE mdspan::mdspan)
+else()
+  target_link_libraries(linalg INTERFACE mdspan)
+endif()
 
 if(LINALG_ENABLE_TBB)
   target_link_libraries(linalg INTERFACE TBB::tbb)
@@ -167,7 +202,9 @@ endif()
 
 target_include_directories(linalg INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include/experimental>
   $<INSTALL_INTERFACE:include>
+  $<INSTALL_INTERFACE:include/experimental>
 )
 
 ################################################################################

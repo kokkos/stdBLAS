@@ -18,6 +18,9 @@
 #ifndef LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_SCALE_HPP_
 #define LINALG_INCLUDE_EXPERIMENTAL___P1673_BITS_BLAS1_SCALE_HPP_
 
+#include "blas_helpers.hpp"
+#include <type_traits>
+
 namespace MDSPAN_IMPL_STANDARD_NAMESPACE {
 namespace MDSPAN_IMPL_PROPOSED_NAMESPACE {
 inline namespace __p1673_version_0 {
@@ -31,12 +34,104 @@ template<class ElementType,
          class Layout,
          class Accessor,
          class Scalar>
-void linalg_scale_rank_1(
+void generic_scale_rank_1(
   const Scalar alpha,
   mdspan<ElementType, extents<IndexType, ext0>, Layout, Accessor> x)
 {
   for (IndexType i = 0; i < x.extent(0); ++i) {
     x(i) *= alpha;
+  }
+}
+
+template<class Scalar, class MdspanType>
+constexpr bool maybe_can_blas_scale() {
+  // It's OK if Scalar and value_type aren't the same,
+  // as long as we can convert Scalar to value_type.
+  using value_type = typename MdspanType::value_type;
+  constexpr bool blas_value_type =
+    std::is_convertible_v<Scalar, value_type> &&
+    impl::is_blas_value_type_v<value_type>;
+
+  constexpr bool blas_layout =
+    impl::is_blas_layout_type_v<typename MdspanType::layout_type>;
+
+  constexpr bool blas_accessor =
+    impl::is_blas_accessor_type_v<typename MdspanType::accessor_type>;
+
+  return blas_value_type && blas_layout && blas_accessor;
+}
+
+// Return true if a BLAS routine could be called to scale the vector, false otherwise.
+template<class ElementType,
+	 class IndexType,
+         ::std::size_t ext0,
+         class Layout,
+         class Accessor,
+         class Scalar>
+bool try_blas_scale(
+  const Scalar alpha,
+  mdspan<ElementType, extents<IndexType, ext0>, Layout, Accessor> x)
+{
+  #ifdef LINALG_HAS_CBLAS
+  auto n = x.extent(0);
+  // We can't call x.stride(0) until we know that x.is_strided() is true.
+  if (x.is_strided() && n <= std::numeric_limits<impl::cblas_index>::max()) {
+    auto incx = x.stride(0);
+    if (incx > std::numeric_limits<impl::cblas_index>::max()) {
+      return false;
+    }
+    // Strided layout mappings can have stride zero; the BLAS cannot.
+    if (incx == 0) {
+      return false;
+    }
+    if constexpr (std::is_same_v<ElementType, float>) {
+      cblas_sscal(n, alpha, x.data_handle(), incx);
+      return true;
+    } else if constexpr (std::is_same_v<ElementType, double>) {
+      cblas_dscal(n, alpha, x.data_handle(), incx);
+      return true;
+    } else if constexpr (std::is_same_v<ElementType, std::complex<float>>) {
+      if constexpr(std::is_convertible_v<Scalar, float>) {
+        cblas_csscal(n, alpha, x.data_handle(), incx);
+        return true;
+      }
+      else if constexpr (std::is_convertible_v<Scalar, std::complex<float>>) {
+        auto converted_alpha = static_cast<std::complex<float>>(alpha);
+        cblas_cscal(n, &converted_alpha, x.data_handle(), incx);
+        return true;
+      }
+    } else if constexpr (std::is_same_v<ElementType, std::complex<double>>) {
+      if constexpr (std::is_convertible_v<Scalar, double>) {
+        cblas_zdscal(n, alpha, x.data_handle(), incx);
+        return true;
+      }
+      else if constexpr (std::is_convertible_v<Scalar, std::complex<double>>) {
+        auto converted_alpha = static_cast<std::complex<double>>(alpha);
+        cblas_zscal(n, &converted_alpha, x.data_handle(), incx);
+        return true;
+      }
+    }
+  }
+  #endif
+  return false;
+}
+
+template<class ElementType,
+	 class IndexType,
+         ::std::size_t ext0,
+         class Layout,
+         class Accessor,
+         class Scalar>
+void linalg_scale_rank_1(
+  const Scalar alpha,
+  mdspan<ElementType, extents<IndexType, ext0>, Layout, Accessor> x)
+{
+  bool done = false;
+  if constexpr (maybe_can_blas_scale<Scalar, decltype(x)>()) {
+    done = try_blas_scale(alpha, x);
+  }
+  if (!done) {
+    generic_scale_rank_1(alpha, x);
   }
 }
 

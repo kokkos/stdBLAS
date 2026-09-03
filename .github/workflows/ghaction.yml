@@ -53,3 +53,70 @@ jobs:
         
     - name: Install stdblas
       run: cmake --install stdblas-build
+
+  # The default matrix never compiles the CBLAS path; this job does.
+  cblas:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cxx-standard: [17,20]
+
+    steps:
+    - name: Install a BLAS with a C interface
+      run: sudo apt-get update && sudo apt-get install -y libopenblas-dev
+
+    - name: Check Out mdspan
+      uses: actions/checkout@v4
+      with:
+        repository: kokkos/mdspan
+        path: mdspan-src
+
+    - name: create directories
+      run: cmake -E make_directory mdspan-build stdblas-build
+
+    - name: Configure mdspan
+      run: cmake -S mdspan-src -B mdspan-build -DMDSPAN_CXX_STANDARD=${{matrix.cxx-standard}} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=mdspan-install
+
+    - name: Build mdspan
+      run: cmake --build mdspan-build -j 3
+
+    - name: Install mdspan
+      run: cmake --install mdspan-build
+
+    - name: Check Out stdblas
+      uses: actions/checkout@v4
+      with:
+        path: stdblas-src
+
+    - name: Configure stdblas with CBLAS
+      run: cmake -S stdblas-src -B stdblas-build -Dmdspan_DIR=mdspan-install -DLINALG_CXX_STANDARD=${{matrix.cxx-standard}} -DLINALG_ENABLE_TESTS=On -DLINALG_ENABLE_BLAS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
+
+    - name: Confirm the CBLAS path was actually compiled
+      run: grep -q '^#define LINALG_HAS_CBLAS' stdblas-build/include/experimental/__p1673_bits/linalg_config.h
+
+    - name: Confirm experimental/linalg compiles on its own
+      run: |
+        printf '#include <experimental/linalg>\nint main(){}\n' > selftest.cpp
+        g++ -std=c++${{matrix.cxx-standard}} -fsyntax-only \
+          -I stdblas-src/include -I stdblas-build/include/experimental \
+          -I mdspan-install/include selftest.cpp
+
+    - name: Build stdblas
+      run: cmake --build stdblas-build -j 3
+
+    - name: Confirm the tests really link a CBLAS
+      run: nm -uC stdblas-build/tests/native/scale | grep -q cblas_dscal
+
+    - name: Test stdblas
+      working-directory: stdblas-build
+      run: ctest --output-on-failure
+
+    - name: Prove the header-name knob with a renamed header
+      run: |
+        mkdir renamed-include
+        cp /usr/include/x86_64-linux-gnu/cblas.h renamed-include/renamed_cblas.h
+        cmake -S stdblas-src -B knob-build -Dmdspan_DIR=mdspan-install -DLINALG_CXX_STANDARD=${{matrix.cxx-standard}} -DLINALG_ENABLE_TESTS=On -DLINALG_ENABLE_BLAS=ON -DLINALG_CBLAS_HEADER=renamed_cblas.h "-DLINALG_CBLAS_INCLUDE_DIRS=$PWD/renamed-include"
+        grep renamed_cblas.h knob-build/include/experimental/__p1673_bits/linalg_config.h
+        cmake --build knob-build -j 3 --target scale
+        ./knob-build/tests/native/scale --gtest_filter='*mdspan*'
