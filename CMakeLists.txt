@@ -187,7 +187,9 @@ endif()
 
 target_include_directories(linalg INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include/experimental>
   $<INSTALL_INTERFACE:include>
+  $<INSTALL_INTERFACE:include/experimental>
 )
 
 ################################################################################
