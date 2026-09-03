@@ -26,8 +26,11 @@ Other compilers, including MSVC 2019, have been tested in the past.
 3. Run CMake, pointing it to your googletest and mdspan install locations
    - If you want to build tests, set LINALG_ENABLE_TESTS=ON
    - If you want to build examples, set LINALG_ENABLE_EXAMPLES=ON
-   - If you have a BLAS installation, set LINALG_ENABLE_BLAS=ON.
-     BLAS support is currently experimental.
+   - If you have a BLAS installation that provides CBLAS and want to call it,
+     set LINALG_ENABLE_BLAS=ON. It is off by default. If your provider does not
+     name its header cblas.h, set LINALG_CBLAS_HEADER (and, if it is not on the
+     default include path, LINALG_CBLAS_INCLUDE_DIRS).
+     CBLAS support is currently experimental.
    - If you have a TBB (Threading Building Blocks) installation
      and want to use TBB, set LINALG_ENABLE_TBB=ON (and optionally
      set TBB_DIR to the lib/cmake/TBB subdirectory of your TBB installation,
