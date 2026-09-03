@@ -171,7 +171,12 @@ message(STATUS "Build include directory: ${CMAKE_CURRENT_BINARY_DIR}/include/exp
 add_library(linalg INTERFACE)
 add_library(std::linalg ALIAS linalg)
 
-target_link_libraries(linalg INTERFACE mdspan)
+# FetchContent defines "mdspan"; an installed package exports "mdspan::mdspan".
+if(TARGET mdspan::mdspan)
+  target_link_libraries(linalg INTERFACE mdspan::mdspan)
+else()
+  target_link_libraries(linalg INTERFACE mdspan)
+endif()
 
 if(LINALG_ENABLE_TBB)
   target_link_libraries(linalg INTERFACE TBB::tbb)
