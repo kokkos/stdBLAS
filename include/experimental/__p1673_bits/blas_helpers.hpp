@@ -23,7 +23,10 @@
 #include <mdspan/mdspan.hpp>
 #include <type_traits>
 #ifdef LINALG_HAS_CBLAS
-#include "cblas.h"
+#ifndef LINALG_CBLAS_INCLUDE
+#define LINALG_CBLAS_INCLUDE <cblas.h>
+#endif
+#include LINALG_CBLAS_INCLUDE
 #endif
 
 namespace MDSPAN_IMPL_STANDARD_NAMESPACE {

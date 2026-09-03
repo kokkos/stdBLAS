@@ -135,6 +135,14 @@ if(LINALG_ENABLE_BLAS AND NOT BLAS_FOUND)
 endif()
 set(LINALG_HAS_CBLAS ${LINALG_ENABLE_BLAS})
 
+set(LINALG_CBLAS_HEADER "cblas.h" CACHE STRING
+  "Name of the CBLAS header, if the provider does not call it cblas.h.")
+set(LINALG_CBLAS_INCLUDE_DIRS "" CACHE STRING
+  "Where to find the CBLAS header, as a ;-list, if not on the default include path.")
+if(LINALG_HAS_CBLAS)
+  set(LINALG_CBLAS_INCLUDE "<${LINALG_CBLAS_HEADER}>")
+endif()
+
 find_package(TBB)
 option(LINALG_ENABLE_TBB
   "Enable TBB. Default: autodetect TBB installation."
@@ -166,6 +174,10 @@ add_library(std::linalg ALIAS linalg)
 
 if(LINALG_HAS_CBLAS)
   target_link_libraries(linalg INTERFACE ${BLAS_LIBRARIES})
+  foreach(_linalg_inc IN LISTS LINALG_CBLAS_INCLUDE_DIRS)
+    target_include_directories(linalg INTERFACE $<BUILD_INTERFACE:${_linalg_inc}>)
+  endforeach()
+  unset(_linalg_inc)
 endif()
 
 # FetchContent defines "mdspan"; an installed package exports "mdspan::mdspan".
