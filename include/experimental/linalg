@@ -18,6 +18,8 @@
 #pragma once
 
 #include "__p1673_bits/linalg_config.h"
+// The headers below open MDSPAN_IMPL_STANDARD_NAMESPACE, which mdspan defines.
+#include <mdspan/mdspan.hpp>
 #include "__p1673_bits/macros.hpp"
 #include "__p1673_bits/linalg_execpolicy_mapper.hpp"
 #include "__p1673_bits/maybe_static_size.hpp"
